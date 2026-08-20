@@ -1,0 +1,31 @@
+.Toastify__toast-container--top-center {
+    width: 100% !important;
+    left: 0 !important;
+    top: 0 !important;
+    transform: none !important;
+}
+
+.Toastify__toast {
+    width: 100% !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    background: #dc2626 !important;
+    color: white !important;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
+.Toastify__toast-container--top-center {
+    width: 100% !important;
+    left: 0 !important;
+    top: 0 !important;
+    transform: none !important;
+    padding: 0 !important;
+}
+
+.Toastify__toast {
+    width: 100% !important;
+    min-height: 60px;
+    margin: 0 !important;
+    border-radius: 0 !important;
+}
