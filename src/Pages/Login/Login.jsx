@@ -16,13 +16,13 @@ function Login() {
   return (
     <main className="flex min-h-screen w-full items-center justify-center bg-linear-to-br from-slate-950 via-emerald-950 to-blue-950 p-6">
       <section className="grid w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-2xl lg:grid-cols-2">
-        <div className="hidden min-h-[620px] flex-col justify-between bg-linear-to-br from-emerald-600 to-blue-700 p-10 text-white lg:flex">
+        <div className="hidden min-h-155 flex-col justify-between bg-linear-to-br from-emerald-600 to-blue-700 p-10 text-white lg:flex">
           <div className="flex items-center gap-3"><div className="rounded-xl bg-white/20 p-3"><ShieldCheck className="h-7 w-7" /></div><span className="text-2xl font-bold">GasFlow ERP</span></div>
           <div><p className="text-sm font-semibold tracking-widest text-emerald-100">GAS MANAGEMENT SYSTEM</p><h1 className="mt-4 text-4xl font-bold leading-tight">Efficient gas flow management starts here.</h1><p className="mt-5 max-w-sm text-emerald-100">Monitor gas flow, track inventory, and manage operations from one place.</p></div>
           <p className="text-sm text-emerald-100">© 2026 GasFlow ERP. All rights reserved.</p>
         </div>
 
-        <div className="flex min-h-[620px] items-center p-7 sm:p-12">
+        <div className="flex min-h-155 items-center p-7 sm:p-12">
           <div className="w-full">
             <div className="mb-10 lg:hidden"><div className="inline-flex items-center gap-2 rounded-xl bg-emerald-100 px-3 py-2 text-emerald-700"><ShieldCheck className="h-5 w-5" /><span className="font-bold">GasFlow ERP</span></div></div>
             <p className="text-sm font-semibold text-emerald-600">WELCOME BACK</p><h2 className="mt-2 text-3xl font-bold text-slate-800">Sign in to your account</h2><p className="mt-3 text-slate-500">Enter your details to access the GasFlow ERP dashboard.</p>

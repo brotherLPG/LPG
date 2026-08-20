@@ -32,7 +32,7 @@ function Cylinders() {
   };
 
   return (
-    <div className="flex min-h-screen bg-linear-to-br from-emerald-50 to-blue-100 w-full">
+    <div className="flex min-h-screen bg-linear-to-br  from-emerald-50 to-blue-100 w-full">
       <div className="flex-1 p-8">
         {/* Header */}
         <motion.div
