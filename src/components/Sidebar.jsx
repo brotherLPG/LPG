@@ -65,13 +65,13 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className=" h-screen bg-linear-to-b from-emerald-900 to-blue-900 flex flex-col shadow-2xl overflow-hidden transition-all duration-300 ease-in-out">
-      <div className="p-6 border-b border-emerald-700 shrink-0">
+    <div className="h-screen flex flex-col shadow-2xl overflow-hidden transition-all duration-300 ease-in-out bg-gradient-primary-vertical">
+      <div className="p-6 border-b border-white/10 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="bg-linear-to-r from-emerald-500 to-blue-500 p-2 rounded-lg">
+          <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
             <LayoutDashboard className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-white text-xl font-bold">GasFlow ERP</h1>
+          <h1 className="text-white text-xl font-bold">LPG Plant ERP</h1>
         </div>
       </div>
 
@@ -86,13 +86,13 @@ const Sidebar = () => {
                   to={item.path}
                   className={`flex items-center px-4 py-3 rounded-xl transition-all duration-200 group ${
                     isActive
-                      ? "bg-linear-to-r from-emerald-600 to-blue-600 text-white shadow-lg shadow-emerald-500/30"
-                      : "text-emerald-100 hover:bg-emerald-800/50 hover:text-white"
+                      ? "bg-white/20 text-white shadow-lg"
+                      : "text-white/80 hover:bg-white/10 hover:text-white"
                   }`}
                 >
                   <div className="transition-transform hover:scale-110 active:scale-95">
                     <Icon
-                      className={`w-5 h-5 mr-3 ${isActive ? "text-white" : "text-emerald-200 group-hover:text-white"}`}
+                      className={`w-5 h-5 mr-3 ${isActive ? "text-white" : "text-white/70 group-hover:text-white"}`}
                     />
                   </div>
                   <span className="flex-1 font-medium">{item.label}</span>

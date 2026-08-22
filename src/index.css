@@ -1,6 +1,15 @@
 @import "tailwindcss";
 @import "@heroui/styles";
 
+:root {
+  --color-primary-dark: #0F172A;
+  --color-accent-blue: #1E40AF;
+  --color-error: #EF4444;
+  --color-orange: #F59E0B;
+  --gradient-primary: linear-gradient(90deg, #0F172A 0%, #1E40AF 100%);
+  --gradient-primary-vertical: linear-gradient(180deg, #0F172A 0%, #1E40AF 100%);
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -58,4 +67,37 @@ button:disabled {
   min-height: 60px;
   margin: 0 !important;
   border-radius: 0 !important;
+}
+
+/* Custom utility classes */
+.bg-gradient-primary {
+  background: var(--gradient-primary);
+}
+
+.bg-gradient-primary-vertical {
+  background: var(--gradient-primary-vertical);
+}
+
+.text-primary-dark {
+  color: var(--color-primary-dark);
+}
+
+.text-accent-blue {
+  color: var(--color-accent-blue);
+}
+
+.text-error {
+  color: var(--color-error);
+}
+
+.text-error-dark {
+  color: #DC2626;
+}
+
+.bg-error-light {
+  background-color: #FEF2F2;
+}
+
+.border-error-light {
+  border-color: #FECACA;
 }

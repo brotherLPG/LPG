@@ -89,31 +89,31 @@ function Dashboard() {
   const getColorClasses = (color) => {
     const colors = {
       emerald: {
-        bg: "bg-emerald-50",
-        iconBg: "bg-emerald-500",
-        text: "text-emerald-600"
+        bg: "bg-slate-50",
+        iconBg: "bg-blue-600",
+        text: "text-blue-600"
       },
       blue: {
-        bg: "bg-blue-50",
-        iconBg: "bg-blue-500",
+        bg: "bg-slate-50",
+        iconBg: "bg-blue-600",
         text: "text-blue-600"
       },
       teal: {
-        bg: "bg-teal-50",
-        iconBg: "bg-teal-500",
-        text: "text-teal-600"
+        bg: "bg-slate-50",
+        iconBg: "bg-blue-600",
+        text: "text-blue-600"
       },
       cyan: {
-        bg: "bg-cyan-50",
-        iconBg: "bg-cyan-500",
-        text: "text-cyan-600"
+        bg: "bg-slate-50",
+        iconBg: "bg-blue-600",
+        text: "text-blue-600"
       }
     };
     return colors[color] || colors.emerald;
   };
 
   return (
-    <div className="flex min-h-screen bg-linear-to-br from-emerald-50 to-blue-100 w-full">
+    <div className="flex min-h-screen bg-slate-50 w-full">
       <div className="flex-1 p-8">
         {/* Header */}
         <motion.div
@@ -122,7 +122,7 @@ function Dashboard() {
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">Dashboard</h1>
+          <h1 className="text-3xl font-bold mb-2 text-primary-dark">Dashboard</h1>
           <p className="text-slate-500">
             LPG Gas Management System - Cylinder tracking, sales & accounting
           </p>
@@ -151,7 +151,7 @@ function Dashboard() {
                   <span
                     className={`text-sm font-medium ${
                       stat.changeType === "positive"
-                        ? "text-emerald-600"
+                        ? "text-blue-600"
                         : "text-blue-600"
                     }`}
                   >
@@ -159,7 +159,7 @@ function Dashboard() {
                   </span>
                 </div>
 
-                <h3 className="text-2xl font-bold text-slate-800 mb-1">
+                <h3 className="text-2xl font-bold mb-1 text-primary-dark">
                   {stat.value}
                 </h3>
                 <p className="text-slate-500 text-sm font-medium">
@@ -181,10 +181,10 @@ function Dashboard() {
           className="bg-white rounded-2xl shadow-lg p-6"
         >
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-slate-800">
+            <h2 className="text-xl font-bold text-primary-dark">
               Recent Activity
             </h2>
-            <button className="text-blue-600 hover:text-blue-700 font-medium text-sm">
+            <button className="font-medium text-sm hover:underline text-accent-blue">
               View All →
             </button>
           </div>
@@ -228,45 +228,45 @@ function Dashboard() {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6"
         >
-          <div className="bg-linear-to-r from-emerald-500 to-emerald-600 rounded-2xl shadow-lg p-6 text-white">
+          <div className="rounded-2xl shadow-lg p-6 text-white bg-gradient-primary">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-emerald-100 text-sm font-medium mb-1">
+                <p className="text-white/80 text-sm font-medium mb-1">
                   Today's Filling
                 </p>
                 <p className="text-3xl font-bold">156</p>
               </div>
-              <Package className="w-12 h-12 text-emerald-200" />
+              <Package className="w-12 h-12 text-white/60" />
             </div>
-            <p className="text-emerald-200 text-sm mt-3">
+            <p className="text-white/70 text-sm mt-3">
               ↑ 12% from yesterday
             </p>
           </div>
 
-          <div className="bg-linear-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 text-white">
+          <div className="rounded-2xl shadow-lg p-6 text-white bg-gradient-primary">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-blue-100 text-sm font-medium mb-1">
+                <p className="text-white/80 text-sm font-medium mb-1">
                   Revenue Today
                 </p>
                 <p className="text-3xl font-bold">PKR 125K</p>
               </div>
-              <DollarSign className="w-12 h-12 text-blue-200" />
+              <DollarSign className="w-12 h-12 text-white/60" />
             </div>
-            <p className="text-blue-200 text-sm mt-3">↑ 8.5% this week</p>
+            <p className="text-white/70 text-sm mt-3">↑ 8.5% this week</p>
           </div>
 
-          <div className="bg-linear-to-r from-teal-500 to-cyan-600 rounded-2xl shadow-lg p-6 text-white">
+          <div className="rounded-2xl shadow-lg p-6 text-white bg-gradient-primary">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-teal-100 text-sm font-medium mb-1">
+                <p className="text-white/80 text-sm font-medium mb-1">
                   Inspections Done
                 </p>
                 <p className="text-3xl font-bold">42</p>
               </div>
-              <ShieldCheck className="w-12 h-12 text-teal-200" />
+              <ShieldCheck className="w-12 h-12 text-white/60" />
             </div>
-            <p className="text-teal-200 text-sm mt-3">98.5% pass rate</p>
+            <p className="text-white/70 text-sm mt-3">98.5% pass rate</p>
           </div>
         </motion.div>
       </div>

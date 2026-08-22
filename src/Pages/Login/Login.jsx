@@ -1,114 +1,127 @@
 import { useState } from "react";
-import { Eye, EyeOff, LoaderCircle, LockKeyhole, LogIn, Mail, ShieldCheck, Flame } from "lucide-react";
+import { Eye, EyeOff, LoaderCircle, LockKeyhole, LogIn, Mail, AlertCircle, Droplets } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   const handleSubmit = (event) => {
     event.preventDefault();
     setIsLoading(true);
-    window.setTimeout(() => navigate("/Dashboard"), 800);
+    setError(true);
+    window.setTimeout(() => {
+      setError(false);
+      navigate("/Dashboard");
+    }, 1500);
   };
 
   return (
-    <main className="flex min-h-screen w-full items-center justify-center bg-linear-to-br from-slate-900 via-emerald-900 to-blue-900 p-6 relative overflow-hidden">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl" />
-      </div>
-
-      <section className="relative grid w-full max-w-5xl overflow-hidden rounded-3xl bg-white/95 backdrop-blur-xl shadow-2xl lg:grid-cols-2">
+    <main className="flex min-h-screen w-full bg-white">
+      <section className="grid w-full lg:grid-cols-2">
         {/* Left Panel - Branding */}
-        <div className="hidden min-h-155 flex-col justify-between bg-linear-to-br from-emerald-600 via-emerald-700 to-blue-700 p-10 text-white lg:flex relative overflow-hidden">
-          <div className="absolute inset-0 bg-linear-to-br from-white/10 to-transparent" />
+        <div className="hidden lg:flex flex-col justify-between p-12 relative overflow-hidden bg-gradient-primary">
+          {/* Decorative elements */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-20 right-20 w-64 h-64 rounded-full border border-white/10" />
+            <div className="absolute top-40 right-40 w-32 h-32 rounded-full border border-white/10" />
+            <div className="absolute bottom-32 left-32 w-48 h-48 rounded-full border border-white/10" />
+            <div className="absolute top-1/3 left-1/4 w-2 h-32 bg-white/10 rounded-full" />
+            <div className="absolute bottom-1/4 right-1/3 w-2 h-24 bg-white/10 rounded-full" />
+          </div>
+
           <div className="relative z-10 flex items-center gap-3">
             <div className="rounded-xl bg-white/20 p-3 backdrop-blur-sm">
-              <Flame className="h-7 w-7" />
+              <Droplets className="h-7 w-7 text-white" />
             </div>
-            <span className="text-2xl font-bold">GasFlow ERP</span>
+            <span className="text-2xl font-bold text-white">LPG Plant ERP</span>
           </div>
+
           <div className="relative z-10">
-            <p className="text-sm font-semibold tracking-widest text-emerald-100">GAS MANAGEMENT SYSTEM</p>
-            <h1 className="mt-4 text-4xl font-bold leading-tight">Efficient gas flow management starts here.</h1>
-            <p className="mt-5 max-w-sm text-emerald-100">Monitor gas flow, track inventory, and manage operations from one place.</p>
+            <h1 className="text-5xl font-bold text-white leading-tight mb-4">LPG Plant ERP</h1>
+            <p className="text-xl text-white/90">Pakistan's leading LPG cylinder management system</p>
           </div>
+
           <div className="relative z-10">
-            <p className="text-sm text-emerald-100">© 2026 GasFlow ERP. All rights reserved.</p>
+            <p className="text-sm text-white/70">© 2026 LPG Plant ERP. All rights reserved.</p>
           </div>
         </div>
 
         {/* Right Panel - Form */}
-        <div className="flex min-h-155 items-center p-7 sm:p-12">
-          <div className="w-full">
-            <div className="mb-10 lg:hidden">
-              <div className="inline-flex items-center gap-2 rounded-xl bg-emerald-100 px-3 py-2 text-emerald-700">
-                <Flame className="h-5 w-5" />
-                <span className="font-bold">GasFlow ERP</span>
+        <div className="flex items-center justify-center p-8 lg:p-16 bg-slate-50">
+          <div className="w-full max-w-md">
+            {/* Mobile Logo */}
+            <div className="mb-8 lg:hidden flex items-center gap-3">
+              <div className="rounded-xl p-2 bg-gradient-primary">
+                <Droplets className="h-6 w-6 text-white" />
               </div>
+              <span className="text-xl font-bold text-primary-dark">LPG Plant ERP</span>
             </div>
-            <p className="text-sm font-semibold text-emerald-600">WELCOME BACK</p>
-            <h2 className="mt-2 text-3xl font-bold text-slate-800">Sign in to your account</h2>
-            <p className="mt-3 text-slate-500">Enter your details to access the GasFlow ERP dashboard.</p>
-            
+
+            <p className="text-sm font-semibold text-primary-dark">Welcome back</p>
+            <h2 className="mt-2 text-3xl font-bold text-primary-dark">Sign in to your account</h2>
+            <p className="mt-3 text-slate-500">Access your LPG plant operations, inventory, and reports securely.</p>
+
+            {/* Error Message */}
+            {error && (
+              <div className="mt-6 p-4 rounded-xl flex items-start gap-3 bg-error-light border border-error-light">
+                <AlertCircle className="h-5 w-5 shrink-0 mt-0.5 text-error" />
+                <div>
+                  <p className="font-semibold text-sm text-error">Access Denied</p>
+                  <p className="text-sm mt-1 text-error-dark">The password you entered is incorrect. Please try again or contact the administrator.</p>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="mt-8 space-y-6">
               <label className="block">
-                <span className="block text-sm font-semibold text-slate-700 mb-2">Email address</span>
-                <div className="relative">
-                  <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-                  <input 
-                    required 
-                    type="email" 
-                    placeholder="admin@gasflow-erp.com" 
-                    className="w-full rounded-xl border border-slate-200 py-3 pl-12 pr-4 font-normal outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100" 
-                  />
-                </div>
+                <span className="block text-sm font-semibold mb-2 text-primary-dark">Email Address</span>
+                <input 
+                  required 
+                  type="email" 
+                  placeholder="mr.ahmad@cworldlpg.pk"
+                  className="w-full rounded-xl border border-slate-200 bg-white py-3 px-4 font-normal outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" 
+                />
               </label>
               
               <label className="block">
-                <span className="block text-sm font-semibold text-slate-700 mb-2">Password</span>
+                <span className="block text-sm font-semibold mb-2 text-primary-dark">Password</span>
                 <div className="relative">
-                  <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                   <input 
                     required 
                     type={showPassword ? "text" : "password"} 
-                    placeholder="Enter your password" 
-                    className="w-full rounded-xl border border-slate-200 py-3 pl-12 pr-12 font-normal outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100" 
+                    placeholder="Enter your password"
+                    className="w-full rounded-xl border border-slate-200 bg-white py-3 px-4 pr-12 font-normal outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" 
                   />
                   <button 
                     type="button" 
                     onClick={() => setShowPassword(!showPassword)} 
-                    aria-label={showPassword ? "Hide password" : "Show password"} 
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                   >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    <span className="text-sm font-medium">{showPassword ? 'Hide' : 'Show'}</span>
                   </button>
                 </div>
               </label>
               
-              <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center gap-2 text-slate-600 cursor-pointer">
-                  <input type="checkbox" className="h-4 w-4 rounded border-slate-300 accent-emerald-600" /> 
-                  Remember me
-                </label>
-                <button type="button" className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">Forgot password?</button>
+              <div className="flex items-center justify-end text-sm">
+                <button type="button" className="font-semibold hover:underline text-accent-blue">Forgot Password?</button>
               </div>
               
               <button 
                 type="submit" 
                 disabled={isLoading} 
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-emerald-600 to-blue-600 py-3.5 font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all hover:from-emerald-700 hover:to-blue-700 hover:shadow-emerald-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-primary"
               >
                 {isLoading ? <><LoaderCircle className="h-5 w-5 animate-spin" /> Signing in...</> : <><LogIn className="h-5 w-5" /> Sign In</>}
               </button>
             </form>
-            
-            <div className="mt-8 text-center text-sm text-slate-500">
-              Don't have an account? <button className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">Contact administrator</button>
+
+            <div className="mt-8 flex items-center gap-4">
+              <div className="flex-1 h-px bg-slate-200"></div>
+              <span className="text-sm text-slate-400">or</span>
+              <div className="flex-1 h-px bg-slate-200"></div>
             </div>
           </div>
         </div>
