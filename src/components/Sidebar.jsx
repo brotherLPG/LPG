@@ -1,5 +1,4 @@
 import { 
-  ChevronUp,
   LayoutDashboard, 
   Package, 
   ScanBarcode, 
@@ -8,6 +7,13 @@ import {
   FileText,
   Calculator,
   Building2,
+  Users,
+  Truck,
+  BarChart3,
+  Droplets,
+  Warehouse,
+  Receipt,
+  Layers
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -23,19 +29,44 @@ const Sidebar = () => {
       path: "/Dashboard",
     },
     {
+      icon: Users,
+      label: "Users & Roles",
+      path: "/users-roles",
+    },
+    {
+      icon: Users,
+      label: "Customers",
+      path: "/customers",
+    },
+    {
+      icon: Truck,
+      label: "Suppliers",
+      path: "/suppliers",
+    },
+    {
       icon: Package,
-      label: "Cylinders",
-      path: "/cylinders",
+      label: "Cylinder Types",
+      path: "/cylinder-types",
     },
     {
-      icon: ScanBarcode,
-      label: "Registration",
-      path: "/registration",
+      icon: Warehouse,
+      label: "Storage Tanks",
+      path: "/storage-tanks",
     },
     {
-      icon: ShieldCheck,
-      label: "Inspections",
-      path: "/inspections",
+      icon: Receipt,
+      label: "LPG Receipts",
+      path: "/lpg-receipts",
+    },
+    {
+      icon: Layers,
+      label: "Filling Batches",
+      path: "/filling-batches",
+    },
+    {
+      icon: Package,
+      label: "Inventory",
+      path: "/inventory",
     },
     {
       icon: DollarSign,
@@ -43,40 +74,40 @@ const Sidebar = () => {
       path: "/sales",
     },
     {
-      icon: FileText,
-      label: "Invoices",
-      path: "/invoices",
+      icon: DollarSign,
+      label: "Payments",
+      path: "/payments",
     },
     {
-      icon: Calculator,
-      label: "Accounting",
-      path: "/accounting",
+      icon: Users,
+      label: "Employees",
+      path: "/employees",
     },
     {
-      icon: Building2,
-      label: "Branches",
-      path: "/branches",
-    },
-    {
-      icon: FileText,
-      label: "Reports",
-      path: "/reports",
+      icon: ShieldCheck,
+      label: "Audit Logs",
+      path: "/audit-logs",
     },
   ];
 
   return (
     <div className="h-screen flex flex-col shadow-2xl overflow-hidden transition-all duration-300 ease-in-out bg-gradient-primary-vertical">
+      {/* Logo Section */}
       <div className="p-6 border-b border-white/10 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-            <LayoutDashboard className="w-6 h-6 text-white" />
+          <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
+            <Droplets className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-white text-xl font-bold">LPG Plant ERP</h1>
+          <div>
+            <h1 className="text-white text-lg font-bold">LPG Plant ERP</h1>
+            <p className="text-white/50 text-xs">Pak Operations v1.0</p>
+          </div>
         </div>
       </div>
 
-      <nav className="flex-1 px-4 py-6 overflow-y-auto">
-        <ul className="space-y-2">
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-4 overflow-y-auto">
+        <ul className="space-y-1">
           {menuItems.map((item, index) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -84,29 +115,39 @@ const Sidebar = () => {
               <li key={index}>
                 <Link
                   to={item.path}
-                  className={`flex items-center px-4 py-3 rounded-xl transition-all duration-200 group ${
+                  className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 group ${
                     isActive
-                      ? "bg-white/20 text-white shadow-lg"
-                      : "text-white/80 hover:bg-white/10 hover:text-white"
+                      ? "bg-white/15 text-white"
+                      : "text-white/70 hover:bg-white/10 hover:text-white"
                   }`}
                 >
-                  <div className="transition-transform hover:scale-110 active:scale-95">
-                    <Icon
-                      className={`w-5 h-5 mr-3 ${isActive ? "text-white" : "text-white/70 group-hover:text-white"}`}
-                    />
-                  </div>
-                  <span className="flex-1 font-medium">{item.label}</span>
-                  {item.notification && (
-                    <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
-                      {item.notification}
-                    </span>
-                  )}
+                  <Icon
+                    className={`w-5 h-5 mr-3 ${isActive ? "text-white" : "text-white/70 group-hover:text-white"}`}
+                  />
+                  <span className="flex-1 font-medium text-sm">
+                    {item.label}
+                  </span>
                 </Link>
               </li>
             );
           })}
         </ul>
       </nav>
+
+      {/* User Section */}
+      {/* <div className="p-4 border-t border-white/10 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+            <span className="text-white font-bold text-sm">A</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white font-medium text-sm truncate">
+              Admin User
+            </p>
+            <p className="text-white/50 text-xs truncate">admin@lpgplant.com</p>
+          </div>
+        </div>
+      </div> */}
     </div>
   );
 };
