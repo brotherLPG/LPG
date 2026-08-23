@@ -1,8 +1,6 @@
 
 import React from 'react'
 import { Route, Routes } from "react-router-dom";
-import Alert from '../Pages/Alerts/Alert';
-import AlertDetail from '../Pages/Alerts/AlertDetail';
 import Dashboard from '../Pages/Dashboard/Dashboard';
 import Events from '../Pages/Events/Events';
 import Devices from '../Pages/Devices/Devices';
@@ -25,8 +23,6 @@ function PageRouter() {
         <Route path="/" element={<Login />} />
         {/* <Route path="/login" element={<Login />} /> */}
         <Route path="/Dashboard" element={<Dashboard />} />
-        <Route path="/Alert" element={<Alert />} />
-        <Route path="/alert/:alertId" element={<AlertDetail />} />
         <Route path="/Events" element={<Events />} />
         <Route path="/devices" element={<Devices />} />
         <Route path="/reports" element={<Reports />} />
