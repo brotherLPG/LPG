@@ -1,21 +1,28 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { DollarSign, CreditCard, Search, Plus, TrendingUp } from "lucide-react";
+import { useStore } from "../../context/StoreContext";
+import AddSaleModal from "../../components/Modals/AddSaleModal";
 
 function Sales() {
   const [searchTerm, setSearchTerm] = useState("");
-
-  const sales = [
-    { id: "SAL-001", invoiceId: "INV-2026-0456", customer: "Ahmed Khan", type: "Cash", amount: 12500, date: "2026-01-15", items: 5 },
-    { id: "SAL-002", invoiceId: "INV-2026-0457", customer: "Fatima Ali", type: "Credit", amount: 25000, date: "2026-01-15", items: 10 },
-    { id: "SAL-003", invoiceId: "INV-2026-0458", customer: "Usman Ahmed", type: "Cash", amount: 7500, date: "2026-01-14", items: 3 },
-    { id: "SAL-004", invoiceId: "INV-2026-0459", customer: "Bilal Khan", type: "Credit", amount: 50000, date: "2026-01-14", items: 20 },
-  ];
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const { sales, addSale } = useStore();
 
   const filteredSales = sales.filter(sale =>
-    sale.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    sale.invoiceId.toLowerCase().includes(searchTerm.toLowerCase())
+    (sale.customer && sale.customer.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (sale.invoiceId && sale.invoiceId.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const handleAddSale = (formData) => {
+    addSale(formData);
+    setIsModalOpen(false);
+  };
+  
+  // Calculate today's sales
+  const today = new Date().toISOString().split('T')[0];
+  const todaySales = sales.filter(s => s.date === today).reduce((sum, s) => sum + s.amount, 0);
 
   return (
     <div className="flex min-h-screen bg-linear-to-br from-emerald-50 to-blue-100 w-full">
@@ -31,7 +38,7 @@ function Sales() {
               <div className="bg-emerald-100 p-2 rounded-lg"><DollarSign className="w-5 h-5 text-emerald-600" /></div>
               <span className="text-slate-500 text-sm">Today's Sales</span>
             </div>
-            <p className="text-3xl font-bold text-slate-800">PKR 125K</p>
+            <p className="text-3xl font-bold text-slate-800">PKR {todaySales.toLocaleString()}</p>
           </div>
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <div className="flex items-center gap-3 mb-2">
@@ -61,7 +68,9 @@ function Sales() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
             <input type="text" placeholder="Search by customer or invoice ID..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition" />
           </div>
-          <button className="flex items-center gap-2 px-6 py-3 bg-linear-to-r from-emerald-600 to-blue-600 text-white rounded-xl font-medium hover:from-emerald-700 hover:to-blue-700 transition shadow-lg shadow-emerald-500/30">
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-linear-to-r from-emerald-600 to-blue-600 text-white rounded-xl font-medium hover:from-emerald-700 hover:to-blue-700 transition shadow-lg shadow-emerald-500/30">
             <Plus className="w-5 h-5" /> New Sale
           </button>
         </motion.div>
@@ -98,6 +107,12 @@ function Sales() {
             </table>
           </div>
         </motion.div>
+        
+        <AddSaleModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleAddSale}
+        />
       </div>
     </div>
   );

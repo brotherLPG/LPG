@@ -2,17 +2,13 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Package, Search, Plus, Filter, MoreVertical, ScanBarcode } from "lucide-react";
 import AddCylinderModal from "../../components/Cylinder/AddCylinderModal";
-  
+import { useStore } from "../../context/StoreContext";
+
 function Cylinders() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [cylinders, setCylinders] = useState([
-    { id: "LPG-2456", barcode: "BC-789456", owner: "Customer A", type: "LPG", status: "Filled", location: "Branch 1", lastFill: "2026-01-15" },
-    { id: "LPG-2457", barcode: "BC-789457", owner: "Customer B", type: "LPG", status: "Empty", location: "Branch 1", lastFill: "2026-01-10" },
-    { id: "LPG-2458", barcode: "BC-789458", owner: "Customer C", type: "Oxygen", status: "Filled", location: "Branch 2", lastFill: "2026-01-14" },
-    { id: "LPG-2459", barcode: "BC-789459", owner: "Customer D", type: "LPG", status: "In Inspection", location: "Branch 1", lastFill: "2026-01-08" },
-    { id: "LPG-2460", barcode: "BC-789460", owner: "Customer E", type: "LPG", status: "Filled", location: "Branch 3", lastFill: "2026-01-16" },
-  ]);
+  
+  const { cylinders, addCylinder } = useStore();
 
   const filteredCylinders = cylinders.filter(cyl =>
     cyl.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -21,13 +17,7 @@ function Cylinders() {
   );
 
   const handleAddCylinder = (formData) => {
-    const newCylinder = {
-      ...formData,
-      id: `LPG-${2456 + cylinders.length + 1}`,
-      barcode: `BC-${789456 + cylinders.length + 1}`,
-      lastFill: formData.lastFill || new Date().toISOString().split('T')[0]
-    };
-    setCylinders([...cylinders, newCylinder]);
+    addCylinder(formData);
     setIsModalOpen(false);
   };
 

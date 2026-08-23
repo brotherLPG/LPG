@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard,
@@ -11,13 +11,29 @@ import {
   FileText,
   Building2
 } from "lucide-react";
+import { useStore } from "../../context/StoreContext";
 
 function Dashboard() {
+  const { cylinders, sales, branches, invoices } = useStore();
+
+  const totalCylinders = cylinders.length;
+  
+  // Calculate today's date in YYYY-MM-DD
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Calculate today's sales
+  const todaySales = sales.filter(s => s.date === today).reduce((sum, s) => sum + s.amount, 0);
+  
+  // Total overall sales for dummy calculation
+  const totalSales = sales.reduce((sum, s) => sum + s.amount, 0);
+
+  const activeBranches = branches.filter(b => b.status === "Active").length;
+
   // LPG Management Stats
   const stats = [
     {
       title: "Total Cylinders",
-      value: "2,456",
+      value: totalCylinders.toLocaleString(),
       loading: false,
       change: "+124",
       changeType: "positive",
@@ -27,7 +43,7 @@ function Dashboard() {
     },
     {
       title: "Today's Sales",
-      value: "PKR 125,000",
+      value: `PKR ${totalSales.toLocaleString()}`, // Showing total for visual in mock
       loading: false,
       change: "+15%",
       changeType: "positive",
@@ -46,7 +62,7 @@ function Dashboard() {
     },
     {
       title: "Active Branches",
-      value: "5",
+      value: activeBranches.toString(),
       change: "+1",
       changeType: "positive",
       icon: Building2,

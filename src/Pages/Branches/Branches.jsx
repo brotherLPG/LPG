@@ -2,21 +2,26 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Building2, MapPin, Phone, Mail, Users, Search, Plus } from "lucide-react";
 
+import { useStore } from "../../context/StoreContext";
+import AddBranchModal from "../../components/Modals/AddBranchModal";
+
 function Branches() {
   const [searchTerm, setSearchTerm] = useState("");
-
-  const branches = [
-    { id: "BR-001", name: "Main Branch - Lahore", location: "123 Main Road, Lahore", manager: "Ali Hassan", phone: "042-XXXXXXX", email: "lahore@gasflow.com", staff: 25, status: "Active" },
-    { id: "BR-002", name: "Karachi Branch", location: "456 Shahrah-e-Faisal, Karachi", manager: "Sara Ahmed", phone: "021-XXXXXXX", email: "karachi@gasflow.com", staff: 30, status: "Active" },
-    { id: "BR-003", name: "Islamabad Branch", location: "789 Blue Area, Islamabad", manager: "Usman Khan", phone: "051-XXXXXXX", email: "islamabad@gasflow.com", staff: 20, status: "Active" },
-    { id: "BR-004", name: "Faisalabad Branch", location: "321 Clock Tower, Faisalabad", manager: "Bilal Ahmed", phone: "041-XXXXXXX", email: "faisalabad@gasflow.com", staff: 15, status: "Active" },
-    { id: "BR-005", name: "Multan Branch", location: "654 Bosan Road, Multan", manager: "Tariq Mehmood", phone: "060-XXXXXXX", email: "multan@gasflow.com", staff: 18, status: "Active" },
-  ];
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const { branches, addBranch } = useStore();
 
   const filteredBranches = branches.filter(branch =>
-    branch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    branch.location.toLowerCase().includes(searchTerm.toLowerCase())
+    (branch.name && branch.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (branch.location && branch.location.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const handleAddBranch = (formData) => {
+    addBranch(formData);
+    setIsModalOpen(false);
+  };
+  
+  const totalStaff = branches.reduce((sum, b) => sum + Number(b.staff || 0), 0);
 
   return (
     <div className="flex min-h-screen bg-linear-to-br from-emerald-50 to-blue-100 w-full">
@@ -32,28 +37,28 @@ function Branches() {
               <div className="bg-emerald-100 p-2 rounded-lg"><Building2 className="w-5 h-5 text-emerald-600" /></div>
               <span className="text-slate-500 text-sm">Total Branches</span>
             </div>
-            <p className="text-3xl font-bold text-slate-800">5</p>
+            <p className="text-3xl font-bold text-slate-800">{branches.length}</p>
           </div>
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="bg-green-100 p-2 rounded-lg"><Building2 className="w-5 h-5 text-green-600" /></div>
               <span className="text-slate-500 text-sm">Active</span>
             </div>
-            <p className="text-3xl font-bold text-slate-800">5</p>
+            <p className="text-3xl font-bold text-slate-800">{branches.filter(b => b.status === 'Active').length}</p>
           </div>
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="bg-blue-100 p-2 rounded-lg"><Users className="w-5 h-5 text-blue-600" /></div>
               <span className="text-slate-500 text-sm">Total Staff</span>
             </div>
-            <p className="text-3xl font-bold text-slate-800">108</p>
+            <p className="text-3xl font-bold text-slate-800">{totalStaff}</p>
           </div>
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="bg-teal-100 p-2 rounded-lg"><MapPin className="w-5 h-5 text-teal-600" /></div>
               <span className="text-slate-500 text-sm">Cities Covered</span>
             </div>
-            <p className="text-3xl font-bold text-slate-800">5</p>
+            <p className="text-3xl font-bold text-slate-800">{new Set(branches.map(b => b.location.split(', ').pop())).size}</p>
           </div>
         </motion.div>
 
@@ -62,7 +67,9 @@ function Branches() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
             <input type="text" placeholder="Search branches..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition" />
           </div>
-          <button className="flex items-center gap-2 px-6 py-3 bg-linear-to-r from-emerald-600 to-blue-600 text-white rounded-xl font-medium hover:from-emerald-700 hover:to-blue-700 transition shadow-lg shadow-emerald-500/30">
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-linear-to-r from-emerald-600 to-blue-600 text-white rounded-xl font-medium hover:from-emerald-700 hover:to-blue-700 transition shadow-lg shadow-emerald-500/30">
             <Plus className="w-5 h-5" /> Add Branch
           </button>
         </motion.div>
@@ -101,6 +108,12 @@ function Branches() {
             </table>
           </div>
         </motion.div>
+
+        <AddBranchModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleAddBranch}
+        />
       </div>
     </div>
   );

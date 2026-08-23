@@ -1,7 +1,38 @@
 import { motion } from "framer-motion";
 import { BarChart3, CalendarDays, Download, FileText, ShieldCheck, TrendingDown, TrendingUp } from "lucide-react";
+import { useStore } from "../../context/StoreContext";
 
 function Reports() {
+  const { cylinders, sales, registrations, invoices, transactions, branches } = useStore();
+
+  const handleExport = () => {
+    const csvRows = [];
+    csvRows.push("--- LPG Plant ERP Full Data Report ---");
+    csvRows.push(`Total Cylinders,${cylinders.length}`);
+    csvRows.push(`Total Sales,${sales.length}`);
+    csvRows.push(`Total Registrations,${registrations.length}`);
+    csvRows.push(`Total Invoices,${invoices.length}`);
+    csvRows.push(`Total Transactions,${transactions.length}`);
+    csvRows.push(`Total Branches,${branches.length}`);
+    
+    csvRows.push("");
+    csvRows.push("--- Recent Sales ---");
+    csvRows.push("ID,Customer,Amount,Type,Date");
+    sales.slice(0, 10).forEach(s => {
+      csvRows.push(`${s.id},${s.customer},${s.amount},${s.type},${s.date}`);
+    });
+
+    const csvContent = csvRows.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `lpg_report_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const reports = [
     { id: 1, title: "Daily Safety Summary", description: "Safety violations, compliance score, and resolved alerts.", period: "20 July 2026", type: "Safety" },
     { id: 2, title: "Weekly Camera Performance", description: "Camera uptime, connection quality, and device health.", period: "14–20 July 2026", type: "System" },
@@ -17,7 +48,11 @@ function Reports() {
           <h1 className="mt-1 text-3xl font-bold text-slate-800">Reports</h1>
           <p className="mt-2 text-slate-500">Track safety performance and export important system data.</p>
         </div>
-        <button className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700"><Download className="h-4 w-4" /> Export Report</button>
+        <button 
+          onClick={handleExport}
+          className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 hover:bg-blue-700">
+          <Download className="h-4 w-4" /> Export Report
+        </button>
       </motion.div>
 
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">

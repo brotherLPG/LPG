@@ -2,21 +2,28 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Calculator, TrendingUp, TrendingDown, Wallet, Search, ArrowDownRight, ArrowUpRight } from "lucide-react";
 
+import { useStore } from "../../context/StoreContext";
+import AddTransactionModal from "../../components/Modals/AddTransactionModal";
+
 function Accounting() {
   const [searchTerm, setSearchTerm] = useState("");
-
-  const transactions = [
-    { id: "TXN-001", type: "Credit", category: "Sales", description: "Cash sale - Ahmed Khan", amount: 12500, date: "2026-01-15", balance: 12500 },
-    { id: "TXN-002", type: "Debit", category: "Purchase", description: "Gas purchase from supplier", amount: 50000, date: "2026-01-15", balance: -37500 },
-    { id: "TXN-003", type: "Credit", category: "Sales", description: "Credit sale - Fatima Ali", amount: 25000, date: "2026-01-15", balance: -12500 },
-    { id: "TXN-004", type: "Credit", category: "Sales", description: "Cash sale - Usman Ahmed", amount: 7500, date: "2026-01-14", balance: -5000 },
-    { id: "TXN-005", type: "Debit", category: "Expense", description: "Staff salaries", amount: 150000, date: "2026-01-14", balance: -155000 },
-  ];
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const { transactions, addTransaction } = useStore();
 
   const filteredTransactions = transactions.filter(txn =>
-    txn.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    txn.category.toLowerCase().includes(searchTerm.toLowerCase())
+    (txn.remarks && txn.remarks.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (txn.category && txn.category.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const handleAddTransaction = (formData) => {
+    addTransaction(formData);
+    setIsModalOpen(false);
+  };
+  
+  const totalIncome = transactions.filter(t => t.type === 'Credit').reduce((sum, t) => sum + t.amount, 0);
+  const totalExpenses = transactions.filter(t => t.type === 'Debit').reduce((sum, t) => sum + t.amount, 0);
+  const currentBalance = totalIncome - totalExpenses;
 
   return (
     <div className="flex min-h-screen bg-linear-to-br from-emerald-50 to-blue-100 w-full">
@@ -32,28 +39,28 @@ function Accounting() {
               <div className="bg-emerald-100 p-2 rounded-lg"><Wallet className="w-5 h-5 text-emerald-600" /></div>
               <span className="text-slate-500 text-sm">Current Balance</span>
             </div>
-            <p className="text-3xl font-bold text-slate-800">PKR 2.4M</p>
+            <p className="text-3xl font-bold text-slate-800">PKR {currentBalance.toLocaleString()}</p>
           </div>
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="bg-green-100 p-2 rounded-lg"><TrendingUp className="w-5 h-5 text-green-600" /></div>
               <span className="text-slate-500 text-sm">Total Income</span>
             </div>
-            <p className="text-3xl font-bold text-slate-800">PKR 8.5M</p>
+            <p className="text-3xl font-bold text-slate-800">PKR {totalIncome.toLocaleString()}</p>
           </div>
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="bg-red-100 p-2 rounded-lg"><TrendingDown className="w-5 h-5 text-red-600" /></div>
               <span className="text-slate-500 text-sm">Total Expenses</span>
             </div>
-            <p className="text-3xl font-bold text-slate-800">PKR 6.1M</p>
+            <p className="text-3xl font-bold text-slate-800">PKR {totalExpenses.toLocaleString()}</p>
           </div>
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="bg-blue-100 p-2 rounded-lg"><Calculator className="w-5 h-5 text-blue-600" /></div>
               <span className="text-slate-500 text-sm">Net Profit</span>
             </div>
-            <p className="text-3xl font-bold text-slate-800">PKR 2.4M</p>
+            <p className="text-3xl font-bold text-slate-800">PKR {currentBalance.toLocaleString()}</p>
           </div>
         </motion.div>
 
@@ -62,7 +69,9 @@ function Accounting() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
             <input type="text" placeholder="Search transactions..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition" />
           </div>
-          <button className="flex items-center gap-2 px-6 py-3 bg-linear-to-r not-first: from-emerald-600 to-blue-600 text-white rounded-xl font-medium hover:from-emerald-700 hover:to-blue-700 transition shadow-lg shadow-emerald-500/30">
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-linear-to-r not-first: from-emerald-600 to-blue-600 text-white rounded-xl font-medium hover:from-emerald-700 hover:to-blue-700 transition shadow-lg shadow-emerald-500/30">
             <Calculator className="w-5 h-5" /> Add Transaction
           </button>
         </motion.div>
@@ -78,7 +87,6 @@ function Accounting() {
                   <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Description</th>
                   <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Amount</th>
                   <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Date</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Balance</th>
                 </tr>
               </thead>
               <tbody>
@@ -94,20 +102,23 @@ function Accounting() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-slate-600">{txn.category}</td>
-                    <td className="px-6 py-4 text-slate-600">{txn.description}</td>
+                    <td className="px-6 py-4 text-slate-600">{txn.remarks}</td>
                     <td className={`px-6 py-4 font-medium ${txn.type === 'Credit' ? 'text-green-600' : 'text-red-600'}`}>
                       {txn.type === 'Credit' ? '+' : '-'}PKR {txn.amount.toLocaleString()}
                     </td>
                     <td className="px-6 py-4 text-slate-600">{txn.date}</td>
-                    <td className={`px-6 py-4 font-medium ${txn.balance >= 0 ? 'text-slate-800' : 'text-red-600'}`}>
-                      PKR {txn.balance.toLocaleString()}
-                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </motion.div>
+
+        <AddTransactionModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleAddTransaction}
+        />
       </div>
     </div>
   );
