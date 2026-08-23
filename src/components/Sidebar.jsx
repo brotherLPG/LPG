@@ -1,16 +1,10 @@
 import { 
   LayoutDashboard, 
   Package, 
-  ScanBarcode, 
   ShieldCheck, 
-  DollarSign, 
-  FileText,
-  Calculator,
-  Building2,
+  DollarSign,
   Users,
   Truck,
-  BarChart3,
-  Droplets,
   Warehouse,
   Receipt,
   Layers
