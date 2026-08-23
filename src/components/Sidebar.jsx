@@ -91,7 +91,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="h-screen flex flex-col shadow-2xl overflow-hidden transition-all duration-300 ease-in-out bg-gradient-primary-vertical">
+    <div className="h-screen flex flex-col w-64 shadow-2xl overflow-hidden transition-all duration-300 ease-in-out bg-gradient-primary-vertical">
       {/* Logo Section */}
       <div className="p-6 border-b border-white/10 shrink-0">
         <div className="flex items-center gap-3">
@@ -133,9 +133,8 @@ const Sidebar = () => {
           })}
         </ul>
       </nav>
-
       {/* User Section */}
-      {/* <div className="p-4 border-t border-white/10 shrink-0">
+      <div className="p-2 border-t border-white/10 shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
             <span className="text-white font-bold text-sm">A</span>
@@ -147,7 +146,8 @@ const Sidebar = () => {
             <p className="text-white/50 text-xs truncate">admin@lpgplant.com</p>
           </div>
         </div>
-      </div> */}
+      </div>
+
     </div>
   );
 };
