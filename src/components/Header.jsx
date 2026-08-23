@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown, UserRound, LogOut, Bell, Menu, X, Search, Building2, MapPin } from 'lucide-react';
+import { ChevronDown, UserRound, LogOut, Bell, Menu, X, Search, Building2, MapPin, CheckCircle, AlertTriangle, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 function Header({ onToggleSidebar, isSidebarOpen }) {
@@ -16,6 +16,41 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
     'Islamabad Plant',
     'Lahore Plant',
     'Karachi Plant'
+  ];
+
+  const notifications = [
+    {
+      id: 1,
+      type: 'success',
+      title: 'Cylinder Registered Successfully',
+      message: 'LPG-2459 has been registered with barcode',
+      time: '2 min ago',
+      read: false
+    },
+    {
+      id: 2,
+      type: 'warning',
+      title: 'Low Stock Alert',
+      message: 'Cylinder stock below threshold at Branch #2',
+      time: '15 min ago',
+      read: false
+    },
+    {
+      id: 3,
+      type: 'info',
+      title: 'New Invoice Generated',
+      message: 'INV-2026-0460 has been created',
+      time: '1 hour ago',
+      read: true
+    },
+    {
+      id: 4,
+      type: 'success',
+      title: 'Payment Received',
+      message: 'PKR 25,000 received from customer #1234',
+      time: '2 hours ago',
+      read: true
+    },
   ];
 
   return (
@@ -92,34 +127,64 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
           <div className="relative">
             <button
               onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-              className="relative p-2.5 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
+              className="relative p-2.5 rounded-xl hover:bg-slate-100 transition-colors"
             >
-              <Bell className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center font-bold">
-                1
+              <Bell className="w-5 h-5 text-slate-600" />
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center font-bold text-white">
+                2
               </span>
             </button>
 
             {isNotificationOpen && (
-              <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-xl overflow-hidden z-50">
-                <div className="p-4 border-b border-slate-200">
+              <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-xl shadow-xl overflow-hidden z-50">
+                <div className="p-4 border-b border-slate-200 flex items-center justify-between">
                   <h3 className="font-semibold text-slate-800">
                     Notifications
                   </h3>
+                  <span className="text-xs text-slate-500">2 unread</span>
                 </div>
-                <div className="max-h-64 overflow-y-auto">
-                  <div className="p-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100">
-                    <p className="text-sm text-slate-800 font-medium">
-                      Cylinder inspection due
-                    </p>
-                    <p className="text-xs text-slate-500 mt-1">
-                      LPG-2459 needs safety check
-                    </p>
-                    <p className="text-xs text-slate-400 mt-1">2 min ago</p>
-                  </div>
+                <div className="max-h-80 overflow-y-auto">
+                  {notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`p-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100 transition-colors ${
+                        !notification.read ? 'bg-blue-50/50' : ''
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`p-2 rounded-full ${
+                          notification.type === 'success' ? 'bg-green-100' :
+                          notification.type === 'warning' ? 'bg-orange-100' :
+                          'bg-blue-100'
+                        }`}>
+                          {notification.type === 'success' && <CheckCircle className="w-4 h-4 text-green-600" />}
+                          {notification.type === 'warning' && <AlertTriangle className="w-4 h-4 text-orange-600" />}
+                          {notification.type === 'info' && <Info className="w-4 h-4 text-blue-600" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-slate-800">
+                            {notification.title}
+                          </p>
+                          <p className="text-xs text-slate-600 mt-1">
+                            {notification.message}
+                          </p>
+                          <p className="text-xs text-slate-400 mt-1">{notification.time}</p>
+                        </div>
+                        {!notification.read && (
+                          <div className="w-2 h-2 bg-blue-500 rounded-full shrink-0 mt-2"></div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="p-3 border-t border-slate-200">
-                  <button className="w-full text-sm font-medium hover:underline text-accent-blue">
+                <div className="p-3 border-t border-slate-200 bg-slate-50">
+                  <button 
+                    onClick={() => {
+                      setIsNotificationOpen(false);
+                      navigate('/notifications');
+                    }}
+                    className="w-full text-sm font-medium text-accent-blue hover:text-blue-700 transition-colors"
+                  >
                     View All Notifications
                   </button>
                 </div>

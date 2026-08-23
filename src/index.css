@@ -7,6 +7,7 @@
   --color-error: #EF4444;
   --color-orange: #F59E0B;
   --color-tertiary: #4B5563;
+  --color-BLUE-dark: #1F2937;
   --gradient-primary: linear-gradient(90deg, #0F172A 0%, #1E40AF 100%);
   --gradient-primary-vertical: linear-gradient(180deg, #0F172A 0%, #1E40AF 100%);
   --gradient-secondary: #0F172A;
@@ -97,6 +98,9 @@ button:disabled {
 
 .text-tertiary {
   color: var(--color-tertiary);
+}
+.text-BLUE-dark {
+  color: var(--color-BLUE-dark);
 }
 
 .text-error {

@@ -14,6 +14,7 @@ import Sales from '../Pages/Sales/Sales';
 import Invoices from '../Pages/Invoices/Invoices';
 import Accounting from '../Pages/Accounting/Accounting';
 import Branches from '../Pages/Branches/Branches';
+import Notifications from '../Pages/Notifications/Notifications';
 
 function PageRouter() {
   return (
@@ -34,6 +35,7 @@ function PageRouter() {
         <Route path="/invoices" element={<Invoices />} />
         <Route path="/accounting" element={<Accounting />} />
         <Route path="/branches" element={<Branches />} />
+        <Route path="/notifications" element={<Notifications />} />
       </Routes>
     </div>
   );
