@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Eye, EyeOff, LoaderCircle, LockKeyhole, LogIn, Mail, AlertCircle, Droplets } from "lucide-react";
+import {  LoaderCircle, LogIn, AlertCircle, Droplets } from "lucide-react";
+import logo from "../../assets/Images/logo.jpeg";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
@@ -33,14 +34,14 @@ function Login() {
           </div>
 
           <div className="relative z-10 flex items-center gap-3">
-            <div className="rounded-xl bg-white/20 p-3 backdrop-blur-sm">
-              <Droplets className="h-7 w-7 text-white" />
+            <div className="rounded-xl bg-white/20 p-1 backdrop-blur-sm">
+              <img src={logo} alt="Logo" className="h-16 w-16 border rounded-sm" />
             </div>
-            <span className="text-2xl font-bold text-white">LPG Plant ERP</span>
+            <span className="text-2xl font-bold text-white">Brother LPG</span>
           </div>
 
           <div className="relative z-10">
-            <h1 className="text-5xl font-bold text-white leading-tight mb-4">
+            <h1 className="text-5xl font-bold text-white leading-tight mb-3">
               LPG Plant ERP
             </h1>
             <p className="text-xl text-white/90">

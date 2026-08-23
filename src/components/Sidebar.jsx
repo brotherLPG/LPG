@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import logo from "../assets/Images/logo.jpeg";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -93,14 +94,14 @@ const Sidebar = () => {
   return (
     <div className="h-screen flex flex-col w-64 shadow-2xl overflow-hidden transition-all duration-300 ease-in-out bg-gradient-primary-vertical">
       {/* Logo Section */}
-      <div className="p-6 border-b border-white/10 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
-            <Droplets className="w-6 h-6 text-white" />
+      <div className="p-3 border-b border-white/10 shrink-0">
+        <div className="flex items-center gap-1">
+          <div className="bg-white/20 p-1 rounded-xl backdrop-blur-sm">
+            <img src={logo} alt="Logo" className="h-12 w-12 border rounded-sm" />
           </div>
           <div>
-            <h1 className="text-white text-lg font-bold">LPG Plant ERP</h1>
-            <p className="text-white/50 text-xs">Pak Operations v1.0</p>
+            <h1 className="text-white text-lg font-bold">Brother LPG</h1>
+            <p className="text-white/50 text-xs">ERP Management System</p>
           </div>
         </div>
       </div>
@@ -147,7 +148,6 @@ const Sidebar = () => {
           </div>
         </div>
       </div>
-
     </div>
   );
 };
