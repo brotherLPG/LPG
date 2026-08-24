@@ -1,5 +1,4 @@
 
-import React from 'react'
 import { Route, Routes } from "react-router-dom";
 import Dashboard from '../Pages/Dashboard/Dashboard';
 import Events from '../Pages/Events/Events';
@@ -17,6 +16,7 @@ import Branches from '../Pages/Branches/Branches';
 import Notifications from '../Pages/Notifications/Notifications';
 import UsersRoles from '../Pages/UsersRoles/UsersRoles';
 import RolePermissions from '../Pages/UsersRoles/RolePermissions';
+import AddUser from '../Pages/UsersRoles/AddUser';
 
 function PageRouter() {
   return (
@@ -27,7 +27,8 @@ function PageRouter() {
         {/* <Route path="/login" element={<Login />} /> */}
         <Route path="/Dashboard" element={<Dashboard />} />
         <Route path="/users-roles" element={<UsersRoles />} />
-        <Route path="/users-roles/administrator" element={<RolePermissions />} />
+        <Route path="/users-roles/add-user" element={<AddUser />} />
+        <Route path="/users-roles/Permissions" element={<RolePermissions />} />
         <Route path="/Events" element={<Events />} />
         <Route path="/devices" element={<Devices />} />
         <Route path="/reports" element={<Reports />} />

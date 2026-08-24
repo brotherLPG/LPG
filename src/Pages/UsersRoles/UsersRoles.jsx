@@ -36,30 +36,33 @@ function UsersRoles() {
   return (
     <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
       <section>
-        <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <p className="text-xs">
+          <span
+            onClick={() => navigate("/dashboard")}
+            className="cursor-pointer font-medium text-4th-color transition-colors duration-200"
+          >
+            Dashboard
+          </span>{" "}
+          <span className="px-1">/</span> Users &amp; Roles
+        </p>
+        <div className="mb-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-xs">
-              <span
-                onClick={() => navigate("/dashboard")}
-                className="cursor-pointer font-medium text-4th-color transition-colors duration-200"
-              >
-                Dashboard
-              </span>{" "}
-              <span className="px-1">/</span> Users &amp; Roles
-            </p>
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-800">
+            <h1 className=" text-2xl font-bold tracking-tight text-BLUE-dark">
               User Management
             </h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="text-sm text-tertiary">
               Manage users, roles, and access permissions
             </p>
           </div>
-          <button
-            type="button"
-            className="inline-flex items-center justify-center gap-2 rounded-md bg-gradient-bg-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
-          >
-            <CirclePlus className="h-4 w-4" /> Add User
-          </button>
+          <div className="my-auto ">
+            <button
+              type="button"
+              onClick={() => navigate("/users-roles/add-user")}
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-gradient-bg-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+            >
+              <CirclePlus className="h-4 w-4" /> Add User
+            </button>
+          </div>
         </div>
 
         <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
@@ -216,7 +219,7 @@ function UsersRoles() {
             </div>
             <button
               type="button"
-              onClick={() => navigate("/users-roles/administrator")}
+              onClick={() => navigate("/users-roles/Permissions")}
               className="mt-4 text-sm font-semibold text-accent-blue hover:text-blue-800"
             >
               Manage Permissions <span aria-hidden="true">›</span>
