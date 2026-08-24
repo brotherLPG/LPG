@@ -1,369 +1,263 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard,
-  Users,
-  TrendingUp,
-  ShieldCheck,
-  Clock,
-  Package,
-  DollarSign,
-  FileText,
-  Building2,
-  Truck,
+  CirclePlus,
   AlertTriangle,
-  CheckCircle,
-  ArrowUpRight,
-  ArrowDownRight,
-  Search,
-  Bell,
-  Settings,
-  LogOut
 } from "lucide-react";
-
+import Recentsales from "../../components/Dashbord/RecentSales/RecentSales";
+import RecentPayments from "../../components/Dashbord/RecentPayments/RecentPayments";
+import RecentNotifications from "../../components/Dashbord/RecentNotifications/RecentNotifications";
 function Dashboard() {
-  // LPG Management Stats
-  const stats = [
-    {
-      title: "Total Cylinders",
-      value: "2,456",
-      change: "+124",
-      changeType: "positive",
-      icon: Package,
-      color: "blue",
-      description: "Registered cylinders",
-    },
-    {
-      title: "Today's Sales",
-      value: "PKR 125,000",
-      change: "+15%",
-      changeType: "positive",
-      icon: DollarSign,
-      color: "green",
-      description: "Cash + Credit sales",
-    },
-    {
-      title: "Pending Inspections",
-      value: "48",
-      change: "-8",
-      changeType: "positive",
-      icon: ShieldCheck,
-      color: "orange",
-      description: "Safety approvals",
-    },
-    {
-      title: "Active Branches",
-      value: "5",
-      change: "+1",
-      changeType: "positive",
-      icon: Building2,
-      color: "purple",
-      description: "Operating locations",
-    },
-    {
-      title: "Total Revenue",
-      value: "PKR 2.5M",
-      change: "+23%",
-      changeType: "positive",
-      icon: TrendingUp,
-      color: "blue",
-      description: "Monthly revenue",
-    },
-    {
-      title: "Deliveries Today",
-      value: "156",
-      change: "+12%",
-      changeType: "positive",
-      icon: Truck,
-      color: "green",
-      description: "Completed deliveries",
-    },
+  const navigate = useNavigate();
+
+  // -----------------------------
+  // Dashboard Data
+  // -----------------------------
+
+  const salesData = [
+    { day: "Mon", value: 400 },
+    { day: "Tue", value: 260 },
+    { day: "Wed", value: 320 },
+    { day: "Thu", value: 220 },
+    { day: "Fri", value: 410 },
+    { day: "Sat", value: 380 },
+    { day: "Sun", value: 520 },
   ];
 
-  const recentActivity = [
+  const lowStockAlerts = [
     {
       id: 1,
-      type: "success",
-      message: "Cylinder #LPG-2456 registered with barcode",
-      time: "2 min ago",
-      severity: "low"
+      title: "FILLED-CYLINDER-15KG",
+      message: "15 remaining (Minimum: 50)",
+      type: "warning",
     },
     {
       id: 2,
-      type: "info",
-      message: "Safety inspection approved for Batch #789",
-      time: "5 min ago",
-      severity: "low"
+      title: "FILLED-CYLINDER-45KG",
+      message: "5 remaining (Minimum: 15)",
+      type: "danger",
     },
     {
       id: 3,
-      type: "success",
-      message: "Tax invoice INV-2026-0456 generated",
-      time: "12 min ago",
-      severity: "low"
+      title: "VALVE-REPLACEMENT-KIT",
+      message: "10 left (Minimum: 30)",
+      type: "warning",
     },
-    {
-      id: 4,
-      type: "info",
-      message: "LPG filling completed - 50 cylinders",
-      time: "25 min ago",
-      severity: "low"
-    }
   ];
 
-  const getColorClasses = (color) => {
-    const colors = {
-      blue: {
-        bg: "bg-blue-50",
-        iconBg: "bg-blue-500",
-        text: "text-blue-600"
-      },
-      green: {
-        bg: "bg-green-50",
-        iconBg: "bg-green-500",
-        text: "text-green-600"
-      },
-      orange: {
-        bg: "bg-orange-50",
-        iconBg: "bg-orange-500",
-        text: "text-orange-600"
-      },
-      purple: {
-        bg: "bg-purple-50",
-        iconBg: "bg-purple-500",
-        text: "text-purple-600"
-      }
-    };
-    return colors[color] || colors.blue;
+  // -----------------------------
+  // Helpers
+  // -----------------------------
+
+
+  const getAlertClass = (type) => {
+    if (type === "danger") {
+      return "border-red-300 bg-red-50 text-red-500";
+    }
+
+    return "border-amber-300 bg-amber-50 text-amber-500";
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-100 w-full">
-      <div className="flex-1 p-6 lg:p-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-8"
-        >
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-primary-dark">Dashboard</h1>
-              <p className="text-slate-500 mt-1">
-                Welcome back! Here's what's happening with your LPG plant today.
-              </p>
+    <div className="min-h-screen w-full bg-slate-50">
+      <div className="w-full px-4 md:px-6 lg:px-8 py-3">
+        {/* =========================================
+            BREADCRUMB
+        ========================================= */}
+        <div className="text-slate-400 mb-1">
+          <span
+            onClick={() => navigate("/dashboard")}
+            className="cursor-pointer hover:text-primary-dark transition-colors"
+          >
+            Brother LPG
+          </span>
+
+          <span className="mx-1">/</span>
+
+          <span>Dashboard</span>
+        </div>
+
+        {/* =========================================
+            HEADER
+        ========================================= */}
+        <div className="flex items-center justify-between  pb-2 my-1">
+          <div>
+            <h1 className="font-bold text-slate-800 text-[28px]">
+              Operations Control Board
+            </h1>
+
+            <p className="text-tertiary text-[14px]">
+              Operational KPIs, filling statistics, and warning indicators for
+              Rawalpindi plant
+            </p>
+          </div>
+
+          <button
+            onClick={() => navigate("/filling-batches/create")}
+            className="
+              flex
+              items-center
+              gap-1
+              px-3
+              py-1.5
+              rounded
+              bg-gradient-bg-blue
+              text-white
+              transition
+              text-[14px]
+            "
+          >
+            <CirclePlus className="w-5 h-5" />
+            New Filling Batch
+          </button>
+        </div>
+
+        {/* =========================================
+            FILLED CYLINDERS
+        ========================================= */}
+        <div className="bg-white border border-slate-200 rounded-md px-4 py-2 mb-2">
+          <p className="text-tertiary font-semibold font-family-inter text-sm my-2">
+            Filled Cylinders
+          </p>
+
+          <h2 className="text-xl font-extrabold text-orange leading-6 my-2">
+            342 units
+          </h2>
+
+          <div className="flex items-center gap-1 mt-2">
+            <span className="w-1 h-1 rounded-full bg-orange-500" />
+
+            <span className="text-[12px] text-slate-400">
+              Low domestic inventory
+            </span>
+          </div>
+        </div>
+
+        {/* =========================================
+            SALES + LOW STOCK
+        ========================================= */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 mb-2">
+          {/* Weekly Sales */}
+          {/* Weekly Sales */}
+          <div className="lg:col-span-2 bg-white border border-slate-200 rounded-md">
+            <div className="px-3 py-2 border-b border-slate-100">
+              <h3 className="font-bold text-[16px] text-BLUE-dark">
+                Weekly Sales Trend (Rs. in thousands)
+              </h3>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
-                />
+
+            <div className="px-4 py-3">
+              <div className="flex">
+                {/* Y Axis */}
+                <div className="w-14 h-44 flex flex-col justify-between text-right pr-2">
+                  <span className="text-[11px] text-tertiary font-regular">Rs. 600k</span>
+
+                  <span className="text-[11px] text-tertiary font-regular">Rs. 480k</span>
+
+                  <span className="text-[11px] text-tertiary font-regular">Rs. 360k</span>
+
+                  <span className="text-[11px] text-tertiary font-regular">Rs. 240k</span>
+
+                  <span className="text-[11px] text-tertiary font-regular">Rs. 120k</span>
+
+                  <span className="text-[11px] text-tertiary font-regular">Rs. 0k</span>
+                </div>
+
+                {/* Chart */}
+                <div className="flex-1">
+                  {/* Bars */}
+                  <div className="h-48 flex items-end justify-between gap-4 ">
+                    {salesData.map((item) => {
+                      const height = Math.max((item.value / 600) * 100, 3);
+
+                      return (
+                        <div
+                          key={item.day}
+                          className="flex-1 h-full flex flex-col items-center justify-end"
+                        >
+                          {/* Bar */}
+                          <div className="w-full h-full flex items-end justify-center">
+                            <div
+                              className="
+                      w-5
+                      md:w-7
+                      bg-gradient-bg-blue
+                      rounded-t-sm
+                      transition-all
+                      duration-300
+                      hover:opacity-80
+                    "
+                              style={{
+                                height: `${height}%`,
+                              }}
+                              title={`Rs. ${item.value}k`}
+                            />
+                          </div>
+
+                          {/* Day */}
+                          <span className="text-[11px] text-tertiary font-regular mt-1">
+                            {item.day}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </motion.div>
 
-        {/* Stats Grid - 6 cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
-        >
-          {stats.map((stat, index) => {
-            const Icon = stat.icon;
-            const colors = getColorClasses(stat.color);
-            return (
-              <motion.div
-                key={index}
-                whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-shadow border border-slate-100"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`${colors.bg} p-3 rounded-xl`}>
-                    <Icon className={`w-6 h-6 ${colors.text}`} />
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {stat.changeType === "positive" ? (
-                      <ArrowUpRight className="w-4 h-4 text-green-500" />
-                    ) : (
-                      <ArrowDownRight className="w-4 h-4 text-red-500" />
-                    )}
-                    <span
-                      className={`text-sm font-medium ${
-                        stat.changeType === "positive"
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
-                    >
-                      {stat.change}
-                    </span>
-                  </div>
-                </div>
-
-                <h3 className="text-2xl font-bold mb-1 text-primary-dark">
-                  {stat.value}
-                </h3>
-                <p className="text-slate-500 text-sm font-medium">
-                  {stat.title}
-                </p>
-                <p className="text-slate-400 text-xs mt-1">
-                  {stat.description}
-                </p>
-              </motion.div>
-            );
-          })}
-        </motion.div>
-
-        {/* Charts and Activity Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Chart Section - Takes 2 columns */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="lg:col-span-2 bg-white rounded-2xl shadow-sm p-6 border border-slate-100"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-primary-dark">
-                Revenue Overview
-              </h2>
-              <select className="px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option>Last 7 days</option>
-                <option>Last 30 days</option>
-                <option>Last 90 days</option>
-              </select>
+          {/* Low Stock */}
+          <div className="bg-white border border-slate-200 rounded-md">
+            <div className="px-3 py-2 border-b border-slate-100">
+              <h3 className="font-bold text-[16px] text-BLUE-dark">
+                Low-Stock Alerts (Minimum Threshold)
+              </h3>
             </div>
-            {/* Placeholder for chart */}
-            <div className="h-64 flex items-center justify-center bg-slate-50 rounded-xl">
-              <div className="text-center">
-                <TrendingUp className="w-12 h-12 text-slate-300 mx-auto mb-2" />
-                <p className="text-slate-400 text-sm">Chart visualization will be added here</p>
-              </div>
-            </div>
-          </motion.div>
 
-          {/* Recent Activity - Takes 1 column */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-primary-dark">
-                Recent Activity
-              </h2>
-              <button className="font-medium text-sm hover:underline text-accent-blue">
-                View All
-              </button>
-            </div>
-            <div className="space-y-4">
-              {recentActivity.slice(0, 4).map((activity) => (
+            <div className="p-3 space-y-1.5">
+              {lowStockAlerts.map((alert) => (
                 <div
-                  key={activity.id}
-                  className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"
+                  key={alert.id}
+                  className={`
+                    flex
+                    items-center
+                    gap-2
+                    border
+                    rounded-lg
+                    px-2
+                    py-3
+                    ${getAlertClass(alert.type)}
+                  `}
                 >
-                  <div
-                    className={`p-2 rounded-lg ${
-                      activity.type === "success"
-                        ? "bg-green-100"
-                        : "bg-blue-100"
-                    }`}
-                  >
-                    {activity.type === "success" && (
-                      <CheckCircle className="w-4 h-4 text-green-600" />
-                    )}
-                    {activity.type === "info" && (
-                      <FileText className="w-4 h-4 text-blue-600" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-slate-700 font-medium text-sm truncate">
-                      {activity.message}
-                    </p>
-                    <p className="text-slate-400 text-xs mt-1">
-                      {activity.time}
-                    </p>
+                  <AlertTriangle className="w-5 h-5 shrink-0" />
+
+                  <div>
+                    <p className="text-[12px] font-bold">{alert.title}</p>
+
+                    <p className="text-[11px] font-regular">{alert.message}</p>
                   </div>
                 </div>
               ))}
             </div>
-          </motion.div>
+          </div>
         </div>
 
-        {/* Alerts and Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Alerts Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-primary-dark">
-                Alerts & Notifications
-              </h2>
-              <span className="bg-red-100 text-red-600 text-xs font-medium px-2 py-1 rounded-full">3 New</span>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3 p-3 bg-red-50 rounded-xl border border-red-100">
-                <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-red-700 font-medium text-sm">Low Stock Alert</p>
-                  <p className="text-red-600 text-xs mt-1">Cylinder stock below threshold at Branch #2</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-3 bg-orange-50 rounded-xl border border-orange-100">
-                <AlertTriangle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-orange-700 font-medium text-sm">Inspection Due</p>
-                  <p className="text-orange-600 text-xs mt-1">12 cylinders require safety inspection</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
-                <Bell className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-blue-700 font-medium text-sm">System Update</p>
-                  <p className="text-blue-600 text-xs mt-1">New features available in dashboard</p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
+        {/* =========================================
+            RECENT SALES + PAYMENTS
+        ========================================= */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 mb-2">
+          {/* Recent Sales */}
+          <Recentsales/>
 
-          {/* Quick Actions */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="bg-gradient-primary rounded-2xl shadow-sm p-6 text-white"
-          >
-            <h2 className="text-xl font-bold mb-6">Quick Actions</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <button className="flex flex-col items-center gap-2 p-4 bg-white/10 rounded-xl hover:bg-white/20 transition-colors">
-                <Package className="w-6 h-6" />
-                <span className="text-sm font-medium">Add Cylinder</span>
-              </button>
-              <button className="flex flex-col items-center gap-2 p-4 bg-white/10 rounded-xl hover:bg-white/20 transition-colors">
-                <Truck className="w-6 h-6" />
-                <span className="text-sm font-medium">New Delivery</span>
-              </button>
-              <button className="flex flex-col items-center gap-2 p-4 bg-white/10 rounded-xl hover:bg-white/20 transition-colors">
-                <ShieldCheck className="w-6 h-6" />
-                <span className="text-sm font-medium">Inspection</span>
-              </button>
-              <button className="flex flex-col items-center gap-2 p-4 bg-white/10 rounded-xl hover:bg-white/20 transition-colors">
-                <FileText className="w-6 h-6" />
-                <span className="text-sm font-medium">Generate Report</span>
-              </button>
-            </div>
-          </motion.div>
+          {/* Recent Payments */}
+          <RecentPayments />
         </div>
+
+        {/* =========================================
+            RECENT NOTIFICATIONS
+        ========================================= */}
+       <RecentNotifications/>
       </div>
     </div>
   );

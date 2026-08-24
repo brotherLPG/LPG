@@ -8,11 +8,13 @@
   --color-orange: #F59E0B;
   --color-tertiary: #4B5563;
   --color-BLUE-dark: #1F2937;
+  --color-4th-color: #9CA3AF;
   --gradient-primary: linear-gradient(90deg, #0F172A 0%, #1E40AF 100%);
   --gradient-primary-vertical: linear-gradient(180deg, #0F172A 0%, #1E40AF 100%);
   --gradient-secondary: #0F172A;
   --gradient-tertiary: #E5E7EB;
    --gradient-thredd-color: linear-gradient(90deg, #1E40AF 0%, #1D4ED8 100%);
+   --gradient-bg-blue: #1E40AF;
 
 }
 
@@ -92,6 +94,9 @@ button:disabled {
 .bg-gradient-thredd-color {
   background: var(--gradient-thredd-color);
 }
+.bg-gradient-bg-blue {
+  background: var(--gradient-bg-blue);
+}
 
 .text-primary-dark {
   color: var(--color-primary-dark);
@@ -106,6 +111,12 @@ button:disabled {
 }
 .text-BLUE-dark {
   color: var(--color-BLUE-dark);
+}
+.text-orange{
+  color: var(--color-orange);
+}
+.text-4th-color{
+  color: var(--color-4th-color);
 }
 
 .text-error {
