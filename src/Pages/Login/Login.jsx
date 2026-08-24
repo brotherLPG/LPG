@@ -23,7 +23,7 @@ function Login() {
     <main className="flex min-h-screen w-full bg-white">
       <section className="grid w-full lg:grid-cols-2">
         {/* Left Panel - Branding */}
-        <div className="hidden lg:flex flex-col justify-between p-12 relative overflow-hidden bg-gradient-primary">
+        <div className="hidden lg:flex flex-col justify-between p-12 relative overflow-hidden bg-gradient-thredd-color">
           {/* Decorative elements */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute top-20 right-20 w-64 h-64 rounded-full border border-white/10" />
@@ -35,7 +35,11 @@ function Login() {
 
           <div className="relative z-10 flex items-center gap-3">
             <div className="rounded-xl bg-white/20 p-1 backdrop-blur-sm">
-              <img src={logo} alt="Logo" className="h-16 w-16 border rounded-sm" />
+              <img
+                src={logo}
+                alt="Logo"
+                className="h-16 w-16 border rounded-sm"
+              />
             </div>
             <span className="text-2xl font-bold text-white">Brother LPG</span>
           </div>
@@ -69,9 +73,7 @@ function Login() {
               </span>
             </div>
 
-            <p className=" font-semibold text-accent-blue">
-              Welcome back
-            </p>
+            <p className=" font-semibold text-accent-blue">Welcome back</p>
             <h2 className="mt-2 text-3xl font-bold text-primary-dark">
               Sign in to your account
             </h2>
@@ -122,7 +124,7 @@ function Login() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400  hover:text-slate-600 transition-colors"
                   >
                     <span className="text-sm font-medium">
                       {showPassword ? "Hide" : "Show"}
@@ -143,7 +145,7 @@ function Login() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-primary"
+                className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-thredd-color"
               >
                 {isLoading ? (
                   <>

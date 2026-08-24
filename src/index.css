@@ -12,6 +12,8 @@
   --gradient-primary-vertical: linear-gradient(180deg, #0F172A 0%, #1E40AF 100%);
   --gradient-secondary: #0F172A;
   --gradient-tertiary: #E5E7EB;
+   --gradient-thredd-color: linear-gradient(90deg, #1E40AF 0%, #1D4ED8 100%);
+
 }
 
 body {
@@ -86,6 +88,9 @@ button:disabled {
 }
 .bg-gradient-tertiary {
   background: var(--gradient-tertiary);
+}
+.bg-gradient-thredd-color {
+  background: var(--gradient-thredd-color);
 }
 
 .text-primary-dark {
