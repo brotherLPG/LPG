@@ -25,6 +25,7 @@ import CylinderTypes from '../Pages/Cylinders/CylinderTypes';
 import Employees from '../Pages/Employees/Employees';
 import AuditLogs from '../Pages/AuditLogs/AuditLogs';
 import StorageTanks from '../Pages/StorageTanks/StorageTanks';
+import Expenses from '../Pages/Expenses/Expenses';
 
 function PageRouter() {
   // Router container
@@ -55,6 +56,7 @@ function PageRouter() {
         <Route path="/suppliers" element={<Suppliers />} />
         <Route path="/cylinder-types" element={<CylinderTypes />} />
         <Route path="/employees" element={<Employees />} />
+        <Route path="/expenses" element={<Expenses />} />
         <Route path="/audit-logs" element={<AuditLogs />} />
         <Route path="/storage-tanks" element={<StorageTanks />} />
       </Routes>

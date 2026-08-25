@@ -7,7 +7,8 @@ import {
   Truck,
   Warehouse,
   Receipt,
-  Layers
+  Layers,
+  CreditCard
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -77,6 +78,11 @@ const Sidebar = () => {
       icon: Users,
       label: "Employees",
       path: "/employees",
+    },
+    {
+      icon: CreditCard,
+      label: "Expenses",
+      path: "/expenses",
     },
     {
       icon: ShieldCheck,
