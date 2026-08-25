@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {  LoaderCircle, LogIn, AlertCircle, Droplets } from "lucide-react";
 import logo from "../../assets/Images/logo.jpeg";
+import loginpimage from "../../assets/Images/loginpage.jpg"
 import { useNavigate } from "react-router-dom";
 
 function Login() {
@@ -23,7 +24,13 @@ function Login() {
     <main className="flex min-h-screen w-full bg-white">
       <section className="grid w-full lg:grid-cols-2">
         {/* Left Panel - Branding */}
-        <div className="hidden lg:flex flex-col justify-between p-12 relative overflow-hidden bg-gradient-thredd-color">
+        <div
+          className="hidden lg:flex flex-col justify-between p-12 relative overflow-hidden bg-cover bg-bottom bg-no-repeat "
+          style={{ backgroundImage: `url(${loginpimage})` }}
+        >
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/60" />
+
           {/* Decorative elements */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute top-20 right-20 w-64 h-64 rounded-full border border-white/10" />
@@ -34,136 +41,159 @@ function Login() {
           </div>
 
           <div className="relative z-10 flex items-center gap-3">
-            <div className="rounded-xl bg-white/20 p-1 backdrop-blur-sm">
+            {/* <div className="rounded-xl bg-white/20 p-1 backdrop-blur-sm">
               <img
                 src={logo}
                 alt="Logo"
-                className="h-16 w-16 border rounded-sm"
+                className="h-16 w-16 border rounded-sm object-cover"
               />
-            </div>
-            <span className="text-2xl font-bold text-white">Brother LPG</span>
+            </div> */}
+            {/* <div>
+              <span className="text-2xl font-bold text-white block">
+                Brother LPG
+              </span>
+              <span className="text-sm text-white/80">(PVT)</span>
+            </div> */}
           </div>
 
           <div className="relative z-10">
+            <img
+              src={logo}
+              alt="Logo"
+              className="h-16 w-16 border rounded-sm object-cover"
+            />
             <h1 className="text-5xl font-bold text-white leading-tight mb-3">
-              LPG Plant ERP
+              Brother LPG
             </h1>
             <p className="text-xl text-white/90">
               Pakistan's leading LPG cylinder management system
             </p>
           </div>
-
-          <div className="relative z-10">
-            <p className="text-sm text-white/70">
-              © 2026 LPG Plant ERP. All rights reserved.
-            </p>
-          </div>
         </div>
 
         {/* Right Panel - Form */}
-        <div className="flex items-center justify-center p-8 lg:p-16 bg-slate-50">
-          <div className="w-full max-w-md">
-            {/* Mobile Logo */}
-            <div className="mb-8 lg:hidden flex items-center gap-3">
-              <div className="rounded-xl p-2 bg-gradient-primary">
-                <Droplets className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-xl font-bold text-primary-dark">
-                LPG Plant ERP
-              </span>
+        <div className="flex items-center justify-center py-2 bg-white w-full">
+          <div>
+            {/* Desktop Logo */}
+            <div className="mb-6 hidden lg:flex items-center">
+              <img
+                src={logo}
+                alt="Logo"
+                className="h-10 w-10 border rounded-sm"
+              />
             </div>
 
-            <p className=" font-semibold text-accent-blue">Welcome back</p>
-            <h2 className="mt-2 text-3xl font-bold text-primary-dark">
+            <p className="text-sm font-bold text-accent-blue">Welcome back</p>
+            <h2 className="mt-1 text-4xl font-bold text-BLUE-dark">
               Sign in to your account
             </h2>
-            <p className="mt-3 text-slate-500">
+            <p className="mt-2 text-sm text-tertiary">
               Access your LPG plant operations, inventory, and reports securely.
             </p>
 
             {/* Error Message */}
             {error && (
-              <div className="mt-6 p-4 rounded-xl flex items-start gap-3 bg-error-light border border-error-light">
-                <AlertCircle className="h-5 w-5 shrink-0 mt-0.5 text-error" />
+              <div className="mt-6 p-4 rounded-xl flex items-start gap-3 bg-red-50 border border-red-200">
+                <AlertCircle className="h-5 w-5 shrink-0 mt-0.5 text-red-600" />
                 <div>
-                  <p className="font-semibold text-sm text-error">
+                  <p className="font-semibold text-sm text-red-600">
                     Access Denied
                   </p>
-                  <p className="text-sm mt-1 text-error-dark">
+                  <p className="text-sm mt-1 text-red-700">
                     The password you entered is incorrect. Please try again or
                     contact the administrator.
                   </p>
                 </div>
               </div>
             )}
-
-            <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-              <label className="block">
-                <span className="block text-sm font-semibold mb-2 text-primary-dark">
-                  Email Address
-                </span>
-                <input
-                  required
-                  type="email"
-                  placeholder="mr.ahmad@cworldlpg.pk"
-                  className="w-full rounded-xl border border-slate-200 bg-white py-3 px-4 font-normal outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-              </label>
-
-              <label className="block">
-                <span className="block text-sm font-semibold mb-2 text-primary-dark">
-                  Password
-                </span>
-                <div className="relative">
+            <div className="bg-[white] shadow-2xl shadow-[#0F172A1A] rounded-lg p-6">
+              <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+                <label className="block">
+                  <span className="block text-sm font-semibold mb-2 text-slate-900">
+                    Email Address
+                  </span>
                   <input
                     required
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
-                    className="w-full rounded-xl border border-slate-200 bg-white py-3 px-4 pr-12 font-normal outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    type="email"
+                    placeholder="ri.ahmad@overlandlpg.pk"
+                    className="w-full rounded-lg border border-slate-300 bg-white py-2.5 px-4 text-sm font-normal outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   />
+                </label>
+
+                <label className="block">
+                  <span className="block text-sm font-semibold mb-2 text-slate-900">
+                    Password
+                  </span>
+                  <div className="relative">
+                    <input
+                      required
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                      className="w-full rounded-lg border border-slate-300 bg-white py-2.5 px-4 pr-20 text-sm font-normal outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors text-sm font-medium"
+                    >
+                      {showPassword ? "Hide" : "Show"}
+                    </button>
+                  </div>
+                </label>
+
+                <div className="flex items-center justify-between text-sm">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-BLUE-dark">Remember me</span>
+                  </label>
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400  hover:text-slate-600 transition-colors"
+                    className="font-semibold hover:underline text-accent-blue"
                   >
-                    <span className="text-sm font-medium">
-                      {showPassword ? "Hide" : "Show"}
-                    </span>
+                    Forgot Password?
                   </button>
                 </div>
-              </label>
 
-              <div className="flex items-center justify-end text-sm">
                 <button
-                  type="button"
-                  className="font-semibold hover:underline text-accent-blue"
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg py-3 font-semibold text-white transition-all hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed bg-blue-600"
                 >
-                  Forgot Password?
+                  {isLoading ? (
+                    <>
+                      <LoaderCircle className="h-5 w-5 animate-spin" /> Signing
+                      in...
+                    </>
+                  ) : (
+                    "Sign In"
+                  )}
                 </button>
+              </form>
+
+              <div className="mt-6 flex items-center gap-4">
+                <div className="flex-1 h-px bg-slate-200"></div>
+                <span className="text-sm text-slate-400">or</span>
+                <div className="flex-1 h-px bg-slate-200"></div>
               </div>
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-thredd-color"
-              >
-                {isLoading ? (
-                  <>
-                    <LoaderCircle className="h-5 w-5 animate-spin" /> Signing
-                    in...
-                  </>
-                ) : (
-                  <>
-                    <LogIn className="h-5 w-5" /> Sign In
-                  </>
-                )}
-              </button>
-            </form>
+              <div className="mt-4 text-center">
+                <button
+                  type="button"
+                  className="text-sm text-tertiary hover:underline"
+                >
+                  Contact Administrator for Account Access
+                </button>
+              </div>
+            </div>
 
-            <div className="mt-8 flex items-center gap-4">
-              <div className="flex-1 h-px bg-slate-200"></div>
-              <span className="text-sm text-slate-400">or</span>
-              <div className="flex-1 h-px bg-slate-200"></div>
+            <div className="mt-3 text-center">
+              <p className="text-sm text-[#6B7280]">
+                Authorized personnel only. Activities are recorded under
+                Pakistan Cybersecurity Law.
+              </p>
             </div>
           </div>
         </div>
