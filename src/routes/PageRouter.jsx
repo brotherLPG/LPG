@@ -23,7 +23,6 @@ import AddCustomers from '../Pages/Customers/addCustomers';
 import Suppliers from '../Pages/Suppliers/Suppliers';
 import CylinderTypes from '../Pages/Cylinders/CylinderTypes';
 import Employees from '../Pages/Employees/Employees';
-import AddUser from '../Pages/UsersRoles/AddUser';
 import AuditLogs from '../Pages/AuditLogs/AuditLogs';
 
 function PageRouter() {
@@ -36,7 +35,6 @@ function PageRouter() {
         {/* <Route path="/login" element={<Login />} /> */}
         <Route path="/Dashboard" element={<Dashboard />} />
         <Route path="/users-roles" element={<UsersRoles />} />
-        <Route path="/users-roles/add" element={<AddUser />} />
         <Route path="/users-roles/add-user" element={<AddUser />} />
         <Route path="/users-roles/Permissions" element={<RolePermissions />} />
         <Route path="/Events" element={<Events />} />
