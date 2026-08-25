@@ -1,23 +1,30 @@
 import { useState } from "react";
-import {  LoaderCircle, LogIn, AlertCircle, Droplets } from "lucide-react";
+import {  LoaderCircle, LogIn, Droplets } from "lucide-react";
 import logo from "../../assets/Images/logo.jpeg";
 import loginpimage from "../../assets/Images/loginpage.jpg"
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../../utils/GlobalToast";
 
 function Login() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(false);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setIsLoading(true);
-    setError(true);
-    window.setTimeout(() => {
-      setError(false);
+
+    // Simulate API call
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      toast.success("Login successful!");
       navigate("/Dashboard");
-    }, 1500);
+    } catch (error) {
+      toast.error("Login failed. Please check your credentials.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -91,21 +98,6 @@ function Login() {
               Access your LPG plant operations, inventory, and reports securely.
             </p>
 
-            {/* Error Message */}
-            {error && (
-              <div className="mt-6 p-4 rounded-xl flex items-start gap-3 bg-red-50 border border-red-200">
-                <AlertCircle className="h-5 w-5 shrink-0 mt-0.5 text-red-600" />
-                <div>
-                  <p className="font-semibold text-sm text-red-600">
-                    Access Denied
-                  </p>
-                  <p className="text-sm mt-1 text-red-700">
-                    The password you entered is incorrect. Please try again or
-                    contact the administrator.
-                  </p>
-                </div>
-              </div>
-            )}
             <div className="bg-[white] shadow-2xl shadow-[#0F172A1A] rounded-lg p-6">
               <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <label className="block">
