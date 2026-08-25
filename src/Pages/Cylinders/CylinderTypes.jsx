@@ -1,7 +1,7 @@
-import { Table } from "@heroui/react";
-import { Search, PlusCircle, Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
+import { PlusCircle, Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import GlobalTable from "../../utils/GlobalTable";
 
 const initialCylinderTypes = [
   { code: "CYL-001", name: "Commercial LPG 11KG", capacity: "11.0 KG", tare: "8.5 KG", price: "Rs. 2,850", status: "Active" },
@@ -27,6 +27,100 @@ function CylinderTypes() {
     return matchesQuery && matchesStatus && matchesCapacity;
   }), [query, status, capacity]);
 
+  // Column definitions for cylinder types table
+  const cylinderTypeColumns = [
+    {
+      key: "code",
+      label: "Type Code",
+      isRowHeader: true,
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3",
+      renderCell: (item) => (
+        <span className="font-bold text-slate-800 text-[13px]">{item.code}</span>
+      ),
+    },
+    {
+      key: "name",
+      label: "Type Name",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3",
+      renderCell: (item) => (
+        <button className="font-semibold text-[#1a56db] hover:underline text-[13px]">
+          {item.name}
+        </button>
+      ),
+    },
+    {
+      key: "capacity",
+      label: "Capacity (KG)",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3 text-slate-600 text-[13px] font-normal",
+    },
+    {
+      key: "tare",
+      label: "Tare Weight (KG)",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3 text-slate-600 text-[13px] font-normal",
+    },
+    {
+      key: "price",
+      label: "Selling Price",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3",
+      renderCell: (item) => (
+        <span className="text-slate-900 font-bold text-[13px]">{item.price}</span>
+      ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3",
+      renderCell: (item) => (
+        <span
+          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+            item.status === "Active"
+              ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+              : "bg-slate-100 text-slate-600 border border-slate-200"
+          }`}
+        >
+          {item.status}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3",
+      renderCell: (item) => (
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            aria-label={`View ${item.name}`}
+            className="flex items-center gap-1.5 rounded-full bg-blue-50/70 border border-blue-200/60 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+          >
+            <Eye className="h-3.5 w-3.5" /> View
+          </button>
+          <button
+            type="button"
+            aria-label={`Edit ${item.name}`}
+            className="flex items-center gap-1.5 rounded-full bg-emerald-50/70 border border-emerald-200/60 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
+          >
+            <Edit3 className="h-3.5 w-3.5" /> Edit
+          </button>
+          <button
+            type="button"
+            aria-label={`Delete ${item.name}`}
+            className="flex items-center gap-1.5 rounded-full bg-rose-50/70 border border-rose-200/60 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition-colors"
+          >
+            <Trash2 className="h-3.5 w-3.5" /> Delet
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
       <section>
@@ -41,7 +135,9 @@ function CylinderTypes() {
                 Dashboard
               </span>{" "}
               <span className="px-1 text-slate-400">/</span>{" "}
-              <span className="font-semibold text-slate-700">Cylinder Types</span>
+              <span className="font-semibold text-slate-700">
+                Cylinder Types
+              </span>
             </p>
             <h1 className="mt-2 text-[28px] font-bold tracking-tight text-slate-900">
               Cylinder Types
@@ -106,146 +202,17 @@ function CylinderTypes() {
 
         {/* Table */}
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <Table>
-            <Table.ScrollContainer>
-              <Table.Content aria-label="Cylinder Types Table">
-                <Table.Header>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Type Code
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Type Name
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Capacity (KG)
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Tare Weight (KG)
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Selling Price
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Status
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Actions
-                  </Table.Column>
-                </Table.Header>
-                <Table.Body
-                  items={filteredCylinders}
-                  emptyContent="No cylinder types match your search."
-                >
-                  {(cyl) => (
-                    <Table.Row key={cyl.code} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
-                      <Table.Cell className="px-4 py-3">
-                        <span className="font-bold text-slate-800 text-[13px]">
-                          {cyl.code}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell className="px-4 py-3">
-                        <button className="font-semibold text-[#1a56db] hover:underline text-[13px]">
-                          {cyl.name}
-                        </button>
-                      </Table.Cell>
-                      <Table.Cell className="px-4 py-3">
-                        <span className="text-slate-600 text-[13px] font-normal">
-                          {cyl.capacity}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell className="px-4 py-3">
-                        <span className="text-slate-600 text-[13px] font-normal">
-                          {cyl.tare}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell className="px-4 py-3">
-                        <span className="text-slate-900 font-bold text-[13px]">
-                          {cyl.price}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell className="px-4 py-3">
-                        <span
-                          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                            cyl.status === "Active" 
-                              ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
-                              : "bg-slate-100 text-slate-600 border border-slate-200"
-                          }`}
-                        >
-                          {cyl.status}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            aria-label={`View ${cyl.name}`}
-                            className="flex items-center gap-1.5 rounded-full bg-blue-50/70 border border-blue-200/60 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
-                          >
-                            <Eye className="h-3.5 w-3.5" /> View
-                          </button>
-                          <button
-                            type="button"
-                            aria-label={`Edit ${cyl.name}`}
-                            className="flex items-center gap-1.5 rounded-full bg-emerald-50/70 border border-emerald-200/60 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
-                          >
-                            <Edit3 className="h-3.5 w-3.5" /> Edit
-                          </button>
-                          <button
-                            type="button"
-                            aria-label={`Delete ${cyl.name}`}
-                            className="flex items-center gap-1.5 rounded-full bg-rose-50/70 border border-rose-200/60 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition-colors"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" /> Delet
-                          </button>
-                        </div>
-                      </Table.Cell>
-                    </Table.Row>
-                  )}
-                </Table.Body>
-              </Table.Content>
-            </Table.ScrollContainer>
-          </Table>
-          
-          {/* Pagination Footer */}
-          <div className="flex items-center justify-between border-t border-slate-200 bg-[#F8FAFC]/50 px-4 py-4 sm:px-6">
-            <div className="hidden sm:block">
-              <p className="text-sm text-slate-500">
-                Showing <span className="font-medium">1</span> to <span className="font-medium">7</span> of{" "}
-                <span className="font-medium">12</span> cylinder types
-              </p>
-            </div>
-            <div className="flex flex-1 justify-between sm:justify-end">
-              <nav className="isolate inline-flex gap-2" aria-label="Pagination">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="relative inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Previous
-                </button>
-                {[1, 2].map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`relative inline-flex items-center rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors ${
-                      currentPage === page
-                        ? "bg-[#0f4bb8] text-white"
-                        : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, 2))}
-                  disabled={currentPage === 2}
-                  className="relative inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Next
-                </button>
-              </nav>
-            </div>
-          </div>
+          <GlobalTable
+            columns={cylinderTypeColumns}
+            data={filteredCylinders}
+            ariaLabel="Cylinder Types Table"
+            className=""
+            rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+            emptyContent="No cylinder types match your search."
+            pagination={true}
+            rowsPerPage={5}
+          />
+
         </div>
       </section>
     </main>

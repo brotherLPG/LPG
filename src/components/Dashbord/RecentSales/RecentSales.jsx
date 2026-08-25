@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Table } from "@heroui/react";
+import GlobalTable from "../../../utils/GlobalTable";
 
 function RecentSales() {
   const navigate = useNavigate();
@@ -43,6 +43,42 @@ function RecentSales() {
     Cancelled: "bg-red-50 text-red-500",
   };
 
+  // Column definitions for recent sales table
+  const salesColumns = [
+    {
+      key: "invoice",
+      label: "Invoice #",
+      isRowHeader: true,
+      className: "px-0 py-1.5 text-left font-bold text-tertiary",
+      cellClassName: "px-0 py-2 text-[10px] font-semibold text-BLUE-dark",
+    },
+    {
+      key: "customer",
+      label: "Customer",
+      className: "px-2 py-1.5 text-left font-bold text-tertiary",
+      cellClassName: "px-2 py-2 text-[10px] text-slate-600",
+    },
+    {
+      key: "amount",
+      label: "Amount (Rs.)",
+      className: "px-2 py-1.5 text-left font-bold text-tertiary",
+      cellClassName: "px-2 py-2 text-[10px] font-semibold text-slate-700",
+    },
+    {
+      key: "status",
+      label: "Status",
+      className: "px-2 py-1.5 text-left font-bold text-tertiary",
+      cellClassName: "px-0 py-2",
+      renderCell: (item) => (
+        <span
+          className={`inline-flex whitespace-nowrap rounded-full px-2 py-0.5 text-[9px] font-medium ${statusClass[item.status]}`}
+        >
+          {item.status}
+        </span>
+      ),
+    },
+  ];
+
   return (
     <section className="min-w-0 overflow-hidden rounded-md border border-slate-200 bg-white">
       <header className="flex items-center justify-between border-b border-slate-100 px-3 py-2">
@@ -56,51 +92,13 @@ function RecentSales() {
         </button>
       </header>
 
-      <Table className="px-3 pb-3 pt-2 bg-white">
-        <Table.ScrollContainer>
-          <Table.Content aria-label="Recent sales">
-            <Table.Header className="bg-white">
-              <Table.Column className="px-0 py-1.5 text-left font-bold text-tertiary">
-                Invoice #
-              </Table.Column>
-              <Table.Column className="px-2 py-1.5 text-left font-bold text-tertiary">
-                Customer
-              </Table.Column>
-              <Table.Column className="px-2 py-1.5 text-left font-bold text-tertiary">
-                Amount (Rs.)
-              </Table.Column>
-              <Table.Column className="px-2 py-1.5 text-left font-bold text-tertiary">
-                Status
-              </Table.Column>
-            </Table.Header>
-            <Table.Body items={recentSales}>
-              {(sale) => (
-                <Table.Row
-                  key={sale.invoice}
-                  className="border-b border-slate-100 last:border-b-0 hover:bg-slate-50"
-                >
-                  <Table.Cell className="px-0 py-2 text-[10px] font-semibold text-BLUE-dark">
-                    {sale.invoice}
-                  </Table.Cell>
-                  <Table.Cell className="px-2 py-2 text-[10px] text-slate-600">
-                    {sale.customer}
-                  </Table.Cell>
-                  <Table.Cell className="px-2 py-2 text-[10px] font-semibold text-slate-700">
-                    {sale.amount}
-                  </Table.Cell>
-                  <Table.Cell className="px-0 py-2">
-                    <span
-                      className={`inline-flex whitespace-nowrap rounded-full px-2 py-0.5 text-[9px] font-medium ${statusClass[sale.status]}`}
-                    >
-                      {sale.status}
-                    </span>
-                  </Table.Cell>
-                </Table.Row>
-              )}
-            </Table.Body>
-          </Table.Content>
-        </Table.ScrollContainer>
-      </Table>
+      <GlobalTable
+        columns={salesColumns}
+        data={recentSales}
+        ariaLabel="Recent sales"
+        className=""
+        rowClassName="border-b border-slate-100 last:border-b-0 hover:bg-slate-50"
+      />
     </section>
   );
 }

@@ -1,7 +1,7 @@
-import { Table } from "@heroui/react";
-import { Search, PlusCircle, Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
+import { PlusCircle, Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import GlobalTable from "../../utils/GlobalTable";
 
 const initialSuppliers = [
   { code: "SUP-001", name: "Pakistan Petroleum Ltd.", contact: "Irfan Qureshi", phone: "021-35681901", terms: "Net 30", outstanding: "Rs. 1,250,000", status: "Active" },
@@ -26,6 +26,106 @@ function Suppliers() {
     const matchesTerms = paymentTerm === "All" || supplier.terms === paymentTerm;
     return matchesQuery && matchesStatus && matchesTerms;
   }), [query, status, paymentTerm]);
+
+  // Column definitions for suppliers table
+  const supplierColumns = [
+    {
+      key: "code",
+      label: "Supplier Code",
+      isRowHeader: true,
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3",
+      renderCell: (item) => (
+        <span className="font-bold text-slate-800 text-[13px]">{item.code}</span>
+      ),
+    },
+    {
+      key: "name",
+      label: "Supplier Name",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3",
+      renderCell: (item) => (
+        <button className="font-semibold text-[#1a56db] hover:underline text-[13px]">
+          {item.name}
+        </button>
+      ),
+    },
+    {
+      key: "contact",
+      label: "Contact Person",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3 text-slate-600 text-[13px] font-medium",
+    },
+    {
+      key: "phone",
+      label: "Phone",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3 text-slate-600 text-[13px]",
+    },
+    {
+      key: "terms",
+      label: "Payment Terms",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3 text-slate-600 text-[13px]",
+    },
+    {
+      key: "outstanding",
+      label: "Outstanding Payable",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3",
+      renderCell: (item) => (
+        <span className="text-slate-900 font-bold text-[13px]">{item.outstanding}</span>
+      ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3",
+      renderCell: (item) => (
+        <span
+          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+            item.status === "Active"
+              ? "bg-emerald-50 text-emerald-600"
+              : "bg-rose-50 text-rose-600"
+          }`}
+        >
+          {item.status}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3",
+      renderCell: (item) => (
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            aria-label={`View ${item.name}`}
+            className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+          >
+            <Eye className="h-3.5 w-3.5" /> View
+          </button>
+          <button
+            type="button"
+            aria-label={`Edit ${item.name}`}
+            className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
+          >
+            <Edit3 className="h-3.5 w-3.5" /> Edit
+          </button>
+          <button
+            type="button"
+            aria-label={`Delete ${item.name}`}
+            className="flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition-colors"
+          >
+            <Trash2 className="h-3.5 w-3.5" /> Delet
+          </button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
@@ -104,154 +204,16 @@ function Suppliers() {
 
         {/* Table */}
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <Table>
-            <Table.ScrollContainer>
-              <Table.Content aria-label="Suppliers Table">
-                <Table.Header>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Supplier Code
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Supplier Name
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Contact Person
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Phone
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Payment Terms
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Outstanding Payable
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Status
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Actions
-                  </Table.Column>
-                </Table.Header>
-                <Table.Body
-                  items={filteredSuppliers}
-                  emptyContent="No suppliers match your search."
-                >
-                  {(supplier) => (
-                    <Table.Row key={supplier.code} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
-                      <Table.Cell className="px-4 py-3">
-                        <span className="font-bold text-slate-800 text-[13px]">
-                          {supplier.code}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell className="px-4 py-3">
-                        <button className="font-semibold text-[#1a56db] hover:underline text-[13px]">
-                          {supplier.name}
-                        </button>
-                      </Table.Cell>
-                      <Table.Cell className="px-4 py-3">
-                        <span className="text-slate-600 text-[13px] font-medium">
-                          {supplier.contact}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell className="px-4 py-3">
-                        <span className="text-slate-600 text-[13px]">
-                          {supplier.phone}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell className="px-4 py-3">
-                        <span className="text-slate-600 text-[13px]">
-                          {supplier.terms}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell className="px-4 py-3">
-                        <span className="text-slate-900 font-bold text-[13px]">
-                          {supplier.outstanding}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell className="px-4 py-3">
-                        <span
-                          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                            supplier.status === "Active" 
-                              ? "bg-emerald-50 text-emerald-600" 
-                              : "bg-rose-50 text-rose-600"
-                          }`}
-                        >
-                          {supplier.status}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            aria-label={`View ${supplier.name}`}
-                            className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
-                          >
-                            <Eye className="h-3.5 w-3.5" /> View
-                          </button>
-                          <button
-                            type="button"
-                            aria-label={`Edit ${supplier.name}`}
-                            className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
-                          >
-                            <Edit3 className="h-3.5 w-3.5" /> Edit
-                          </button>
-                          <button
-                            type="button"
-                            aria-label={`Delete ${supplier.name}`}
-                            className="flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition-colors"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" /> Delet
-                          </button>
-                        </div>
-                      </Table.Cell>
-                    </Table.Row>
-                  )}
-                </Table.Body>
-              </Table.Content>
-            </Table.ScrollContainer>
-          </Table>
-          
-          {/* Pagination Footer */}
-          <div className="flex items-center justify-between border-t border-slate-200 bg-[#F8FAFC]/50 px-4 py-4 sm:px-6">
-            <div className="hidden sm:block">
-              <p className="text-sm text-slate-500">
-                Showing <span className="font-medium">1</span> to <span className="font-medium">7</span> of{" "}
-                <span className="font-medium">23</span> suppliers
-              </p>
-            </div>
-            <div className="flex flex-1 justify-between sm:justify-end">
-              <nav className="isolate inline-flex gap-2" aria-label="Pagination">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="relative inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Previous
-                </button>
-                {[1, 2, 3].map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`relative inline-flex items-center rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors ${
-                      currentPage === page
-                        ? "bg-[#0f4bb8] text-white"
-                        : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, 3))}
-                  disabled={currentPage === 3}
-                  className="relative inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Next
-                </button>
-              </nav>
-            </div>
-          </div>
+          <GlobalTable
+            columns={supplierColumns}
+            data={filteredSuppliers}
+            ariaLabel="Suppliers Table"
+            className=""
+            rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+            emptyContent="No suppliers match your search."
+            pagination={true}
+            rowsPerPage={5}
+          />
         </div>
       </section>
     </main>

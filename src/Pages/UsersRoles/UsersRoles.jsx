@@ -1,7 +1,7 @@
-import { Table } from "@heroui/react";
-import { Eye, Pencil, CirclePlus , Search, Trash2 } from "lucide-react";
+import { Eye, Pencil, CirclePlus, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import GlobalTable from "../../utils/GlobalTable";
 
 const users = [
   { name: "Muhammad Ahmad", email: "admin@almanida-lpg.pk", role: "Administrator", employee: "Ahmad Hassan", status: "Active", login: "21 Aug 2026 09:15" },
@@ -32,6 +32,88 @@ function UsersRoles() {
     const matchesStatus = status === "All" || user.status === status;
     return matchesQuery && matchesRole && matchesStatus;
   }), [query, role, status]);
+
+  // Column definitions for users table
+  const userColumns = [
+    {
+      key: "name",
+      label: "Name",
+      isRowHeader: true,
+      className: "text-[13px] font-bold text-tertiary",
+      cellClassName: "px-4 py-3",
+      renderCell: (item) => (
+        <span className="font-semibold text-BLUE-dark text-[13px]">{item.name}</span>
+      ),
+    },
+    {
+      key: "email",
+      label: "Email Address",
+      className: "text-[13px] font-bold text-tertiary",
+      cellClassName: "px-4 py-3 text-slate-500 text-[13px] font-regular",
+    },
+    {
+      key: "role",
+      label: "Role",
+      className: "text-[13px] font-bold text-tertiary",
+      cellClassName: "px-4 py-3 text-slate-600 text-[13px] font-medium",
+    },
+    {
+      key: "employee",
+      label: "Linked Employee",
+      className: "text-[13px] font-bold text-tertiary",
+      cellClassName: "px-4 py-3 text-tertiary text-[13px] font-regular",
+    },
+    {
+      key: "status",
+      label: "Status",
+      className: "text-[13px] font-bold text-tertiary",
+      cellClassName: "px-4 py-3",
+      renderCell: (item) => (
+        <span
+          className={`rounded-full px-2 py-1 text-xs font-medium ${statusStyles[item.status]}`}
+        >
+          {item.status}
+        </span>
+      ),
+    },
+    {
+      key: "login",
+      label: "Last Login",
+      className: "text-[13px] font-bold text-tertiary",
+      cellClassName: "px-4 py-3 whitespace-nowrap text-tertiary font-regular text-[13px]",
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      className: "text-[13px] font-bold text-tertiary",
+      cellClassName: "px-4 py-3",
+      renderCell: (item) => (
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            aria-label={`View ${item.name}`}
+            className="text-blue-500 hover:text-blue-700"
+          >
+            <Eye className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            aria-label={`Edit ${item.name}`}
+            className="text-emerald-500 hover:text-emerald-700"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            aria-label={`Delete ${item.name}`}
+            className="text-red-500 hover:text-red-700"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
@@ -103,101 +185,14 @@ function UsersRoles() {
         </div>
 
         <div className="mt-5 overflow-hidden border border-slate-200 bg-white shadow-sm">
-          <Table>
-            <Table.ScrollContainer>
-              <Table.Content aria-label="User management table">
-                <Table.Header>
-                  <Table.Column className="text-[13px] font-bold text-tertiary">
-                    Name
-                  </Table.Column>
-                  <Table.Column className="text-[13px] font-bold text-tertiary">
-                    Email Address
-                  </Table.Column>
-                  <Table.Column className="text-[13px] font-bold text-tertiary">
-                    Role
-                  </Table.Column>
-                  <Table.Column className="text-[13px] font-bold text-tertiary">
-                    Linked Employee
-                  </Table.Column>
-                  <Table.Column className="text-[13px] font-bold text-tertiary">
-                    Status
-                  </Table.Column>
-                  <Table.Column className="text-[13px] font-bold text-tertiary">
-                    Last Login
-                  </Table.Column>
-                  <Table.Column className="text-[13px] font-bold text-tertiary">
-                    Actions
-                  </Table.Column>
-                </Table.Header>
-                <Table.Body
-                  items={filteredUsers}
-                  emptyContent="No users match your search."
-                >
-                  {(user) => (
-                    <Table.Row key={user.email}>
-                      <Table.Cell>
-                        <span className="font-semibold text-BLUE-dark text-[13px]">
-                          {user.name}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <span className="text-slate-500 text-[13px] font-regular">
-                          {user.email}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <span className="text-slate-600 text-[13px] font-medium">
-                          {user.role}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <span className="text-tertiary text-[13px] font-regular">
-                          {user.employee}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <span
-                          className={`rounded-full px-2 py-1 text-xs font-medium ${statusStyles[user.status]}`}
-                        >
-                          {user.status}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <span className="whitespace-nowrap text-tertiary font-regular text-[13px]">
-                          {user.login}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            aria-label={`View ${user.name}`}
-                            className="text-blue-500 hover:text-blue-700"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </button>
-                          <button
-                            type="button"
-                            aria-label={`Edit ${user.name}`}
-                            className="text-emerald-500 hover:text-emerald-700"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </button>
-                          <button
-                            type="button"
-                            aria-label={`Delete ${user.name}`}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </Table.Cell>
-                    </Table.Row>
-                  )}
-                </Table.Body>
-              </Table.Content>
-            </Table.ScrollContainer>
-          </Table>
+          <GlobalTable
+            columns={userColumns}
+            data={filteredUsers}
+            ariaLabel="User management table"
+            className=""
+            rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+            emptyContent="No users match your search."
+          />
         </div>
 
         <section className="mt-5">

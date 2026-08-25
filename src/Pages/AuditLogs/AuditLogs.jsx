@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from "react";
-import { Table } from "@heroui/react";
 import {
   Search,
   CalendarDays,
   ChevronDown,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import GlobalTable from "../../utils/GlobalTable";
 
 function AuditLogs() {
   const navigate = useNavigate();
@@ -227,10 +227,6 @@ function AuditLogs() {
   const [selectedModule, setSelectedModule] = useState("All Modules");
   const [selectedAction, setSelectedAction] = useState("All Actions");
 
-  const [page, setPage] = useState(1);
-
-  const rowsPerPage = 10;
-
   // =========================================================
   // FILTER OPTIONS
   // =========================================================
@@ -314,53 +310,6 @@ function AuditLogs() {
   ]);
 
   // =========================================================
-  // PAGINATION
-  // =========================================================
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredLogs.length / rowsPerPage)
-  );
-
-  const currentPage = Math.min(page, totalPages);
-
-  const startIndex = (currentPage - 1) * rowsPerPage;
-
-  const endIndex = Math.min(
-    startIndex + rowsPerPage,
-    filteredLogs.length
-  );
-
-  const currentLogs = filteredLogs.slice(
-    startIndex,
-    endIndex
-  );
-
-  // =========================================================
-  // RESET PAGE WHEN FILTER CHANGES
-  // =========================================================
-
-  const handleSearchChange = (value) => {
-    setSearch(value);
-    setPage(1);
-  };
-
-  const handleUserChange = (value) => {
-    setSelectedUser(value);
-    setPage(1);
-  };
-
-  const handleModuleChange = (value) => {
-    setSelectedModule(value);
-    setPage(1);
-  };
-
-  const handleActionChange = (value) => {
-    setSelectedAction(value);
-    setPage(1);
-  };
-
-  // =========================================================
   // ACTION STYLE
   // =========================================================
 
@@ -389,42 +338,89 @@ function AuditLogs() {
     }
   };
 
+  // Column definitions for audit logs table
+  const auditLogColumns = [
+    {
+      key: "timestamp",
+      label: "Timestamp",
+      isRowHeader: true,
+      className: "bg-slate-50/80 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3",
+      renderCell: (item) => (
+        <span className="text-slate-500 text-[13px]">{item.timestamp}</span>
+      ),
+    },
+    {
+      key: "user",
+      label: "User",
+      className: "bg-slate-50/80 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3",
+      renderCell: (item) => (
+        <span className="font-medium text-slate-700 text-[13px]">{item.user}</span>
+      ),
+    },
+    {
+      key: "action",
+      label: "Action",
+      className: "bg-slate-50/80 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3",
+      renderCell: (item) => (
+        <span className={`font-semibold text-[13px] ${getActionClass(item.action)}`}>
+          {item.action}
+        </span>
+      ),
+    },
+    {
+      key: "module",
+      label: "Module",
+      className: "bg-slate-50/80 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3 text-slate-600 text-[13px]",
+    },
+    {
+      key: "entity",
+      label: "Entity Description",
+      className: "bg-slate-50/80 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3 text-slate-500 text-[13px]",
+    },
+    {
+      key: "entityId",
+      label: "Entity ID",
+      className: "bg-slate-50/80 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3",
+      renderCell: (item) =>
+        item.entityId === "—" ? (
+          <span className="text-slate-400 text-[13px]">—</span>
+        ) : (
+          <span className="font-medium text-blue-600 text-[13px]">{item.entityId}</span>
+        ),
+    },
+    {
+      key: "ip",
+      label: "IP Address",
+      className: "bg-slate-50/80 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3 text-slate-500 text-[13px]",
+    },
+  ];
+
   // =========================================================
-  // PAGINATION ITEMS
+  // RESET FILTERS
   // =========================================================
 
-  const getPaginationItems = () => {
-    if (totalPages <= 5) {
-      return Array.from(
-        { length: totalPages },
-        (_, index) => index + 1
-      );
-    }
-
-    if (currentPage <= 3) {
-      return [1, 2, 3, "...", totalPages];
-    }
-
-    if (currentPage >= totalPages - 2) {
-      return [
-        1,
-        "...",
-        totalPages - 2,
-        totalPages - 1,
-        totalPages,
-      ];
-    }
-
-    return [
-      1,
-      "...",
-      currentPage,
-      "...",
-      totalPages,
-    ];
+  const handleSearchChange = (value) => {
+    setSearch(value);
   };
 
-  const paginationItems = getPaginationItems();
+  const handleUserChange = (value) => {
+    setSelectedUser(value);
+  };
+
+  const handleModuleChange = (value) => {
+    setSelectedModule(value);
+  };
+
+  const handleActionChange = (value) => {
+    setSelectedAction(value);
+  };
 
   // =========================================================
   // RENDER
@@ -652,217 +648,16 @@ function AuditLogs() {
         ==================================================== */}
 
         <div className="mt-5 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-          <Table className="w-full">
-            <Table.ScrollContainer>
-              <Table.Content
-                aria-label="Audit logs"
-                className="w-full"
-              >
-
-                {/* HEADER */}
-
-                <Table.Header>
-
-                  <Table.Column
-                    id="timestamp"
-                    className="bg-slate-50/80 text-[13px] font-bold text-slate-700"
-                  >
-                    Timestamp
-                  </Table.Column>
-
-                  <Table.Column
-                    id="user"
-                    className="bg-slate-50/80 text-[13px] font-bold text-slate-700"
-                  >
-                    User
-                  </Table.Column>
-
-                  <Table.Column
-                    id="action"
-                    className="bg-slate-50/80 text-[13px] font-bold text-slate-700"
-                  >
-                    Action
-                  </Table.Column>
-
-                  <Table.Column
-                    id="module"
-                    className="bg-slate-50/80 text-[13px] font-bold text-slate-700"
-                  >
-                    Module
-                  </Table.Column>
-
-                  <Table.Column
-                    id="entity"
-                    className="bg-slate-50/80 text-[13px] font-bold text-slate-700"
-                  >
-                    Entity Description
-                  </Table.Column>
-
-                  <Table.Column
-                    id="entityId"
-                    className="bg-slate-50/80 text-[13px] font-bold text-slate-700"
-                  >
-                    Entity ID
-                  </Table.Column>
-
-                  <Table.Column
-                    id="ip"
-                    className="bg-slate-50/80 text-[13px] font-bold text-slate-700"
-                  >
-                    IP Address
-                  </Table.Column>
-
-                </Table.Header>
-
-                {/* BODY */}
-
-                <Table.Body
-                  items={currentLogs}
-                  emptyContent="No audit logs found."
-                >
-                  {(log) => (
-                    <Table.Row
-                      id={String(log.id)}
-                      key={log.id}
-                      className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
-                    >
-
-                      {/* TIMESTAMP */}
-
-                      <Table.Cell>
-                        <span className="text-slate-500 text-[13px]">
-                          {log.timestamp}
-                        </span>
-                      </Table.Cell>
-
-                      {/* USER */}
-
-                      <Table.Cell>
-                        <span className="font-medium text-slate-700 text-[13px]">
-                          {log.user}
-                        </span>
-                      </Table.Cell>
-
-                      {/* ACTION */}
-
-                      <Table.Cell>
-                        <span
-                          className={`
-                            font-semibold
-                            text-[13px]
-                            ${getActionClass(log.action)}
-                          `}
-                        >
-                          {log.action}
-                        </span>
-                      </Table.Cell>
-
-                      {/* MODULE */}
-
-                      <Table.Cell>
-                        <span className="text-slate-600 text-[13px]">
-                          {log.module}
-                        </span>
-                      </Table.Cell>
-
-                      {/* ENTITY */}
-
-                      <Table.Cell>
-                        <span className="text-slate-500 text-[13px]">
-                          {log.entity}
-                        </span>
-                      </Table.Cell>
-
-                      {/* ENTITY ID */}
-
-                      <Table.Cell>
-                        {log.entityId === "—" ? (
-                          <span className="text-slate-400 text-[13px]">
-                            —
-                          </span>
-                        ) : (
-                          <span className="font-medium text-blue-600 text-[13px]">
-                            {log.entityId}
-                          </span>
-                        )}
-                      </Table.Cell>
-
-                      {/* IP */}
-
-                      <Table.Cell>
-                        <span className="text-slate-500 text-[13px]">
-                          {log.ip}
-                        </span>
-                      </Table.Cell>
-
-                    </Table.Row>
-                  )}
-                </Table.Body>
-
-              </Table.Content>
-            </Table.ScrollContainer>
-
-          </Table>
-
-          {/* Pagination Footer */}
-          <div className="flex items-center justify-between border-t border-slate-200 bg-white px-4 py-4 sm:px-6">
-            <div className="text-sm text-slate-500">
-              {filteredLogs.length === 0
-                ? "Showing 0 of 0 entries"
-                : `Showing ${startIndex + 1}-${endIndex} of ${filteredLogs.length} entries`}
-            </div>
-            <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-end">
-              <nav className="isolate inline-flex gap-2 rounded-md" aria-label="Pagination">
-                <button
-                  onClick={() => {
-                    if (currentPage > 1) {
-                      setPage(currentPage - 1);
-                    }
-                  }}
-                  disabled={currentPage === 1}
-                  className="relative inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Previous
-                </button>
-                {paginationItems.map((item, index) => {
-                  if (item === "...") {
-                    return (
-                      <span
-                        key={`ellipsis-${index}`}
-                        className="relative inline-flex items-center px-3 py-1.5 text-sm font-semibold text-slate-400"
-                      >
-                        ...
-                      </span>
-                    );
-                  }
-                  return (
-                    <button
-                      key={item}
-                      onClick={() => setPage(item)}
-                      className={`relative inline-flex items-center rounded-md px-3.5 py-1.5 text-sm font-semibold transition-colors ${
-                        currentPage === item
-                          ? "bg-[#1a56db] text-white"
-                          : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                      }`}
-                    >
-                      {item}
-                    </button>
-                  );
-                })}
-                <button
-                  onClick={() => {
-                    if (currentPage < totalPages) {
-                      setPage(currentPage + 1);
-                    }
-                  }}
-                  disabled={currentPage === totalPages}
-                  className="relative inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Next
-                </button>
-              </nav>
-            </div>
-          </div>
+          <GlobalTable
+            columns={auditLogColumns}
+            data={filteredLogs}
+            ariaLabel="Audit logs"
+            className="w-full"
+            rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+            emptyContent="No audit logs found."
+            pagination={true}
+            rowsPerPage={10}
+          />
         </div>
       </section>
     </main>

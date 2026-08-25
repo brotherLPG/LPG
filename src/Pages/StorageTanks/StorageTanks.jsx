@@ -1,8 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Table } from "@heroui/react";
 import { AlertTriangle, Edit, History } from "lucide-react";
 import StorageTanksimage from "../../assets/Images/StorageTanks.jpg"
+import GlobalTable from "../../utils/GlobalTable"
 
 function StorageTanks() {
   const navigate = useNavigate();
@@ -36,6 +36,76 @@ function StorageTanks() {
     { batch: "FD-2026-0120", description: "11.8 KG Domestic", units: "150 units", quantity: "3,186 KG" },
     { batch: "FD-2026-0119", description: "15 KG Domestic", units: "80 units", quantity: "1,840 KG" },
     { batch: "FD-2026-0118", description: "11.8 KG Domestic", units: "120 units", quantity: "2,548 KG" },
+  ];
+
+  // Column definitions for receipts table
+  const receiptColumns = [
+    {
+      key: "receipt",
+      label: "Receipt ID",
+      isRowHeader: true,
+      className: "px-0 py-1.5 text-left font-bold text-tertiary",
+      cellClassName: "px-0 py-2",
+      renderCell: (item) => (
+        <div className="flex flex-col">
+          <span className="text-[12px] font-bold text-6th-color">{item.receipt}</span>
+          <span className="text-4th-color text-[10px] font-regular">10 May 2026</span>
+        </div>
+      ),
+    },
+    {
+      key: "supplier",
+      label: "Supplier",
+      className: "px-2 py-1.5 text-left font-bold text-tertiary",
+      cellClassName: "px-2 py-2 text-[12px] text-tertiary",
+    },
+    {
+      key: "quantity",
+      label: "Quantity",
+      className: "px-2 py-1.5 text-left font-bold text-tertiary",
+      cellClassName: "px-2 py-2 text-[12px] font-bold text-BLUE-dark",
+    },
+    {
+      key: "amount",
+      label: "Amount (Rs.)",
+      className: "px-2 py-1.5 text-left font-bold text-tertiary",
+      cellClassName: "px-2 py-2 text-[12px] font-bold text-5th-color",
+    },
+  ];
+
+  // Column definitions for filling batches table
+  const batchColumns = [
+    {
+      key: "batch",
+      label: "Batch ID",
+      isRowHeader: true,
+      className: "px-0 py-1.5 text-left font-bold text-tertiary",
+      cellClassName: "px-0 py-2",
+      renderCell: (item) => (
+        <div className="flex flex-col">
+          <span className="text-[12px] font-bold text-6th-color">{item.batch}</span>
+          <span className="text-4th-color text-[10px] font-regular">10 May 2026</span>
+        </div>
+      ),
+    },
+    {
+      key: "description",
+      label: "Description",
+      className: "px-2 py-1.5 text-left font-bold text-tertiary",
+      cellClassName: "px-2 py-2 text-[12px] text-tertiary",
+    },
+    {
+      key: "units",
+      label: "Units",
+      className: "px-2 py-1.5 text-left font-bold text-tertiary",
+      cellClassName: "px-2 py-2 text-[12px] font-bold text-BLUE-dark",
+    },
+    {
+      key: "quantity",
+      label: "Quantity",
+      className: "px-2 py-1.5 text-left font-bold text-tertiary",
+      cellClassName: "px-2 py-1.5 text-left font-bold text-error",
+    },
   ];
 
   return (
@@ -230,57 +300,11 @@ function StorageTanks() {
               </h3>
             </header>
 
-            <Table className="px-3 pb-3 pt-2 bg-white">
-              <Table.ScrollContainer>
-                <Table.Content aria-label="Recent receipts">
-                  <Table.Header className="bg-white">
-                    <Table.Column
-                      isRowHeader
-                      className="px-0 py-1.5 text-left font-bold text-tertiary"
-                    >
-                      Receipt ID
-                    </Table.Column>
-                    <Table.Column className="px-2 py-1.5 text-left font-bold text-tertiary">
-                      Supplier
-                    </Table.Column>
-                    <Table.Column className="px-2 py-1.5 text-left font-bold text-tertiary">
-                      Quantity
-                    </Table.Column>
-                    <Table.Column className="px-2 py-1.5 text-left font-bold text-tertiary">
-                      Amount (Rs.)
-                    </Table.Column>
-                  </Table.Header>
-                  <Table.Body items={recentReceipts}>
-                    {(receipt) => (
-                      <Table.Row
-                        key={receipt.receipt}
-                        className="border-b border-slate-100 last:border-b-0 hover:bg-slate-50"
-                      >
-                        <Table.Cell className="px-0 py-2">
-                          <div className="flex flex-col">
-                            <span className="text-[12px] font-bold text-6th-color">
-                              {receipt.receipt}
-                            </span>
-                            <span className="text-4th-color  text-[10px] font-regular">
-                              10 May 2026
-                            </span>
-                          </div>
-                        </Table.Cell>
-                        <Table.Cell className="px-2 py-2 text-[12px] text-tertiary">
-                          {receipt.supplier}
-                        </Table.Cell>
-                        <Table.Cell className="px-2 py-2 text-[12px] font-bold text-BLUE-dark">
-                          {receipt.quantity}
-                        </Table.Cell>
-                        <Table.Cell className="px-2 py-2 text-[12px] font-bold text-5th-color">
-                          {receipt.amount}
-                        </Table.Cell>
-                      </Table.Row>
-                    )}
-                  </Table.Body>
-                </Table.Content>
-              </Table.ScrollContainer>
-            </Table>
+            <GlobalTable
+              columns={receiptColumns}
+              data={recentReceipts}
+              ariaLabel="Recent receipts"
+            />
           </section>
 
           {/* Recent Cylinder Filling Batches */}
@@ -291,57 +315,12 @@ function StorageTanks() {
               </h3>
             </header>
 
-            <Table className="px-3 pb-3 pt-2 bg-white">
-              <Table.ScrollContainer>
-                <Table.Content aria-label="Recent filling batches">
-                  <Table.Header className="bg-white">
-                    <Table.Column
-                      isRowHeader
-                      className="px-0 py-1.5 text-left font-bold text-tertiary"
-                    >
-                      Batch ID
-                    </Table.Column>
-                    <Table.Column className="px-2 py-1.5 text-left font-bold text-tertiary">
-                      Description
-                    </Table.Column>
-                    <Table.Column className="px-2 py-1.5 text-left font-bold text-tertiary">
-                      Units
-                    </Table.Column>
-                    <Table.Column className="px-2 py-1.5 text-left font-bold text-tertiary">
-                      Quantity
-                    </Table.Column>
-                  </Table.Header>
-                  <Table.Body items={fillingBatches}>
-                    {(batch) => (
-                      <Table.Row
-                        key={batch.batch}
-                        className="border-b border-slate-100 last:border-b-0 hover:bg-slate-50"
-                      >
-                        <Table.Cell className="px-0 py-2">
-                          <div className="flex flex-col">
-                            <span className="text-[12px] font-bold text-6th-color">
-                              {batch.batch}
-                            </span>
-                            <span className="text-4th-color  text-[10px] font-regular">
-                              10 May 2026
-                            </span>
-                          </div>
-                        </Table.Cell>
-                        <Table.Cell className="px-2 py-2 text-[12px] text-tertiary">
-                          {batch.description}
-                        </Table.Cell>
-                        <Table.Cell className="px-2 py-2 text-[12px] font-bold text-BLUE-dark">
-                          {batch.units}
-                        </Table.Cell>
-                        <Table.Cell className="px-2 py-1.5 text-left font-bold text-error">
-                          {batch.quantity}
-                        </Table.Cell>
-                      </Table.Row>
-                    )}
-                  </Table.Body>
-                </Table.Content>
-              </Table.ScrollContainer>
-            </Table>
+            <GlobalTable
+              columns={batchColumns}
+              data={fillingBatches}
+              ariaLabel="Recent filling batches"
+              // pagination={true}
+            />
           </section>
         </div>
       </div>

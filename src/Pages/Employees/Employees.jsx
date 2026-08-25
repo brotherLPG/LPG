@@ -1,7 +1,7 @@
-import { Table } from "@heroui/react";
 import { Plus, Eye, Edit3, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import GlobalTable from "../../utils/GlobalTable";
 
 const initialEmployees = [
   { code: "EMP-001", name: "Ahmad Hassan", department: "Operations", jobTitle: "Plant Operator", phone: "0300-5550011", salary: "Rs. 45,000", status: "Active" },
@@ -27,6 +27,100 @@ function Employees() {
     const matchesStatus = status === "All" || emp.status === status;
     return matchesQuery && matchesDept && matchesStatus;
   }), [query, department, status]);
+
+  // Column definitions for employees table
+  const employeeColumns = [
+    {
+      key: "code",
+      label: "Code",
+      isRowHeader: true,
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-4",
+      renderCell: (item) => (
+        <span className="font-bold text-slate-800 text-[13px]">{item.code}</span>
+      ),
+    },
+    {
+      key: "name",
+      label: "Full Name",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-4",
+      renderCell: (item) => (
+        <button className="flex flex-col items-start font-bold text-[#1a56db] hover:underline text-[13px] text-left leading-tight">
+          <span>{item.name.split(' ')[0]}</span>
+          <span>{item.name.split(' ').slice(1).join(' ')}</span>
+        </button>
+      ),
+    },
+    {
+      key: "department",
+      label: "Department",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
+    },
+    {
+      key: "jobTitle",
+      label: "Job Title",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
+    },
+    {
+      key: "phone",
+      label: "Phone",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
+    },
+    {
+      key: "salary",
+      label: "Monthly Salary",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-4",
+      renderCell: (item) => (
+        <span className="text-slate-900 font-bold text-[13px]">{item.salary}</span>
+      ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-4",
+      renderCell: (item) => (
+        <span
+          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+            item.status === "Active"
+              ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+              : "bg-amber-50 text-amber-600 border border-amber-100"
+          }`}
+        >
+          {item.status}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 text-right pr-6",
+      cellClassName: "px-4 py-4 pr-6",
+      renderCell: (item) => (
+        <div className="flex items-center justify-end gap-3">
+          <button
+            type="button"
+            aria-label={`View ${item.name}`}
+            className="text-[#1a56db] hover:text-blue-800 transition-colors"
+          >
+            <Eye className="h-4 w-4" strokeWidth={2.5} />
+          </button>
+          <button
+            type="button"
+            aria-label={`Edit ${item.name}`}
+            className="text-[#008951] hover:text-emerald-800 transition-colors"
+          >
+            <Edit3 className="h-4 w-4" strokeWidth={2.5} />
+          </button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
@@ -109,148 +203,16 @@ function Employees() {
 
         {/* Table */}
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <Table>
-            <Table.ScrollContainer>
-              <Table.Content aria-label="Employees Table">
-                <Table.Header>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Code
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Full Name
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Department
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Job Title
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Phone
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Monthly Salary
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700">
-                    Status
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 text-right pr-6">
-                    Actions
-                  </Table.Column>
-                </Table.Header>
-                <Table.Body
-                  items={filteredEmployees}
-                  emptyContent="No employees match your search."
-                >
-                  {(emp) => (
-                    <Table.Row key={emp.code} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
-                      <Table.Cell className="px-4 py-4">
-                        <span className="font-bold text-slate-800 text-[13px]">
-                          {emp.code}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell className="px-4 py-4">
-                        <button className="flex flex-col items-start font-bold text-[#1a56db] hover:underline text-[13px] text-left leading-tight">
-                          <span>{emp.name.split(' ')[0]}</span>
-                          <span>{emp.name.split(' ').slice(1).join(' ')}</span>
-                        </button>
-                      </Table.Cell>
-                      <Table.Cell className="px-4 py-4">
-                        <span className="text-slate-600 text-[13px] font-medium">
-                          {emp.department}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell className="px-4 py-4">
-                        <span className="text-slate-600 text-[13px] font-medium">
-                          {emp.jobTitle}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell className="px-4 py-4">
-                        <span className="text-slate-600 text-[13px] font-medium">
-                          {emp.phone}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell className="px-4 py-4">
-                        <span className="text-slate-900 font-bold text-[13px]">
-                          {emp.salary}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell className="px-4 py-4">
-                        <span
-                          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                            emp.status === "Active" 
-                              ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
-                              : "bg-amber-50 text-amber-600 border border-amber-100"
-                          }`}
-                        >
-                          {emp.status}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell className="px-4 py-4 pr-6">
-                        <div className="flex items-center justify-end gap-3">
-                          <button
-                            type="button"
-                            aria-label={`View ${emp.name}`}
-                            className="text-[#1a56db] hover:text-blue-800 transition-colors"
-                          >
-                            <Eye className="h-4 w-4" strokeWidth={2.5} />
-                          </button>
-                          <button
-                            type="button"
-                            aria-label={`Edit ${emp.name}`}
-                            className="text-[#008951] hover:text-emerald-800 transition-colors"
-                          >
-                            <Edit3 className="h-4 w-4" strokeWidth={2.5} />
-                          </button>
-                        </div>
-                      </Table.Cell>
-                    </Table.Row>
-                  )}
-                </Table.Body>
-              </Table.Content>
-            </Table.ScrollContainer>
-          </Table>
-          
-          {/* Pagination Footer */}
-          <div className="flex items-center justify-between border-t border-slate-200 bg-[#F8FAFC]/50 px-4 py-4 sm:px-6">
-            <div className="hidden sm:block">
-              <p className="text-sm text-slate-500">
-                Showing <span className="font-medium">1</span> to <span className="font-medium">8</span> of{" "}
-                <span className="font-medium">24</span> plant personnel
-              </p>
-            </div>
-            <div className="flex flex-1 justify-between sm:justify-end">
-              <nav className="isolate inline-flex gap-2" aria-label="Pagination">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="relative inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Previous
-                </button>
-                {[1, 2].map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`relative inline-flex items-center rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors ${
-                      currentPage === page
-                        ? "bg-[#0f4bb8] text-white"
-                        : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, 2))}
-                  disabled={currentPage === 2}
-                  className="relative inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Next
-                </button>
-              </nav>
-            </div>
-          </div>
+          <GlobalTable
+            columns={employeeColumns}
+            data={filteredEmployees}
+            ariaLabel="Employees Table"
+            className=""
+            rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+            emptyContent="No employees match your search."
+            pagination={true}
+            rowsPerPage={5}
+          />
         </div>
       </section>
     </main>
