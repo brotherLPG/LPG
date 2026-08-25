@@ -9,6 +9,8 @@
   --color-tertiary: #4B5563;
   --color-BLUE-dark: #1F2937;
   --color-4th-color: #9CA3AF;
+  --color-5th-color: #10B981;
+  --color-6th-color: #2563EB;
   --gradient-primary: linear-gradient(90deg, #0F172A 0%, #1E40AF 100%);
   --gradient-primary-vertical: linear-gradient(180deg, #0F172A 0%, #1E40AF 100%);
   --gradient-secondary: #0F172A;
@@ -117,6 +119,12 @@ button:disabled {
 }
 .text-4th-color{
   color: var(--color-4th-color);
+}
+.text-5th-color{
+  color: var(--color-5th-color);
+}
+.text-6th-color{
+  color: var(--color-6th-color);
 }
 
 .text-error {
