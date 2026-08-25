@@ -17,6 +17,7 @@ import Notifications from '../Pages/Notifications/Notifications';
 import UsersRoles from '../Pages/UsersRoles/UsersRoles';
 import RolePermissions from '../Pages/UsersRoles/RolePermissions';
 import AddUser from '../Pages/UsersRoles/AddUser';
+import AuditLogs from '../Pages/AuditLogs/AuditLogs';
 
 function PageRouter() {
   return (
@@ -41,6 +42,7 @@ function PageRouter() {
         <Route path="/accounting" element={<Accounting />} />
         <Route path="/branches" element={<Branches />} />
         <Route path="/notifications" element={<Notifications />} />
+        <Route path="/audit-logs" element={<AuditLogs />} />
       </Routes>
     </div>
   );
