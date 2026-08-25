@@ -1,4 +1,5 @@
 
+import React from 'react'
 import { Route, Routes } from "react-router-dom";
 import Dashboard from '../Pages/Dashboard/Dashboard';
 import Events from '../Pages/Events/Events';
@@ -17,9 +18,16 @@ import Notifications from '../Pages/Notifications/Notifications';
 import UsersRoles from '../Pages/UsersRoles/UsersRoles';
 import RolePermissions from '../Pages/UsersRoles/RolePermissions';
 import AddUser from '../Pages/UsersRoles/AddUser';
+import Customers from '../Pages/Customers/Customers';
+import AddCustomers from '../Pages/Customers/addCustomers';
+import Suppliers from '../Pages/Suppliers/Suppliers';
+import CylinderTypes from '../Pages/Cylinders/CylinderTypes';
+import Employees from '../Pages/Employees/Employees';
+import AddUser from '../Pages/UsersRoles/AddUser';
 import AuditLogs from '../Pages/AuditLogs/AuditLogs';
 
 function PageRouter() {
+  // Router container
   return (
     <div className="flex-1 overflow-y-auto">
       <Routes>
@@ -28,6 +36,7 @@ function PageRouter() {
         {/* <Route path="/login" element={<Login />} /> */}
         <Route path="/Dashboard" element={<Dashboard />} />
         <Route path="/users-roles" element={<UsersRoles />} />
+        <Route path="/users-roles/add" element={<AddUser />} />
         <Route path="/users-roles/add-user" element={<AddUser />} />
         <Route path="/users-roles/Permissions" element={<RolePermissions />} />
         <Route path="/Events" element={<Events />} />
@@ -42,10 +51,15 @@ function PageRouter() {
         <Route path="/accounting" element={<Accounting />} />
         <Route path="/branches" element={<Branches />} />
         <Route path="/notifications" element={<Notifications />} />
+        <Route path="/customers" element={<Customers />} />
+        <Route path="/customers/add" element={<AddCustomers />} />
+        <Route path="/suppliers" element={<Suppliers />} />
+        <Route path="/cylinder-types" element={<CylinderTypes />} />
+        <Route path="/employees" element={<Employees />} />
         <Route path="/audit-logs" element={<AuditLogs />} />
       </Routes>
     </div>
   );
 }
 
-export default PageRouter
+export default PageRouter;
