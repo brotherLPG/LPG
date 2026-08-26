@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown, UserRound, LogOut, Bell, Menu, X, Search, Building2, MapPin, CheckCircle, AlertTriangle, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +10,10 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
   const [isPlantDropdownOpen, setIsPlantDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPlant, setSelectedPlant] = useState('Rawalpindi Plant');
+  
+  const profileMenuRef = useRef(null);
+  const notificationRef = useRef(null);
+  const plantDropdownRef = useRef(null);
 
   const plants = [
     'Rawalpindi Plant',
@@ -53,6 +57,25 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
     },
   ];
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setIsProfileMenuOpen(false);
+      }
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setIsNotificationOpen(false);
+      }
+      if (plantDropdownRef.current && !plantDropdownRef.current.contains(event.target)) {
+        setIsPlantDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <motion.header
       animate={{
@@ -92,7 +115,7 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
         {/* Right Side - Plant Selection, Notifications & User */}
         <div className="flex items-center gap-3">
           {/* Plant Selection */}
-          <div className="relative">
+          <div className="relative" ref={plantDropdownRef}>
             <button
               onClick={() => setIsPlantDropdownOpen(!isPlantDropdownOpen)}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors text-accent-blue text-sm font-medium"
@@ -124,7 +147,7 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
           </div>
 
           {/* Notifications */}
-          <div className="relative">
+          <div className="relative" ref={notificationRef}>
             <button
               onClick={() => setIsNotificationOpen(!isNotificationOpen)}
               className="relative p-2.5 rounded-xl hover:bg-slate-100 transition-colors"
@@ -148,18 +171,28 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
                     <div
                       key={notification.id}
                       className={`p-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100 transition-colors ${
-                        !notification.read ? 'bg-blue-50/50' : ''
+                        !notification.read ? "bg-blue-50/50" : ""
                       }`}
                     >
                       <div className="flex items-start gap-3">
-                        <div className={`p-2 rounded-full ${
-                          notification.type === 'success' ? 'bg-green-100' :
-                          notification.type === 'warning' ? 'bg-orange-100' :
-                          'bg-blue-100'
-                        }`}>
-                          {notification.type === 'success' && <CheckCircle className="w-4 h-4 text-green-600" />}
-                          {notification.type === 'warning' && <AlertTriangle className="w-4 h-4 text-orange-600" />}
-                          {notification.type === 'info' && <Info className="w-4 h-4 text-blue-600" />}
+                        <div
+                          className={`p-2 rounded-full ${
+                            notification.type === "success"
+                              ? "bg-green-100"
+                              : notification.type === "warning"
+                                ? "bg-orange-100"
+                                : "bg-blue-100"
+                          }`}
+                        >
+                          {notification.type === "success" && (
+                            <CheckCircle className="w-4 h-4 text-green-600" />
+                          )}
+                          {notification.type === "warning" && (
+                            <AlertTriangle className="w-4 h-4 text-orange-600" />
+                          )}
+                          {notification.type === "info" && (
+                            <Info className="w-4 h-4 text-blue-600" />
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold text-slate-800">
@@ -168,7 +201,9 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
                           <p className="text-xs text-slate-600 mt-1">
                             {notification.message}
                           </p>
-                          <p className="text-xs text-slate-400 mt-1">{notification.time}</p>
+                          <p className="text-xs text-slate-400 mt-1">
+                            {notification.time}
+                          </p>
                         </div>
                         {!notification.read && (
                           <div className="w-2 h-2 bg-blue-500 rounded-full shrink-0 mt-2"></div>
@@ -178,10 +213,10 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
                   ))}
                 </div>
                 <div className="p-3 border-t border-slate-200 bg-slate-50">
-                  <button 
+                  <button
                     onClick={() => {
                       setIsNotificationOpen(false);
-                      navigate('/notifications');
+                      navigate("/notifications");
                     }}
                     className="w-full text-sm font-medium text-accent-blue hover:text-blue-700 transition-colors"
                   >
@@ -193,7 +228,7 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
           </div>
 
           {/* Profile Menu */}
-          <div className="relative">
+          <div className="relative" ref={profileMenuRef}>
             {isProfileMenuOpen && (
               <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl overflow-hidden z-50">
                 <div className="p-4 border-b border-slate-200 bg-gradient-primary">
@@ -213,11 +248,12 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
                   <button
                     onClick={() => {
                       setIsProfileMenuOpen(false);
-                      navigate("/profile");
+                      navigate("/settings");
                     }}
                     className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
                   >
-                    <UserRound className="h-4 w-4 text-slate-400" /> Profile
+                    <UserRound className="h-4 w-4 text-slate-400" /> Profile And
+                    settings
                   </button>
                   <div className="border-t border-slate-100 my-1"></div>
                   <button
