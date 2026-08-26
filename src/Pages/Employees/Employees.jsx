@@ -34,55 +34,66 @@ function Employees() {
       key: "code",
       label: "Code",
       isRowHeader: true,
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-4",
       renderCell: (item) => (
-        <span className="font-bold text-slate-800 text-[13px]">{item.code}</span>
+        <span className="font-bold text-slate-800 text-[13px]">
+          {item.code}
+        </span>
       ),
     },
     {
       key: "name",
       label: "Full Name",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-4",
       renderCell: (item) => (
         <button className="flex flex-col items-start font-bold text-[#1a56db] hover:underline text-[13px] text-left leading-tight">
-          <span>{item.name.split(' ')[0]}</span>
-          <span>{item.name.split(' ').slice(1).join(' ')}</span>
+          <span>{item.name.split(" ")[0]}</span>
+          <span>{item.name.split(" ").slice(1).join(" ")}</span>
         </button>
       ),
     },
     {
       key: "department",
       label: "Department",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
     },
     {
       key: "jobTitle",
       label: "Job Title",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
     },
     {
       key: "phone",
       label: "Phone",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
     },
     {
       key: "salary",
       label: "Monthly Salary",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-4",
       renderCell: (item) => (
-        <span className="text-slate-900 font-bold text-[13px]">{item.salary}</span>
+        <span className="text-slate-900 font-bold text-[13px]">
+          {item.salary}
+        </span>
       ),
     },
     {
       key: "status",
       label: "Status",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-4",
       renderCell: (item) => (
         <span
@@ -99,23 +110,24 @@ function Employees() {
     {
       key: "actions",
       label: "Actions",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 text-right pr-6",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 text-right pr-6",
       cellClassName: "px-4 py-4 pr-6",
       renderCell: (item) => (
         <div className="flex items-center justify-end gap-3">
           <button
             type="button"
             aria-label={`View ${item.name}`}
-            className="text-[#1a56db] hover:text-blue-800 transition-colors"
+            className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
           >
-            <Eye className="h-4 w-4" strokeWidth={2.5} />
+            <Eye className="h-4 w-4" strokeWidth={2.5} /> View
           </button>
           <button
             type="button"
             aria-label={`Edit ${item.name}`}
-            className="text-[#008951] hover:text-emerald-800 transition-colors"
+            className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
           >
-            <Edit3 className="h-4 w-4" strokeWidth={2.5} />
+            <Edit3 className="h-4 w-4" strokeWidth={2.5} /> Edit
           </button>
         </div>
       ),
