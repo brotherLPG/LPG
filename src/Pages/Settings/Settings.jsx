@@ -1,52 +1,317 @@
-import { motion } from "framer-motion";
-import { Bell, Building2, ChevronRight, Globe2, KeyRound, LockKeyhole, Mail, Save, ShieldCheck, UserRound } from "lucide-react";
+import { useState } from "react";
+import { Building2, Coins, Layout, Bell, Shield, Database, ChevronRight, Save } from "lucide-react";
+import { Switch } from "@heroui/react";
 
 function Settings() {
-  const settings = [
-    { icon: Bell, title: "Alert Notifications", description: "Receive alerts for safety and access events.", enabled: true },
-    { icon: Mail, title: "Email Reports", description: "Send the daily safety report to administrators.", enabled: true },
-    { icon: Globe2, title: "System Time Zone", description: "Asia/Karachi (GMT+5)", action: "Change" },
-    { icon: Building2, title: "Organization Details", description: "GTRACK-MES Manufacturing Facility", action: "Edit" }
+  const [activeTab, setActiveTab] = useState("company");
+  const [autoBackup, setAutoBackup] = useState(true);
+
+  const tabs = [
+    { id: "company", icon: Building2, label: "Company Information" },
+    { id: "currency", icon: Coins, label: "Currency & Units" },
+    { id: "invoice", icon: Layout, label: "Invoice Layouts" },
+    { id: "notification", icon: Bell, label: "Notification Channels" },
+    { id: "security", icon: Shield, label: "Security & Roles" },
+    { id: "backup", icon: Database, label: "Database Backups" },
   ];
 
   return (
-    <div className="min-h-screen w-full bg-linear-to-br from-slate-50 to-slate-100 p-8">
-      <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <p className="text-sm font-semibold text-blue-600">SYSTEM MANAGEMENT</p>
-        <h1 className="mt-1 text-3xl font-bold text-slate-800">Settings</h1>
-        <p className="mt-2 text-slate-500">Manage your account, notifications, and system preferences.</p>
-      </motion.div>
+    <div className="min-h-screen w-full bg-slate-50">
+      <div className="w-full px-4 md:px-6 lg:px-8 py-3">
+        <div className="text-xs">
+          <span
+            onClick={() => navigate("/dashboard")}
+            className="cursor-pointer font-medium text-4th-color transition-colors duration-200"
+          >
+            Dashboard
+          </span>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl bg-white p-6 shadow-xl xl:col-span-2">
-          <div className="mb-6 flex items-center gap-3"><div className="rounded-xl bg-blue-100 p-3"><UserRound className="h-6 w-6 text-blue-600" /></div><div><h2 className="font-bold text-slate-800">Profile Settings</h2><p className="text-sm text-slate-500">Your administrator account details.</p></div></div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <label className="text-sm font-medium text-slate-700">Full Name<input defaultValue="Admin User" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 font-normal outline-none focus:border-blue-500" /></label>
-            <label className="text-sm font-medium text-slate-700">Email Address<input defaultValue="admin@gtrack-mes.com" type="email" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 font-normal outline-none focus:border-blue-500" /></label>
-            <label className="text-sm font-medium text-slate-700 sm:col-span-2">Role<input defaultValue="System Administrator" disabled className="mt-2 w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-normal text-slate-500" /></label>
+          <span className="mx-1">/</span>
+
+          <span>Settings</span>
+        </div>
+        <div className="pb-2 my-1">
+          <h1 className=" text-2xl font-bold tracking-tight text-BLUE-dark">
+            System Settings
+          </h1>
+
+          <p className="text-sm text-tertiary mt-2">
+            Configure global preferences, financial periods, tax rates, and
+            backup routines
+          </p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3">
+          {/* Sidebar */}
+          <div className="col-span-1 bg-white rounded-xl shadow-sm border border-gray-200 p-4 h-full mt-2.5  ">
+            <h1 className="text-xl font-bold text-gray-800 mb-2">
+              System Settings
+            </h1>
+            <p className="text-sm text-gray-500 mb-6">
+              Configure your LPG plant settings
+            </p>
+
+            <nav className="space-y-1">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                      activeTab === tab.id
+                        ? "bg-blue-50 text-blue-600"
+                        : "text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    <Icon className="h-5 w-5" />
+                    {tab.label}
+                    {activeTab === tab.id && (
+                      <ChevronRight className="h-4 w-4 ml-auto" />
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
           </div>
-          <button className="mt-6 flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"><Save className="h-4 w-4" /> Save Profile</button>
-        </motion.section>
 
-        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="rounded-2xl bg-slate-900 p-6 text-white shadow-xl">
-          <ShieldCheck className="h-10 w-10 text-blue-400" />
-          <h2 className="mt-5 text-xl font-bold">Security Status</h2>
-          <p className="mt-2 text-sm text-slate-400">Your account and connected devices are protected.</p>
-          <div className="mt-6 rounded-xl bg-slate-800 p-4"><p className="text-sm font-medium text-slate-300">Two-factor authentication</p><p className="mt-1 text-sm font-bold text-green-400">Enabled</p></div>
-          <button className="mt-5 flex items-center gap-2 text-sm font-semibold text-blue-400 hover:text-blue-300"><KeyRound className="h-4 w-4" /> Manage security</button>
-        </motion.section>
+          {/* Main Content */}
+          <div className="flex-1 p-3 overflow-y-auto col-span-2">
+            <div className="max-w-4xl mx-auto space-y-6">
+              {/* Company Profile Details */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-2">
+                  Company Profile Details
+                </h2>
 
-        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="rounded-2xl bg-white p-6 shadow-xl xl:col-span-3">
-          <h2 className="mb-1 text-xl font-bold text-slate-800">Preferences</h2><p className="mb-5 text-sm text-slate-500">Configure how GTRACK-MES communicates with you.</p>
-          <div className="divide-y divide-slate-100">
-            {settings.map((setting) => {
-              const Icon = setting.icon;
-              return <div key={setting.title} className="flex items-center gap-4 py-4"><div className="rounded-xl bg-slate-100 p-3"><Icon className="h-5 w-5 text-slate-600" /></div><div className="flex-1"><h3 className="font-semibold text-slate-800">{setting.title}</h3><p className="text-sm text-slate-500">{setting.description}</p></div>{typeof setting.enabled === "boolean" ? <button aria-label={`Toggle ${setting.title}`} className={`relative h-7 w-12 rounded-full transition-colors ${setting.enabled ? "bg-blue-600" : "bg-slate-300"}`}><span className={`absolute top-1 h-5 w-5 rounded-full bg-white transition-transform ${setting.enabled ? "translate-x-6" : "translate-x-1"}`} /></button> : <button className="flex items-center gap-1 text-sm font-semibold text-blue-600">{setting.action}<ChevronRight className="h-4 w-4" /></button>}</div>;
-            })}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Company Name
+                    </label>
+                    <input
+                      type="text"
+                      defaultValue="Al-Madina LPG Plant"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Business Registration No.
+                    </label>
+                    <input
+                      type="text"
+                      defaultValue="BR-2024-158-4521"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      National Tax Number (NTN)
+                    </label>
+                    <input
+                      type="text"
+                      defaultValue="4521387-9"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Contact Phone
+                    </label>
+                    <input
+                      type="text"
+                      defaultValue="+92-51-4851234"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Physical Office Address
+                    </label>
+                    <input
+                      type="text"
+                      defaultValue="Plot 45-B, Industrial Area, Sector 1-9, Islamabad, Pakistan"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Official Email Address
+                    </label>
+                    <input
+                      type="email"
+                      defaultValue="admin@almadina-lpg.pk"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-end">
+                  <button className="flex items-center gap-2 bg-gradient-bg-blue text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    <Save className="h-4 w-4" />
+                    Update Profile
+                  </button>
+                </div>
+              </div>
+
+              {/* Operational & Financial Settings */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-2">
+                  Operational & Financial Settings
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Default Payment Terms
+                    </label>
+                    <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
+                      <option>Net 30 Days</option>
+                      <option>Net 15 Days</option>
+                      <option>Net 45 Days</option>
+                      <option>Net 60 Days</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Financial Year Cycle
+                    </label>
+                    <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
+                      <option>July - June</option>
+                      <option>January - December</option>
+                      <option>April - March</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Sales Tax Rate (GST)
+                    </label>
+                    <input
+                      type="text"
+                      defaultValue="17%"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Low Stock Alert Level
+                    </label>
+                    <input
+                      type="text"
+                      defaultValue="20% of minimum threshold"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Cylinder Auto-Inspection Interval
+                    </label>
+                    <input
+                      type="text"
+                      defaultValue="180 Days"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-end">
+                  <button className="flex items-center gap-2 bg-gradient-bg-blue  text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    <Save className="h-4 w-4" />
+                    Save Preferences
+                  </button>
+                </div>
+              </div>
+
+              {/* Localisation & Automated Systems */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-2">
+                  Localisation & Automated Systems
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Date Formatting
+                    </label>
+                    <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
+                      <option>DD/MM/YYYY</option>
+                      <option>MM/DD/YYYY</option>
+                      <option>YYYY-MM-DD</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Time Zone
+                    </label>
+                    <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
+                      <option>Asia/Karachi (PKT +05:00)</option>
+                      <option>UTC</option>
+                      <option>Asia/Dubai (GST +04:00)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div>
+                    <h3 className="font-medium text-gray-800">
+                      Automated Server Cloud Backups
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Automatically backup SQLite operational databases every
+                      night at 02:00 AM
+                    </p>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <div className="flex items-center gap-3">
+                      <Switch
+                        isSelected={autoBackup}
+                        onValueChange={setAutoBackup}
+                        classNames={{
+                          wrapper: autoBackup ? "bg-[#008951]" : "bg-slate-200",
+                        }}
+                        size="sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setAutoBackup(!autoBackup)}
+                        className={`relative inline-flex h-6 w-11 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${autoBackup ? "bg-[#10b981]" : "bg-slate-200"}`}
+                        role="switch"
+                        aria-checked={autoBackup}
+                      >
+                        <span
+                          aria-hidden="true"
+                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${autoBackup ? "translate-x-5" : "translate-x-0"}`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-between items-center my-auto">
+                  <p className="text-[#9CA3AF] text-[11px]">
+                    Last Settings update by Admin (Muhammad Ahmad) on 20 Aug
+                    2026
+                  </p>
+                  <button className="flex items-center gap-2 bg-[#10B981] text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    <Save className="h-4 w-4" />
+                    Save Config
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-        </motion.section>
-
-        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="rounded-2xl border border-red-100 bg-white p-6 shadow-xl xl:col-span-3"><div className="flex items-start gap-4"><div className="rounded-xl bg-red-100 p-3"><LockKeyhole className="h-5 w-5 text-red-600" /></div><div><h2 className="font-bold text-slate-800">Password & Access</h2><p className="mt-1 text-sm text-slate-500">Change your password or manage access permissions for your account.</p><button className="mt-4 rounded-xl border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50">Change Password</button></div></div></motion.section>
+        </div>
       </div>
     </div>
   );
