@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Building2, Coins, Layout, Bell, Shield, Database, ChevronRight, Save } from "lucide-react";
 import { Switch } from "@heroui/react";
+import { useNavigate } from "react-router-dom";
 
 function Settings() {
   const [activeTab, setActiveTab] = useState("company");
   const [autoBackup, setAutoBackup] = useState(true);
+    const navigate = useNavigate();
 
   const tabs = [
     { id: "company", icon: Building2, label: "Company Information" },
