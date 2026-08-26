@@ -10,6 +10,8 @@ import Cylinders from '../Pages/Cylinders/Cylinders';
 import Registration from '../Pages/Registration/Registration';
 import Inspections from '../Pages/Inspections/Inspections';
 import Sales from '../Pages/Sales/Sales';
+import AddSales from '../Pages/Sales/AddSales';
+import CreateReturn from '../Pages/Sales/CreateReturn';
 import Invoices from '../Pages/Invoices/Invoices';
 import Accounting from '../Pages/Accounting/Accounting';
 import Branches from '../Pages/Branches/Branches';
@@ -55,6 +57,8 @@ function PageRouter() {
         <Route path="/registration" element={<Registration />} />
         <Route path="/inspections" element={<Inspections />} />
         <Route path="/sales" element={<Sales />} />
+        <Route path="/sales/add" element={<AddSales />} />
+        <Route path="/sales/return" element={<CreateReturn />} />
         <Route path="/invoices" element={<Invoices />} />
         <Route path="/accounting" element={<Accounting />} />
         <Route path="/branches" element={<Branches />} />
