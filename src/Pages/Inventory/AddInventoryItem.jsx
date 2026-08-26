@@ -126,7 +126,7 @@ function AddInventoryItem() {
                 <button
                   type="button"
                   onClick={() => setIsActive(!isActive)}
-                  className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2 ${
+                  className={`relative inline-flex h-5 w-9 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2 ${
                     isActive ? "bg-emerald-600" : "bg-gray-200"
                   }`}
                 >
@@ -266,7 +266,7 @@ function AddInventoryItem() {
                 <input
                   type="date"
                   defaultValue="2026-02-15"
-                  className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 [color-scheme:light]"
+                  className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 scheme-light"
                 />
               </div>
             </div>

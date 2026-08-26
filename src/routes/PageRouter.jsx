@@ -3,7 +3,6 @@ import React from 'react'
 import { Route, Routes } from "react-router-dom";
 import Dashboard from '../Pages/Dashboard/Dashboard';
 import Events from '../Pages/Events/Events';
-import Devices from '../Pages/Devices/Devices';
 import Reports from '../Pages/Reports/Reports';
 import Settings from '../Pages/Settings/Settings';
 import Login from '../Pages/Login/Login';
@@ -30,6 +29,12 @@ import AddExpenses from '../Pages/Expenses/addExpenses';
 import AddEmployee from '../Pages/Employees/addEmployee';
 import AddSupplier from '../Pages/Suppliers/addSupplier';
 import AddCylinderType from '../Pages/Cylinders/addCylinderType';
+import Inventory from '../Pages/Inventory/inventory';
+import AddInventoryItem from '../Pages/Inventory/AddInventoryItem';
+import LpgReceipts from '../Pages/LPGReceipts/LpgReceipts';
+import ReceiveLpg from '../Pages/LPGReceipts/ReceiveLpg';
+import Payments from '../Pages/Payments/Payments';
+import AddPayment from '../Pages/Payments/addPayment';
 
 function PageRouter() {
   // Router container
@@ -44,7 +49,6 @@ function PageRouter() {
         <Route path="/users-roles/add-user" element={<AddUser />} />
         <Route path="/users-roles/Permissions" element={<RolePermissions />} />
         <Route path="/Events" element={<Events />} />
-        <Route path="/devices" element={<Devices />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/cylinders" element={<Cylinders />} />
@@ -61,10 +65,16 @@ function PageRouter() {
         <Route path="/suppliers/add" element={<AddSupplier />} />
         <Route path="/cylinder-types" element={<CylinderTypes />} />
         <Route path="/cylinders/add-type" element={<AddCylinderType />} />
+        <Route path="/inventory" element={<Inventory />} />
+        <Route path="/inventory/add" element={<AddInventoryItem />} />
+        <Route path="/lpg-receipts" element={<LpgReceipts />} />
+        <Route path="/lpg-receipts/receive" element={<ReceiveLpg />} />
         <Route path="/employees" element={<Employees />} />
         <Route path="/employees/add" element={<AddEmployee />} />
         <Route path="/expenses" element={<Expenses />} />
         <Route path="/expenses/add" element={<AddExpenses />} />
+        <Route path="/payments" element={<Payments />} />
+        <Route path="/payments/add" element={<AddPayment />} />
         <Route path="/audit-logs" element={<AuditLogs />} />
         <Route path="/storage-tanks" element={<StorageTanks />} />
       </Routes>
