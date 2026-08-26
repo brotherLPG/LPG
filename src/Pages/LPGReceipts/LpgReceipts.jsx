@@ -187,9 +187,10 @@ function LpgReceipts() {
                 <p className="mt-2 text-2xl font-extrabold text-6th-color">
                   {summaryStats.thisMonthReceipts} Shipments
                 </p>
-                <p className="mt-1 text-xs text-slate-500">
+                <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary my-auto">
+                  <span className="h-2 w-2 rounded-full bg-[#2563EB]"></span>
                   Total deliveries received
-                </p>
+                </div>
               </div>
             </div>
           </div>
@@ -203,7 +204,10 @@ function LpgReceipts() {
                 <p className="mt-2 text-2xl font-extrabold text-5th-color">
                   {summaryStats.totalQuantity.toLocaleString()} KG
                 </p>
-                <p className="mt-1 text-xs text-slate-500">May 2025 volume</p>
+                <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary my-auto">
+                  <span className="h-2 w-2 rounded-full bg-[#10B981]"></span>
+                  May 2025 volume
+                </div>
               </div>
             </div>
           </div>
@@ -217,7 +221,10 @@ function LpgReceipts() {
                 <p className="mt-2 text-2xl font-extrabold text-slate-900">
                   Rs. {summaryStats.totalCost.toLocaleString()}
                 </p>
-                <p className="mt-1 text-xs text-slate-500">Monthly spend</p>
+                <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary my-auto">
+                  <span className="h-2 w-2 rounded-full bg-[#4B5563]"></span>
+                  Monthly spend
+                </div>
               </div>
             </div>
           </div>
@@ -231,9 +238,10 @@ function LpgReceipts() {
                 <p className="mt-2 text-2xl font-extrabold text-orange">
                   {summaryStats.pendingReceipts}
                 </p>
-                <p className="mt-1 text-xs text-slate-500">
+                <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary my-auto">
+                  <span className="h-2 w-2 rounded-full bg-amber-500"></span>
                   Awaiting confirmation
-                </p>
+                </div>
               </div>
             </div>
           </div>
