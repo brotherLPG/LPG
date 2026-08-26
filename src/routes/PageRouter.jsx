@@ -26,6 +26,7 @@ import Employees from '../Pages/Employees/Employees';
 import AuditLogs from '../Pages/AuditLogs/AuditLogs';
 import StorageTanks from '../Pages/StorageTanks/StorageTanks';
 import Expenses from '../Pages/Expenses/Expenses';
+import AddExpenses from '../Pages/Expenses/addExpenses';
 import AddEmployee from '../Pages/Employees/addEmployee';
 import AddSupplier from '../Pages/Suppliers/addSupplier';
 import AddCylinderType from '../Pages/Cylinders/addCylinderType';
@@ -63,6 +64,7 @@ function PageRouter() {
         <Route path="/employees" element={<Employees />} />
         <Route path="/employees/add" element={<AddEmployee />} />
         <Route path="/expenses" element={<Expenses />} />
+        <Route path="/expenses/add" element={<AddExpenses />} />
         <Route path="/audit-logs" element={<AuditLogs />} />
         <Route path="/storage-tanks" element={<StorageTanks />} />
       </Routes>
