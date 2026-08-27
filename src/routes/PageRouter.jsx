@@ -20,8 +20,17 @@ import AddUser from '../Pages/UsersRoles/AddUser';
 import Customers from '../Pages/Customers/Customers';
 import AddCustomers from '../Pages/Customers/addCustomers';
 import Suppliers from '../Pages/Suppliers/Suppliers';
+import AddSupplier from '../Pages/Suppliers/addSupplier';
 import CylinderTypes from '../Pages/Cylinders/CylinderTypes';
+import AddCylinderType from '../Pages/Cylinders/addCylinderType';
 import Employees from '../Pages/Employees/Employees';
+import AddEmployee from '../Pages/Employees/addEmployee';
+import Inventory from '../Pages/Inventory/inventory';
+import AddInventoryItem from '../Pages/Inventory/AddInventoryItem';
+import LpgReceipts from '../Pages/LpgReceipts/LpgReceipts';
+import ReceiveLpg from '../Pages/LpgReceipts/ReceiveLpg';
+import FillingBatches from '../Pages/FillingBatches/FillingBatches';
+import CreateBatch from '../Pages/FillingBatches/CreateBatch';
 
 function PageRouter() {
   // Router container
@@ -49,9 +58,24 @@ function PageRouter() {
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/customers" element={<Customers />} />
         <Route path="/customers/add" element={<AddCustomers />} />
+        
         <Route path="/suppliers" element={<Suppliers />} />
+        <Route path="/suppliers/add" element={<AddSupplier />} />
+        
         <Route path="/cylinder-types" element={<CylinderTypes />} />
+        <Route path="/cylinder-types/add" element={<AddCylinderType />} />
+        
         <Route path="/employees" element={<Employees />} />
+        <Route path="/employees/add" element={<AddEmployee />} />
+        
+        <Route path="/inventory" element={<Inventory />} />
+        <Route path="/inventory/add" element={<AddInventoryItem />} />
+        
+        <Route path="/lpg-receipts" element={<LpgReceipts />} />
+        <Route path="/lpg-receipts/receive" element={<ReceiveLpg />} />
+        
+        <Route path="/filling-batches" element={<FillingBatches />} />
+        <Route path="/filling-batches/create" element={<CreateBatch />} />
       </Routes>
     </div>
   );
