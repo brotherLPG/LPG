@@ -1,30 +1,40 @@
 import { useState } from "react";
-import {  LoaderCircle, LogIn, Droplets } from "lucide-react";
+import { AlertCircle, LoaderCircle} from "lucide-react";
 import logo from "../../assets/Images/logo.jpeg";
-import loginpimage from "../../assets/Images/loginpage.jpg"
+import loginpimage from "../../assets/Images/loginpage.jpg";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../utils/GlobalToast";
+import { useLogin } from "../../queries/auth/auth.queries";
 
 function Login() {
   const navigate = useNavigate();
   const toast = useToast();
+  const loginMutation = useLogin();
+
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [form, setForm] = useState({
+    emailAddress: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setIsLoading(true);
 
-    // Simulate API call
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      toast.success("Login successful!");
-      navigate("/Dashboard");
-    } catch (error) {
-      toast.error("Login failed. Please check your credentials.");
-    } finally {
-      setIsLoading(false);
-    }
+    loginMutation.mutate(form, {
+      onSuccess: () => {
+        navigate("/dashboard");
+      },
+      onError:()=>{
+        toast.error("Login failed. Please check your credentials.");
+      }
+    });
   };
 
   return (
@@ -47,21 +57,7 @@ function Login() {
             <div className="absolute bottom-1/4 right-1/3 w-2 h-24 bg-white/10 rounded-full" />
           </div>
 
-          <div className="relative z-10 flex items-center gap-3">
-            {/* <div className="rounded-xl bg-white/20 p-1 backdrop-blur-sm">
-              <img
-                src={logo}
-                alt="Logo"
-                className="h-16 w-16 border rounded-sm object-cover"
-              />
-            </div> */}
-            {/* <div>
-              <span className="text-2xl font-bold text-white block">
-                Brother LPG
-              </span>
-              <span className="text-sm text-white/80">(PVT)</span>
-            </div> */}
-          </div>
+          <div className="relative z-10 flex items-center gap-3"></div>
 
           <div className="relative z-10">
             <img
@@ -98,6 +94,21 @@ function Login() {
               Access your LPG plant operations, inventory, and reports securely.
             </p>
 
+            {loginMutation.isError && (
+              <div className="mt-6 p-4 rounded-xl flex items-start gap-3 bg-error-light border border-error-light">
+                <AlertCircle className="h-5 w-5 shrink-0 mt-0.5 text-error" />
+                <div>
+                  <p className="font-semibold text-sm text-error">
+                    Access Denied
+                  </p>
+                  <p className="text-sm mt-1 text-error-dark">
+                    The password you entered is incorrect. Please try again or
+                    contact the administrator.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="bg-[white] shadow-2xl shadow-[#0F172A1A] rounded-lg p-6">
               <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <label className="block">
@@ -107,8 +118,11 @@ function Login() {
                   <input
                     required
                     type="email"
+                    name="emailAddress"
                     placeholder="ri.ahmad@overlandlpg.pk"
                     className="w-full rounded-lg border border-slate-300 bg-white py-2.5 px-4 text-sm font-normal outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    value={form.emailAddress}
+                    onChange={handleChange}
                   />
                 </label>
 
@@ -120,8 +134,11 @@ function Login() {
                     <input
                       required
                       type={showPassword ? "text" : "password"}
+                      name="password"
                       placeholder="Enter your password"
                       className="w-full rounded-lg border border-slate-300 bg-white py-2.5 px-4 pr-20 text-sm font-normal outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      value={form.password}
+                      onChange={handleChange}
                     />
                     <button
                       type="button"
@@ -151,14 +168,14 @@ function Login() {
 
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={loginMutation.isPending}
                   className="flex w-full items-center justify-center gap-2 rounded-lg py-3 font-semibold text-white transition-all hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed bg-blue-600"
                 >
-                  {isLoading ? (
-                    <>
+                  {loginMutation.isPending ? (
+                    <div className="flex items-center gap-2">
                       <LoaderCircle className="h-5 w-5 animate-spin" /> Signing
                       in...
-                    </>
+                    </div>
                   ) : (
                     "Sign In"
                   )}

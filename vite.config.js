@@ -10,13 +10,13 @@ export default defineConfig({
     babel({ presets: [reactCompilerPreset()] }),
     tailwindcss()
   ],
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://127.0.0.1:5051',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-      },
-    },
-  },
+  // server: {
+  //   proxy: {
+  //     '/api': {
+  //       target: 'http://127.0.0.1:5051',
+  //       changeOrigin: true,
+  //       rewrite: (path) => path.replace(/^\/api/, ''),
+  //     },
+  //   },
+  // },
 })
