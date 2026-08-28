@@ -31,8 +31,8 @@ function Login() {
       onSuccess: () => {
         navigate("/dashboard");
       },
-      onError:()=>{
-        toast.error("Login failed. Please check your credentials.");
+      onError:(error)=>{
+        toast.error(error.response.data.message || "Login failed. Please try again.");
       }
     });
   };
@@ -102,8 +102,7 @@ function Login() {
                     Access Denied
                   </p>
                   <p className="text-sm mt-1 text-error-dark">
-                    The password you entered is incorrect. Please try again or
-                    contact the administrator.
+                    {loginMutation.error.response.data.message || "Something went wrong. Please try again."}
                   </p>
                 </div>
               </div>
