@@ -30,6 +30,7 @@ function Login() {
     loginMutation.mutate(form, {
       onSuccess: () => {
         navigate("/dashboard");
+        toast.success("Login successful!");
       },
       onError:(error)=>{
         toast.error(error.response.data.message || "Login failed. Please try again.");
