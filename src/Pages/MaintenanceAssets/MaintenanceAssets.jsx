@@ -200,10 +200,33 @@ function MaintenanceAssets() {
   ];
 
   const stats = [
-    { label: "Total Assets", value: assets.length, icon: Wrench, color: "bg-blue-50 text-blue-600" },
-    { label: "Operational", value: assets.filter(a => a.operationalStatus === "Operational").length, icon: CheckCircle, color: "bg-emerald-50 text-emerald-600" },
-    { label: "Maintenance Required", value: assets.filter(a => a.operationalStatus === "Maintenance Required").length, icon: AlertTriangle, color: "bg-amber-50 text-amber-600" },
-    { label: "Under Maintenance", value: assets.filter(a => a.operationalStatus === "Under Maintenance").length, icon: Clock, color: "bg-blue-50 text-blue-600" },
+    {
+      label: "Total Assets Listed",
+      value: assets.length,
+      subLabel: "Across 4 physical zones",
+      color: "text-[#9CA3AF]",
+    },
+    {
+      label: "Operational",
+      value: assets.filter((a) => a.operationalStatus === "Operational").length,
+      subLabel: "Fully functioning",
+      color: "text-emerald-500",
+    },
+    {
+      label: "Maintenance Required",
+      value: assets.filter(
+        (a) => a.operationalStatus === "Maintenance Required",
+      ).length,
+      subLabel: "Active schedule logs",
+      color: "text-amber-500",
+    },
+    {
+      label: "Out of Service",
+      value: assets.filter((a) => a.operationalStatus === "Out of Service")
+        .length,
+      subLabel: "Requires immediate replacement",
+      color: "text-red-500",
+    },
   ];
 
   return (
@@ -220,7 +243,9 @@ function MaintenanceAssets() {
                 Dashboard
               </span>{" "}
               <span className="px-1 text-slate-400">/</span>{" "}
-              <span className="font-semibold text-slate-700">Maintenance Assets</span>
+              <span className="font-semibold text-slate-700">
+                Maintenance Assets
+              </span>
             </p>
             <h1 className="text-2xl font-bold tracking-tight text-BLUE-dark mt-2">
               Maintenance Assets
@@ -241,14 +266,17 @@ function MaintenanceAssets() {
         {/* Statistics Cards */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (
-            <div key={stat.label} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div
+              key={stat.label}
+              className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+            >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-slate-500">{stat.label}</p>
-                  <p className="mt-1 text-2xl font-bold text-slate-800">{stat.value}</p>
-                </div>
-                <div className={`rounded-full p-2.5 ${stat.color}`}>
-                  <stat.icon className="h-5 w-5" />
+                  <p className="text-sm font-semibold text-tertiary">
+                    {stat.label}
+                  </p>
+                  <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+                  <p className="text-xs text-tertiary">{stat.subLabel}</p>
                 </div>
               </div>
             </div>
@@ -290,7 +318,9 @@ function MaintenanceAssets() {
                 >
                   <option value="All">Status: All</option>
                   <option value="Operational">Operational</option>
-                  <option value="Maintenance Required">Maintenance Required</option>
+                  <option value="Maintenance Required">
+                    Maintenance Required
+                  </option>
                   <option value="Under Maintenance">Under Maintenance</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
@@ -321,7 +351,11 @@ function MaintenanceAssets() {
         onConfirm={handleDeleteConfirm}
         title="Delete Asset"
         message="Are you sure you want to delete this asset? This action cannot be undone and will permanently remove the record from the system."
-        itemName={deleteModal.item ? `${deleteModal.item.assetCode} - ${deleteModal.item.assetName}` : ""}
+        itemName={
+          deleteModal.item
+            ? `${deleteModal.item.assetCode} - ${deleteModal.item.assetName}`
+            : ""
+        }
       />
     </main>
   );
