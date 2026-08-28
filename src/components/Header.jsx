@@ -10,6 +10,7 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
   const [isPlantDropdownOpen, setIsPlantDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPlant, setSelectedPlant] = useState('Rawalpindi Plant');
+  const [user, setUser] = useState(null);
   
   const profileMenuRef = useRef(null);
   const notificationRef = useRef(null);
@@ -58,6 +59,12 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
   ];
 
   useEffect(() => {
+    // Load user data from localStorage
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+
     const handleClickOutside = (event) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
         setIsProfileMenuOpen(false);
@@ -86,18 +93,6 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
       className="shadow-lg bg-white"
     >
       <div className="flex items-center justify-between px-6 py-3">
-        {/* Left Side - Menu Toggle & Search */}
-        {/* <div className="flex items-center gap-4">
-          <button
-            onClick={onToggleSidebar}
-            className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-white"
-          >
-            {isSidebarOpen ? (
-              <X className="w-5 h-5" />
-            ) : (
-              <Menu className="w-5 h-5" />
-            )}
-          </button>
 
           {/* Search Bar */}
         <div className="relative hidden md:block">
@@ -234,12 +229,14 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
                 <div className="p-4 border-b border-slate-200 bg-gradient-primary">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-lg">M</span>
+                      <span className="text-white font-bold text-lg">
+                        {user?.fullName?.charAt(0) || 'U'}
+                      </span>
                     </div>
                     <div>
-                      <p className="text-white font-semibold">Muhammad Ahmad</p>
+                      <p className="text-white font-semibold">{user?.fullName || 'User'}</p>
                       <p className="text-white/70 text-xs">
-                        System Administrator
+                        {user?.role?.roleName || 'User'}
                       </p>
                     </div>
                   </div>
@@ -257,7 +254,12 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
                   </button>
                   <div className="border-t border-slate-100 my-1"></div>
                   <button
-                    onClick={() => navigate("/")}
+                    onClick={() => {
+                      localStorage.removeItem('token');
+                      localStorage.removeItem('refreshToken');
+                      localStorage.removeItem('user');
+                      navigate('/');
+                    }}
                     className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
                   >
                     <LogOut className="h-4 w-4" /> Sign Out
@@ -273,7 +275,7 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
               {/* <div className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center border-2 border-white/30">
                 <span className="text-white font-bold text-sm">M</span>
               </div> */}
-              <span className="text-sm font-medium">Muhammad Ahmad</span>
+              <span className="text-sm font-medium">{user?.fullName || 'User'}</span>
               <ChevronDown
                 className={`h-4 w-4 transition-transform ${isProfileMenuOpen ? "rotate-180" : ""}`}
               />

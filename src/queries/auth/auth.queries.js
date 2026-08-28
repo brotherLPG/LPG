@@ -12,19 +12,27 @@ export const useLogin = () => {
     mutationFn: loginUser,
 
     onSuccess: (data) => {
-      // Store token
-      if (data?.token) {
+      // Store access token
+      if (data?.data?.accessToken) {
         localStorage.setItem(
           "token",
-          data.token
+          data.data.accessToken
         );
       }
 
-      // Store user if required
-      if (data?.user) {
+      // Store refresh token
+      if (data?.data?.refreshToken) {
+        localStorage.setItem(
+          "refreshToken",
+          data.data.refreshToken
+        );
+      }
+
+      // Store user data
+      if (data?.data?.user) {
         localStorage.setItem(
           "user",
-          JSON.stringify(data.user)
+          JSON.stringify(data.data.user)
         );
       }
 
