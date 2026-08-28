@@ -14,10 +14,31 @@ import {
   Receipt,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import {
+  useNotifications,
+  useMarkNotificationAsRead,
+  useMarkAllNotificationsAsRead,
+} from "../../queries/Notification/notificationQueries";
 
 function Notifications() {
   const [selectedTab, setSelectedTab] = useState("all");
+  const [page, setPage] = useState(1);
   const navigate = useNavigate();
+  const limit = 10;
+
+  // =====================================================
+  // GET NOTIFICATIONS
+  // =====================================================
+
+  const { data, isLoading, isError, error } = useNotifications(page, limit);
+
+  // =====================================================
+  // MUTATIONS
+  // =====================================================
+
+  const markAsReadMutation = useMarkNotificationAsRead();
+
+  const markAllMutation = useMarkAllNotificationsAsRead();
 
   const notifications = [
     {

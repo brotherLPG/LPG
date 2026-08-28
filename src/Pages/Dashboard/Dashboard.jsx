@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   CirclePlus,
@@ -7,8 +7,15 @@ import {
 import Recentsales from "../../components/Dashbord/RecentSales/RecentSales";
 import RecentPayments from "../../components/Dashbord/RecentPayments/RecentPayments";
 import RecentNotifications from "../../components/Dashbord/RecentNotifications/RecentNotifications";
+import { useQueryClient } from "@tanstack/react-query";
+import { prefetchDashboard } from "../../queries/prefetchDashboard";
 function Dashboard() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    prefetchDashboard(queryClient);
+  }, [queryClient]);
 
   // -----------------------------
   // Dashboard Data
