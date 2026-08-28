@@ -36,6 +36,8 @@ import LpgReceipts from '../Pages/LPGReceipts/LpgReceipts';
 import ReceiveLpg from '../Pages/LPGReceipts/ReceiveLpg';
 import Payments from '../Pages/Payments/Payments';
 import AddPayment from '../Pages/Payments/addPayment';
+import FillingBatches from '../Pages/FillingBatches/FillingBatches';
+import CreateBatch from '../Pages/FillingBatches/CreateBatch';
 
 function PageRouter() {
   // Router container
@@ -79,6 +81,8 @@ function PageRouter() {
         <Route path="/payments/add" element={<AddPayment />} />
         <Route path="/audit-logs" element={<AuditLogs />} />
         <Route path="/storage-tanks" element={<StorageTanks />} />
+        <Route path="/filling-batches" element={<FillingBatches />} />
+        <Route path="/filling-batches/create" element={<CreateBatch />} />
       </Routes>
     </div>
   );
