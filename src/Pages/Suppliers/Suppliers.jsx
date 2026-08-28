@@ -2,6 +2,8 @@ import { PlusCircle, Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalTable from "../../utils/GlobalTable";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import { useToast } from "../../utils/GlobalToast";
 
 const initialSuppliers = [
   { code: "SUP-001", name: "Pakistan Petroleum Ltd.", contact: "Irfan Qureshi", phone: "021-35681901", terms: "Net 30", outstanding: "Rs. 1,250,000", status: "Active" },
@@ -15,17 +17,36 @@ const initialSuppliers = [
 
 function Suppliers() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [paymentTerm, setPaymentTerm] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
+  const [suppliers, setSuppliers] = useState(initialSuppliers);
 
-  const filteredSuppliers = useMemo(() => initialSuppliers.filter((supplier) => {
+  const filteredSuppliers = useMemo(() => suppliers.filter((supplier) => {
     const matchesQuery = `${supplier.code} ${supplier.name} ${supplier.contact}`.toLowerCase().includes(query.toLowerCase());
     const matchesStatus = status === "All" || supplier.status === status;
     const matchesTerms = paymentTerm === "All" || supplier.terms === paymentTerm;
     return matchesQuery && matchesStatus && matchesTerms;
-  }), [query, status, paymentTerm]);
+  }), [query, status, paymentTerm, suppliers]);
+
+  const handleDeleteClick = (item) => {
+    setDeleteModal({ isOpen: true, item });
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deleteModal.item) {
+      setSuppliers(suppliers.filter(s => s.code !== deleteModal.item.code));
+      toast.success(`Supplier ${deleteModal.item.name} has been deleted successfully`);
+      setDeleteModal({ isOpen: false, item: null });
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModal({ isOpen: false, item: null });
+  };
 
   // Column definitions for suppliers table
   const supplierColumns = [
@@ -117,10 +138,11 @@ function Suppliers() {
           </button>
           <button
             type="button"
+            onClick={() => handleDeleteClick(item)}
             aria-label={`Delete ${item.name}`}
             className="flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition-colors"
           >
-            <Trash2 className="h-3.5 w-3.5" /> Delet
+            <Trash2 className="h-3.5 w-3.5" /> Delete
           </button>
         </div>
       ),
@@ -216,6 +238,16 @@ function Suppliers() {
           />
         </div>
       </section>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Supplier"
+        message="Are you sure you want to delete this supplier? This action cannot be undone and will permanently remove the supplier record from the system."
+        itemName={deleteModal.item ? `${deleteModal.item.code} - ${deleteModal.item.name}` : ""}
+      />
     </main>
   );
 }

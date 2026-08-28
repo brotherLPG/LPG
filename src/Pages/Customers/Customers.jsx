@@ -2,6 +2,8 @@ import { Table } from "@heroui/react";
 import { Search, PlusCircle, Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import { useToast } from "../../utils/GlobalToast";
 
 const initialCustomers = [
   { code: "CUST-001", name: "Islamabad Gas Agency", contact: "Faisal Malik", phone: "0300-5551234", limit: 500000, outstanding: 175000, status: "Active" },
@@ -16,17 +18,36 @@ const initialCustomers = [
 
 function Customers() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [paymentTerm, setPaymentTerm] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
+  const [customers, setCustomers] = useState(initialCustomers);
 
-  const filteredCustomers = useMemo(() => initialCustomers.filter((customer) => {
+  const filteredCustomers = useMemo(() => customers.filter((customer) => {
     const matchesQuery = `${customer.code} ${customer.name}`.toLowerCase().includes(query.toLowerCase());
     const matchesStatus = status === "All" || customer.status === status;
     // Payment terms filtering logic would go here, omitting for mock simplicity
     return matchesQuery && matchesStatus;
-  }), [query, status]);
+  }), [query, status, customers]);
+
+  const handleDeleteClick = (item) => {
+    setDeleteModal({ isOpen: true, item });
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deleteModal.item) {
+      setCustomers(customers.filter(c => c.code !== deleteModal.item.code));
+      toast.success(`Customer ${deleteModal.item.name} has been deleted successfully`);
+      setDeleteModal({ isOpen: false, item: null });
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModal({ isOpen: false, item: null });
+  };
 
   const getStatusStyle = (customer) => {
     if (customer.code === "CUST-003") return "bg-amber-50 text-amber-600";
@@ -206,6 +227,7 @@ function Customers() {
                           </button>
                           <button
                             type="button"
+                            onClick={() => handleDeleteClick(customer)}
                             aria-label={`Delete ${customer.name}`}
                             className="flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors"
                           >
@@ -256,6 +278,16 @@ function Customers() {
           </div>
         </div>
       </section>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Customer"
+        message="Are you sure you want to delete this customer? This action cannot be undone and will permanently remove the customer record from the system."
+        itemName={deleteModal.item ? `${deleteModal.item.code} - ${deleteModal.item.name}` : ""}
+      />
     </main>
   );
 }

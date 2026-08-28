@@ -2,6 +2,8 @@ import { PlusCircle, Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalTable from "../../utils/GlobalTable";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import { useToast } from "../../utils/GlobalToast";
 
 const initialPayments = [
   { voucherNo: "PAY-2026-0312", date: "21 Aug 2026", party: "Islamabad Gas Agency", amount: "Rs. 50,000", method: "Bank Transfer", direction: "Inward", status: "Recorded" },
@@ -13,17 +15,37 @@ const initialPayments = [
 
 function Payments() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [direction, setDirection] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
+  const [payments, setPayments] = useState(initialPayments);
 
-  const filteredPayments = useMemo(() => initialPayments.filter((payment) => {
+  const filteredPayments = useMemo(() => payments.filter((payment) => {
     const matchesQuery = `${payment.voucherNo} ${payment.party}`.toLowerCase().includes(query.toLowerCase());
     const matchesStatus = status === "All" || payment.status === status;
     const matchesDirection = direction === "All" || payment.direction === direction;
     return matchesQuery && matchesStatus && matchesDirection;
-  }), [query, status, direction]);
+  }), [query, status, direction, payments]);
+
+  const handleDeleteClick = (item) => {
+    setDeleteModal({ isOpen: true, item });
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deleteModal.item) {
+      setPayments(payments.filter(p => p.voucherNo !== deleteModal.item.voucherNo));
+      toast.success(`Payment voucher ${deleteModal.item.voucherNo} has been deleted successfully`);
+      setDeleteModal({ isOpen: false, item: null });
+      
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModal({ isOpen: false, item: null });
+  };
 
   const paymentColumns = [
     {
@@ -125,6 +147,7 @@ function Payments() {
           </button>
           <button
             type="button"
+            onClick={() => handleDeleteClick(item)}
             aria-label={`Delete ${item.voucherNo}`}
             className="flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition-colors"
           >
@@ -222,6 +245,16 @@ function Payments() {
           />
         </div>
       </section>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Payment Voucher"
+        message="Are you sure you want to delete this payment voucher? This action cannot be undone and will permanently remove the record from the system."
+        itemName={deleteModal.item ? `${deleteModal.item.voucherNo} - ${deleteModal.item.party}` : ""}
+      />
     </main>
   );
 }

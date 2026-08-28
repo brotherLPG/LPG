@@ -2,6 +2,8 @@ import { PlusCircle, Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalTable from "../../utils/GlobalTable";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import { useToast } from "../../utils/GlobalToast";
 
 const initialCylinderTypes = [
   { code: "CYL-001", name: "Commercial LPG 11KG", capacity: "11.0 KG", tare: "8.5 KG", price: "Rs. 2,850", status: "Active" },
@@ -15,17 +17,36 @@ const initialCylinderTypes = [
 
 function CylinderTypes() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [capacity, setCapacity] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
+  const [cylinderTypes, setCylinderTypes] = useState(initialCylinderTypes);
 
-  const filteredCylinders = useMemo(() => initialCylinderTypes.filter((cyl) => {
+  const filteredCylinders = useMemo(() => cylinderTypes.filter((cyl) => {
     const matchesQuery = `${cyl.code} ${cyl.name}`.toLowerCase().includes(query.toLowerCase());
     const matchesStatus = status === "All" || cyl.status === status;
     const matchesCapacity = capacity === "All" || cyl.capacity === capacity;
     return matchesQuery && matchesStatus && matchesCapacity;
-  }), [query, status, capacity]);
+  }), [query, status, capacity, cylinderTypes]);
+
+  const handleDeleteClick = (item) => {
+    setDeleteModal({ isOpen: true, item });
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deleteModal.item) {
+      setCylinderTypes(cylinderTypes.filter(c => c.code !== deleteModal.item.code));
+      toast.success(`Cylinder type ${deleteModal.item.name} has been deleted successfully`);
+      setDeleteModal({ isOpen: false, item: null });
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModal({ isOpen: false, item: null });
+  };
 
   // Column definitions for cylinder types table
   const cylinderTypeColumns = [
@@ -111,10 +132,11 @@ function CylinderTypes() {
           </button>
           <button
             type="button"
+            onClick={() => handleDeleteClick(item)}
             aria-label={`Delete ${item.name}`}
             className="flex items-center gap-1.5 rounded-full bg-rose-50/70 border border-rose-200/60 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition-colors"
           >
-            <Trash2 className="h-3.5 w-3.5" /> Delet
+            <Trash2 className="h-3.5 w-3.5" /> Delete
           </button>
         </div>
       ),
@@ -215,6 +237,16 @@ function CylinderTypes() {
 
         </div>
       </section>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Cylinder Type"
+        message="Are you sure you want to delete this cylinder type? This action cannot be undone and will permanently remove the cylinder type from the system."
+        itemName={deleteModal.item ? `${deleteModal.item.code} - ${deleteModal.item.name}` : ""}
+      />
     </main>
   );
 }
