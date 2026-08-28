@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Sidebar from './components/Sidebar'
 import Header from './components/Header'
 import PageRouter from './routes/PageRouter';
+import { ToastProvider } from './utils/GlobalToast';
 
 function App() {
   const location = useLocation();
@@ -11,13 +12,15 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden">
-      {!isLoginPage && isSidebarOpen && <Sidebar />}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {!isLoginPage && <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} isSidebarOpen={isSidebarOpen} />}
-        <PageRouter/>
+    <ToastProvider>
+      <div className="flex h-screen bg-gray-100 overflow-hidden">
+        {!isLoginPage && isSidebarOpen && <Sidebar />}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {!isLoginPage && <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} isSidebarOpen={isSidebarOpen} />}
+          <PageRouter/>
+        </div>
       </div>
-    </div>
+    </ToastProvider>
   );
 }
 

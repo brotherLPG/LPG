@@ -38,6 +38,8 @@ import Payments from '../Pages/Payments/Payments';
 import AddPayment from '../Pages/Payments/addPayment';
 import FillingBatches from '../Pages/FillingBatches/FillingBatches';
 import CreateBatch from '../Pages/FillingBatches/CreateBatch';
+import MaintenanceAssets from '../Pages/MaintenanceAssets/MaintenanceAssets';
+import LogMaintenance from '../Pages/MaintenanceAssets/LogMaintenance';
 
 function PageRouter() {
   // Router container
@@ -83,6 +85,8 @@ function PageRouter() {
         <Route path="/storage-tanks" element={<StorageTanks />} />
         <Route path="/filling-batches" element={<FillingBatches />} />
         <Route path="/filling-batches/create" element={<CreateBatch />} />
+        <Route path="/maintenance-assets" element={<MaintenanceAssets />} />
+        <Route path="/maintenance-assets/log" element={<LogMaintenance />} />
       </Routes>
     </div>
   );

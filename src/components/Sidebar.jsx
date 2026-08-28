@@ -8,7 +8,8 @@ import {
   Warehouse,
   Receipt,
   Layers,
-  CreditCard
+  CreditCard,
+  Wrench
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -73,6 +74,11 @@ const Sidebar = () => {
       icon: DollarSign,
       label: "Payments",
       path: "/payments",
+    },
+    {
+      icon: Wrench,
+      label: "Maintenance Assets",
+      path: "/maintenance-assets",
     },
     {
       icon: Users,
