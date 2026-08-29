@@ -16,7 +16,7 @@ export const createCustomer = async (data) => {
 }
 
 export const updateCustomer = async (id, data) => {
-  const response = await api.put(`/customers/${id}`, data)
+  const response = await api.patch(`/customers/${id}`, data)
   return response.data
 }
 
