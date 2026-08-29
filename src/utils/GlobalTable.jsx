@@ -10,31 +10,48 @@ const GlobalTable = ({
   className = "",
   rowClassName = "border-b border-slate-100 last:border-b-0 hover:bg-slate-50",
   emptyContent = "No data available",
+  // Server-side pagination props (optional)
+  totalCount = undefined,
+  page: pageProp = undefined,
+  onPageChange = undefined,
 }) => {
-  const [page, setPage] = useState(1);
+  const [internalPage, setInternalPage] = useState(1);
 
-  const totalPages = Math.ceil(data.length / rowsPerPage);
+  // Determine whether we're in server-side mode by presence of totalCount or controlled page/onPageChange
+  const isServerSide = typeof totalCount === 'number' || typeof pageProp === 'number' || typeof onPageChange === 'function';
+
+  const effectiveTotal = typeof totalCount === 'number' ? totalCount : data.length;
+
+  const totalPages = Math.max(1, Math.ceil(effectiveTotal / rowsPerPage));
+
+  // effectivePage: prefer controlled prop, otherwise internal state
+  const effectivePage = typeof pageProp === 'number' ? pageProp : internalPage;
 
   useEffect(() => {
-    setPage(1);
-  }, [data.length, rowsPerPage]);
+    // reset to first page when data length or rowsPerPage changes (client-side mode)
+    if (!isServerSide) setInternalPage(1);
+  }, [data.length, rowsPerPage, isServerSide]);
 
   useEffect(() => {
-    if (totalPages > 0 && page > totalPages) {
-      setPage(totalPages);
+    if (effectivePage > totalPages) {
+      // if controlled, invoke callback; otherwise update internal
+      if (onPageChange) onPageChange(totalPages);
+      else setInternalPage(totalPages);
     }
-  }, [page, totalPages]);
+  }, [effectivePage, totalPages, onPageChange]);
 
-  const startIndex = (page - 1) * rowsPerPage;
+  const startIndex = (effectivePage - 1) * rowsPerPage;
 
+  // For server-side mode the `data` is assumed to already be the paged slice
   const paginatedData = pagination
-    ? data.slice(startIndex, startIndex + rowsPerPage)
+    ? isServerSide
+      ? data
+      : data.slice(startIndex, startIndex + rowsPerPage)
     : data;
 
-  const start = data.length === 0 ? 0 : startIndex + 1;
+  const start = effectiveTotal === 0 ? 0 : startIndex + 1;
 
-  const end =
-    data.length === 0 ? 0 : Math.min(startIndex + rowsPerPage, data.length);
+  const end = effectiveTotal === 0 ? 0 : Math.min(startIndex + rowsPerPage, effectiveTotal);
 
   const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
 
@@ -94,14 +111,18 @@ const GlobalTable = ({
         <Table.Footer>
           <Pagination size="sm">
             <Pagination.Summary>
-              {start} to {end} of {data.length} results
+              {start} to {end} of {effectiveTotal} results
             </Pagination.Summary>
 
             <Pagination.Content>
               <Pagination.Item>
                 <Pagination.Previous
-                  isDisabled={page === 1}
-                  onPress={() => setPage((p) => Math.max(1, p - 1))}
+                  isDisabled={effectivePage === 1}
+                  onPress={() => {
+                    const next = Math.max(1, effectivePage - 1);
+                    if (onPageChange) onPageChange(next);
+                    else setInternalPage(next);
+                  }}
                 >
                   <Pagination.PreviousIcon />
                   Prev
@@ -111,9 +132,12 @@ const GlobalTable = ({
               {pages.map((p) => (
                 <Pagination.Item key={p}>
                   <Pagination.Link
-                    isActive={p === page}
-                    onPress={() => setPage(p)}
-                    className={p === page ? "bg-[#0f4bb8] text-white" : ""}
+                    isActive={p === effectivePage}
+                    onPress={() => {
+                      if (onPageChange) onPageChange(p);
+                      else setInternalPage(p);
+                    }}
+                    className={p === effectivePage ? "bg-[#0f4bb8] text-white" : ""}
                   >
                     {p}
                   </Pagination.Link>
@@ -122,8 +146,12 @@ const GlobalTable = ({
 
               <Pagination.Item>
                 <Pagination.Next
-                  isDisabled={page === totalPages}
-                  onPress={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  isDisabled={effectivePage === totalPages}
+                  onPress={() => {
+                    const next = Math.min(totalPages, effectivePage + 1);
+                    if (onPageChange) onPageChange(next);
+                    else setInternalPage(next);
+                  }}
                 >
                   Next
                   <Pagination.NextIcon />

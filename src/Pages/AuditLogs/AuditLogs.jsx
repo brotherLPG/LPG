@@ -322,7 +322,10 @@ function AuditLogs () {
               rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
               emptyContent="No audit logs found."
               pagination={true}
-              rowsPerPage={10}
+              rowsPerPage={pagination.limit || 10}
+              page={pagination.page}
+              totalCount={pagination.total}
+              onPageChange={(p) => setCurrentPage(p)}
             />
           )}
         </div>
