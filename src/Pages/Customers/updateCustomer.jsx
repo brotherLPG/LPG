@@ -1,14 +1,18 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
-import { useCreateCustomer } from "../../queries/customers/customers.queries";
+import { useUpdateCustomer, useCustomerById } from "../../queries/customers/customers.queries";
 import { useToast } from "../../utils/GlobalToast";
 
-function AddCustomers() {
+function UpdateCustomer() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { id } = useParams();
   const [isActive, setIsActive] = useState(true);
-  const createCustomerMutation = useCreateCustomer();
+  const updateCustomerMutation = useUpdateCustomer();
+  
+  const { data: customerData, isLoading } = useCustomerById(id);
+  const customer = customerData?.data;
 
   const [formData, setFormData] = useState({
     customerName: "",
@@ -21,6 +25,23 @@ function AddCustomers() {
     paymentTermDays: 30,
     openingBalanceAmount: 0,
   });
+
+  useEffect(() => {
+    if (customer) {
+      setFormData({
+        customerName: customer.customerName || "",
+        contactPersonName: customer.contactPersonName || "",
+        phoneNumber: customer.phoneNumber || "",
+        emailAddress: customer.emailAddress || "",
+        billingAddress: customer.billingAddress || "",
+        taxRegistrationNumber: customer.taxRegistrationNumber || "",
+        creditLimitAmount: customer.creditLimitAmount || "",
+        paymentTermDays: customer.paymentTermDays || 30,
+        openingBalanceAmount: customer.openingBalanceAmount || 0,
+      });
+      setIsActive(customer.isActive !== undefined ? customer.isActive : true);
+    }
+  }, [customer]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,17 +60,27 @@ function AddCustomers() {
         isActive: isActive,
       };
 
-      await createCustomerMutation.mutateAsync(payload);
-      toast.success("Customer created successfully!");
+      await updateCustomerMutation.mutateAsync({ id, data: payload });
+      toast.success("Customer updated successfully!");
       navigate("/customers");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to create customer. Please try again.");
+      toast.error(error.response?.data?.message || "Failed to update customer. Please try again.");
     }
   };
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
+
+  if (isLoading) {
+    return (
+      <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
+        <div className="text-center py-12">
+          <p className="text-slate-500">Loading customer data...</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
@@ -70,13 +101,13 @@ function AddCustomers() {
             Customers
           </span>{" "}
           <span className="px-1 text-slate-400">/</span>{" "}
-          <span className="font-semibold text-slate-600">Add Customer</span>
+          <span className="font-semibold text-slate-600">Edit Customer</span>
         </p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-          Add Customer
+          Edit Customer
         </h1>
         <p className="mt-1 text-sm text-slate-500">
-          Create a new customer profile and assign credit parameters
+          Update customer profile and credit parameters
         </p>
       </div>
 
@@ -100,7 +131,7 @@ function AddCustomers() {
                 <input
                   type="text"
                   disabled
-                  value="CUST-009 (Auto-generated)"
+                  value={customer.customerCode || "N/A"}
                   className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed"
                 />
               </div>
@@ -300,10 +331,10 @@ function AddCustomers() {
         </button>
         <button
           type="submit"
-          disabled={createCustomerMutation.isPending}
+          disabled={updateCustomerMutation.isPending}
           className="rounded-lg bg-[#133E87] px-6 py-2 text-sm font-medium text-white transition hover:bg-[#0f326e] disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {createCustomerMutation.isPending ? "Saving..." : "Save Profile"}
+          {updateCustomerMutation.isPending ? "Updating..." : "Update Profile"}
         </button>
       </div>
       </form>
@@ -311,4 +342,4 @@ function AddCustomers() {
   );
 }
 
-export default AddCustomers;
+export default UpdateCustomer;

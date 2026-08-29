@@ -4,17 +4,8 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
+import { useCustomers, useDeleteCustomer } from "../../queries/customers/customers.queries";
 
-const initialCustomers = [
-  { code: "CUST-001", name: "Islamabad Gas Agency", contact: "Faisal Malik", phone: "0300-5551234", limit: 500000, outstanding: 175000, status: "Active" },
-  { code: "CUST-002", name: "Karachi LPG Distributors", contact: "Tariq Mahmood", phone: "0321-4448765", limit: 1200000, outstanding: 845000, status: "Active" },
-  { code: "CUST-003", name: "Lahore Fuel Traders", contact: "Kamran Shah", phone: "0333-8889900", limit: 800000, outstanding: 950000, status: "Active", isOverdue: true },
-  { code: "CUST-004", name: "Khyber Gas Supply", contact: "Sher Khan", phone: "0312-7773322", limit: 600000, outstanding: 120000, status: "Active" },
-  { code: "CUST-005", name: "Faisalabad Cylinder Co.", contact: "Bilal Anwar", phone: "0345-1112233", limit: 400000, outstanding: 390000, status: "Active" },
-  { code: "CUST-006", name: "Multan Oasis LPG", contact: "Zahid Siddiqui", phone: "0301-9998877", limit: 300000, outstanding: 0, status: "Inactive" },
-  { code: "CUST-007", name: "Peshawar Fuel Services", contact: "Asif Afridi", phone: "0311-5556677", limit: 500000, outstanding: 45000, status: "Active" },
-  { code: "CUST-008", name: "Rawalpindi Gas Traders", contact: "Waqas Butt", phone: "0322-3334455", limit: 600000, outstanding: 180000, status: "Active" },
-];
 
 function Customers() {
   const navigate = useNavigate();
@@ -24,24 +15,50 @@ function Customers() {
   const [paymentTerm, setPaymentTerm] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
-  const [customers, setCustomers] = useState(initialCustomers);
+  
+  const { data: customersData, isLoading, error } = useCustomers({
+    search: query,
+    isActive: status === "All" ? undefined : status === "Active",
+    page: currentPage,
+    limit: 10,
+  });
+  
+  const deleteMutation = useDeleteCustomer();
+  
+  const customers = customersData?.data?.items || [];
+  const pagination = customersData?.data?.pagination || { total: 0, page: 1, limit: 10, totalPages: 1 };
 
-  const filteredCustomers = useMemo(() => customers.filter((customer) => {
-    const matchesQuery = `${customer.code} ${customer.name}`.toLowerCase().includes(query.toLowerCase());
-    const matchesStatus = status === "All" || customer.status === status;
-    // Payment terms filtering logic would go here, omitting for mock simplicity
-    return matchesQuery && matchesStatus;
-  }), [query, status, customers]);
+  const filteredCustomers = useMemo(() => {
+    // API handles filtering, so we just return the customers as-is
+    return customers.map(customer => ({
+      code: customer.customerCode,
+      name: customer.customerName,
+      contact: customer.contactPersonName,
+      phone: customer.phoneNumber,
+      email: customer.emailAddress,
+      address: customer.billingAddress,
+      taxNumber: customer.taxRegistrationNumber,
+      limit: customer.creditLimitAmount,
+      paymentTermDays: customer.paymentTermDays,
+      outstanding: customer.openingBalanceAmount,
+      status: customer.isActive ? "Active" : "Inactive",
+      _id: customer._id,
+    }));
+  }, [customers]);
 
   const handleDeleteClick = (item) => {
     setDeleteModal({ isOpen: true, item });
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (deleteModal.item) {
-      setCustomers(customers.filter(c => c.code !== deleteModal.item.code));
-      toast.success(`Customer ${deleteModal.item.name} has been deleted successfully`);
-      setDeleteModal({ isOpen: false, item: null });
+      try {
+        await deleteMutation.mutateAsync(deleteModal.item._id);
+        toast.success(`Customer ${deleteModal.item.name} has been deleted successfully`);
+        setDeleteModal({ isOpen: false, item: null });
+      } catch (error) {
+        toast.error("Failed to delete customer. Please try again.");
+      }
     }
   };
 
@@ -50,7 +67,6 @@ function Customers() {
   };
 
   const getStatusStyle = (customer) => {
-    if (customer.code === "CUST-003") return "bg-amber-50 text-amber-600";
     if (customer.status === "Active") return "bg-emerald-50 text-emerald-600";
     if (customer.status === "Inactive") return "bg-red-50 text-red-600";
     return "bg-slate-50 text-slate-600";
@@ -76,7 +92,8 @@ function Customers() {
               Customers
             </h1>
             <p className="mt-1 text-sm text-slate-500">
-              Manage customer credit terms, records, and outstanding debt statuses
+              Manage customer credit terms, records, and outstanding debt
+              statuses
             </p>
           </div>
           <button
@@ -112,148 +129,168 @@ function Customers() {
               </select>
               <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
             </div>
-            <div className="relative">
+            {/* <div className="relative">
               <select
                 value={paymentTerm}
                 onChange={(event) => setPaymentTerm(event.target.value)}
                 className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-600 outline-none focus:border-[#008951] lg:w-48"
               >
                 <option value="All">All Payment Terms</option>
-                <option value="Net 15">Net 15</option>
+                <option value="15">Net 15</option>
                 <option value="Net 30">Net 30</option>
                 <option value="Net 60">Net 60</option>
                 <option value="Cash">Cash</option>
               </select>
               <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-            </div>
+            </div> */}
           </div>
         </div>
 
         {/* Table */}
         <div className="mt-5 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-          <Table>
-            <Table.ScrollContainer>
-              <Table.Content aria-label="Customers Table">
-                <Table.Header>
-                  <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-slate-700">
-                    Code
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-slate-700">
-                    Customer Name
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-slate-700">
-                    Contact Person
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-slate-700">
-                    Phone
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-slate-700">
-                    Credit Limit (Rs.)
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-slate-700">
-                    Outstanding (Rs.)
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-slate-700">
-                    Status
-                  </Table.Column>
-                  <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-slate-700">
-                    Actions
-                  </Table.Column>
-                </Table.Header>
-                <Table.Body
-                  items={filteredCustomers}
-                  emptyContent="No customers match your search."
+          {error ? (
+            <div className="flex items-center justify-center p-8">
+              <div className="text-sm text-red-500">
+                Error loading customers. Please try again.
+              </div>
+            </div>
+          ) : (
+            <Table className="w-full h-[350px] max-h-[350px] overflow-auto bg-white">
+              <Table.ScrollContainer className="overflow-x-auto">
+                <Table.Content
+                  aria-label="Customers Table"
+                  className="min-w-[1200px]"
                 >
-                  {(customer) => (
-                    <Table.Row key={customer.code} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
-                      <Table.Cell>
-                        <span className="font-medium text-slate-700 text-[13px]">
-                          {customer.code}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <button className="font-semibold text-[#1a56db] hover:underline text-[13px]">
-                          {customer.name}
-                        </button>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <span className="text-slate-600 text-[13px] font-medium">
-                          {customer.contact}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <span className="text-slate-500 text-[13px]">
-                          {customer.phone}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <span className="text-slate-700 text-[13px] font-medium">
-                          {customer.limit.toLocaleString()}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell>
-                        {customer.isOverdue ? (
-                          <span className="inline-flex items-center rounded-md bg-red-100 px-2 py-1 text-xs font-bold text-[#e11d48]">
-                            {customer.outstanding.toLocaleString()}
+                  <Table.Header>
+                    <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-slate-700">
+                      Code
+                    </Table.Column>
+                    <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-slate-700">
+                      Customer Name
+                    </Table.Column>
+                    <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-slate-700">
+                      Contact Person
+                    </Table.Column>
+                    <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-slate-700">
+                      Phone
+                    </Table.Column>
+                    <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-slate-700">
+                      Credit Limit (Rs.)
+                    </Table.Column>
+                    <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-slate-700">
+                      Outstanding (Rs.)
+                    </Table.Column>
+                    <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-center text-slate-700">
+                      Status
+                    </Table.Column>
+                    <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-center text-slate-700">
+                      Actions
+                    </Table.Column>
+                  </Table.Header>
+                  <Table.Body
+                    items={filteredCustomers}
+                    emptyContent="No customers match your search."
+                  >
+                    {(customer) => (
+                      <Table.Row
+                        key={customer._id}
+                        className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+                      >
+                        <Table.Cell>
+                          <span className="font-medium text-slate-700 text-[13px]">
+                            {customer.code}
                           </span>
-                        ) : (
+                        </Table.Cell>
+                        <Table.Cell>
+                          <button className="font-semibold text-[#1a56db] hover:underline text-[13px]">
+                            {customer.name}
+                          </button>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <span className="text-slate-600 text-[13px] font-medium">
+                            {customer.contact}
+                          </span>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <span className="text-slate-500 text-[13px]">
+                            {customer.phone}
+                          </span>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <span className="text-slate-700 text-[13px] font-medium">
+                            {customer.limit?.toLocaleString() || 0}
+                          </span>
+                        </Table.Cell>
+                        <Table.Cell>
                           <span className="text-slate-700 font-bold text-[13px]">
-                            {customer.outstanding.toLocaleString()}
+                            {customer.outstanding?.toLocaleString() || 0}
                           </span>
-                        )}
-                      </Table.Cell>
-                      <Table.Cell>
-                        <span
-                          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${getStatusStyle(customer)}`}
-                        >
-                          {customer.status}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            aria-label={`View ${customer.name}`}
-                            className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+                        </Table.Cell>
+                        <Table.Cell>
+                          <span
+                            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${getStatusStyle(customer)}`}
                           >
-                            <Eye className="h-3.5 w-3.5" /> View
-                          </button>
-                          <button
-                            type="button"
-                            aria-label={`Edit ${customer.name}`}
-                            className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
-                          >
-                            <Edit3 className="h-3.5 w-3.5" /> Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteClick(customer)}
-                            aria-label={`Delete ${customer.name}`}
-                            className="flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" /> Delete
-                          </button>
-                        </div>
-                      </Table.Cell>
-                    </Table.Row>
-                  )}
-                </Table.Body>
-              </Table.Content>
-            </Table.ScrollContainer>
-          </Table>
-          
+                            {customer.status}
+                          </span>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              aria-label={`View ${customer.name}`}
+                              className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+                            >
+                              <Eye className="h-3.5 w-3.5" /> View
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => navigate(`/customers/edit/${customer._id}`)}
+                              aria-label={`Edit ${customer.name}`}
+                              className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
+                            >
+                              <Edit3 className="h-3.5 w-3.5" /> Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteClick(customer)}
+                              aria-label={`Delete ${customer.name}`}
+                              className="flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" /> Delete
+                            </button>
+                          </div>
+                        </Table.Cell>
+                      </Table.Row>
+                    )}
+                  </Table.Body>
+                </Table.Content>
+              </Table.ScrollContainer>
+            </Table>
+          )}
+
           {/* Pagination Footer */}
           <div className="flex items-center justify-between border-t border-slate-200 bg-white px-4 py-4 sm:px-6">
+            <div className="text-sm text-slate-500">
+              Showing {filteredCustomers.length} of {pagination.total} customers
+            </div>
             <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-end">
-              <nav className="isolate inline-flex gap-2 rounded-md" aria-label="Pagination">
+              <nav
+                className="isolate inline-flex gap-2 rounded-md"
+                aria-label="Pagination"
+              >
                 <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                  }
                   disabled={currentPage === 1}
                   className="relative inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
-                {[1, 2, 3].map((page) => (
+                {Array.from(
+                  { length: pagination.totalPages },
+                  (_, i) => i + 1,
+                ).map((page) => (
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
@@ -267,8 +304,12 @@ function Customers() {
                   </button>
                 ))}
                 <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, 3))}
-                  disabled={currentPage === 3}
+                  onClick={() =>
+                    setCurrentPage((prev) =>
+                      Math.min(prev + 1, pagination.totalPages),
+                    )
+                  }
+                  disabled={currentPage === pagination.totalPages}
                   className="relative inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
@@ -286,7 +327,12 @@ function Customers() {
         onConfirm={handleDeleteConfirm}
         title="Delete Customer"
         message="Are you sure you want to delete this customer? This action cannot be undone and will permanently remove the customer record from the system."
-        itemName={deleteModal.item ? `${deleteModal.item.code} - ${deleteModal.item.name}` : ""}
+        itemName={
+          deleteModal.item
+            ? `${deleteModal.item.code} - ${deleteModal.item.name}`
+            : ""
+        }
+        isDeleting={deleteMutation.isPending}
       />
     </main>
   );

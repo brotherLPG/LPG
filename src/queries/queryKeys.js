@@ -19,4 +19,17 @@ export const queryKeys = {
     detail: id => ['notifications', 'detail', id]
   },
 
+  // =========================
+  // Customers
+  // =========================
+  customers: {
+    all: ['customers'],
+
+    lists: () => ['customers', 'list'],
+
+    list: (params) => ['customers', 'list', params],
+
+    detail: id => ['customers', 'detail', id]
+  },
+
 }

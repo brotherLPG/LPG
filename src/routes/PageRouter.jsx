@@ -20,6 +20,7 @@ import RolePermissions from '../Pages/UsersRoles/RolePermissions';
 import AddUser from '../Pages/UsersRoles/AddUser';
 import Customers from '../Pages/Customers/Customers';
 import AddCustomers from '../Pages/Customers/addCustomers';
+import UpdateCustomer from '../Pages/Customers/updateCustomer';
 import Suppliers from '../Pages/Suppliers/Suppliers';
 import CylinderTypes from '../Pages/Cylinders/CylinderTypes';
 import Employees from '../Pages/Employees/Employees';
@@ -67,6 +68,7 @@ function PageRouter() {
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/customers" element={<Customers />} />
         <Route path="/customers/add" element={<AddCustomers />} />
+        <Route path="/customers/edit/:id" element={<UpdateCustomer />} />
         <Route path="/suppliers" element={<Suppliers />} />
         <Route path="/suppliers/add" element={<AddSupplier />} />
         <Route path="/cylinder-types" element={<CylinderTypes />} />
