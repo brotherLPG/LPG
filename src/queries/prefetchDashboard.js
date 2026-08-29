@@ -4,6 +4,7 @@ import { getNotifications } from '../api/notificationApi.js'
 import { getCustomers } from '../api/customers.api.js'
 import { getUsers } from '../api/users.api.js'
 import { getAuditLogs } from '../api/auditLogs.api.js'
+import { getRoles } from '../api/roles.api.js'
 
 export const prefetchDashboard = async queryClient => {
   await Promise.all([
@@ -66,6 +67,17 @@ export const prefetchDashboard = async queryClient => {
 
       queryFn: () =>
         getAuditLogs({ page: 1, limit: 10 })
+    }),
+
+    // ========================================
+    // Roles
+    // ========================================
+
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.roles.list({ search: "", page: 1, limit: 10 }),
+
+      queryFn: () =>
+        getRoles({ search: "", page: 1, limit: 10 })
     }),
   ])
 }

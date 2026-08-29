@@ -56,4 +56,17 @@ export const queryKeys = {
     list: (params) => ['audit-logs', 'list', params],
   },
 
+  // =========================
+  // Roles
+  // =========================
+  roles: {
+    all: ['roles'],
+
+    lists: () => ['roles', 'list'],
+
+    list: (params) => ['roles', 'list', params],
+
+    detail: id => ['roles', 'detail', id],
+  },
+
 }

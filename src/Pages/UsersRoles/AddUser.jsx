@@ -2,6 +2,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createUser } from "../../api/users.api";
+import { useRoles } from "../../queries/roles/roles.queries";
 import { useToast } from "../../utils/GlobalToast";
 
 
@@ -59,6 +60,9 @@ function AddUser() {
     cnic: "", username: "", password: "", confirmPassword: "",
     role: "Plant Operator", employee: "Bilal Hassan", status: "Active",
   });
+
+  const { data: rolesData } = useRoles({ page: 1, limit: 50 });
+  const roles = rolesData?.data?.items || [];
 
   const inputClass =
     "w-full rounded border border-[#E5E7EB] bg-white px-2.5 py-2 text-[13px] text-BLUE-dark outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
@@ -248,13 +252,15 @@ function AddUser() {
                     onChange={update("role")}
                     className={selectClass}
                   >
-                    <option value="12">Plant Operator</option>
-                    <option value="6a8b594793541511c2ba1d6d">
-                      Administrator
-                    </option>
-                    <option value="14">Finance Manager</option>
-                    <option value="15">Sales Executive</option>
-                    <option value="16">Viewer</option>
+                    {roles.length === 0 ? (
+                      <>
+                        <option disabled>NO Assigne Role</option>
+                      </>
+                    ) : (
+                      roles.map((r) => (
+                        <option key={r._id} value={r._id}>{r.name || r.roleName || r.title || r.displayName}</option>
+                      ))
+                    )}
                   </select>
                 </Field>
                 <Field label="Linked Employee">
