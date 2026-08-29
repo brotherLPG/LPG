@@ -41,10 +41,10 @@ const GlobalTable = ({
   return (
     <Table
       aria-label={ariaLabel}
-      className={`px-3 pb-3 pt-2 bg-white ${className} w-full  h-[350px] max-h-[350px] overflow-auto `}
+      className={`px-3 pb-3 pt-2 bg-white ${className} w-full  h-88 max-h-88 overflow-auto `}
     >
       <Table.ScrollContainer className="overflow-x-auto">
-        <Table.Content className="min-w-[1200px]">
+        <Table.Content className="min-w-300">
           {/* Header */}
           <Table.Header className="bg-white">
             {columns.map((column) => (

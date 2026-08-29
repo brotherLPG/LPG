@@ -45,4 +45,15 @@ export const queryKeys = {
     detail: id => ['users', 'detail', id]
   },
 
+  // =========================
+  // Audit Logs
+  // =========================
+  auditLogs: {
+    all: ['audit-logs'],
+
+    lists: () => ['audit-logs', 'list'],
+
+    list: (params) => ['audit-logs', 'list', params],
+  },
+
 }
