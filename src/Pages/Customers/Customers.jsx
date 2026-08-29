@@ -12,7 +12,7 @@ function Customers() {
   const toast = useToast();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
-  const [paymentTerm, setPaymentTerm] = useState("All");
+  // const [paymentTerm, setPaymentTerm] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
   
@@ -114,7 +114,7 @@ function Customers() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 className="w-full rounded-md border border-slate-200 py-2 pl-9 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                placeholder="Search by code or company name..."
+                placeholder="Search by code or customer name..."
               />
             </label>
             <div className="relative">
@@ -148,10 +148,23 @@ function Customers() {
 
         {/* Table */}
         <div className="mt-5 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-          {error ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center p-8">
+              <svg className="animate-spin h-6 w-6 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+          ) : error ? (
             <div className="flex items-center justify-center p-8">
               <div className="text-sm text-red-500">
                 Error loading customers. Please try again.
+              </div>
+            </div>
+          ) : filteredCustomers.length === 0 ? (
+            <div className="flex items-center justify-center p-8">
+              <div className="text-sm text-slate-500">
+                No customer data
               </div>
             </div>
           ) : (
