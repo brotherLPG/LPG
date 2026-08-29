@@ -1,6 +1,9 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { createUser } from "../../api/users.api";
+import { useToast } from "../../utils/GlobalToast";
+
 
 const permissionRows = [
   ["Dashboard", "Full Access", "emerald"],
@@ -47,8 +50,10 @@ function Field({ label, required, hint, children }) {
 
 function AddUser() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     fullName: "", email: "", phone: "",
     cnic: "", username: "", password: "", confirmPassword: "",
@@ -60,9 +65,39 @@ function AddUser() {
   const selectClass =
     "w-full rounded border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-2 text-[13px] text-BLUE-dark outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
   const update = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    navigate("/users-roles");
+
+    if (form.password !== form.confirmPassword) {
+      toast.error("Password and Confirm Password do not match.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const userData = {
+        fullName: form.fullName,
+        emailAddress: form.email,
+        // phone: form.phone,
+        // cnic: form.cnic,
+        username: form.username,
+        password: form.password,
+        roleId: form.role,
+        // employeeId: form.employee,
+        isActive: form.status,
+      };
+
+      const response = await createUser(userData);
+
+      console.log("User created:", response);
+      toast.success("User created successfully!");
+      navigate("/users-roles");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to create user. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -213,11 +248,13 @@ function AddUser() {
                     onChange={update("role")}
                     className={selectClass}
                   >
-                    <option>Plant Operator</option>
-                    <option>Administrator</option>
-                    <option>Finance Manager</option>
-                    <option>Sales Executive</option>
-                    <option>Viewer</option>
+                    <option value="12">Plant Operator</option>
+                    <option value="6a8b594793541511c2ba1d6d">
+                      Administrator
+                    </option>
+                    <option value="14">Finance Manager</option>
+                    <option value="15">Sales Executive</option>
+                    <option value="16">Viewer</option>
                   </select>
                 </Field>
                 <Field label="Linked Employee">
@@ -226,8 +263,8 @@ function AddUser() {
                     onChange={update("employee")}
                     className={selectClass}
                   >
-                    <option>Bilal Hassan</option>
-                    <option>Not linked</option>
+                    <option value="12">Bilal Hassan</option>
+                    <option value="0">Not linked</option>
                   </select>
                 </Field>
                 <p className="rounded bg-slate-50 px-2 py-2 text-[12px] leading-3 ">
@@ -244,12 +281,18 @@ function AddUser() {
                     />
                     <select
                       value={form.status}
-                      onChange={update("status")}
+                      // onChange={update("status")}
+                      onChange={(e) =>
+                        setForm((current) => ({
+                          ...current,
+                          status: e.target.value === "true",
+                        }))
+                      }
                       className={`${selectClass} pl-6 ${statusStyles[form.status]}`}
                     >
-                      <option value="Active">Active</option>
-                      <option value="Inactive">Inactive</option>
-                      <option value="Suspended">Suspended</option>
+                      <option value="true">Active</option>
+                      <option value="false">Inactive</option>
+                      <option value="false">Suspended</option>
                     </select>
                   </span>
                 </Field>
@@ -289,9 +332,10 @@ function AddUser() {
           </button>
           <button
             type="submit"
-            className="rounded bg-gradient-bg-blue px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-blue-800"
+            disabled={loading}
+            className="rounded bg-gradient-bg-blue px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Create User
+            {loading ? "Creating..." : "Create User"}
           </button>
         </div>
       </form>

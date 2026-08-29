@@ -2,16 +2,7 @@ import { Eye, Pencil, CirclePlus, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalTable from "../../utils/GlobalTable";
-
-const users = [
-  { name: "Muhammad Ahmad", email: "admin@almanida-lpg.pk", role: "Administrator", employee: "Ahmad Hassan", status: "Active", login: "21 Aug 2026 09:15" },
-  { name: "Fatima Zahra", email: "fatima@almanida-lpg.pk", role: "Finance Manager", employee: "Fatima Zahra", status: "Active", login: "21 Aug 2026 08:30" },
-  { name: "Usman Ali", email: "usman@almanida-lpg.pk", role: "Plant Operator", employee: "Usman Ali", status: "Active", login: "20 Aug 2026 17:45" },
-  { name: "Zainab Rashid", email: "zainab@almanida-lpg.pk", role: "Sales Executive", employee: "Zainab Rashid", status: "Active", login: "20 Aug 2026 16:20" },
-  { name: "Ayesha Siddiqui", email: "ayesha@almanida-lpg.pk", role: "Office Manager", employee: "Ayesha Siddiqui", status: "Active", login: "19 Aug 2026" },
-  { name: "Guest User", email: "guest.user@almanida-lpg.pk", role: "Viewer", employee: "—", status: "Inactive", login: "Never" },
-  { name: "Test Account", email: "test.account@almanida-lpg.pk", role: "Viewer", employee: "—", status: "Suspended", login: "01 Aug 2026" },
-];
+import { useUsers } from "../../queries/users/users.queries";
 
 const statusStyles = {
   Active: "bg-emerald-50 text-emerald-600",
@@ -26,27 +17,39 @@ function UsersRoles() {
   const [role, setRole] = useState("All Roles");
   const [status, setStatus] = useState("All");
 
+  const { data: usersData, isLoading, error } = useUsers({
+    search: query,
+    role: role === "All Roles" ? undefined : role,
+    status: status === "All" ? undefined : status,
+  });
+
+  const users = usersData?.data?.items || [];
+  console.log(users);
+  
+  const availableRoles = usersData?.data?.meta?.roles || [];
+  const availableStatuses = usersData?.data?.meta?.statuses || [];
+
   const filteredUsers = useMemo(() => users.filter((user) => {
-    const matchesQuery = `${user.name} ${user.email}`.toLowerCase().includes(query.toLowerCase());
-    const matchesRole = role === "All Roles" || user.role === role;
-    const matchesStatus = status === "All" || user.status === status;
+    const matchesQuery = `${user.fullName} ${user.emailAddress}`.toLowerCase().includes(query.toLowerCase());
+    const matchesRole = role === "All Roles" || user.role?.roleName === role;
+    const matchesStatus = status === "All" || (user.isActive ? "Active" : "Inactive") === status;
     return matchesQuery && matchesRole && matchesStatus;
-  }), [query, role, status]);
+  }), [users, query, role, status]);
 
   // Column definitions for users table
   const userColumns = [
     {
-      key: "name",
+      key: "fullName",
       label: "Name",
       isRowHeader: true,
       className: "text-[13px] font-bold text-tertiary",
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
-        <span className="font-semibold text-BLUE-dark text-[13px]">{item.name}</span>
+        <span className="font-semibold text-BLUE-dark text-[13px]">{item.fullName}</span>
       ),
     },
     {
-      key: "email",
+      key: "emailAddress",
       label: "Email Address",
       className: "text-[13px] font-bold text-tertiary",
       cellClassName: "px-4 py-3 text-slate-500 text-[13px] font-regular",
@@ -56,12 +59,14 @@ function UsersRoles() {
       label: "Role",
       className: "text-[13px] font-bold text-tertiary",
       cellClassName: "px-4 py-3 text-slate-600 text-[13px] font-medium",
+      renderCell: (item) => item.role?.roleName || "—",
     },
     {
       key: "employee",
       label: "Linked Employee",
       className: "text-[13px] font-bold text-tertiary",
       cellClassName: "px-4 py-3 text-tertiary text-[13px] font-regular",
+      renderCell: (item) => item.employeeId || "—",
     },
     {
       key: "status",
@@ -70,17 +75,18 @@ function UsersRoles() {
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
         <span
-          className={`rounded-full px-2 py-1 text-xs font-medium ${statusStyles[item.status]}`}
+          className={`rounded-full px-2 py-1 text-xs font-medium ${statusStyles[item.isActive ? "Active" : "Inactive"]}`}
         >
-          {item.status}
+          {item.isActive ? "Active" : "Inactive"}
         </span>
       ),
     },
     {
-      key: "login",
+      key: "lastLogin",
       label: "Last Login",
       className: "text-[13px] font-bold text-tertiary",
       cellClassName: "px-4 py-3 whitespace-nowrap text-tertiary font-regular text-[13px]",
+      renderCell: (item) => item.lastLoginAt ? new Date(item.lastLoginAt).toLocaleDateString() : "Never",
     },
     {
       key: "actions",
@@ -91,21 +97,21 @@ function UsersRoles() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            aria-label={`View ${item.name}`}
+            aria-label={`View ${item.fullName}`}
             className="text-blue-500 hover:text-blue-700"
           >
             <Eye className="h-4 w-4" />
           </button>
           <button
             type="button"
-            aria-label={`Edit ${item.name}`}
+            aria-label={`Edit ${item.fullName}`}
             className="text-emerald-500 hover:text-emerald-700"
           >
             <Pencil className="h-4 w-4" />
           </button>
           <button
             type="button"
-            aria-label={`Delete ${item.name}`}
+            aria-label={`Delete ${item.fullName}`}
             className="text-red-500 hover:text-red-700"
           >
             <Trash2 className="h-4 w-4" />
@@ -163,36 +169,58 @@ function UsersRoles() {
               onChange={(event) => setRole(event.target.value)}
               className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none focus:border-emerald-500"
             >
-              <option>All Roles</option>
-              <option>Administrator</option>
-              <option>Finance Manager</option>
-              <option>Plant Operator</option>
-              <option>Sales Executive</option>
-              <option>Office Manager</option>
-              <option>Viewer</option>
+              <option value="All Roles">All Roles</option>
+              {availableRoles.map((r) => (
+                <option key={r._id} value={r.roleName}>
+                  {r.roleName}
+                </option>
+              ))}
             </select>
             <select
               value={status}
               onChange={(event) => setStatus(event.target.value)}
               className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none focus:border-emerald-500"
             >
-              <option>All</option>
-              <option>Active</option>
-              <option>Inactive</option>
-              <option>Suspended</option>
+              <option value="All">All</option>
+              {availableStatuses.map((s) => (
+                <option key={s.value} value={s.label}>
+                  {s.label}
+                </option>
+              ))}
             </select>
           </div>
         </div>
 
         <div className="mt-5 overflow-hidden border border-slate-200 bg-white shadow-sm">
-          <GlobalTable
-            columns={userColumns}
-            data={filteredUsers}
-            ariaLabel="User management table"
-            className=""
-            rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
-            emptyContent="No users match your search."
-          />
+          {isLoading ? (
+            <div className="flex items-center justify-center p-8">
+              <svg className="animate-spin h-6 w-6 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+          ) : error ? (
+            <div className="flex items-center justify-center p-8">
+              <div className="text-sm text-red-500">
+                Error loading users. Please try again.
+              </div>
+            </div>
+          ) : filteredUsers.length === 0 ? (
+            <div className="flex items-center justify-center p-8">
+              <div className="text-sm text-slate-500">
+                No user data
+              </div>
+            </div>
+          ) : (
+            <GlobalTable
+              columns={userColumns}
+              data={filteredUsers}
+              ariaLabel="User management table"
+              className=""
+              rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+              emptyContent="No users match your search."
+            />
+          )}
         </div>
 
         <section className="mt-5">

@@ -32,4 +32,17 @@ export const queryKeys = {
     detail: id => ['customers', 'detail', id]
   },
 
+  // =========================
+  // Users
+  // =========================
+  users: {
+    all: ['users'],
+
+    lists: () => ['users', 'list'],
+
+    list: (params) => ['users', 'list', params],
+
+    detail: id => ['users', 'detail', id]
+  },
+
 }
