@@ -4,16 +4,9 @@ import { useNavigate } from "react-router-dom";
 import GlobalTable from "../../utils/GlobalTable";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
+import { useSuppliers, useDeleteSupplier } from "../../queries/suppliers/suppliers.queries";
 
-const initialSuppliers = [
-  { code: "SUP-001", name: "Pakistan Petroleum Ltd.", contact: "Irfan Qureshi", phone: "021-35681901", terms: "Net 30", outstanding: "Rs. 1,250,000", status: "Active" },
-  { code: "SUP-002", name: "Sui Northern Gas Pipelines", contact: "Asim Masood", phone: "042-99201451", terms: "Net 15", outstanding: "Rs. 3,400,000", status: "Active" },
-  { code: "SUP-003", name: "Attock Refinery Ltd.", contact: "Jamil Khan", phone: "051-5487041", terms: "Net 30", outstanding: "Rs. 0", status: "Active" },
-  { code: "SUP-004", name: "Byco Petroleum Pakistan", contact: "Zubair Ahmad", phone: "021-11122209", terms: "Cash On Delivery", outstanding: "Rs. 450,000", status: "Inactive" },
-  { code: "SUP-005", name: "Parco LPG Division", contact: "Noman Shah", phone: "021-35090100", terms: "Net 45", outstanding: "Rs. 2,150,000", status: "Active" },
-  { code: "SUP-006", name: "National Refinery Limited", contact: "Sohail Abbas", phone: "021-35064135", terms: "Net 30", outstanding: "Rs. 890,000", status: "Active" },
-  { code: "SUP-007", name: "Hi-Q LPG Pakistan", contact: "Yasir Habib", phone: "042-11144455", terms: "Net 15", outstanding: "Rs. 120,000", status: "Active" },
-];
+// Data comes from API via react-query
 
 function Suppliers() {
   const navigate = useNavigate();
@@ -23,14 +16,36 @@ function Suppliers() {
   const [paymentTerm, setPaymentTerm] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
-  const [suppliers, setSuppliers] = useState(initialSuppliers);
+  const [suppliersState, setSuppliersState] = useState([]);
 
-  const filteredSuppliers = useMemo(() => suppliers.filter((supplier) => {
-    const matchesQuery = `${supplier.code} ${supplier.name} ${supplier.contact}`.toLowerCase().includes(query.toLowerCase());
-    const matchesStatus = status === "All" || supplier.status === status;
-    const matchesTerms = paymentTerm === "All" || supplier.terms === paymentTerm;
-    return matchesQuery && matchesStatus && matchesTerms;
-  }), [query, status, paymentTerm, suppliers]);
+  const { data: suppliersData, isLoading, error } = useSuppliers({
+    search: query,
+    isActive: status === "All" ? undefined : status === "Active",
+    page: currentPage,
+    limit: 10,
+  });
+
+  const deleteMutation = useDeleteSupplier();
+
+  const suppliers = suppliersData?.data?.items || [];
+  const pagination = suppliersData?.data?.pagination || { total: 0, page: 1, limit: 10, totalPages: 1 };
+
+  const mappedSuppliers = useMemo(() => {
+    return suppliers.map((s) => ({
+      code: s.supplierCode,
+      name: s.supplierName,
+      contact: s.contactPersonName,
+      phone: s.phoneNumber,
+      email: s.emailAddress,
+      address: s.businessAddress,
+      taxNumber: s.taxRegistrationNumber,
+      limit: null,
+      paymentTermDays: s.paymentTermDays,
+      outstanding: s.openingBalanceAmount,
+      status: s.isActive ? "Active" : "Inactive",
+      _id: s._id,
+    }));
+  }, [suppliers]);
 
   const handleDeleteClick = (item) => {
     setDeleteModal({ isOpen: true, item });
@@ -38,9 +53,16 @@ function Suppliers() {
 
   const handleDeleteConfirm = () => {
     if (deleteModal.item) {
-      setSuppliers(suppliers.filter(s => s.code !== deleteModal.item.code));
-      toast.success(`Supplier ${deleteModal.item.name} has been deleted successfully`);
-      setDeleteModal({ isOpen: false, item: null });
+      const id = deleteModal.item._id;
+      deleteMutation.mutate(id, {
+        onSuccess: () => {
+          toast.success(`Supplier ${deleteModal.item.name} has been deleted successfully`);
+          setDeleteModal({ isOpen: false, item: null });
+        },
+        onError: () => {
+          toast.error("Failed to delete supplier. Please try again.");
+        }
+      });
     }
   };
 
@@ -84,7 +106,7 @@ function Suppliers() {
       cellClassName: "px-4 py-3 text-slate-600 text-[13px]",
     },
     {
-      key: "terms",
+      key: "paymentTermDays",
       label: "Payment Terms",
       className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-3 text-slate-600 text-[13px]",
@@ -95,7 +117,7 @@ function Suppliers() {
       className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
-        <span className="text-slate-900 font-bold text-[13px]">{item.outstanding}</span>
+        <span className="text-slate-900 font-bold text-[13px]">{item.outstanding?.toLocaleString?.() || item.outstanding}</span>
       ),
     },
     {
@@ -131,6 +153,7 @@ function Suppliers() {
           </button>
           <button
             type="button"
+            onClick={() => navigate(`/suppliers/edit/${item._id}`)}
             aria-label={`Edit ${item.name}`}
             className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
           >
@@ -206,7 +229,7 @@ function Suppliers() {
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
               </div>
-              <div className="relative">
+              {/* <div className="relative">
                 <select
                   value={paymentTerm}
                   onChange={(event) => setPaymentTerm(event.target.value)}
@@ -216,26 +239,62 @@ function Suppliers() {
                   <option value="Net 15">Payment Terms: Net 15</option>
                   <option value="Net 30">Payment Terms: Net 30</option>
                   <option value="Net 45">Payment Terms: Net 45</option>
-                  <option value="Cash On Delivery">Payment Terms: Cash On Delivery</option>
+                  <option value="Cash On Delivery">
+                    Payment Terms: Cash On Delivery
+                  </option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
 
         {/* Table */}
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <GlobalTable
-            columns={supplierColumns}
-            data={filteredSuppliers}
-            ariaLabel="Suppliers Table"
-            className=""
-            rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
-            emptyContent="No suppliers match your search."
-            pagination={true}
-            rowsPerPage={5}
-          />
+          {isLoading ? (
+            <div className="flex items-center justify-center p-8">
+              <svg
+                className="animate-spin h-6 w-6 text-slate-400"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+            </div>
+          ) : error ? (
+            <div className="flex items-center justify-center p-8">
+              <div className="text-sm text-red-500">
+                Error loading suppliers. Please try again.
+              </div>
+            </div>
+          ) : (
+            <GlobalTable
+              columns={supplierColumns}
+              data={mappedSuppliers}
+              ariaLabel="Suppliers Table"
+              className=""
+              rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+              emptyContent="No suppliers match your search."
+              pagination={true}
+              rowsPerPage={pagination.limit || 10}
+              totalCount={pagination.total}
+              page={currentPage}
+              onPageChange={(p) => setCurrentPage(p)}
+            />
+          )}
         </div>
       </section>
 
@@ -246,7 +305,12 @@ function Suppliers() {
         onConfirm={handleDeleteConfirm}
         title="Delete Supplier"
         message="Are you sure you want to delete this supplier? This action cannot be undone and will permanently remove the supplier record from the system."
-        itemName={deleteModal.item ? `${deleteModal.item.code} - ${deleteModal.item.name}` : ""}
+        itemName={
+          deleteModal.item
+            ? `${deleteModal.item.code} - ${deleteModal.item.name}`
+            : ""
+        }
+        isDeleting={deleteMutation.isPending}
       />
     </main>
   );

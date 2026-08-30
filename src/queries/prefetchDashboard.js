@@ -2,6 +2,7 @@ import { queryKeys } from './queryKeys'
 
 import { getNotifications } from '../api/notificationApi.js'
 import { getCustomers } from '../api/customers.api.js'
+import { getSuppliers } from '../api/suppliers.api.js'
 import { getUsers } from '../api/users.api.js'
 import { getAuditLogs } from '../api/auditLogs.api.js'
 import { getRoles } from '../api/roles.api.js'
@@ -36,6 +37,22 @@ export const prefetchDashboard = async queryClient => {
           isActive: undefined,
           page: 1,
           limit: 10
+        })
+    }),
+
+    // ========================================
+    // Suppliers
+    // ========================================
+
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.suppliers.list({ search: "", isActive: undefined, page: 1, limit: 10 }),
+
+      queryFn: () =>
+        getSuppliers({
+          search: "",
+          isActive: undefined,
+          page: 1,
+          limit: 10,
         })
     }),
 

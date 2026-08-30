@@ -2,10 +2,54 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Switch } from "@heroui/react";
 import { ChevronDown } from "lucide-react";
+import { useToast } from "../../utils/GlobalToast";
+import { useCreateSupplier } from "../../queries/suppliers/suppliers.queries";
 
 function AddSupplier() {
   const navigate = useNavigate();
   const [isActive, setIsActive] = useState(true);
+  const toast = useToast();
+
+  const [supplierName, setSupplierName] = useState("");
+  const [contactPersonName, setContactPersonName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [emailAddress, setEmailAddress] = useState("");
+  const [businessAddress, setBusinessAddress] = useState("");
+  const [taxRegistrationNumber, setTaxRegistrationNumber] = useState("");
+  const [paymentTermDays, setPaymentTermDays] = useState("30");
+  const [openingBalanceAmount, setOpeningBalanceAmount] = useState(0);
+
+  const createMutation = useCreateSupplier();
+
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+
+      try {
+      
+         const payload = {
+           supplierName,
+           contactPersonName,
+           phoneNumber,
+           emailAddress,
+           businessAddress,
+           taxRegistrationNumber,
+           paymentTermDays:
+             paymentTermDays === "COD" ? 0 : parseInt(paymentTermDays, 10),
+           openingBalanceAmount: Number(openingBalanceAmount) || 0,
+           isActive,
+         };
+
+        await createMutation.mutate(payload);
+        toast.success("supplier created successfully!");
+        navigate("/supplier");
+      } catch (error) {
+        toast.error(
+          error.response?.data?.message ||
+            "Failed to create supplier. Please try again.",
+        );
+      }
+    };
 
   return (
     <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
@@ -39,7 +83,6 @@ function AddSupplier() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column (lg:col-span-2) */}
         <div className="lg:col-span-2 space-y-6">
-          
           {/* Card 1: Supplier Information */}
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
             <div className="border-b border-slate-200 p-4">
@@ -62,11 +105,14 @@ function AddSupplier() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Supplier / Company Name <span className="text-rose-500">*</span>
+                  Supplier / Company Name{" "}
+                  <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
                   placeholder="e.g. Attock Gas Ltd."
+                  value={supplierName}
+                  onChange={(e) => setSupplierName(e.target.value)}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-emerald-100 focus:border-[#008951]"
                 />
               </div>
@@ -78,6 +124,8 @@ function AddSupplier() {
                 <input
                   type="text"
                   placeholder="Full name of contact representative"
+                  value={contactPersonName}
+                  onChange={(e) => setContactPersonName(e.target.value)}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
@@ -89,6 +137,8 @@ function AddSupplier() {
                 <input
                   type="text"
                   placeholder="e.g. +92 300 1234567"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
@@ -100,6 +150,8 @@ function AddSupplier() {
                 <input
                   type="email"
                   placeholder="e.g. supplier@domain.com"
+                  value={emailAddress}
+                  onChange={(e) => setEmailAddress(e.target.value)}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
@@ -109,16 +161,23 @@ function AddSupplier() {
                   Status Toggle
                 </label>
                 <div className="flex items-center gap-3">
-                  <Switch
-                    isSelected={isActive}
-                    onValueChange={setIsActive}
-                    classNames={{
-                      wrapper: isActive ? "bg-[#008951]" : "bg-slate-200",
-                    }}
-                    size="sm"
-                  />
-                  <span className={`text-sm font-semibold ${isActive ? "text-[#008951]" : "text-slate-500"}`}>
-                    Active Supplier
+                  <button
+                    type="button"
+                    onClick={() => setIsActive(!isActive)}
+                    className={`relative inline-flex h-6 w-11 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isActive ? "bg-[#10b981]" : "bg-slate-200"}`}
+                    role="switch"
+                    aria-checked={isActive}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isActive ? "translate-x-5" : "translate-x-0"}`}
+                    />
+                  </button>
+                  <span
+                    className={`text-sm font-semibold ${isActive ? "text-[#008951]" : "text-[error]"}`}
+                  >
+                    {isActive ? "Active Supplier" : "Inactive Supplier"}
+                    {/* Active Supplier */}
                   </span>
                 </div>
               </div>
@@ -142,19 +201,20 @@ function AddSupplier() {
                 </label>
                 <div className="relative">
                   <select
-                    defaultValue="Net 30 Days"
+                    value={paymentTermDays}
+                    onChange={(e) => setPaymentTermDays(e.target.value)}
                     className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   >
-                    <option value="Net 15 Days">Net 15 Days</option>
-                    <option value="Net 30 Days">Net 30 Days</option>
-                    <option value="Net 45 Days">Net 45 Days</option>
-                    <option value="Net 60 Days">Net 60 Days</option>
-                    <option value="Cash On Delivery">Cash On Delivery</option>
+                    <option value="15">Net 15 Days</option>
+                    <option value="30">Net 30 Days</option>
+                    <option value="45">Net 45 Days</option>
+                    <option value="60">Net 60 Days</option>
+                    <option value="COD">Cash On Delivery</option>
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Credit Limit (Rs.)
@@ -172,14 +232,15 @@ function AddSupplier() {
                 </label>
                 <input
                   type="text"
-                  defaultValue="0"
+                  value={openingBalanceAmount}
+                  onChange={(e) => setOpeningBalanceAmount(e.target.value)}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
             </div>
           </div>
         </div>
-        
+
         {/* Card 3: Address & Tax Details */}
         <div className="lg:col-span-3 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
           <div className="border-b border-slate-200 p-4">
@@ -195,6 +256,8 @@ function AddSupplier() {
               <textarea
                 rows="2"
                 placeholder="Plot, Street, Area, Sector, Industrial Area..."
+                value={businessAddress}
+                onChange={(e) => setBusinessAddress(e.target.value)}
                 className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
               />
             </div>
@@ -226,6 +289,8 @@ function AddSupplier() {
                 <input
                   type="text"
                   placeholder="e.g. 1234567-8"
+                  value={taxRegistrationNumber}
+                  onChange={(e) => setTaxRegistrationNumber(e.target.value)}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
@@ -283,7 +348,6 @@ function AddSupplier() {
             </div>
           </div>
         </div>
-
       </div>
 
       {/* Bottom Action Bar */}
@@ -295,10 +359,34 @@ function AddSupplier() {
           Cancel
         </button>
         <button
-          onClick={() => navigate("/suppliers")}
-          className="rounded-lg bg-[#008951] px-6 py-2 text-sm font-medium text-white transition hover:bg-[#007545]"
+          // onClick={() => {
+          //   const payload = {
+          //     supplierName,
+          //     contactPersonName,
+          //     phoneNumber,
+          //     emailAddress,
+          //     businessAddress,
+          //     taxRegistrationNumber,
+          //     paymentTermDays: paymentTermDays === 'COD' ? 0 : parseInt(paymentTermDays, 10),
+          //     openingBalanceAmount: Number(openingBalanceAmount) || 0,
+          //     isActive,
+          //   };
+
+          //   createMutation.mutate(payload, {
+          //     onSuccess: () => {
+          //       toast.success('Supplier created successfully');
+          //       navigate('/suppliers');
+          //     },
+          //     onError: () => {
+          //       toast.error('Failed to create supplier. Please try again.');
+          //     }
+          //   });
+          // }}
+          onClick={handleSubmit}
+          disabled={createMutation.isPending}
+          className="rounded-lg bg-[#008951] px-6 py-2 text-sm font-medium text-white transition hover:bg-[#007545] disabled:opacity-60"
         >
-          Save Supplier
+          {createMutation.isPending ? "Saving..." : "Save Supplier"}
         </button>
       </div>
     </main>
