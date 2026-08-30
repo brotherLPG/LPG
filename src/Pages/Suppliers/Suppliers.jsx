@@ -224,8 +224,8 @@ function Suppliers() {
                   className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-40 lg:w-44"
                 >
                   <option value="All">Status: All</option>
-                  <option value="Active">Status: Active</option>
-                  <option value="Inactive">Status: Inactive</option>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
               </div>
