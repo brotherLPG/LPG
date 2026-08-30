@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import GlobalTable from "../../utils/GlobalTable";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
+import { useCylinderTypes, useDeleteCylinderType } from "../../queries/cylinderTypes/cylinderTypes.queries";
 
 const initialCylinderTypes = [
   { code: "CYL-001", name: "Commercial LPG 11KG", capacity: "11.0 KG", tare: "8.5 KG", price: "Rs. 2,850", status: "Active" },
@@ -23,7 +24,28 @@ function CylinderTypes() {
   const [capacity, setCapacity] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
-  const [cylinderTypes, setCylinderTypes] = useState(initialCylinderTypes);
+
+  const { data: cylinderTypesData, isLoading, error } = useCylinderTypes({
+    search: query,
+    isActive: status === "All" ? undefined : status === "Active",
+    page: currentPage,
+    limit: 10,
+  });
+
+  const deleteMutation = useDeleteCylinderType();
+
+  const cylinderTypes = cylinderTypesData?.data?.items || [];
+  const pagination = cylinderTypesData?.data?.pagination || { total: 0, page: 1, limit: 10, totalPages: 1 };
+
+  const mappedCylinders = useMemo(() => cylinderTypes.map((s) => ({
+    code: s.typeCode,
+    name: s.typeName,
+    capacity: `${s.capacityKg?.toFixed?.(1) || s.capacityKg} KG`,
+    tare: `${s.tareWeightKg?.toFixed?.(1) || s.tareWeightKg} KG`,
+    price: s.sellingPricePerCylinder?.toLocaleString ? `Rs. ${s.sellingPricePerCylinder.toLocaleString()}` : s.sellingPricePerCylinder,
+    status: s.isActive ? "Active" : "Inactive",
+    _id: s._id,
+  })), [cylinderTypes]);
 
   const filteredCylinders = useMemo(() => cylinderTypes.filter((cyl) => {
     const matchesQuery = `${cyl.code} ${cyl.name}`.toLowerCase().includes(query.toLowerCase());
@@ -36,11 +58,15 @@ function CylinderTypes() {
     setDeleteModal({ isOpen: true, item });
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (deleteModal.item) {
-      setCylinderTypes(cylinderTypes.filter(c => c.code !== deleteModal.item.code));
-      toast.success(`Cylinder type ${deleteModal.item.name} has been deleted successfully`);
-      setDeleteModal({ isOpen: false, item: null });
+      try {
+        await deleteMutation.mutateAsync(deleteModal.item._id);
+        toast.success(`Cylinder type ${deleteModal.item.name} has been deleted successfully`);
+        setDeleteModal({ isOpen: false, item: null });
+      } catch (err) {
+        toast.error("Failed to delete cylinder type. Please try again.");
+      }
     }
   };
 
@@ -95,8 +121,8 @@ function CylinderTypes() {
     {
       key: "status",
       label: "Status",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-3",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 ",
+      cellClassName: "px-4 py-3 ",
       renderCell: (item) => (
         <span
           className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
@@ -112,8 +138,8 @@ function CylinderTypes() {
     {
       key: "actions",
       label: "Actions",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-3",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 text-center",
+      cellClassName: "py-3",
       renderCell: (item) => (
         <div className="flex items-center gap-2">
           <button
@@ -126,6 +152,7 @@ function CylinderTypes() {
           <button
             type="button"
             aria-label={`Edit ${item.name}`}
+            onClick={() => navigate(`/cylinders/edit-type/${item._id}`)}
             className="flex items-center gap-1.5 rounded-full bg-emerald-50/70 border border-emerald-200/60 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
           >
             <Edit3 className="h-3.5 w-3.5" /> Edit
@@ -197,12 +224,12 @@ function CylinderTypes() {
                   className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-40 lg:w-44"
                 >
                   <option value="All">Status: All</option>
-                  <option value="Active">Status: Active</option>
-                  <option value="Inactive">Status: Inactive</option>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
               </div>
-              <div className="relative">
+              {/* <div className="relative">
                 <select
                   value={capacity}
                   onChange={(event) => setCapacity(event.target.value)}
@@ -217,23 +244,39 @@ function CylinderTypes() {
                   <option value="50.0 KG">50.0 KG</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
 
         {/* Table */}
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <GlobalTable
-            columns={cylinderTypeColumns}
-            data={filteredCylinders}
-            ariaLabel="Cylinder Types Table"
-            className=""
-            rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
-            emptyContent="No cylinder types match your search."
-            pagination={true}
-            rowsPerPage={5}
-          />
+          {isLoading ? (
+            <div className="flex items-center justify-center p-8">
+              <svg className="animate-spin h-6 w-6 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+          ) : error ? (
+            <div className="flex items-center justify-center p-8">
+              <div className="text-sm text-red-500">Error loading cylinder types. Please try again.</div>
+            </div>
+          ) : (
+            <GlobalTable
+              columns={cylinderTypeColumns}
+              data={mappedCylinders}
+              ariaLabel="Cylinder Types Table"
+              className=""
+              rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+              emptyContent="No cylinder types match your search."
+              pagination={true}
+              rowsPerPage={pagination.limit || 10}
+              totalCount={pagination.total}
+              page={currentPage}
+              onPageChange={(p) => setCurrentPage(p)}
+            />
+          )}
 
         </div>
       </section>
@@ -246,6 +289,7 @@ function CylinderTypes() {
         title="Delete Cylinder Type"
         message="Are you sure you want to delete this cylinder type? This action cannot be undone and will permanently remove the cylinder type from the system."
         itemName={deleteModal.item ? `${deleteModal.item.code} - ${deleteModal.item.name}` : ""}
+        isDeleting={deleteMutation.isPending}
       />
     </main>
   );

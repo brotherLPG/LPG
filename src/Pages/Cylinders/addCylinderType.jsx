@@ -2,10 +2,63 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Switch } from "@heroui/react";
 import { ChevronDown } from "lucide-react";
+import { useToast } from "../../utils/GlobalToast";
+import { useCreateCylinderType } from "../../queries/cylinderTypes/cylinderTypes.queries";
 
 function AddCylinderType() {
   const navigate = useNavigate();
   const [isActive, setIsActive] = useState(true);
+  const toast = useToast();
+
+  const [typeName, setTypeName] = useState("");
+  const [category, setCategory] = useState("");
+  const [capacityKg, setCapacityKg] = useState("");
+  const [tareWeightKg, setTareWeightKg] = useState("");
+  const [colorCode, setColorCode] = useState("");
+  const [sellingPrice, setSellingPrice] = useState("");
+  const [purchasePrice, setPurchasePrice] = useState("");
+  const [refillPrice, setRefillPrice] = useState("");
+  const [securityDeposit, setSecurityDeposit] = useState("");
+  const [description, setDescription] = useState("");
+  const [valveType, setValveType] = useState("");
+  const [material, setMaterial] = useState("");
+  const [safetyCert, setSafetyCert] = useState("");
+
+  const createMutation = useCreateCylinderType();
+
+
+     const handleSubmit = async (e) => {
+       e.preventDefault();
+
+       try {
+       const payload = {
+         typeName,
+         category,
+         capacityKg: parseFloat(capacityKg) || 0,
+         tareWeightKg: parseFloat(tareWeightKg) || 0,
+         colorCode,
+         isActive,
+         sellingPricePerCylinder: parseFloat(sellingPrice) || 0,
+         purchasePricePerCylinder: parseFloat(purchasePrice) || 0,
+         refillPricePerCylinder: parseFloat(refillPrice) || 0,
+         securityDeposit: parseFloat(securityDeposit) || 0,
+         description,
+         valveType,
+         material,
+         safetyCertificationNumber: safetyCert,
+       };
+
+         await createMutation.mutateAsync(payload);
+          toast.success("Cylinder type created successfully.");
+          navigate("/cylinder-types");
+       } catch (error) {
+         toast.error(
+           error.response?.data?.message ||
+             "Failed to create Cylinder type. Please try again.",
+         );
+       }
+     };
+
 
   return (
     <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
@@ -26,7 +79,9 @@ function AddCylinderType() {
             Cylinder Types
           </span>{" "}
           <span className="px-1 text-slate-400">/</span>{" "}
-          <span className="font-semibold text-slate-600">Add Cylinder Type</span>
+          <span className="font-semibold text-slate-600">
+            Add Cylinder Type
+          </span>
         </p>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">
           Add Cylinder Type
@@ -39,7 +94,6 @@ function AddCylinderType() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column (lg:col-span-2) */}
         <div className="lg:col-span-2 space-y-6">
-          
           {/* Card 1: Cylinder Specification */}
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
             <div className="border-b border-slate-200 p-4">
@@ -67,6 +121,8 @@ function AddCylinderType() {
                 <input
                   type="text"
                   placeholder="e.g. Commercial LPG 11KG"
+                  value={typeName}
+                  onChange={(e) => setTypeName(e.target.value)}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
@@ -78,9 +134,13 @@ function AddCylinderType() {
                 <div className="relative">
                   <select
                     defaultValue=""
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
                     className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   >
-                    <option value="" disabled>Select Category</option>
+                    <option value="" disabled>
+                      Select Category
+                    </option>
                     <option value="Commercial">Commercial</option>
                     <option value="Domestic">Domestic</option>
                     <option value="Industrial">Industrial</option>
@@ -94,8 +154,10 @@ function AddCylinderType() {
                   Capacity (KG) <span className="text-rose-500">*</span>
                 </label>
                 <input
-                  type="text"
+                  type="number"
                   placeholder="e.g. 11.0"
+                  value={capacityKg}
+                  onChange={(e) => setCapacityKg(e.target.value)}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
@@ -107,6 +169,8 @@ function AddCylinderType() {
                 <input
                   type="text"
                   placeholder="e.g. 8.5"
+                  value={tareWeightKg}
+                  onChange={(e) => setTareWeightKg(e.target.value)}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
@@ -118,9 +182,13 @@ function AddCylinderType() {
                 <div className="relative">
                   <select
                     defaultValue=""
+                    value={colorCode}
+                    onChange={(e) => setColorCode(e.target.value)}
                     className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   >
-                    <option value="" disabled>Select Color Identification</option>
+                    <option value="" disabled>
+                      Select Color Identification
+                    </option>
                     <option value="Red">Red</option>
                     <option value="Blue">Blue</option>
                     <option value="Green">Green</option>
@@ -129,7 +197,9 @@ function AddCylinderType() {
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
-                <p className="mt-1.5 text-xs text-slate-400">Color identification for cylinder body status/brand</p>
+                <p className="mt-1.5 text-xs text-slate-400">
+                  Color identification for cylinder body status/brand
+                </p>
               </div>
 
               <div className="md:col-span-2 mt-2">
@@ -137,16 +207,30 @@ function AddCylinderType() {
                   Status
                 </label>
                 <div className="flex items-center gap-3">
-                  <Switch
+                  {/* <Switch
                     isSelected={isActive}
                     onValueChange={setIsActive}
                     classNames={{
                       wrapper: isActive ? "bg-[#008951]" : "bg-slate-200",
                     }}
                     size="sm"
-                  />
-                  <span className={`text-sm font-semibold ${isActive ? "text-[#008951]" : "text-slate-500"}`}>
-                    Active Type
+                  /> */}
+                  <button
+                    type="button"
+                    onClick={() => setIsActive(!isActive)}
+                    className={`relative inline-flex h-6 w-11 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isActive ? "bg-[#10b981]" : "bg-slate-200"}`}
+                    role="switch"
+                    aria-checked={isActive}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isActive ? "translate-x-5" : "translate-x-0"}`}
+                    />
+                  </button>
+                  <span
+                    className={`text-sm font-semibold ${isActive ? "text-[#008951]" : "text-error"}`}
+                  >
+                    {isActive ? "Active Type" : "InActive Type"}
                   </span>
                 </div>
               </div>
@@ -171,10 +255,12 @@ function AddCylinderType() {
                 <input
                   type="text"
                   placeholder="0.00"
+                  value={sellingPrice}
+                  onChange={(e) => setSellingPrice(e.target.value)}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Purchase Price (Rs.)
@@ -182,6 +268,8 @@ function AddCylinderType() {
                 <input
                   type="text"
                   placeholder="0.00"
+                  value={purchasePrice}
+                  onChange={(e) => setPurchasePrice(e.target.value)}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
@@ -193,6 +281,8 @@ function AddCylinderType() {
                 <input
                   type="text"
                   placeholder="0.00"
+                  value={refillPrice}
+                  onChange={(e) => setRefillPrice(e.target.value)}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
@@ -204,13 +294,15 @@ function AddCylinderType() {
                 <input
                   type="text"
                   placeholder="0.00"
+                  value={securityDeposit}
+                  onChange={(e) => setSecurityDeposit(e.target.value)}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
             </div>
           </div>
         </div>
-        
+
         {/* Card 3: Additional Details */}
         <div className="lg:col-span-3 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
           <div className="border-b border-slate-200 p-4">
@@ -227,9 +319,11 @@ function AddCylinderType() {
                 rows="2"
                 placeholder="Enter cylinder maintenance rules, storage details, or descriptive notes here..."
                 className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
               />
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
@@ -238,13 +332,23 @@ function AddCylinderType() {
                 <div className="relative">
                   <select
                     defaultValue=""
+                    value={valveType}
+                    onChange={(e) => setValveType(e.target.value)}
                     className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   >
-                    <option value="" disabled>Select Valve Type</option>
-                    <option value="Compact Valve (20mm)">Compact Valve (20mm)</option>
-                    <option value="Jumbo Valve (22mm)">Jumbo Valve (22mm)</option>
+                    <option value="" disabled>
+                      Select Valve Type
+                    </option>
+                    <option value="Compact Valve (20mm)">
+                      Compact Valve (20mm)
+                    </option>
+                    <option value="Jumbo Valve (22mm)">
+                      Jumbo Valve (22mm)
+                    </option>
                     <option value="Threaded Valve">Threaded Valve</option>
-                    <option value="Standard POL Valve">Standard POL Valve</option>
+                    <option value="Standard POL Valve">
+                      Standard POL Valve
+                    </option>
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
@@ -256,10 +360,16 @@ function AddCylinderType() {
                 <div className="relative">
                   <select
                     defaultValue=""
+                    value={material}
+                    onChange={(e) => setMaterial(e.target.value)}
                     className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   >
-                    <option value="" disabled>Select Material</option>
-                    <option value="Steel (High Tensile)">Steel (High Tensile)</option>
+                    <option value="" disabled>
+                      Select Material
+                    </option>
+                    <option value="Steel (High Tensile)">
+                      Steel (High Tensile)
+                    </option>
                     <option value="Composite / Fiber">Composite / Fiber</option>
                     <option value="Aluminum Alloy">Aluminum Alloy</option>
                   </select>
@@ -273,13 +383,14 @@ function AddCylinderType() {
                 <input
                   type="text"
                   placeholder="e.g. ISO-9001 / DOT-4BA"
+                  value={safetyCert}
+                  onChange={(e) => setSafetyCert(e.target.value)}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
             </div>
           </div>
         </div>
-
       </div>
 
       {/* Bottom Action Bar */}
@@ -291,10 +402,12 @@ function AddCylinderType() {
           Cancel
         </button>
         <button
-          onClick={() => navigate("/cylinder-types")}
-          className="rounded-lg bg-[#008951] px-6 py-2 text-sm font-medium text-white transition hover:bg-[#007545]"
+          onClick={handleSubmit}
+          disabled={createMutation.isLoading}
+          className={`rounded-lg px-6 py-2 text-sm font-medium text-white transition ${createMutation.isLoading ? "bg-emerald-300 pointer-events-none" : "bg-[#008951] hover:bg-[#007545]"}`}
         >
-          Save Cylinder Type
+        
+          {createMutation.isPending ? "Saving..." : "Save Cylinder Type"}
         </button>
       </div>
     </main>

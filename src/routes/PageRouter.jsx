@@ -42,6 +42,7 @@ import CreateBatch from '../Pages/FillingBatches/CreateBatch';
 import MaintenanceAssets from '../Pages/MaintenanceAssets/MaintenanceAssets';
 import LogMaintenance from '../Pages/MaintenanceAssets/LogMaintenance';
 import UpdateSupplier from '../Pages/Suppliers/updateSupplier';
+import UpdateCylinderType from '../Pages/Cylinders/updateCylinderType';
 
 function PageRouter() {
   // Router container
@@ -74,6 +75,7 @@ function PageRouter() {
         <Route path="/suppliers/add" element={<AddSupplier />} />
         <Route path="/suppliers/edit/:id" element={<UpdateSupplier />} />
         <Route path="/cylinder-types" element={<CylinderTypes />} />
+        <Route path="/cylinders/edit-type/:id" element={<UpdateCylinderType />} />
         <Route path="/cylinders/add-type" element={<AddCylinderType />} />
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/inventory/add" element={<AddInventoryItem />} />

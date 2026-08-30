@@ -3,6 +3,7 @@ import { queryKeys } from './queryKeys'
 import { getNotifications } from '../api/notificationApi.js'
 import { getCustomers } from '../api/customers.api.js'
 import { getSuppliers } from '../api/suppliers.api.js'
+import { getCylinderTypes } from '../api/cylinderTypes.api.js'
 import { getUsers } from '../api/users.api.js'
 import { getAuditLogs } from '../api/auditLogs.api.js'
 import { getRoles } from '../api/roles.api.js'
@@ -55,6 +56,25 @@ export const prefetchDashboard = async queryClient => {
           limit: 10,
         })
     }),
+
+    // ========================================
+    // Cylinder Types
+    // ========================================
+
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.cylinderTypes.list({ search: "", isActive: undefined, page: 1, limit: 10 }),
+
+      queryFn: () =>
+        getCylinderTypes({
+          search: "",
+          isActive: undefined,
+          page: 1,
+          limit: 10,
+        })
+    }),
+
+
+    
 
     // ========================================
     // Users

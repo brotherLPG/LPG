@@ -82,4 +82,17 @@ export const queryKeys = {
     detail: id => ['roles', 'detail', id],
   },
 
+  // =========================
+  // Cylinder Types
+  // =========================
+  cylinderTypes: {
+    all: ['cylinder-types'],
+
+    lists: () => ['cylinder-types', 'list'],
+
+    list: (params) => ['cylinder-types', 'list', params],
+
+    detail: id => ['cylinder-types', 'detail', id]
+  },
+
 }

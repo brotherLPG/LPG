@@ -1,0 +1,263 @@
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ChevronDown } from "lucide-react";
+import { useToast } from "../../utils/GlobalToast";
+import { useCylinderTypeById, useUpdateCylinderType } from "../../queries/cylinderTypes/cylinderTypes.queries";
+
+function UpdateCylinderType() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const toast = useToast();
+
+  const { data, isLoading: isFetching } = useCylinderTypeById(id);
+  const updateMutation = useUpdateCylinderType();
+
+  const [typeName, setTypeName] = useState("");
+  const [category, setCategory] = useState("");
+  const [capacityKg, setCapacityKg] = useState("");
+  const [tareWeightKg, setTareWeightKg] = useState("");
+  const [colorCode, setColorCode] = useState("");
+  const [isActive, setIsActive] = useState(true);
+  const [sellingPrice, setSellingPrice] = useState("");
+  const [purchasePrice, setPurchasePrice] = useState("");
+  const [refillPrice, setRefillPrice] = useState("");
+  const [securityDeposit, setSecurityDeposit] = useState("");
+  const [description, setDescription] = useState("");
+  const [valveType, setValveType] = useState("");
+  const [material, setMaterial] = useState("");
+  const [safetyCert, setSafetyCert] = useState("");
+
+  useEffect(() => {
+    if (data?.data) {
+      const s = data.data;
+      setTypeName(s.typeName || "");
+      setCategory(s.category || "");
+      setCapacityKg(s.capacityKg ?? "");
+      setTareWeightKg(s.tareWeightKg ?? "");
+      setColorCode(s.colorCode || "");
+      setIsActive(typeof s.isActive === "boolean" ? s.isActive : true);
+      setSellingPrice(s.sellingPricePerCylinder ?? "");
+      setPurchasePrice(s.purchasePricePerCylinder ?? "");
+      setRefillPrice(s.refillPricePerCylinder ?? "");
+      setSecurityDeposit(s.securityDeposit ?? "");
+      setDescription(s.description || "");
+      setValveType(s.valveType || "");
+      setMaterial(s.material || "");
+      setSafetyCert(s.safetyCertificationNumber || "");
+    }
+  }, [data]);
+
+  const handleSave = async () => {
+    const payload = {
+      typeName,
+      category,
+      capacityKg: parseFloat(capacityKg) || 0,
+      tareWeightKg: parseFloat(tareWeightKg) || 0,
+      colorCode,
+      isActive,
+      sellingPricePerCylinder: parseFloat(sellingPrice) || 0,
+      purchasePricePerCylinder: parseFloat(purchasePrice) || 0,
+      refillPricePerCylinder: parseFloat(refillPrice) || 0,
+      securityDeposit: parseFloat(securityDeposit) || 0,
+      description,
+      valveType,
+      material,
+      safetyCertificationNumber: safetyCert,
+    };
+
+    try {
+      await updateMutation.mutateAsync({ id, data: payload });
+      toast.success("Cylinder type updated successfully.");
+      navigate("/cylinder-types");
+    } catch (err) {
+      toast.error("Failed to update cylinder type. Please try again.");
+    }
+  };
+
+  if (isFetching) {
+    return (
+      <div className="p-8 flex items-center justify-center">
+        <svg className="animate-spin h-6 w-6 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </div>
+    );
+  }
+
+  return (
+    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+      <div className="mb-6">
+        <p className="text-xs mb-2">
+          <span
+            onClick={() => navigate("/dashboard")}
+            className="cursor-pointer font-medium text-slate-400 hover:text-slate-600 transition-colors duration-200"
+          >
+            Dashboard
+          </span>{" "}
+          <span className="px-1 text-slate-400">/</span>{" "}
+          <span
+            onClick={() => navigate("/cylinder-types")}
+            className="cursor-pointer font-medium text-slate-400 hover:text-slate-600 transition-colors duration-200"
+          >
+            Cylinder Types
+          </span>{" "}
+          <span className="px-1 text-slate-400">/</span>{" "}
+          <span className="font-semibold text-slate-600">Edit Cylinder Type</span>
+        </p>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Edit Cylinder Type</h1>
+        <p className="mt-1 text-sm text-slate-500">Update cylinder specification</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 p-4">
+              <h2 className="text-sm font-semibold text-slate-800">Cylinder Specification</h2>
+            </div>
+            <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Type Code</label>
+                <input type="text" disabled value={data?.data?.typeCode || ""} className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Type Name <span className="text-rose-500">*</span></label>
+                <input type="text" placeholder="e.g. Commercial LPG 11KG" value={typeName} onChange={(e) => setTypeName(e.target.value)} className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Category <span className="text-rose-500">*</span></label>
+                <div className="relative">
+                  <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100">
+                    <option value="" disabled>Select Category</option>
+                    <option value="Commercial">Commercial</option>
+                    <option value="Domestic">Domestic</option>
+                    <option value="Industrial">Industrial</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Capacity (KG) <span className="text-rose-500">*</span></label>
+                <input type="text" placeholder="e.g. 11.0" value={capacityKg} onChange={(e) => setCapacityKg(e.target.value)} className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Tare Weight (KG) <span className="text-rose-500">*</span></label>
+                <input type="text" placeholder="e.g. 8.5" value={tareWeightKg} onChange={(e) => setTareWeightKg(e.target.value)} className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Color Code</label>
+                <div className="relative">
+                  <select value={colorCode} onChange={(e) => setColorCode(e.target.value)} className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100">
+                    <option value="" disabled>Select Color Identification</option>
+                    <option value="Red">Red</option>
+                    <option value="Blue">Blue</option>
+                    <option value="Green">Green</option>
+                    <option value="Silver / Gray">Silver / Gray</option>
+                    <option value="Yellow">Yellow</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                </div>
+                <p className="mt-1.5 text-xs text-slate-400">Color identification for cylinder body status/brand</p>
+              </div>
+
+              <div className="md:col-span-2 mt-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">Status</label>
+                <div className="flex items-center gap-3">
+                  <button type="button" onClick={() => setIsActive(!isActive)} className={`relative inline-flex h-6 w-11 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isActive ? "bg-[#10b981]" : "bg-slate-200"}`} role="switch" aria-checked={isActive}>
+                    <span aria-hidden="true" className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isActive ? "translate-x-5" : "translate-x-0"}`} />
+                  </button>
+                  <span className={`text-sm font-semibold ${isActive ? "text-[#008951]" : "text-error"}`}>{isActive ? "Active Type" : "InActive Type"}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-1">
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden h-full">
+            <div className="border-b border-slate-200 p-4">
+              <h2 className="text-sm font-semibold text-slate-800">Pricing & Rates</h2>
+            </div>
+            <div className="p-5 space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Selling Price (Rs.) <span className="text-rose-500">*</span></label>
+                <input type="text" placeholder="0.00" value={sellingPrice} onChange={(e) => setSellingPrice(e.target.value)} className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Purchase Price (Rs.)</label>
+                <input type="text" placeholder="0.00" value={purchasePrice} onChange={(e) => setPurchasePrice(e.target.value)} className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Refill Price (Rs.)</label>
+                <input type="text" placeholder="0.00" value={refillPrice} onChange={(e) => setRefillPrice(e.target.value)} className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Security Deposit (Rs.)</label>
+                <input type="text" placeholder="0.00" value={securityDeposit} onChange={(e) => setSecurityDeposit(e.target.value)} className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-3 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+          <div className="border-b border-slate-200 p-4">
+            <h2 className="text-sm font-semibold text-slate-800">Additional Details</h2>
+          </div>
+          <div className="p-5 space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Description / Notes</label>
+              <textarea rows="2" placeholder="Enter cylinder maintenance rules, storage details, or descriptive notes here..." className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none" value={description} onChange={(e) => setDescription(e.target.value)} />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Valve Type</label>
+                <div className="relative">
+                  <select value={valveType} onChange={(e) => setValveType(e.target.value)} className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100">
+                    <option value="" disabled>Select Valve Type</option>
+                    <option value="Compact Valve (20mm)">Compact Valve (20mm)</option>
+                    <option value="Jumbo Valve (22mm)">Jumbo Valve (22mm)</option>
+                    <option value="Threaded Valve">Threaded Valve</option>
+                    <option value="Standard POL Valve">Standard POL Valve</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Material</label>
+                <div className="relative">
+                  <select value={material} onChange={(e) => setMaterial(e.target.value)} className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100">
+                    <option value="" disabled>Select Material</option>
+                    <option value="Steel (High Tensile)">Steel (High Tensile)</option>
+                    <option value="Composite / Fiber">Composite / Fiber</option>
+                    <option value="Aluminum Alloy">Aluminum Alloy</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Safety Certification Number</label>
+                <input type="text" placeholder="e.g. ISO-9001 / DOT-4BA" value={safetyCert} onChange={(e) => setSafetyCert(e.target.value)} className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <button onClick={() => navigate("/cylinder-types")} className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancel</button>
+        <button onClick={handleSave} disabled={updateMutation.isLoading} className={`rounded-lg px-6 py-2 text-sm font-medium text-white transition ${updateMutation.isLoading ? "bg-emerald-300 pointer-events-none" : "bg-[#008951] hover:bg-[#007545]"}`}>
+         {updateMutation.isPending ? "Update Saving..." : " Update Cylinder Type"}
+        </button>
+      </div>
+    </main>
+  );
+}
+
+export default UpdateCylinderType;
