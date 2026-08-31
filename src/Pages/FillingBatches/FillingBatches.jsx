@@ -4,49 +4,10 @@ import { CirclePlus, Eye, Edit3, ChevronDown } from "lucide-react";
 import GlobalTable from "../../utils/GlobalTable";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
-
-const initialBatches = [
-  {
-    _id: "FB-2026-0234",
-    batchNo: "FB-2026-0234",
-    tank: "TNK-001 — Main Bulk",
-    cylinderType: "11 KG Domestic Cylinder",
-    quantity: 250,
-    operator: "Tariq Mahmood",
-    date: "2026-05-18T00:00:00.000Z",
-    status: "Completed",
-  },
-  {
-    _id: "FB-2026-0235",
-    batchNo: "FB-2026-0235",
-    tank: "TNK-002 — Secondary Bulk",
-    cylinderType: "22 KG Commercial Cylinder",
-    quantity: 180,
-    operator: "Ali Raza",
-    date: "2026-05-19T00:00:00.000Z",
-    status: "In Progress",
-  },
-  {
-    _id: "FB-2026-0236",
-    batchNo: "FB-2026-0236",
-    tank: "TNK-001 — Main Bulk",
-    cylinderType: "11 KG Domestic Cylinder",
-    quantity: 310,
-    operator: "Naseer Khan",
-    date: "2026-05-20T00:00:00.000Z",
-    status: "Pending",
-  },
-  {
-    _id: "FB-2026-0237",
-    batchNo: "FB-2026-0237",
-    tank: "TNK-003 — Reserve Tank",
-    cylinderType: "15 KG Family Cylinder",
-    quantity: 210,
-    operator: "Tariq Mahmood",
-    date: "2026-05-21T00:00:00.000Z",
-    status: "Completed",
-  },
-];
+import {
+  useDeleteFillingBatch,
+  useFillingBatches,
+} from "../../queries/fillingBatches/fillingBatches.queries";
 
 function FillingBatches() {
   const navigate = useNavigate();
@@ -58,28 +19,43 @@ function FillingBatches() {
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
 
+  const { data: batchesData, isLoading, error } = useFillingBatches({
+    search: query,
+    startDate: selectedDate || undefined,
+    endDate: selectedDate || undefined,
+    page: currentPage,
+    limit: 10,
+  });
+
+  const deleteMutation = useDeleteFillingBatch();
+
+  const apiBatches = batchesData?.data?.items || [];
+  const pagination = batchesData?.data?.pagination || { total: 0, page: 1, limit: 10, totalPages: 1 };
+
   const mappedBatches = useMemo(
     () =>
-      initialBatches.map((batch) => {
-        const parsedDate = batch.date ? new Date(batch.date) : null;
+      apiBatches.map((batch) => {
+        const parsedDate = batch.fillingDate ? new Date(batch.fillingDate) : null;
 
         return {
           _id: batch._id,
-          batchNo: batch.batchNo,
-          tank: batch.tank,
-          cylinderType: batch.cylinderType,
-          quantity: batch.quantity,
-          operator: batch.operator,
+          batchNo: batch.batchNumber,
+          tank: batch.storageTankId?.tankName || batch.storageTankId?.tankCode || "-",
+          cylinderType: batch.cylinderTypeId?.typeName || batch.cylinderTypeId?.typeCode || "-",
+          quantity: batch.cylinderCount,
+          actualLpgUsedKg: batch.actualLpgUsedKg,
+          targetFillWeightKg: batch.targetFillWeightKg,
+          operator: batch.operatorEmployeeId?.fullName || batch.operatorEmployeeId?.employeeCode || "-",
           date: parsedDate
             ? `${parsedDate.getDate().toString().padStart(2, "0")}/${(parsedDate.getMonth() + 1)
                 .toString()
                 .padStart(2, "0")}/${parsedDate.getFullYear()}`
             : "",
           receivedDate: parsedDate ? parsedDate.toISOString().slice(0, 10) : "",
-          status: batch.status,
+          status: batch.batchStatus || "Completed",
         };
       }),
-    []
+    [apiBatches]
   );
 
   const filteredBatches = useMemo(() => {
@@ -94,18 +70,18 @@ function FillingBatches() {
   }, [mappedBatches, query, status, selectedDate]);
 
   const summaryStats = useMemo(() => {
-    const totalQuantity = mappedBatches.reduce((sum, item) => sum + (item.quantity || 0), 0);
+    const totalQuantity = mappedBatches.reduce((sum, item) => sum + (item.actualLpgUsedKg || 0), 0);
     const completedCount = mappedBatches.filter((item) => item.status === "Completed").length;
     const inProgressCount = mappedBatches.filter((item) => item.status === "In Progress").length;
     const pendingCount = mappedBatches.filter((item) => item.status === "Pending").length;
 
     return {
-      totalBatches: mappedBatches.length,
+      totalBatches: pagination.total || mappedBatches.length,
       totalQuantity,
       completedCount,
       pendingCount: pendingCount + inProgressCount,
     };
-  }, [mappedBatches]);
+  }, [mappedBatches, pagination.total]);
 
   const batchColumns = [
     {
@@ -132,10 +108,17 @@ function FillingBatches() {
     },
     {
       key: "quantity",
-      label: "Quantity",
+      label: "Qty",
       className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
-      renderCell: (item) => `${item.quantity.toLocaleString()} KG`,
+      renderCell: (item) => `${item.quantity.toLocaleString()} Cyl`,
+    },
+    {
+      key: "actualLpgUsedKg",
+      label: "LPG Used",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
+      renderCell: (item) => `${item.actualLpgUsedKg?.toLocaleString() || 0} KG`,
     },
     {
       key: "operator",
@@ -188,7 +171,7 @@ function FillingBatches() {
           <button
             type="button"
             aria-label={`Edit ${item.batchNo}`}
-            onClick={() => navigate(`/filling-batches/create`)}
+            onClick={() => navigate(`/filling-batches/edit/${item._id}`)}
             className="text-[#008951] hover:text-emerald-800 transition-colors"
           >
             <Edit3 className="h-4 w-4" strokeWidth={2.5} />
@@ -313,19 +296,32 @@ function FillingBatches() {
         </div>
 
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <GlobalTable
-            columns={batchColumns}
-            data={filteredBatches}
-            ariaLabel="Filling Batches Table"
-            className=""
-            rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
-            emptyContent="No batches match your search."
-            pagination={true}
-            rowsPerPage={10}
-            totalCount={filteredBatches.length}
-            page={currentPage}
-            onPageChange={(p) => setCurrentPage(p)}
-          />
+          {isLoading ? (
+            <div className="flex items-center justify-center p-8">
+              <svg className="animate-spin h-6 w-6 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+          ) : error ? (
+            <div className="flex items-center justify-center p-8">
+              <div className="text-sm text-red-500">Error loading filling batches. Please try again.</div>
+            </div>
+          ) : (
+            <GlobalTable
+              columns={batchColumns}
+              data={filteredBatches}
+              ariaLabel="Filling Batches Table"
+              className=""
+              rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+              emptyContent="No batches match your search."
+              pagination={true}
+              rowsPerPage={pagination.limit || 10}
+              totalCount={pagination.total}
+              page={currentPage}
+              onPageChange={(p) => setCurrentPage(p)}
+            />
+          )}
         </div>
 
         <DeleteConfirmationModal
@@ -334,6 +330,7 @@ function FillingBatches() {
           onConfirm={async () => {
             if (deleteModal.item) {
               try {
+                await deleteMutation.mutateAsync(deleteModal.item._id);
                 toast.success(`${deleteModal.item.batchNo} deleted successfully`);
                 setDeleteModal({ isOpen: false, item: null });
               } catch (err) {
@@ -344,7 +341,7 @@ function FillingBatches() {
           title="Delete Filling Batch"
           message="Are you sure you want to delete this batch? This action cannot be undone."
           itemName={deleteModal.item ? `${deleteModal.item.batchNo} - ${deleteModal.item.tank}` : ""}
-          isDeleting={false}
+          isDeleting={deleteMutation.isPending}
         />
       </section>
     </main>

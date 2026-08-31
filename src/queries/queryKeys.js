@@ -108,4 +108,17 @@ export const queryKeys = {
     detail: id => ['lpg-receipts', 'detail', id]
   },
 
+  // =========================
+  // Filling Batches
+  // =========================
+  fillingBatches: {
+    all: ['filling-batches'],
+
+    lists: () => ['filling-batches', 'list'],
+
+    list: (params) => ['filling-batches', 'list', params],
+
+    detail: id => ['filling-batches', 'detail', id],
+  },
+
 }

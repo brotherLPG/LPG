@@ -8,6 +8,7 @@ import { getLpgReceipts } from '../api/lpgReceipts.api.js'
 import { getUsers } from '../api/users.api.js'
 import { getAuditLogs } from '../api/auditLogs.api.js'
 import { getRoles } from '../api/roles.api.js'
+import { getFillingBatches } from '../api/fillingBatches.api.js'
 
 export const prefetchDashboard = async queryClient => {
   await Promise.all([
@@ -128,6 +129,21 @@ export const prefetchDashboard = async queryClient => {
 
       queryFn: () =>
         getRoles({ search: "", page: 1, limit: 10 })
+    }),
+
+    // ========================================
+    // Filling Batches
+    // ========================================
+
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.fillingBatches.list({ search: "", page: 1, limit: 10 }),
+
+      queryFn: () =>
+        getFillingBatches({
+          search: "",
+          page: 1,
+          limit: 10,
+        })
     }),
   ])
 }

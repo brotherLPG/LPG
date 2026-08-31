@@ -98,6 +98,7 @@ function PageRouter() {
         <Route path="/audit-logs" element={<AuditLogs />} />
         <Route path="/filling-batches" element={<FillingBatches />} />
         <Route path="/filling-batches/create" element={<CreateBatch />} />
+        <Route path="/filling-batches/edit/:id" element={<CreateBatch />} />
         <Route path="/maintenance-assets" element={<MaintenanceAssets />} />
         <Route path="/maintenance-assets/log" element={<LogMaintenance />} />
       </Routes>
