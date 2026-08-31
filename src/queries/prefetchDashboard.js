@@ -4,6 +4,7 @@ import { getNotifications } from '../api/notificationApi.js'
 import { getCustomers } from '../api/customers.api.js'
 import { getSuppliers } from '../api/suppliers.api.js'
 import { getCylinderTypes } from '../api/cylinderTypes.api.js'
+import { getLpgReceipts } from '../api/lpgReceipts.api.js'
 import { getUsers } from '../api/users.api.js'
 import { getAuditLogs } from '../api/auditLogs.api.js'
 import { getRoles } from '../api/roles.api.js'
@@ -73,8 +74,20 @@ export const prefetchDashboard = async queryClient => {
         })
     }),
 
+    // ========================================
+    // LPG Receipts
+    // ========================================
 
-    
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.lpgReceipts.list({ search: "", page: 1, limit: 10 }),
+
+      queryFn: () =>
+        getLpgReceipts({
+          search: "",
+          page: 1,
+          limit: 10,
+        })
+    }),
 
     // ========================================
     // Users

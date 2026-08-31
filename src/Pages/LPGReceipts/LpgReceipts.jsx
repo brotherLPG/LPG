@@ -1,41 +1,76 @@
 import { CirclePlus, Eye, Edit3, ChevronDown } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalTable from "../../utils/GlobalTable";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import { useToast } from "../../utils/GlobalToast";
+import { useLpgReceipts, useDeleteLpgReceipt } from "../../queries/lpgReceipts/lpgReceipts.queries";
+import { useSuppliers } from "../../queries/suppliers/suppliers.queries";
 
-const initialReceipts = [
-  { receiptNo: "REC-001", supplier: "Pakistan Petroleum Ltd.", date: "2025-05-15", truckReg: "LEA-4521", quantity: 45000, rate: 285, totalCost: 12825000, status: "Confirmed" },
-  { receiptNo: "REC-002", supplier: "Sui Northern Gas Pipelines", date: "2025-05-18", truckReg: "LHR-8832", quantity: 38000, rate: 290, totalCost: 11020000, status: "Confirmed" },
-  { receiptNo: "REC-003", supplier: "Attock Refinery Ltd.", date: "2025-05-20", truckReg: "ISB-2991", quantity: 52000, rate: 275, totalCost: 14300000, status: "Draft" },
-  { receiptNo: "REC-004", supplier: "Byco Petroleum Pakistan", date: "2025-05-22", truckReg: "RWP-5678", quantity: 41000, rate: 280, totalCost: 11480000, status: "Confirmed" },
-  { receiptNo: "REC-005", supplier: "Parco LPG Division", date: "2025-05-25", truckReg: "KHI-1234", quantity: 48000, rate: 282, totalCost: 13536000, status: "Pending" },
-  { receiptNo: "REC-006", supplier: "National Refinery Limited", date: "2025-05-28", truckReg: "MUL-7890", quantity: 36000, rate: 288, totalCost: 10368000, status: "Confirmed" },
-  { receiptNo: "REC-007", supplier: "Hi-Q LPG Pakistan", date: "2025-05-30", truckReg: "FSD-3456", quantity: 25000, rate: 295, totalCost: 7375000, status: "Pending" },
-];
+
+const initialReceipts = [];
 
 function LpgReceipts() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [supplier, setSupplier] = useState("All");
+  const [supplierOptions, setSupplierOptions] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
 
-  const filteredReceipts = useMemo(() => initialReceipts.filter((receipt) => {
+  const toast = useToast();
+
+  const { data: receiptsData, isLoading, error } = useLpgReceipts({
+    search: query,
+    page: currentPage,
+    limit: 10,
+  });
+
+  const deleteMutation = useDeleteLpgReceipt();
+
+  const apiReceipts = receiptsData?.data?.items || [];
+  const pagination = receiptsData?.data?.pagination || { total: 0, page: 1, limit: 10, totalPages: 1 };
+  const { data: suppliersData } = useSuppliers({ search: "", isActive: undefined, page: 1, limit: 100 });
+  const suppliersList = suppliersData?.data?.items || [];
+
+  useEffect(() => {
+    setSupplierOptions([
+      { label: 'All', value: 'All' },
+      ...suppliersList.map((s) => ({ label: s.supplierName || s.supplierCode || s.name, value: s.supplierName || s.supplierCode || s.name }))
+    ]);
+  }, [suppliersList]);
+
+  const mappedReceipts = useMemo(() => apiReceipts.map((r) => ({
+    _id: r._id,
+    receiptNo: r.receiptNumber,
+    supplier: r.supplierId?.supplierName || "",
+    date: r.receivedAt ? new Date(r.receivedAt).toLocaleDateString() : "",
+    truckReg: r.truckRegistrationNumber,
+    quantity: r.receivedQuantityKg,
+    rate: r.purchaseRatePerKg,
+    totalCost: r.totalPurchaseAmount,
+    status: r.status || 'Confirmed',
+  })), [apiReceipts]);
+
+  const filteredReceipts = useMemo(() => mappedReceipts.filter((receipt) => {
     const matchesQuery = `${receipt.receiptNo} ${receipt.supplier} ${receipt.truckReg}`.toLowerCase().includes(query.toLowerCase());
     const matchesStatus = status === "All" || receipt.status === status;
     const matchesSupplier = supplier === "All" || receipt.supplier === supplier;
     return matchesQuery && matchesStatus && matchesSupplier;
-  }), [query, status, supplier]);
+  }), [query, status, supplier, mappedReceipts]);
 
   // Calculate summary statistics
   const summaryStats = useMemo(() => {
-    const totalQuantity = initialReceipts.reduce((sum, receipt) => sum + receipt.quantity, 0);
-    const totalCost = initialReceipts.reduce((sum, receipt) => sum + receipt.totalCost, 0);
-    const confirmedCount = initialReceipts.filter(r => r.status === "Confirmed").length;
-    const pendingCount = initialReceipts.filter(r => r.status === "Pending").length;
-    const draftCount = initialReceipts.filter(r => r.status === "Draft").length;
+    const source = mappedReceipts.length ? mappedReceipts : initialReceipts;
+    const totalQuantity = source.reduce((sum, receipt) => sum + (receipt.quantity || 0), 0);
+    const totalCost = source.reduce((sum, receipt) => sum + (receipt.totalCost || 0), 0);
+    const confirmedCount = source.filter(r => r.status === "Confirmed").length;
+    const pendingCount = source.filter(r => r.status === "Pending").length;
+    const draftCount = source.filter(r => r.status === "Draft").length;
 
     return {
-      thisMonthReceipts: initialReceipts.length,
+      thisMonthReceipts: source.length,
       totalQuantity,
       totalCost,
       pendingReceipts: pendingCount + draftCount,
@@ -135,9 +170,18 @@ function LpgReceipts() {
           <button
             type="button"
             aria-label={`Edit ${item.receiptNo}`}
+            onClick={() => navigate(`/lpg-receipts/edit/${item._id}`)}
             className="text-[#008951] hover:text-emerald-800 transition-colors"
           >
             <Edit3 className="h-4 w-4" strokeWidth={2.5} />
+          </button>
+          <button
+            type="button"
+            aria-label={`Delete ${item.receiptNo}`}
+            onClick={() => setDeleteModal({ isOpen: true, item })}
+            className="text-rose-600 hover:text-rose-800 transition-colors"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M8 6v14a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
           </button>
         </div>
       ),
@@ -279,24 +323,9 @@ function LpgReceipts() {
                   onChange={(event) => setSupplier(event.target.value)}
                   className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
                 >
-                  <option value="All">Supplier: All</option>
-                  <option value="Pakistan Petroleum Ltd.">
-                    Pakistan Petroleum Ltd.
-                  </option>
-                  <option value="Sui Northern Gas Pipelines">
-                    Sui Northern Gas Pipelines
-                  </option>
-                  <option value="Attock Refinery Ltd.">
-                    Attock Refinery Ltd.
-                  </option>
-                  <option value="Byco Petroleum Pakistan">
-                    Byco Petroleum Pakistan
-                  </option>
-                  <option value="Parco LPG Division">Parco LPG Division</option>
-                  <option value="National Refinery Limited">
-                    National Refinery Limited
-                  </option>
-                  <option value="Hi-Q LPG Pakistan">Hi-Q LPG Pakistan</option>
+                  {supplierOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
               </div>
@@ -306,17 +335,54 @@ function LpgReceipts() {
 
         {/* Table */}
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <GlobalTable
-            columns={receiptColumns}
-            data={filteredReceipts}
-            ariaLabel="LPG Receipts Table"
-            className=""
-            rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
-            emptyContent="No receipts match your search."
-            pagination={true}
-            rowsPerPage={7}
-          />
+          {isLoading ? (
+            <div className="flex items-center justify-center p-8">
+              <svg className="animate-spin h-6 w-6 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+          ) : error ? (
+            <div className="flex items-center justify-center p-8">
+              <div className="text-sm text-red-500">Error loading receipts. Please try again.</div>
+            </div>
+          ) : (
+            <GlobalTable
+              columns={receiptColumns}
+              data={filteredReceipts}
+              ariaLabel="LPG Receipts Table"
+              className=""
+              rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+              emptyContent="No receipts match your search."
+              pagination={true}
+              rowsPerPage={pagination.limit || 10}
+              totalCount={pagination.total}
+              page={currentPage}
+              onPageChange={(p) => setCurrentPage(p)}
+            />
+          )}
+
         </div>
+
+        <DeleteConfirmationModal
+          isOpen={deleteModal.isOpen}
+          onClose={() => setDeleteModal({ isOpen: false, item: null })}
+          onConfirm={async () => {
+            if (deleteModal.item) {
+              try {
+                await deleteMutation.mutateAsync(deleteModal.item._id);
+                toast.success(`${deleteModal.item.receiptNo} deleted successfully`);
+                setDeleteModal({ isOpen: false, item: null });
+              } catch (err) {
+                toast.error('Failed to delete receipt. Please try again.');
+              }
+            }
+          }}
+          title="Delete LPG Receipt"
+          message="Are you sure you want to delete this LPG receipt? This action cannot be undone."
+          itemName={deleteModal.item ? `${deleteModal.item.receiptNo} - ${deleteModal.item.supplier}` : ""}
+          isDeleting={deleteMutation.isPending}
+        />
       </section>
     </main>
   );

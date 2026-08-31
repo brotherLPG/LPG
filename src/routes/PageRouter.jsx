@@ -43,6 +43,7 @@ import MaintenanceAssets from '../Pages/MaintenanceAssets/MaintenanceAssets';
 import LogMaintenance from '../Pages/MaintenanceAssets/LogMaintenance';
 import UpdateSupplier from '../Pages/Suppliers/updateSupplier';
 import UpdateCylinderType from '../Pages/Cylinders/updateCylinderType';
+import UpdateLpgReceipt from '../Pages/LPGReceipts/updateLpgReceipt';
 
 function PageRouter() {
   // Router container
@@ -75,12 +76,17 @@ function PageRouter() {
         <Route path="/suppliers/add" element={<AddSupplier />} />
         <Route path="/suppliers/edit/:id" element={<UpdateSupplier />} />
         <Route path="/cylinder-types" element={<CylinderTypes />} />
-        <Route path="/cylinders/edit-type/:id" element={<UpdateCylinderType />} />
         <Route path="/cylinders/add-type" element={<AddCylinderType />} />
+        <Route
+          path="/cylinders/edit-type/:id"
+          element={<UpdateCylinderType />}
+        />
+        <Route path="/storage-tanks" element={<StorageTanks />} />
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/inventory/add" element={<AddInventoryItem />} />
         <Route path="/lpg-receipts" element={<LpgReceipts />} />
         <Route path="/lpg-receipts/receive" element={<ReceiveLpg />} />
+        <Route path="/lpg-receipts/edit/:id" element={<UpdateLpgReceipt />} />
         <Route path="/employees" element={<Employees />} />
         <Route path="/employees/add" element={<AddEmployee />} />
         <Route path="/expenses" element={<Expenses />} />
@@ -88,7 +94,6 @@ function PageRouter() {
         <Route path="/payments" element={<Payments />} />
         <Route path="/payments/add" element={<AddPayment />} />
         <Route path="/audit-logs" element={<AuditLogs />} />
-        <Route path="/storage-tanks" element={<StorageTanks />} />
         <Route path="/filling-batches" element={<FillingBatches />} />
         <Route path="/filling-batches/create" element={<CreateBatch />} />
         <Route path="/maintenance-assets" element={<MaintenanceAssets />} />

@@ -95,4 +95,17 @@ export const queryKeys = {
     detail: id => ['cylinder-types', 'detail', id]
   },
 
+  // =========================
+  // LPG Receipts
+  // =========================
+  lpgReceipts: {
+    all: ['lpg-receipts'],
+
+    lists: () => ['lpg-receipts', 'list'],
+
+    list: (params) => ['lpg-receipts', 'list', params],
+
+    detail: id => ['lpg-receipts', 'detail', id]
+  },
+
 }
