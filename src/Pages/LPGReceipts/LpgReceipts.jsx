@@ -15,6 +15,7 @@ function LpgReceipts() {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [supplier, setSupplier] = useState("All");
+  const [selectedDate, setSelectedDate] = useState("");
   const [supplierOptions, setSupplierOptions] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
@@ -41,24 +42,32 @@ function LpgReceipts() {
     ]);
   }, [suppliersList]);
 
-  const mappedReceipts = useMemo(() => apiReceipts.map((r) => ({
-    _id: r._id,
-    receiptNo: r.receiptNumber,
-    supplier: r.supplierId?.supplierName || "",
-    date: r.receivedAt ? new Date(r.receivedAt).toLocaleDateString() : "",
-    truckReg: r.truckRegistrationNumber,
-    quantity: r.receivedQuantityKg,
-    rate: r.purchaseRatePerKg,
-    totalCost: r.totalPurchaseAmount,
-    status: r.status || 'Confirmed',
-  })), [apiReceipts]);
+  const mappedReceipts = useMemo(() => apiReceipts.map((r) => {
+    const receivedDate = r.receivedAt ? new Date(r.receivedAt) : null;
+
+    return {
+      _id: r._id,
+      receiptNo: r.receiptNumber,
+      supplier: r.supplierId?.supplierName || "",
+      date: receivedDate
+        ? `${receivedDate.getDate().toString().padStart(2, '0')}/${(receivedDate.getMonth() + 1).toString().padStart(2, '0')}/${receivedDate.getFullYear()}`
+        : "",
+      receivedDate: receivedDate ? receivedDate.toISOString().slice(0, 10) : "",
+      truckReg: r.truckRegistrationNumber,
+      quantity: r.receivedQuantityKg,
+      rate: r.purchaseRatePerKg,
+      totalCost: r.totalPurchaseAmount,
+      status: r.status || 'Confirmed',
+    };
+  }), [apiReceipts]);
 
   const filteredReceipts = useMemo(() => mappedReceipts.filter((receipt) => {
     const matchesQuery = `${receipt.receiptNo} ${receipt.supplier} ${receipt.truckReg}`.toLowerCase().includes(query.toLowerCase());
     const matchesStatus = status === "All" || receipt.status === status;
     const matchesSupplier = supplier === "All" || receipt.supplier === supplier;
-    return matchesQuery && matchesStatus && matchesSupplier;
-  }), [query, status, supplier, mappedReceipts]);
+    const matchesDate = !selectedDate || receipt.receivedDate === selectedDate;
+    return matchesQuery && matchesStatus && matchesSupplier && matchesDate;
+  }), [query, status, supplier, selectedDate, mappedReceipts]);
 
   // Calculate summary statistics
   const summaryStats = useMemo(() => {
@@ -104,6 +113,7 @@ function LpgReceipts() {
       label: "Date Received",
       className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
+      renderCell: (item) => item.date || "-",
     },
     {
       key: "truckReg",
@@ -300,10 +310,18 @@ function LpgReceipts() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 className="w-full rounded-md border border-slate-200 bg-slate-50/50 py-2.5 pl-8 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-500 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
-                placeholder="Search by receipt number, supplier, or date..."
+                placeholder="Search by receipt number, supplier, or truck..."
               />
             </label>
             <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative">
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(event) => setSelectedDate(event.target.value)}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-600 outline-none transition focus:border-[#008951] focus:ring-1 focus:ring-[#008951] sm:w-40 lg:w-44"
+                />
+              </div>
               <div className="relative">
                 <select
                   value={status}
