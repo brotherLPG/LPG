@@ -13,6 +13,7 @@ import AddSales from '../Pages/Sales/AddSales';
 import CreateReturn from '../Pages/Sales/CreateReturn';
 import Invoices from '../Pages/Invoices/Invoices';
 import Accounting from '../Pages/Accounting/Accounting';
+import AddAccount from '../Pages/Accounting/AddAccount';
 import AccountDetails from '../Pages/Accounting/AccountDetails';
 import Branches from '../Pages/Branches/Branches';
 import Notifications from '../Pages/Notifications/Notifications';
@@ -68,6 +69,7 @@ function PageRouter() {
         <Route path="/sales/return" element={<CreateReturn />} />
         <Route path="/invoices" element={<Invoices />} />
         <Route path="/accounting" element={<Accounting />} />
+        <Route path="/accounting/add" element={<AddAccount />} />
         <Route path="/accounting/details/:id" element={<AccountDetails />} />
         <Route path="/branches" element={<Branches />} />
         <Route path="/notifications" element={<Notifications />} />

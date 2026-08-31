@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Eye, ChevronDown } from "lucide-react";
+import { Search, Eye, ChevronDown, Plus } from "lucide-react";
 import GlobalTable from "../../utils/GlobalTable";
 import { accountRecords } from "./accountData";
 
@@ -127,6 +127,15 @@ function Accounting() {
             Track all company bank accounts and their live financial balances
           </p>
         </div>
+
+        <button
+          type="button"
+          onClick={() => navigate("/accounting/add")}
+          className="inline-flex items-center gap-2 rounded-lg bg-[#008951] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#007545]"
+        >
+          <Plus className="h-4 w-4" />
+          Add Account
+        </button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
