@@ -67,6 +67,11 @@ const Sidebar = () => {
     },
     {
       icon: DollarSign,
+      label: "Accounting",
+      path: "/accounting",
+    },
+    {
+      icon: DollarSign,
       label: "Sales",
       path: "/sales",
     },

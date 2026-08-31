@@ -1,115 +1,233 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { Calculator, TrendingUp, TrendingDown, Wallet, Search, ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Search, Eye, ChevronDown } from "lucide-react";
+import GlobalTable from "../../utils/GlobalTable";
+import { accountRecords } from "./accountData";
 
 function Accounting() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [categoryFilter, setCategoryFilter] = useState("All");
 
-  const transactions = [
-    { id: "TXN-001", type: "Credit", category: "Sales", description: "Cash sale - Ahmed Khan", amount: 12500, date: "2026-01-15", balance: 12500 },
-    { id: "TXN-002", type: "Debit", category: "Purchase", description: "Gas purchase from supplier", amount: 50000, date: "2026-01-15", balance: -37500 },
-    { id: "TXN-003", type: "Credit", category: "Sales", description: "Credit sale - Fatima Ali", amount: 25000, date: "2026-01-15", balance: -12500 },
-    { id: "TXN-004", type: "Credit", category: "Sales", description: "Cash sale - Usman Ahmed", amount: 7500, date: "2026-01-14", balance: -5000 },
-    { id: "TXN-005", type: "Debit", category: "Expense", description: "Staff salaries", amount: 150000, date: "2026-01-14", balance: -155000 },
+  const filteredAccounts = useMemo(() => {
+    return accountRecords.filter((account) => {
+      const matchesQuery = `${account.id} ${account.name} ${account.bank} ${account.branch}`
+        .toLowerCase()
+        .includes(query.toLowerCase());
+      const matchesStatus = statusFilter === "All" || account.status === statusFilter;
+      const matchesCategory = categoryFilter === "All" || account.category === categoryFilter;
+
+      return matchesQuery && matchesStatus && matchesCategory;
+    });
+  }, [query, statusFilter, categoryFilter]);
+
+  const columns = [
+    {
+      key: "id",
+      label: "Account Code",
+      isRowHeader: true,
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100",
+      cellClassName: "px-4 py-4",
+      renderCell: (item) => <span className="font-semibold text-slate-800 text-[13px]">{item.id}</span>,
+    },
+    {
+      key: "name",
+      label: "Account Name",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100",
+      cellClassName: "px-4 py-4",
+      renderCell: (item) => (
+        <button className="font-semibold text-[#1a56db] hover:underline text-[13px]">
+          {item.name}
+        </button>
+      ),
+    },
+    {
+      key: "bank",
+      label: "Bank",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100",
+      cellClassName: "px-4 py-4 text-slate-600 text-sm",
+    },
+    {
+      key: "branch",
+      label: "Branch",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100",
+      cellClassName: "px-4 py-4 text-slate-600 text-sm",
+    },
+    {
+      key: "openingBalance",
+      label: "Opening Balance",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100",
+      cellClassName: "px-4 py-4 text-slate-700 text-sm font-semibold",
+      renderCell: (item) => `Rs. ${item.openingBalance.toLocaleString()}`,
+    },
+    {
+      key: "currentBalance",
+      label: "Current Balance",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100",
+      cellClassName: "px-4 py-4",
+      renderCell: (item) => (
+        <span className="text-[13px] font-bold text-emerald-600">Rs. {item.currentBalance.toLocaleString()}</span>
+      ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100",
+      cellClassName: "px-4 py-4",
+      renderCell: (item) => (
+        <span
+          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+            item.status === "Active"
+              ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+              : item.status === "Review"
+                ? "bg-amber-100 text-amber-800 border border-amber-200"
+                : "bg-slate-100 text-slate-600 border border-slate-200"
+          }`}
+        >
+          {item.status}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100",
+      cellClassName: "px-4 py-4",
+      renderCell: (item) => (
+        <button
+          type="button"
+          onClick={() => navigate(`/accounting/details/${item.id}`)}
+          className="flex items-center gap-1.5 rounded-full bg-blue-50/70 border border-blue-200/60 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+        >
+          <Eye className="h-3.5 w-3.5" /> Details
+        </button>
+      ),
+    },
   ];
 
-  const filteredTransactions = transactions.filter(txn =>
-    txn.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    txn.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
-    <div className="flex min-h-screen bg-linear-to-br from-emerald-50 to-blue-100 w-full">
-      <div className="flex-1 p-8">
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">Accounting Ledger</h1>
-          <p className="text-slate-500">Complete accounting ledger with income and expense tracking</p>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="bg-emerald-100 p-2 rounded-lg"><Wallet className="w-5 h-5 text-emerald-600" /></div>
-              <span className="text-slate-500 text-sm">Current Balance</span>
-            </div>
-            <p className="text-3xl font-bold text-slate-800">PKR 2.4M</p>
-          </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="bg-green-100 p-2 rounded-lg"><TrendingUp className="w-5 h-5 text-green-600" /></div>
-              <span className="text-slate-500 text-sm">Total Income</span>
-            </div>
-            <p className="text-3xl font-bold text-slate-800">PKR 8.5M</p>
-          </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="bg-red-100 p-2 rounded-lg"><TrendingDown className="w-5 h-5 text-red-600" /></div>
-              <span className="text-slate-500 text-sm">Total Expenses</span>
-            </div>
-            <p className="text-3xl font-bold text-slate-800">PKR 6.1M</p>
-          </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="bg-blue-100 p-2 rounded-lg"><Calculator className="w-5 h-5 text-blue-600" /></div>
-              <span className="text-slate-500 text-sm">Net Profit</span>
-            </div>
-            <p className="text-3xl font-bold text-slate-800">PKR 2.4M</p>
-          </div>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-            <input type="text" placeholder="Search transactions..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition" />
-          </div>
-          <button className="flex items-center gap-2 px-6 py-3 bg-linear-to-r not-first: from-emerald-600 to-blue-600 text-white rounded-xl font-medium hover:from-emerald-700 hover:to-blue-700 transition shadow-lg shadow-emerald-500/30">
-            <Calculator className="w-5 h-5" /> Add Transaction
-          </button>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Transaction ID</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Type</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Category</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Description</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Amount</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Date</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Balance</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredTransactions.map((txn) => (
-                  <tr key={txn.id} className="border-b border-slate-100 hover:bg-slate-50 transition">
-                    <td className="px-6 py-4 font-medium text-slate-800">{txn.id}</td>
-                    <td className="px-6 py-4">
-                      <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${
-                        txn.type === 'Credit' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                      }`}>
-                        {txn.type === 'Credit' ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                        {txn.type}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-slate-600">{txn.category}</td>
-                    <td className="px-6 py-4 text-slate-600">{txn.description}</td>
-                    <td className={`px-6 py-4 font-medium ${txn.type === 'Credit' ? 'text-green-600' : 'text-red-600'}`}>
-                      {txn.type === 'Credit' ? '+' : '-'}PKR {txn.amount.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 text-slate-600">{txn.date}</td>
-                    <td className={`px-6 py-4 font-medium ${txn.balance >= 0 ? 'text-slate-800' : 'text-red-600'}`}>
-                      PKR {txn.balance.toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </motion.div>
+    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-xs mb-2">
+            <span
+              onClick={() => navigate("/dashboard")}
+              className="cursor-pointer font-medium text-slate-400 hover:text-slate-600 transition-colors duration-200"
+            >
+              Dashboard
+            </span>{" "}
+            <span className="px-1 text-slate-400">/</span>{" "}
+            <span className="font-semibold text-slate-700">Accounts</span>
+          </p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            Accounts Management
+          </h1>
+          <p className="mt-0.5 text-sm text-slate-500">
+            Track all company bank accounts and their live financial balances
+          </p>
+        </div>
       </div>
-    </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h3 className="text-xs font-semibold text-slate-600">Total Accounts</h3>
+          <p className="mt-2 text-2xl font-bold text-slate-900">{accountRecords.length}</p>
+          <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
+            <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+            Active financial records
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h3 className="text-xs font-semibold text-slate-600">Opening Balance</h3>
+          <p className="mt-2 text-2xl font-bold text-slate-900">
+            Rs. {accountRecords.reduce((sum, item) => sum + item.openingBalance, 0).toLocaleString()}
+          </p>
+          <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
+            <span className="h-2 w-2 rounded-full bg-blue-500"></span>
+            Total starting funds
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h3 className="text-xs font-semibold text-slate-600">Current Balance</h3>
+          <p className="mt-2 text-2xl font-bold text-emerald-600">
+            Rs. {accountRecords.reduce((sum, item) => sum + item.currentBalance, 0).toLocaleString()}
+          </p>
+          <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
+            <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+            Live account value
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h3 className="text-xs font-semibold text-slate-600">Needs Review</h3>
+          <p className="mt-2 text-2xl font-bold text-amber-500">
+            {accountRecords.filter((item) => item.status === "Review").length}
+          </p>
+          <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
+            <span className="h-2 w-2 rounded-full bg-amber-500"></span>
+            Accounts under review
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+        <label className="relative flex-1 w-full md:w-auto">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            className="w-full rounded-md border border-slate-200 bg-slate-50/50 py-2.5 pl-9 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-500 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
+            placeholder="Search account code, bank, or branch..."
+          />
+        </label>
+
+        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+          <div className="relative">
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+              className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48"
+            >
+              <option value="All">Status: All</option>
+              <option value="Active">Status: Active</option>
+              <option value="Review">Status: Review</option>
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
+          </div>
+
+          <div className="relative">
+            <select
+              value={categoryFilter}
+              onChange={(event) => setCategoryFilter(event.target.value)}
+              className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48"
+            >
+              <option value="All">Category: All</option>
+              <option value="Main Account">Category: Main Account</option>
+              <option value="Operating">Category: Operating</option>
+              <option value="Operational">Category: Operational</option>
+              <option value="Liability">Category: Liability</option>
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
+          </div>
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <GlobalTable
+          columns={columns}
+          data={filteredAccounts}
+          ariaLabel="Accounts Table"
+          className=""
+          rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+          emptyContent="No accounts match your search."
+          pagination={true}
+          rowsPerPage={5}
+        />
+      </div>
+    </main>
   );
 }
 
