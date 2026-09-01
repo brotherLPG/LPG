@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import { Table } from "@heroui/react";
@@ -9,7 +9,6 @@ function AddSales() {
     { id: 1, product: "", cylinderType: "", quantity: "", unitPrice: "", discount: "", taxRate: 17, total: "" }
   ]);
   const [amountPaid, setAmountPaid] = useState(0);
-  const [paymentStatus, setPaymentStatus] = useState("Unpaid");
 
   const calculateRow = (item) => {
     const qty = Number(item.quantity) || 0;
@@ -72,19 +71,19 @@ function AddSales() {
 
   const outstanding = totals.grandTotal - amountPaid;
 
-  useEffect(() => {
-    if (amountPaid <= 0) {
-      setPaymentStatus("Unpaid");
-      return;
+  const getPaymentStatus = () => {
+    if (totals.grandTotal === outstanding) {
+      return "Unpaid";
     }
 
-    if (outstanding > 0) {
-      setPaymentStatus("Partially Paid");
-      return;
+    if (outstanding === 0) {
+      return "Paid";
     }
 
-    setPaymentStatus("Paid");
-  }, [amountPaid, outstanding]);
+    return "Partially Paid";
+  };
+
+  const paymentStatus = getPaymentStatus();
 
   return (
     <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
@@ -348,18 +347,17 @@ function AddSales() {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-600">Payment Status</span>
-                <div className="relative">
-                  <select
-                    value={paymentStatus}
-                    onChange={(e) => setPaymentStatus(e.target.value)}
-                    className="w-32 appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-8 py-1.5 text-sm text-slate-700 outline-none focus:border-[#008951]"
-                  >
-                    <option value="Unpaid">Unpaid</option>
-                    <option value="Partially Paid">Partially Paid</option>
-                    <option value="Paid">Paid</option>
-                  </select>
-                  <ChevronDown className="absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                </div>
+                <span
+                  className={`text-sm font-medium px-3 py-1 rounded-full ${
+                    paymentStatus === "Paid"
+                      ? "bg-green-100 text-green-700"
+                      : paymentStatus === "Partially Paid"
+                      ? "bg-amber-100 text-amber-700"
+                      : "bg-rose-100 text-rose-700"
+                  }`}
+                >
+                  {paymentStatus}
+                </span>
               </div>
             </div>
           </div>
