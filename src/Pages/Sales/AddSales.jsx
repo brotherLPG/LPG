@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import { Table } from "@heroui/react";
@@ -6,16 +6,85 @@ import { Table } from "@heroui/react";
 function AddSales() {
   const navigate = useNavigate();
   const [lineItems, setLineItems] = useState([
-    { id: 1, product: "", cylinderType: "", quantity: "", unitPrice: "", total: "" }
+    { id: 1, product: "", cylinderType: "", quantity: "", unitPrice: "", discount: "", taxRate: 17, total: "" }
   ]);
+  const [amountPaid, setAmountPaid] = useState(0);
+  const [paymentStatus, setPaymentStatus] = useState("Unpaid");
+
+  const calculateRow = (item) => {
+    const qty = Number(item.quantity) || 0;
+    const unitPrice = Number(item.unitPrice) || 0;
+    const discount = Number(item.discount) || 0;
+    const taxRate = Number(item.taxRate) || 0;
+
+    const subtotal = qty * unitPrice;
+    const taxAmount = (subtotal - discount) * (taxRate / 100);
+    const total = subtotal - discount + taxAmount;
+
+    return {
+      subtotal,
+      discount,
+      taxAmount,
+      total,
+    };
+  };
+
+  const updateLineItem = (id, field, value) => {
+    setLineItems((prev) =>
+      prev.map((item) => {
+        if (item.id !== id) return item;
+
+        const updatedItem = { ...item, [field]: value };
+        const computed = calculateRow(updatedItem);
+
+        return {
+          ...updatedItem,
+          total: computed.total,
+          rowSubtotal: computed.subtotal,
+          rowTax: computed.taxAmount,
+        };
+      })
+    );
+  };
 
   const addLineItem = () => {
-    setLineItems([...lineItems, { id: lineItems.length + 1, product: "", cylinderType: "", quantity: "", unitPrice: "", total: "" }]);
+    setLineItems((prev) => [
+      ...prev,
+      { id: prev.length + 1, product: "", cylinderType: "", quantity: "", unitPrice: "", discount: "", taxRate: 17, total: "" }
+    ]);
   };
 
   const removeLineItem = (id) => {
-    setLineItems(lineItems.filter(item => item.id !== id));
+    setLineItems((prev) => prev.filter((item) => item.id !== id));
   };
+
+  const totals = lineItems.reduce(
+    (acc, item) => {
+      const row = calculateRow(item);
+      acc.subtotal += row.subtotal;
+      acc.discount += row.discount;
+      acc.tax += row.taxAmount;
+      acc.grandTotal += row.total;
+      return acc;
+    },
+    { subtotal: 0, discount: 0, tax: 0, grandTotal: 0 }
+  );
+
+  const outstanding = totals.grandTotal - amountPaid;
+
+  useEffect(() => {
+    if (amountPaid <= 0) {
+      setPaymentStatus("Unpaid");
+      return;
+    }
+
+    if (outstanding > 0) {
+      setPaymentStatus("Partially Paid");
+      return;
+    }
+
+    setPaymentStatus("Paid");
+  }, [amountPaid, outstanding]);
 
   return (
     <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
@@ -142,64 +211,81 @@ function AddSales() {
                       <Table.Column className="text-xs font-semibold text-slate-600"></Table.Column>
                     </Table.Header>
                     <Table.Body items={lineItems}>
-                      {(item) => (
-                        <Table.Row key={item.id}>
-                          <Table.Cell>
-                            <select className="w-40 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-700 outline-none focus:border-[#008951]">
-                              <option value="">Select</option>
-                              <option value="LPG">LPG</option>
-                              <option value="Natural Gas">Natural Gas</option>
-                              <option value="Propane">Propane</option>
-                            </select>
-                          </Table.Cell>
-                          <Table.Cell>
-                            <input
-                              type="number"
-                              placeholder="0"
-                              className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
-                            />
-                          </Table.Cell>
-                          <Table.Cell>
-                            <input
-                              type="number"
-                              placeholder="0"
-                              className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
-                            />
-                          </Table.Cell>
-                          <Table.Cell>
-                            <input
-                              type="number"
-                              placeholder="0"
-                              className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
-                            />
-                          </Table.Cell>
-                          <Table.Cell>
-                            <input
-                              type="number"
-                              placeholder="0.00"
-                              className="w-28 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
-                            />
-                          </Table.Cell>
-                          <Table.Cell>
-                            <input
-                              type="text"
-                              disabled
-                              placeholder="0.00"
-                              className="w-28 rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-sm text-slate-500 outline-none cursor-not-allowed"
-                            />
-                          </Table.Cell>
-                          <Table.Cell>
-                            {lineItems.length > 1 && (
-                              <button
-                                onClick={() => removeLineItem(item.id)}
-                                className="text-rose-500 hover:text-rose-700 transition"
+                      {(item) => {
+                        const row = calculateRow(item);
+
+                        return (
+                          <Table.Row key={item.id}>
+                            <Table.Cell>
+                              <select
+                                value={item.product}
+                                onChange={(e) => updateLineItem(item.id, "product", e.target.value)}
+                                className="w-40 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-700 outline-none focus:border-[#008951]"
                               >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            )}
-                          </Table.Cell>
-                        </Table.Row>
-                      )}
+                                <option value="">Select</option>
+                                <option value="LPG">LPG</option>
+                                <option value="Natural Gas">Natural Gas</option>
+                                <option value="Propane">Propane</option>
+                              </select>
+                            </Table.Cell>
+                            <Table.Cell>
+                              <input
+                                type="number"
+                                value={item.quantity}
+                                onChange={(e) => updateLineItem(item.id, "quantity", e.target.value)}
+                                placeholder="0"
+                                className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
+                              />
+                            </Table.Cell>
+                            <Table.Cell>
+                              <input
+                                type="number"
+                                value={item.unitPrice}
+                                onChange={(e) => updateLineItem(item.id, "unitPrice", e.target.value)}
+                                placeholder="0"
+                                className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
+                              />
+                            </Table.Cell>
+                            <Table.Cell>
+                              <input
+                                type="number"
+                                value={item.discount}
+                                onChange={(e) => updateLineItem(item.id, "discount", e.target.value)}
+                                placeholder="0"
+                                className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
+                              />
+                            </Table.Cell>
+                            <Table.Cell>
+                              <input
+                                type="number"
+                                value={item.taxRate}
+                                onChange={(e) => updateLineItem(item.id, "taxRate", e.target.value)}
+                                placeholder="0.00"
+                                className="w-28 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
+                              />
+                            </Table.Cell>
+                            <Table.Cell>
+                              <input
+                                type="text"
+                                value={row.total ? row.total.toFixed(2) : "0.00"}
+                                disabled
+                                className="w-28 rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-sm text-slate-500 outline-none cursor-not-allowed"
+                              />
+                            </Table.Cell>
+                            <Table.Cell>
+                              {lineItems.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeLineItem(item.id)}
+                                  className="text-rose-500 hover:text-rose-700 transition"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
+                            </Table.Cell>
+                          </Table.Row>
+                        );
+                      }}
                     </Table.Body>
                   </Table.Content>
                 </Table.ScrollContainer>
@@ -221,21 +307,19 @@ function AddSales() {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-600">Subtotal</span>
                 <span className="text-sm font-medium text-slate-900">
-                  Rs. 0.00
+                  Rs. {totals.subtotal.toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-600">Trade Discount</span>
-                <input
-                  type="number"
-                  placeholder="0"
-                  className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951] text-right"
-                />
+                <span className="text-sm font-medium text-slate-900">
+                  Rs. {totals.discount.toFixed(2)}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-600">Tax (17% GST)</span>
                 <span className="text-sm font-medium text-slate-900">
-                  Rs. 0.00
+                  Rs. {totals.tax.toFixed(2)}
                 </span>
               </div>
               <div className="border-t border-slate-200 pt-4 flex justify-between items-center">
@@ -243,13 +327,15 @@ function AddSales() {
                   Grand Total
                 </span>
                 <span className="text-lg font-extrabold text-accent-blue">
-                  Rs. 0.00
+                  Rs. {totals.grandTotal.toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-600">Amount Paid</span>
                 <input
                   type="number"
+                  value={amountPaid}
+                  onChange={(e) => setAmountPaid(Number(e.target.value) || 0)}
                   placeholder="0"
                   className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951] text-right"
                 />
@@ -257,14 +343,15 @@ function AddSales() {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-600">Outstanding</span>
                 <span className="text-sm font-medium text-orange">
-                  Rs. 0.00
+                  Rs. {outstanding.toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-600">Payment Status</span>
                 <div className="relative">
                   <select
-                    defaultValue="Unpaid"
+                    value={paymentStatus}
+                    onChange={(e) => setPaymentStatus(e.target.value)}
                     className="w-32 appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-8 py-1.5 text-sm text-slate-700 outline-none focus:border-[#008951]"
                   >
                     <option value="Unpaid">Unpaid</option>
