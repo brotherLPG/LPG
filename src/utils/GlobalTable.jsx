@@ -53,7 +53,23 @@ const GlobalTable = ({
 
   const end = effectiveTotal === 0 ? 0 : Math.min(startIndex + rowsPerPage, effectiveTotal);
 
-  const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
+  const getVisiblePages = () => {
+    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, index) => index + 1);
+
+    const pages = [];
+
+    if (effectivePage <= 3) {
+      return [1, 2, 3, 4, "ellipsis-end", totalPages];
+    }
+
+    if (effectivePage >= totalPages - 2) {
+      return [1, "ellipsis-start", totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+
+    return [1, "ellipsis-start", effectivePage - 1, effectivePage, effectivePage + 1, "ellipsis-end", totalPages];
+  };
+
+  const visiblePages = getVisiblePages();
 
   return (
     <Table
@@ -129,20 +145,30 @@ const GlobalTable = ({
                 </Pagination.Previous>
               </Pagination.Item>
 
-              {pages.map((p) => (
-                <Pagination.Item key={p}>
-                  <Pagination.Link
-                    isActive={p === effectivePage}
-                    onPress={() => {
-                      if (onPageChange) onPageChange(p);
-                      else setInternalPage(p);
-                    }}
-                    className={p === effectivePage ? "bg-[#0f4bb8] text-white" : ""}
-                  >
-                    {p}
-                  </Pagination.Link>
-                </Pagination.Item>
-              ))}
+              {visiblePages.map((page, index) => {
+                if (page === "ellipsis-start" || page === "ellipsis-end") {
+                  return (
+                    <Pagination.Item key={`${page}-${index}`}>
+                      <span className="px-2 text-sm text-slate-400">...</span>
+                    </Pagination.Item>
+                  );
+                }
+
+                return (
+                  <Pagination.Item key={page}>
+                    <Pagination.Link
+                      isActive={page === effectivePage}
+                      onPress={() => {
+                        if (onPageChange) onPageChange(page);
+                        else setInternalPage(page);
+                      }}
+                      className={page === effectivePage ? "bg-[#0f4bb8] text-white" : ""}
+                    >
+                      {page}
+                    </Pagination.Link>
+                  </Pagination.Item>
+                );
+              })}
 
               <Pagination.Item>
                 <Pagination.Next
