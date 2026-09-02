@@ -11,16 +11,21 @@ export const createUser = async (data) => {
 }
 
 export const deleteUser = async (id) => {
-  const response = await api.delete(`/user/${id}`)
+  const response = await api.delete(`/users/${id}`)
   return response.data
 }
 
 export const updateUser = async (id, data) => {
-  const response = await api.patch(`/user/${id}`, data)
+  const response = await api.patch(`/users/${id}`, data)
+  return response.data
+}
+
+export const changeUserPassword = async (id, data) => {
+  const response = await api.patch(`/users/${id}/password`, data)
   return response.data
 }
 
 export const getUserById = async (id) => {
-  const response = await api.get(`/user/${id}`)
+  const response = await api.get(`/users/${id}`)
   return response.data
 }

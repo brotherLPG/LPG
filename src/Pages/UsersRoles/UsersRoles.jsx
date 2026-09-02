@@ -1,8 +1,10 @@
 import { Eye, Pencil, CirclePlus, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import GlobalTable from "../../utils/GlobalTable";
-import { useUsers } from "../../queries/users/users.queries";
+import { useToast } from "../../utils/GlobalToast";
+import { useDeleteUser, useUsers } from "../../queries/users/users.queries";
 
 const statusStyles = {
   Active: "bg-emerald-50 text-emerald-600",
@@ -12,10 +14,12 @@ const statusStyles = {
 
 function UsersRoles() {
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const toast = useToast();
   const [query, setQuery] = useState("");
   const [role, setRole] = useState("All Roles");
   const [status, setStatus] = useState("All");
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
 
   const { data: usersData, isLoading, error } = useUsers({
     search: query,
@@ -24,7 +28,7 @@ function UsersRoles() {
   });
 
   const users = usersData?.data?.items || [];
-  console.log(users);
+  const deleteMutation = useDeleteUser();
   
   const availableRoles = usersData?.data?.meta?.roles || [];
   const availableStatuses = usersData?.data?.meta?.statuses || [];
@@ -36,6 +40,18 @@ function UsersRoles() {
     return matchesQuery && matchesRole && matchesStatus;
   }), [users, query, role, status]);
 
+  const handleDeleteConfirm = async () => {
+    if (!deleteModal.item) return;
+
+    try {
+      await deleteMutation.mutateAsync(deleteModal.item._id);
+      toast.success(`User ${deleteModal.item.fullName} has been deleted successfully`);
+      setDeleteModal({ isOpen: false, item: null });
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete user. Please try again.");
+    }
+  };
+
   // Column definitions for users table
   const userColumns = [
     {
@@ -45,12 +61,20 @@ function UsersRoles() {
       className: "text-[13px] font-bold text-tertiary",
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
-        <span className="font-semibold text-BLUE-dark text-[13px]">{item.fullName}</span>
+        <span className="font-semibold text-BLUE-dark text-[13px]">
+          {item.fullName}
+        </span>
       ),
     },
     {
       key: "emailAddress",
       label: "Email Address",
+      className: "text-[13px] font-bold text-tertiary",
+      cellClassName: "px-4 py-3 text-slate-500 text-[13px] font-regular",
+    },
+    {
+      key: "username",
+      label: "Username",
       className: "text-[13px] font-bold text-tertiary",
       cellClassName: "px-4 py-3 text-slate-500 text-[13px] font-regular",
     },
@@ -66,7 +90,8 @@ function UsersRoles() {
       label: "Linked Employee",
       className: "text-[13px] font-bold text-tertiary",
       cellClassName: "px-4 py-3 text-tertiary text-[13px] font-regular",
-      renderCell: (item) => item.employeeId?.fullName || item.employeeId?.employeeCode || "—",
+      renderCell: (item) =>
+        item.employeeId?.fullName || item.employeeId?.employeeCode || "—",
     },
     {
       key: "status",
@@ -85,8 +110,12 @@ function UsersRoles() {
       key: "lastLogin",
       label: "Last Login",
       className: "text-[13px] font-bold text-tertiary",
-      cellClassName: "px-4 py-3 whitespace-nowrap text-tertiary font-regular text-[13px]",
-      renderCell: (item) => item.lastLoginAt ? new Date(item.lastLoginAt).toLocaleDateString() : "Never",
+      cellClassName:
+        "px-4 py-3 whitespace-nowrap text-tertiary font-regular text-[13px]",
+      renderCell: (item) =>
+        item.lastLoginAt
+          ? new Date(item.lastLoginAt).toLocaleDateString()
+          : "Never",
     },
     {
       key: "actions",
@@ -98,6 +127,7 @@ function UsersRoles() {
           <button
             type="button"
             aria-label={`View ${item.fullName}`}
+            onClick={() => navigate(`/users-roles/view/${item._id}`)}
             className="text-blue-500 hover:text-blue-700"
           >
             <Eye className="h-4 w-4" />
@@ -105,17 +135,19 @@ function UsersRoles() {
           <button
             type="button"
             aria-label={`Edit ${item.fullName}`}
+            onClick={() => navigate(`/users-roles/edit/${item._id}`)}
             className="text-emerald-500 hover:text-emerald-700"
           >
             <Pencil className="h-4 w-4" />
           </button>
-          <button
+          {/* <button
             type="button"
             aria-label={`Delete ${item.fullName}`}
+            onClick={() => setDeleteModal({ isOpen: true, item })}
             className="text-red-500 hover:text-red-700"
           >
             <Trash2 className="h-4 w-4" />
-          </button>
+          </button> */}
         </div>
       ),
     },
@@ -249,6 +281,16 @@ function UsersRoles() {
             </button>
           </article>
         </section>
+
+        <DeleteConfirmationModal
+          isOpen={deleteModal.isOpen}
+          onClose={() => setDeleteModal({ isOpen: false, item: null })}
+          onConfirm={handleDeleteConfirm}
+          title="Delete User"
+          message="Are you sure you want to delete this user? This action cannot be undone."
+          itemName={deleteModal.item?.fullName || ""}
+          isDeleting={deleteMutation.isPending}
+        />
       </section>
     </main>
   );

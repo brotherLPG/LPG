@@ -9,6 +9,7 @@ import {
   deleteUser,
   createUser,
   updateUser,
+  changeUserPassword,
   getUserById,
 } from "../../api/users.api";
 
@@ -56,6 +57,17 @@ export const useUpdateUser = () => {
     mutationFn: ({ id, data }) => updateUser(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+    },
+  });
+};
+
+export const useChangeUserPassword = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }) => changeUserPassword(id, data),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.detail(variables.id) });
     },
   });
 };

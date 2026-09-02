@@ -6,17 +6,6 @@ import { useRoles } from "../../queries/roles/roles.queries";
 import { useToast } from "../../utils/GlobalToast";
 
 
-const permissionRows = [
-  ["Dashboard", "Full Access", "emerald"],
-  ["Storage Tanks", "Full Access", "emerald"],
-  ["Filling Batches", "Full Access", "emerald"],
-  ["Inventory", "Full Access", "emerald"],
-  ["Cylinder Types", "View Only", "blue"],
-  ["Sales", "View Only", "blue"],
-  ["Customers", "No Access", "slate"],
-  ["Accounts", "No Access", "slate"],
-];
-
 const badgeColors = {
   emerald: "bg-emerald-50 text-emerald-600",
   blue: "bg-blue-50 text-blue-600",
@@ -49,6 +38,14 @@ function Field({ label, required, hint, children }) {
   );
 }
 
+const formatCnic = (value) => {
+  const digits = value.replace(/\D/g, "").slice(0, 13);
+  const parts = [digits.slice(0, 5), digits.slice(5, 12), digits.slice(12, 13)]
+    .filter(Boolean);
+
+  return parts.join("-");
+};
+
 function AddUser() {
   const navigate = useNavigate();
   const toast = useToast();
@@ -58,11 +55,29 @@ function AddUser() {
   const [form, setForm] = useState({
     fullName: "", email: "", phone: "",
     cnic: "", username: "", password: "", confirmPassword: "",
-    role: "Plant Operator", employee: "Bilal Hassan", status: "Active",
+    role: "", employee: "Bilal Hassan", status: true,
   });
 
-  const { data: rolesData } = useRoles({ page: 1, limit: 50 });
+  const { data: rolesData } = useRoles({ page: 1, limit: 100 });
   const roles = rolesData?.data?.items || [];
+
+  const selectedRole = roles.find((currentRole) => currentRole._id === form.role);
+  const permissionRows = Array.isArray(selectedRole?.permissionsPreview)
+    ? selectedRole.permissionsPreview.map((permission) => {
+        const level = permission.accessLabel || permission.level || permission.access || permission.accessLevel || "No Access";
+        const color = level.toLowerCase().includes("full")
+          ? "emerald"
+          : level.toLowerCase().includes("view")
+            ? "blue"
+            : "slate";
+
+        return [
+          permission.displayName || permission.name || permission.module || permission.permissionName || permission.label,
+          level,
+          color,
+        ];
+      })
+    : [];
 
   const inputClass =
     "w-full rounded border border-[#E5E7EB] bg-white px-2.5 py-2 text-[13px] text-BLUE-dark outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
@@ -77,24 +92,28 @@ function AddUser() {
       return;
     }
 
+    if (!form.role || !roles.some((currentRole) => currentRole._id === form.role)) {
+      toast.error("Please select a valid role.");
+      return;
+    }
+
     try {
       setLoading(true);
 
       const userData = {
         fullName: form.fullName,
         emailAddress: form.email,
-        // phone: form.phone,
-        // cnic: form.cnic,
+        phoneNumber: form.phone,
+        cnicNumber: form.cnic.replace(/\D/g, ""),
         username: form.username,
         password: form.password,
+        confirmPassword: form.confirmPassword,
         roleId: form.role,
-        // employeeId: form.employee,
+        employeeId: form.employee,
         isActive: form.status,
       };
 
       const response = await createUser(userData);
-
-      console.log("User created:", response);
       toast.success("User created successfully!");
       navigate("/users-roles");
     } catch (error) {
@@ -173,7 +192,12 @@ function AddUser() {
                 >
                   <input
                     value={form.cnic}
-                    onChange={update("cnic")}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        cnic: formatCnic(event.target.value),
+                      }))
+                    }
                     className={inputClass}
                     placeholder="35201-1234567-9"
                   />
@@ -252,15 +276,14 @@ function AddUser() {
                     onChange={update("role")}
                     className={selectClass}
                   >
-                    {roles.length === 0 ? (
-                      <>
-                        <option disabled>NO Assigne Role</option>
-                      </>
-                    ) : (
-                      roles.map((r) => (
-                        <option key={r._id} value={r._id}>{r.name || r.roleName || r.title || r.displayName}</option>
-                      ))
-                    )}
+                    <option value="">
+                      Select the Assigned Role
+                    </option>
+                    {roles.map((r) => (
+                      <option key={r._id} value={r._id}>
+                        {r.name || r.roleName || r.title || r.displayName}
+                      </option>
+                    ))}
                   </select>
                 </Field>
                 <Field label="Linked Employee">
@@ -269,36 +292,36 @@ function AddUser() {
                     onChange={update("employee")}
                     className={selectClass}
                   >
-                    <option value="12">Bilal Hassan</option>
-                    <option value="0">Not linked</option>
+                    <option value="6a93dee2f8dc7b4205bdcb68">
+                      Bilal Hassan
+                    </option>
+                    <option value="6a952a4e1193d5249d1e9fa7">Not linked</option>
                   </select>
                 </Field>
                 <p className="rounded bg-slate-50 px-2 py-2 text-[12px] leading-3 ">
                   <span>Role Description:</span>
                   <span className="text-4th-color ms-2">
-                    Manages daily plant operations, filling batches, and
-                    cylinder inventory tracking.
+                    {selectedRole?.roleDescription ||
+                      "No role description available."}
                   </span>
                 </p>
                 <Field label="Status">
                   <span className="relative block">
                     <span
-                      className={`pointer-events-none absolute left-3 top-1/2 z-10 h-1.5 w-1.5 -translate-y-1/2 rounded-full ${statusDotColors[form.status]}`}
+                      className={`pointer-events-none absolute left-3 top-1/2 z-10 h-1.5 w-1.5 -translate-y-1/2 rounded-full ${statusDotColors[form.status ? "Active" : "Inactive"]}`}
                     />
                     <select
-                      value={form.status}
-                      // onChange={update("status")}
+                      value={String(form.status)}
                       onChange={(e) =>
                         setForm((current) => ({
                           ...current,
                           status: e.target.value === "true",
                         }))
                       }
-                      className={`${selectClass} pl-6 ${statusStyles[form.status]}`}
+                      className={`${selectClass} pl-6 ${statusStyles[form.status ? "Active" : "Inactive"]}`}
                     >
                       <option value="true">Active</option>
                       <option value="false">Inactive</option>
-                      <option value="false">Suspended</option>
                     </select>
                   </span>
                 </Field>
@@ -309,20 +332,26 @@ function AddUser() {
               <h2 className="border-b border-slate-100 px-3 py-2 text-[16px] font-bold text-BLUE-dark">
                 Role Permissions Preview
               </h2>
-              <div className="divide-y divide-slate-100 px-3 ">
-                {permissionRows.map(([name, level, color]) => (
-                  <div
-                    key={name}
-                    className="flex items-center justify-between py-3 text-[13px] font-medium text-BLUE-dark"
-                  >
-                    <span>{name}</span>
-                    <span
-                      className={`rounded-full px-1.5 py-0.5 text-[11px] font-semibold ${badgeColors[color]}`}
+              <div className="divide-y divide-slate-100 px-3 h-80 overflow-auto">
+                {permissionRows.length === 0 ? (
+                  <p className="py-3 text-[13px] text-slate-500">
+                    No permissions preview available.
+                  </p>
+                ) : (
+                  permissionRows.map(([name, level, color]) => (
+                    <div
+                      key={name}
+                      className="flex items-center justify-between py-3 text-[13px] font-medium text-BLUE-dark "
                     >
-                      {level}
-                    </span>
-                  </div>
-                ))}
+                      <span>{name}</span>
+                      <span
+                        className={`rounded-full px-1.5 py-0.5 text-[11px] font-semibold ${badgeColors[color]}`}
+                      >
+                        {level}
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
             </section>
           </div>
