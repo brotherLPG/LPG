@@ -1,32 +1,55 @@
-import { Plus, Eye, Edit3, ChevronDown } from "lucide-react";
+import { Plus, Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import GlobalTable from "../../utils/GlobalTable";
-
-const initialEmployees = [
-  { code: "EMP-001", name: "Ahmad Hassan", department: "Operations", jobTitle: "Plant Operator", phone: "0300-5550011", salary: "Rs. 45,000", status: "Active" },
-  { code: "EMP-002", name: "Fatima Zahra", department: "Finance", jobTitle: "Accountant", phone: "0321-4441122", salary: "Rs. 65,000", status: "Active" },
-  { code: "EMP-003", name: "Muhammad Bilal", department: "Maintenance", jobTitle: "Technician", phone: "0333-8882233", salary: "Rs. 40,000", status: "Active" },
-  { code: "EMP-004", name: "Ayesha Siddiqui", department: "Admin", jobTitle: "Office Manager", phone: "0345-1113344", salary: "Rs. 55,000", status: "Active" },
-  { code: "EMP-005", name: "Usman Ali", department: "Operations", jobTitle: "Filling Operator", phone: "0312-7774455", salary: "Rs. 42,000", status: "Active" },
-  { code: "EMP-006", name: "Zainab Rashid", department: "Sales", jobTitle: "Sales Executive", phone: "0301-9995566", salary: "Rs. 50,000", status: "On Leave" },
-  { code: "EMP-007", name: "Tariq Mehmood", department: "Security", jobTitle: "Guard Supervisor", phone: "0311-5556677", salary: "Rs. 35,000", status: "Active" },
-  { code: "EMP-008", name: "Sana Pervez", department: "HR", jobTitle: "HR Officer", phone: "0322-3337788", salary: "Rs. 58,000", status: "Active" },
-];
+import { useEmployees, useDeleteEmployee } from "../../queries/employees/employees.queries";
+import { useToast } from "../../utils/GlobalToast";
 
 function Employees() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [query, setQuery] = useState("");
   const [department, setDepartment] = useState("All");
-  const [status, setStatus] = useState("Active");
+  const [status, setStatus] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
 
-  const filteredEmployees = useMemo(() => initialEmployees.filter((emp) => {
-    const matchesQuery = `${emp.code} ${emp.name}`.toLowerCase().includes(query.toLowerCase());
-    const matchesDept = department === "All" || emp.department === department;
-    const matchesStatus = status === "All" || emp.status === status;
-    return matchesQuery && matchesDept && matchesStatus;
-  }), [query, department, status]);
+  const { data: employeesData, isLoading, error } = useEmployees({
+    search: query || undefined,
+    employmentStatus: status === "All" ? undefined : status.toLowerCase(),
+    page: currentPage,
+    limit: 10,
+  });
+  const deleteMutation = useDeleteEmployee();
+  const employees = employeesData?.data?.items || [];
+  const pagination = employeesData?.data?.pagination || { total: 0, page: 1, totalPages: 1 };
+  const departments = [...new Set(employees.map((employee) => employee.departmentName).filter(Boolean))];
+
+  const filteredEmployees = useMemo(() => employees
+    .filter((employee) => department === "All" || employee.departmentName === department)
+    .map((employee) => ({
+      ...employee,
+      code: employee.employeeCode,
+      id: employee._id,
+      name: employee.fullName,
+      department: employee.departmentName || "-",
+      phone: employee.phoneNumber || "-",
+      salary: employee.monthlySalaryAmount || 0,
+      status: employee.employmentStatus,
+    })), [employees, department]);
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteModal.item) return;
+
+    try {
+      await deleteMutation.mutateAsync(deleteModal.item._id);
+      toast.success(`Employee ${deleteModal.item.name} has been deleted successfully`);
+      setDeleteModal({ isOpen: false, item: null });
+    } catch (deleteError) {
+      toast.error(deleteError.response?.data?.message || "Failed to delete employee. Please try again.");
+    }
+  };
 
   // Column definitions for employees table
   const employeeColumns = [
@@ -50,9 +73,9 @@ function Employees() {
         "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-4",
       renderCell: (item) => (
-        <button className="flex flex-col items-start font-bold text-[#1a56db] hover:underline text-[13px] text-left leading-tight">
+        <button className="flex flex-row  items-start font-bold text-[#1a56db] hover:underline text-[13px] text-left leading-tight">
           <span>{item.name.split(" ")[0]}</span>
-          <span>{item.name.split(" ").slice(1).join(" ")}</span>
+          <span className="ms-1">{item.name.split(" ").slice(1).join(" ")}</span>
         </button>
       ),
     },
@@ -85,7 +108,7 @@ function Employees() {
       cellClassName: "px-4 py-4",
       renderCell: (item) => (
         <span className="text-slate-900 font-bold text-[13px]">
-          {item.salary}
+          Rs. {item.salary.toLocaleString()}
         </span>
       ),
     },
@@ -98,12 +121,12 @@ function Employees() {
       renderCell: (item) => (
         <span
           className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-            item.status === "Active"
+            item.status === "active"
               ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
               : "bg-amber-50 text-amber-600 border border-amber-100"
           }`}
         >
-          {item.status}
+          {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
         </span>
       ),
     },
@@ -111,7 +134,7 @@ function Employees() {
       key: "actions",
       label: "Actions",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 text-right pr-6",
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 text-center pr-6",
       cellClassName: "px-4 py-4 pr-6",
       renderCell: (item) => (
         <div className="flex items-center justify-end gap-3">
@@ -124,10 +147,19 @@ function Employees() {
           </button>
           <button
             type="button"
+            onClick={() => navigate(`/employees/edit/${item._id}`)}
             aria-label={`Edit ${item.name}`}
             className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
           >
             <Edit3 className="h-4 w-4" strokeWidth={2.5} /> Edit
+          </button>
+          <button
+            type="button"
+            onClick={() => setDeleteModal({ isOpen: true, item })}
+            aria-label={`Delete ${item.name}`}
+            className="flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors"
+          >
+            <Trash2 className="h-4 w-4" strokeWidth={2.5} /> Delete
           </button>
         </div>
       ),
@@ -186,13 +218,7 @@ function Employees() {
                   className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
                 >
                   <option value="All">Department: All</option>
-                  <option value="Operations">Department: Operations</option>
-                  <option value="Finance">Department: Finance</option>
-                  <option value="Maintenance">Department: Maintenance</option>
-                  <option value="Admin">Department: Admin</option>
-                  <option value="Sales">Department: Sales</option>
-                  <option value="Security">Department: Security</option>
-                  <option value="HR">Department: HR</option>
+                  {departments.map((name) => <option key={name} value={name}>Department: {name}</option>)}
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
               </div>
@@ -204,8 +230,7 @@ function Employees() {
                 >
                   <option value="All">Status: All</option>
                   <option value="Active">Status: Active</option>
-                  <option value="On Leave">Status: On Leave</option>
-                  <option value="Inactive">Status: Inactive</option>
+                  <option value="Terminated">Status: Terminated</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
               </div>
@@ -215,7 +240,7 @@ function Employees() {
 
         {/* Table */}
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <GlobalTable
+          {isLoading ? <div className="p-8 text-center text-sm text-slate-500">Loading employees...</div> : error ? <div className="p-8 text-center text-sm text-red-500">Error loading employees. Please try again.</div> : <GlobalTable
             columns={employeeColumns}
             data={filteredEmployees}
             ariaLabel="Employees Table"
@@ -223,10 +248,22 @@ function Employees() {
             rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
             emptyContent="No employees match your search."
             pagination={true}
-            rowsPerPage={5}
-          />
+            rowsPerPage={10}
+            totalCount={pagination.total}
+            page={currentPage}
+            onPageChange={setCurrentPage}
+          />}
         </div>
       </section>
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, item: null })}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Employee"
+        message="Are you sure you want to delete this employee? This action cannot be undone."
+        itemName={deleteModal.item ? `${deleteModal.item.code} - ${deleteModal.item.name}` : ""}
+        isDeleting={deleteMutation.isPending}
+      />
     </main>
   );
 }

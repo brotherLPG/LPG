@@ -2,10 +2,43 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Switch } from "@heroui/react";
 import { ChevronDown } from "lucide-react";
+import { useCreateEmployee } from "../../queries/employees/employees.queries";
+import { useToast } from "../../utils/GlobalToast";
 
 function AddEmployee() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [isActive, setIsActive] = useState(true);
+  const createMutation = useCreateEmployee();
+  const [formData, setFormData] = useState({
+    fullName: "",
+    departmentName: "",
+    jobTitle: "",
+    phoneNumber: "",
+    emailAddress: "",
+    joiningDate: "",
+    monthlySalaryAmount: "",
+  });
+
+  const handleInputChange = (field, value) => {
+    setFormData((previous) => ({ ...previous, [field]: value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      await createMutation.mutateAsync({
+        ...formData,
+        monthlySalaryAmount: Number(formData.monthlySalaryAmount) || 0,
+        joiningDate: formData.joiningDate || null,
+        employmentStatus: isActive ? "active" : "inactive",
+      });
+      toast.success("Employee created successfully!");
+      navigate("/employees");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to create employee. Please try again.");
+    }
+  };
 
   return (
     <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
@@ -36,7 +69,7 @@ function AddEmployee() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column (lg:col-span-2) */}
         <div className="lg:col-span-2 space-y-6">
           
@@ -66,6 +99,8 @@ function AddEmployee() {
                 </label>
                 <input
                   type="text"
+                  value={formData.fullName}
+                  onChange={(event) => handleInputChange("fullName", event.target.value)}
                   placeholder="Enter legal full name"
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
@@ -100,6 +135,8 @@ function AddEmployee() {
                   </label>
                   <input
                     type="text"
+                    value={formData.departmentName}
+                    onChange={(event) => handleInputChange("departmentName", event.target.value)}
                     placeholder="YYYY-MM-DD"
                     className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
@@ -182,6 +219,8 @@ function AddEmployee() {
                 </label>
                 <input
                   type="text"
+                  value={formData.jobTitle}
+                  onChange={(event) => handleInputChange("jobTitle", event.target.value)}
                   placeholder="e.g. Plant Operator"
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
@@ -192,7 +231,9 @@ function AddEmployee() {
                   Date of Joining
                 </label>
                 <input
-                  type="text"
+                  type="date"
+                  value={formData.joiningDate}
+                  onChange={(event) => handleInputChange("joiningDate", event.target.value)}
                   placeholder="YYYY-MM-DD"
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
@@ -203,7 +244,9 @@ function AddEmployee() {
                   Monthly Salary (Rs.)
                 </label>
                 <input
-                  type="text"
+                  type="number"
+                  value={formData.monthlySalaryAmount}
+                  onChange={(event) => handleInputChange("monthlySalaryAmount", event.target.value)}
                   placeholder="e.g. 45,000"
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
@@ -226,6 +269,8 @@ function AddEmployee() {
               </label>
               <input
                 type="text"
+                value={formData.phoneNumber}
+                onChange={(event) => handleInputChange("phoneNumber", event.target.value)}
                 placeholder="e.g. 0300-5550011"
                 className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
               />
@@ -236,6 +281,8 @@ function AddEmployee() {
               </label>
               <input
                 type="email"
+                value={formData.emailAddress}
+                onChange={(event) => handleInputChange("emailAddress", event.target.value)}
                 placeholder="e.g. ahmad.h@brotherlpg.com"
                 className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
               />
@@ -274,23 +321,24 @@ function AddEmployee() {
           </div>
         </div>
 
-      </div>
-
       {/* Bottom Action Bar */}
-      <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:col-span-3">
         <button
+          type="button"
           onClick={() => navigate("/employees")}
           className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
         >
           Cancel
         </button>
         <button
-          onClick={() => navigate("/employees")}
+          type="submit"
+          disabled={createMutation.isPending}
           className="rounded-lg bg-[#008951] px-6 py-2 text-sm font-medium text-white transition hover:bg-[#007545]"
         >
-          Save Profile
+          {createMutation.isPending ? "Saving..." : "Save Profile"}
         </button>
       </div>
+      </form>
     </main>
   );
 }

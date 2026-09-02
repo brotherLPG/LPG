@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createUser } from "../../api/users.api";
 import { useRoles } from "../../queries/roles/roles.queries";
+import { useEmployees } from "../../queries/employees/employees.queries";
 import { useToast } from "../../utils/GlobalToast";
 
 
@@ -55,11 +56,13 @@ function AddUser() {
   const [form, setForm] = useState({
     fullName: "", email: "", phone: "",
     cnic: "", username: "", password: "", confirmPassword: "",
-    role: "", employee: "Bilal Hassan", status: true,
+    role: "", employee: "", status: true,
   });
 
   const { data: rolesData } = useRoles({ page: 1, limit: 100 });
+  const { data: employeesData } = useEmployees({ page: 1, limit: 100 });
   const roles = rolesData?.data?.items || [];
+  const employees = employeesData?.data?.items || [];
 
   const selectedRole = roles.find((currentRole) => currentRole._id === form.role);
   const permissionRows = Array.isArray(selectedRole?.permissionsPreview)
@@ -292,10 +295,12 @@ function AddUser() {
                     onChange={update("employee")}
                     className={selectClass}
                   >
-                    <option value="6a93dee2f8dc7b4205bdcb68">
-                      Bilal Hassan
-                    </option>
-                    <option value="6a952a4e1193d5249d1e9fa7">Not linked</option>
+                    <option value="">Not linked</option>
+                    {employees.map((employee) => (
+                      <option key={employee._id} value={employee._id}>
+                        {employee.fullName} ({employee.employeeCode})
+                      </option>
+                    ))}
                   </select>
                 </Field>
                 <p className="rounded bg-slate-50 px-2 py-2 text-[12px] leading-3 ">

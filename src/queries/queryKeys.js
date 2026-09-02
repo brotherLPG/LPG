@@ -33,6 +33,19 @@ export const queryKeys = {
   },
 
   // =========================
+  // Employees
+  // =========================
+  employees: {
+    all: ['employees'],
+
+    lists: () => ['employees', 'list'],
+
+    list: (params) => ['employees', 'list', params],
+
+    detail: id => ['employees', 'detail', id]
+  },
+
+  // =========================
   // Suppliers
   // =========================
   suppliers: {

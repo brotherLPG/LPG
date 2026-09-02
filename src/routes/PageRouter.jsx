@@ -33,6 +33,7 @@ import StorageTanks from '../Pages/StorageTanks/StorageTanks';
 import Expenses from '../Pages/Expenses/Expenses';
 import AddExpenses from '../Pages/Expenses/addExpenses';
 import AddEmployee from '../Pages/Employees/addEmployee';
+import UpdateEmployee from '../Pages/Employees/updateEmployee';
 import AddSupplier from '../Pages/Suppliers/addSupplier';
 import AddCylinderType from '../Pages/Cylinders/addCylinderType';
 import Inventory from '../Pages/Inventory/inventory';
@@ -97,6 +98,7 @@ function PageRouter() {
         <Route path="/lpg-receipts/edit/:id" element={<UpdateLpgReceipt />} />
         <Route path="/employees" element={<Employees />} />
         <Route path="/employees/add" element={<AddEmployee />} />
+        <Route path="/employees/edit/:id" element={<UpdateEmployee />} />
         <Route path="/expenses" element={<Expenses />} />
         <Route path="/expenses/add" element={<AddExpenses />} />
         <Route path="/payments" element={<Payments />} />

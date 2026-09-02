@@ -2,6 +2,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useRoles } from "../../queries/roles/roles.queries";
+import { useEmployees } from "../../queries/employees/employees.queries";
 import {
     useChangeUserPassword,
     useUpdateUser,
@@ -58,9 +59,11 @@ function UpdateUser() {
 
     const { data: userData, isLoading: isUserLoading, error: userError } = useUserById(id);
     const { data: rolesData, isLoading: areRolesLoading } = useRoles({ page: 1, limit: 100 });
+    const { data: employeesData } = useEmployees({ page: 1, limit: 100 });
     const updateMutation = useUpdateUser();
     const passwordMutation = useChangeUserPassword();
     const roles = rolesData?.data?.items || [];
+    const employees = employeesData?.data?.items || [];
     const user = userData?.data?.user || userData?.data;
 
     useEffect(() => {
@@ -309,12 +312,18 @@ function UpdateUser() {
                     </select>
                   </Field>
                   <Field label="Linked Employee">
-                    <input
+                    <select
                       value={form.employee}
                       onChange={updateField("employee")}
-                      className={inputClass}
-                      placeholder="Employee ID (optional)"
-                    />
+                      className={selectClass}
+                    >
+                      <option value="">Not linked</option>
+                      {employees.map((employee) => (
+                        <option key={employee._id} value={employee._id}>
+                          {employee.fullName} ({employee.employeeCode})
+                        </option>
+                      ))}
+                    </select>
                   </Field>
                   <p className="rounded bg-slate-50 px-2 py-2 text-[12px] leading-3">
                     <span>Role Description:</span>

@@ -9,6 +9,7 @@ import { getUsers } from '../api/users.api.js'
 import { getAuditLogs } from '../api/auditLogs.api.js'
 import { getRoles } from '../api/roles.api.js'
 import { getFillingBatches } from '../api/fillingBatches.api.js'
+import { getEmployees } from '../api/employees.api.js'
 
 export const prefetchDashboard = async queryClient => {
   await Promise.all([
@@ -141,6 +142,22 @@ export const prefetchDashboard = async queryClient => {
       queryFn: () =>
         getFillingBatches({
           search: "",
+          page: 1,
+          limit: 10,
+        })
+    }),
+
+    // ========================================
+    // Employees
+    // ========================================
+
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.employees.list({ search: undefined, employmentStatus: undefined, page: 1, limit: 10 }),
+
+      queryFn: () =>
+        getEmployees({
+          search: undefined,
+          employmentStatus: undefined,
           page: 1,
           limit: 10,
         })
