@@ -96,6 +96,15 @@ export const queryKeys = {
   },
 
   // =========================
+  // Permissions
+  // =========================
+  permissions: {
+    all: ['permissions'],
+
+    list: () => ['permissions', 'list'],
+  },
+
+  // =========================
   // Cylinder Types
   // =========================
   cylinderTypes: {

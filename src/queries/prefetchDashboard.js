@@ -10,6 +10,7 @@ import { getAuditLogs } from '../api/auditLogs.api.js'
 import { getRoles } from '../api/roles.api.js'
 import { getFillingBatches } from '../api/fillingBatches.api.js'
 import { getEmployees } from '../api/employees.api.js'
+import { getPermissions } from '../api/permissions.api.js'
 
 export const prefetchDashboard = async queryClient => {
   await Promise.all([
@@ -161,6 +162,17 @@ export const prefetchDashboard = async queryClient => {
           page: 1,
           limit: 10,
         })
+    }),
+
+    // ========================================
+    // Permissions
+    // ========================================
+
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.permissions.list(),
+
+      queryFn: () =>
+        getPermissions()
     }),
   ])
 }

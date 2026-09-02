@@ -1,8 +1,10 @@
 import { Check, ChevronDown, Folder } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useRoles } from "../../queries/roles/roles.queries";
+import { usePermissions } from "../../queries/permissions/permissions.queries";
 
-const modules = [
+const fallbackModules = [
   "Dashboard",
   "Customers",
   "Suppliers",
@@ -24,19 +26,44 @@ const modules = [
   "Settings",
   "Audit Logs",
 ];
-const actions = ["View", "Create", "Edit", "Delete", "Approve", "Export"];
-const createPermissions = (value) =>
+const fallbackActions = ["read", "create", "update", "delete", "approve", "export"];
+const actionLabels = {
+  read: "View",
+  create: "Create",
+  update: "Edit",
+  delete: "Delete",
+  approve: "Approve",
+  export: "Export",
+};
+const createPermissions = (moduleNames, actionNames, value) =>
   Object.fromEntries(
-    modules.map((module) => [
+    moduleNames.map((module) => [
       module,
-      Object.fromEntries(actions.map((action) => [action, value])),
+      Object.fromEntries(actionNames.map((action) => [action, value])),
     ]),
   );
 
 function RolePermissions() {
   const navigate = useNavigate();
+  const { data: rolesData, isLoading: areRolesLoading, error: rolesError } = useRoles({ page: 1, limit: 100 });
+  const { data: permissionsData, isLoading: arePermissionsLoading, error: permissionsError } = usePermissions();
+  const roles = rolesData?.data?.items || [];
+  const permissionCatalog = permissionsData?.data || [];
+  const permissionModules = useMemo(() => permissionCatalog.length
+    ? [...new Set(permissionCatalog.map((permission) => permission.moduleName))]
+    : fallbackModules, [permissionCatalog]);
+  const permissionActions = useMemo(() => permissionCatalog.length
+    ? [...new Set(permissionCatalog.map((permission) => permission.actionName))]
+    : fallbackActions, [permissionCatalog]);
+  const [selectedRoleId, setSelectedRoleId] = useState("");
   const [allPermissions, setAllPermissions] = useState(true);
-  const [permissions, setPermissions] = useState(() => createPermissions(true));
+  const [permissions, setPermissions] = useState(() => createPermissions(fallbackModules, fallbackActions, true));
+  useEffect(() => {
+    setPermissions(createPermissions(permissionModules, permissionActions, true));
+    setAllPermissions(true);
+  }, [permissionModules, permissionActions]);
+  const selectedRole = roles.find((role) => role._id === selectedRoleId) || roles[0];
+  const selectedRoleName = selectedRole?.roleName || selectedRole?.name || selectedRole?.title || selectedRole?.displayName || "Role";
   const togglePermission = (module, action) =>
     setPermissions((current) => ({
       ...current,
@@ -45,7 +72,7 @@ function RolePermissions() {
   const toggleAllPermissions = () => {
     const nextValue = !allPermissions;
     setAllPermissions(nextValue);
-    setPermissions(createPermissions(nextValue));
+    setPermissions(createPermissions(permissionModules, permissionActions, nextValue));
   };
 
   return (
@@ -66,13 +93,13 @@ function RolePermissions() {
             >
               Users &amp; Roles
             </span>{" "}
-            <span className="px-1">/</span> Role: Administrator
+              <span className="px-1">/</span> Role: {selectedRoleName}
           </p>
           <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-800">
-            Role Permissions - Administrator
+            Role Permissions - {selectedRoleName}
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Configure module-level access permissions for the Administrator role
+            Configure module-level access permissions for the {selectedRoleName} role
           </p>
         </div>
         <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
@@ -81,13 +108,25 @@ function RolePermissions() {
               <p className="text-sm font-semibold text-tertiary">
                 Switch Role Profile:
               </p>
-              <button
-                type="button"
-                className="inline-flex w-fit items-center gap-2 rounded-md border border-[#1E40AF] ms-2 bg-white px-3 py-2 text-sm font-semibold text-accent-blue hover:bg-slate-50"
-              >
-                Administrator
-                <ChevronDown className="h-4 w-4" />
-              </button>
+              <div className="relative ms-2">
+                <select
+                  aria-label="Switch role profile"
+                  value={selectedRoleId || selectedRole?._id || ""}
+                  onChange={(event) => setSelectedRoleId(event.target.value)}
+                  disabled={areRolesLoading || rolesError || roles.length === 0}
+                  className="inline-flex w-fit appearance-none items-center gap-2 rounded-md border border-[#1E40AF] bg-white py-2 pl-3 pr-9 text-sm font-semibold text-accent-blue hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {areRolesLoading && <option value="">Loading roles...</option>}
+                  {!areRolesLoading && rolesError && <option value="">Unable to load roles</option>}
+                  {!areRolesLoading && !rolesError && roles.length === 0 && <option value="">No roles available</option>}
+                  {roles.map((role) => (
+                    <option key={role._id} value={role._id}>
+                      {role.roleName || role.name || role.title || role.displayName}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2" />
+              </div>
             </div>
 
             <label className="flex items-center gap-2 text-sm font-regular text-tertiary">
@@ -105,24 +144,32 @@ function RolePermissions() {
         </div>
         <div className="mt-5 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-190 text-left text-xs">
+            {permissionsError ? (
+              <p className="p-6 text-center text-sm text-red-500">
+                Unable to load permissions. Please try again.
+              </p>
+            ) : arePermissionsLoading ? (
+              <p className="p-6 text-center text-sm text-slate-500">
+                Loading permissions...
+              </p>
+            ) : <table className="w-full min-w-190 text-left text-xs">
               <thead className="border-b border-slate-200 bg-slate-50 text-slate-500">
                 <tr>
                   <th className="px-4 py-3 text-tertiary text-sm font-bold">
                     System Module
                   </th>
-                  {actions.map((action) => (
+                  {permissionActions.map((action) => (
                     <th
                       key={action}
                       className="px-3 py-3 text-center text-tertiary text-sm font-bold"
                     >
-                      {action}
+                      {actionLabels[action] || action}
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {modules.map((module) => (
+                {(arePermissionsLoading ? [] : permissionModules).map((module) => (
                   <tr
                     key={module}
                     className="border-b border-slate-100 last:border-0 hover:bg-slate-50/70"
@@ -135,14 +182,14 @@ function RolePermissions() {
                         {module}
                       </span>
                     </td>
-                    {actions.map((action) => {
-                      const isGranted = permissions[module][action];
+                    {permissionActions.map((action) => {
+                      const isGranted = permissions[module]?.[action] ?? false;
                       return (
                         <td key={action} className="px-3 py-2.5 text-center">
                           <button
                             type="button"
                             aria-pressed={isGranted}
-                            aria-label={`${isGranted ? "Remove" : "Grant"} ${action} permission for ${module}`}
+                            aria-label={`${isGranted ? "Remove" : "Grant"} ${actionLabels[action] || action} permission for ${module}`}
                             onClick={() => togglePermission(module, action)}
                             className={`inline-flex h-4 w-4 items-center justify-center rounded border transition ${isGranted ? "border-emerald-400 bg-emerald-50 text-emerald-500" : "border-slate-300 bg-white text-transparent hover:border-emerald-400"}`}
                           >
@@ -154,7 +201,7 @@ function RolePermissions() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table>}
           </div>
         </div>
         <div className="mt-5 flex flex-wrap justify-end gap-2">
