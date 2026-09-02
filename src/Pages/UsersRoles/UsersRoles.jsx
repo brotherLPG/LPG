@@ -66,7 +66,7 @@ function UsersRoles() {
       label: "Linked Employee",
       className: "text-[13px] font-bold text-tertiary",
       cellClassName: "px-4 py-3 text-tertiary text-[13px] font-regular",
-      renderCell: (item) => item.employeeId || "—",
+      renderCell: (item) => item.employeeId?.fullName || item.employeeId?.employeeCode || "—",
     },
     {
       key: "status",
