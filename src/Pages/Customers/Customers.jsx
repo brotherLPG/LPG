@@ -1,9 +1,9 @@
-import { Table } from "@heroui/react";
 import { Search, PlusCircle, Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
+import GlobalTable from "../../utils/GlobalTable";
 import { useCustomers, useDeleteCustomer } from "../../queries/customers/customers.queries";
 
 
@@ -42,6 +42,7 @@ function Customers() {
       paymentTermDays: customer.paymentTermDays,
       outstanding: customer.openingBalanceAmount,
       status: customer.isActive ? "Active" : "Inactive",
+      id: customer._id,
       _id: customer._id,
     }));
   }, [customers]);
@@ -71,6 +72,103 @@ function Customers() {
     if (customer.status === "Inactive") return "bg-red-50 text-red-600";
     return "bg-slate-50 text-slate-600";
   };
+
+  const columns = [
+    {
+      key: "code",
+      label: "Code",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+    },
+    {
+      key: "name",
+      label: "Customer Name",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      renderCell: (customer) => (
+        <button
+          type="button"
+          onClick={() => navigate(`/customers/view/${customer._id}`)}
+          className="font-semibold text-[#1a56db] hover:underline text-[13px]"
+        >
+          {customer.name}
+        </button>
+      ),
+    },
+    {
+      key: "contact",
+      label: "Contact Person",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+    },
+    {
+      key: "phone",
+      label: "Phone",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+    },
+    {
+      key: "limit",
+      label: "Credit Limit (Rs.)",
+      renderCell: (customer) => customer.limit?.toLocaleString() || 0,
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+    },
+    {
+      key: "outstanding",
+      label: "Outstanding (Rs.)",
+      renderCell: (customer) => customer.outstanding?.toLocaleString() || 0,
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+    },
+    {
+      key: "status",
+      label: "Status",
+      className: "text-center",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      renderCell: (customer) => (
+        <span
+          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${getStatusStyle(customer)}`}
+        >
+          {customer.status}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+       className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 text-center",
+      renderCell: (customer) => (
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => navigate(`/customers/view/${customer._id}`)}
+            aria-label={`View ${customer.name}`}
+            className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+          >
+            <Eye className="h-3.5 w-3.5" /> View
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate(`/customers/edit/${customer._id}`)}
+            aria-label={`Edit ${customer.name}`}
+            className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
+          >
+            <Edit3 className="h-3.5 w-3.5" /> Edit
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDeleteClick(customer)}
+            aria-label={`Delete ${customer.name}`}
+            className="flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors"
+          >
+            <Trash2 className="h-3.5 w-3.5" /> Delete
+          </button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
@@ -168,173 +266,18 @@ function Customers() {
               </div>
             </div>
           ) : (
-            <Table className="w-full h-[350px] max-h-[350px] overflow-auto bg-white">
-              <Table.ScrollContainer className="overflow-x-auto">
-                <Table.Content
-                  aria-label="Customers Table"
-                  className="min-w-[1200px]"
-                >
-                  <Table.Header>
-                    <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-slate-700">
-                      Code
-                    </Table.Column>
-                    <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-slate-700">
-                      Customer Name
-                    </Table.Column>
-                    <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-slate-700">
-                      Contact Person
-                    </Table.Column>
-                    <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-slate-700">
-                      Phone
-                    </Table.Column>
-                    <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-slate-700">
-                      Credit Limit (Rs.)
-                    </Table.Column>
-                    <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-slate-700">
-                      Outstanding (Rs.)
-                    </Table.Column>
-                    <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-center text-slate-700">
-                      Status
-                    </Table.Column>
-                    <Table.Column className="bg-slate-50/80 text-[13px] font-bold text-center text-slate-700">
-                      Actions
-                    </Table.Column>
-                  </Table.Header>
-                  <Table.Body
-                    items={filteredCustomers}
-                    emptyContent="No customers match your search."
-                  >
-                    {(customer) => (
-                      <Table.Row
-                        key={customer._id}
-                        className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
-                      >
-                        <Table.Cell>
-                          <span className="font-medium text-slate-700 text-[13px]">
-                            {customer.code}
-                          </span>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <button
-                            type="button"
-                            onClick={() => navigate(`/customers/view/${customer._id}`)}
-                            className="font-semibold text-[#1a56db] hover:underline text-[13px]"
-                          >
-                            {customer.name}
-                          </button>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <span className="text-slate-600 text-[13px] font-medium">
-                            {customer.contact}
-                          </span>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <span className="text-slate-500 text-[13px]">
-                            {customer.phone}
-                          </span>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <span className="text-slate-700 text-[13px] font-medium">
-                            {customer.limit?.toLocaleString() || 0}
-                          </span>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <span className="text-slate-700 font-bold text-[13px]">
-                            {customer.outstanding?.toLocaleString() || 0}
-                          </span>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <span
-                            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${getStatusStyle(customer)}`}
-                          >
-                            {customer.status}
-                          </span>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => navigate(`/customers/view/${customer._id}`)}
-                              aria-label={`View ${customer.name}`}
-                              className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
-                            >
-                              <Eye className="h-3.5 w-3.5" /> View
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => navigate(`/customers/edit/${customer._id}`)}
-                              aria-label={`Edit ${customer.name}`}
-                              className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
-                            >
-                              <Edit3 className="h-3.5 w-3.5" /> Edit
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteClick(customer)}
-                              aria-label={`Delete ${customer.name}`}
-                              className="flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" /> Delete
-                            </button>
-                          </div>
-                        </Table.Cell>
-                      </Table.Row>
-                    )}
-                  </Table.Body>
-                </Table.Content>
-              </Table.ScrollContainer>
-            </Table>
+            <GlobalTable
+              columns={columns}
+              data={filteredCustomers}
+              pagination
+              rowsPerPage={10}
+              ariaLabel="Customers Table"
+              emptyContent="No customers match your search."
+              totalCount={pagination.total}
+              page={currentPage}
+              onPageChange={setCurrentPage}
+            />
           )}
-
-          {/* Pagination Footer */}
-          <div className="flex items-center justify-between border-t border-slate-200 bg-white px-4 py-4 sm:px-6">
-            <div className="text-sm text-slate-500">
-              Showing {filteredCustomers.length} of {pagination.total} customers
-            </div>
-            <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-end">
-              <nav
-                className="isolate inline-flex gap-2 rounded-md"
-                aria-label="Pagination"
-              >
-                <button
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
-                  disabled={currentPage === 1}
-                  className="relative inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Previous
-                </button>
-                {Array.from(
-                  { length: pagination.totalPages },
-                  (_, i) => i + 1,
-                ).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`relative inline-flex items-center rounded-md px-3.5 py-1.5 text-sm font-semibold transition-colors ${
-                      currentPage === page
-                        ? "bg-[#1a56db] text-white"
-                        : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button
-                  onClick={() =>
-                    setCurrentPage((prev) =>
-                      Math.min(prev + 1, pagination.totalPages),
-                    )
-                  }
-                  disabled={currentPage === pagination.totalPages}
-                  className="relative inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Next
-                </button>
-              </nav>
-            </div>
-          </div>
         </div>
       </section>
 
