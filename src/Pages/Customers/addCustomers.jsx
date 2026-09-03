@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
-import { useCreateCustomer } from "../../queries/customers/customers.queries";
+import { useCustomers, useCreateCustomer } from "../../queries/customers/customers.queries";
 import { useToast } from "../../utils/GlobalToast";
 
 function AddCustomers() {
@@ -9,6 +9,17 @@ function AddCustomers() {
   const toast = useToast();
   const [isActive, setIsActive] = useState(true);
   const createCustomerMutation = useCreateCustomer();
+  const { data: customersData, isLoading: isCustomersLoading } = useCustomers({
+    page: 1,
+    limit: 1,
+  });
+  const customerCode = customersData?.data?.items?.[0]?.customerCode;
+  const nextCustomerCode = customerCode
+    ? customerCode.replace(/(\D*)(\d+)$/, (_, prefix, number) => {
+        const nextNumber = Number(number) + 1;
+        return `${prefix}${String(nextNumber).padStart(number.length, "0")}`;
+      })
+    : undefined;
 
   const [formData, setFormData] = useState({
     customerName: "",
@@ -100,7 +111,7 @@ function AddCustomers() {
                 <input
                   type="text"
                   disabled
-                  value="CUST-009 (Auto-generated)"
+                  value={nextCustomerCode || (isCustomersLoading ? "Loading..." : "Auto-generated")}
                   className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed"
                 />
               </div>
