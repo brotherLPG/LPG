@@ -1,9 +1,9 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createUser } from "../../api/users.api";
 import { useRoles } from "../../queries/roles/roles.queries";
 import { useEmployees } from "../../queries/employees/employees.queries";
+import { useCreateUser } from "../../queries/users/users.queries";
 import { useToast } from "../../utils/GlobalToast";
 
 
@@ -53,6 +53,7 @@ function AddUser() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const createMutation = useCreateUser();
   const [form, setForm] = useState({
     fullName: "", email: "", phone: "",
     cnic: "", username: "", password: "", confirmPassword: "",
@@ -116,7 +117,7 @@ function AddUser() {
         isActive: form.status,
       };
 
-      const response = await createUser(userData);
+      await createMutation.mutateAsync(userData);
       toast.success("User created successfully!");
       navigate("/users-roles");
     } catch (error) {

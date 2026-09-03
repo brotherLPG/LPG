@@ -20,6 +20,8 @@ import Notifications from '../Pages/Notifications/Notifications';
 import UsersRoles from '../Pages/UsersRoles/UsersRoles';
 import RolePermissions from '../Pages/UsersRoles/RolePermissions';
 import AddUser from '../Pages/UsersRoles/AddUser';
+import AddRole from '../Pages/UsersRoles/AddRole';
+import UpdateRole from '../Pages/UsersRoles/UpdateRole';
 import UpdateUser from '../Pages/UsersRoles/UpdateUser';
 import UserDetails from '../Pages/UsersRoles/UserDetails';
 import Customers from '../Pages/Customers/Customers';
@@ -61,6 +63,8 @@ function PageRouter() {
         <Route path="/Dashboard" element={<Dashboard />} />
         <Route path="/users-roles" element={<UsersRoles />} />
         <Route path="/users-roles/add-user" element={<AddUser />} />
+        <Route path="/users-roles/add-role" element={<AddRole />} />
+        <Route path="/users-roles/edit-role/:id" element={<UpdateRole />} />
         <Route path="/users-roles/edit/:id" element={<UpdateUser />} />
         <Route path="/users-roles/view/:id" element={<UserDetails />} />
         <Route path="/users-roles/Permissions" element={<RolePermissions />} />

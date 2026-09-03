@@ -127,7 +127,7 @@ export const prefetchDashboard = async queryClient => {
     // ========================================
 
     queryClient.prefetchQuery({
-      queryKey: queryKeys.roles.list({ search: "", page: 1, limit: 10 }),
+      queryKey: queryKeys.roles.list(),
 
       queryFn: () =>
         getRoles({ search: "", page: 1, limit: 10 })

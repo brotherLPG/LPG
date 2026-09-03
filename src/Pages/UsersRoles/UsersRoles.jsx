@@ -5,6 +5,7 @@ import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import GlobalTable from "../../utils/GlobalTable";
 import { useToast } from "../../utils/GlobalToast";
 import { useDeleteUser, useUsers } from "../../queries/users/users.queries";
+import Roles from "./Roles";
 
 const statusStyles = {
   Active: "bg-emerald-50 text-emerald-600",
@@ -13,15 +14,20 @@ const statusStyles = {
 };
 
 function UsersRoles() {
-
   const navigate = useNavigate();
   const toast = useToast();
   const [query, setQuery] = useState("");
   const [role, setRole] = useState("All Roles");
   const [status, setStatus] = useState("All");
+  const [roleTableFilter, setRoleTableFilter] = useState("All Roles");
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
+  const [activeTab, setActiveTab] = useState("users");
 
-  const { data: usersData, isLoading, error } = useUsers({
+  const {
+    data: usersData,
+    isLoading,
+    error,
+  } = useUsers({
     search: query,
     role: role === "All Roles" ? undefined : role,
     status: status === "All" ? undefined : status,
@@ -29,26 +35,40 @@ function UsersRoles() {
 
   const users = usersData?.data?.items || [];
   const deleteMutation = useDeleteUser();
-  
+
   const availableRoles = usersData?.data?.meta?.roles || [];
   const availableStatuses = usersData?.data?.meta?.statuses || [];
 
-  const filteredUsers = useMemo(() => users.filter((user) => {
-    const matchesQuery = `${user.fullName} ${user.emailAddress}`.toLowerCase().includes(query.toLowerCase());
-    const matchesRole = role === "All Roles" || user.role?.roleName === role;
-    const matchesStatus = status === "All" || (user.isActive ? "Active" : "Inactive") === status;
-    return matchesQuery && matchesRole && matchesStatus;
-  }), [users, query, role, status]);
+  const filteredUsers = useMemo(
+    () =>
+      users.filter((user) => {
+        const matchesQuery = `${user.fullName} ${user.emailAddress}`
+          .toLowerCase()
+          .includes(query.toLowerCase());
+        const matchesRole =
+          role === "All Roles" || user.role?.roleName === role;
+        const matchesStatus =
+          status === "All" ||
+          (user.isActive ? "Active" : "Inactive") === status;
+        return matchesQuery && matchesRole && matchesStatus;
+      }),
+    [users, query, role, status],
+  );
 
   const handleDeleteConfirm = async () => {
     if (!deleteModal.item) return;
 
     try {
       await deleteMutation.mutateAsync(deleteModal.item._id);
-      toast.success(`User ${deleteModal.item.fullName} has been deleted successfully`);
+      toast.success(
+        `User ${deleteModal.item.fullName} has been deleted successfully`,
+      );
       setDeleteModal({ isOpen: false, item: null });
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to delete user. Please try again.");
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to delete user. Please try again.",
+      );
     }
   };
 
@@ -177,83 +197,127 @@ function UsersRoles() {
           <div className="my-auto ">
             <button
               type="button"
-              onClick={() => navigate("/users-roles/add-user")}
+              onClick={() =>
+                navigate(
+                  activeTab === "users"
+                    ? "/users-roles/add-user"
+                    : "/users-roles/add-role",
+                )
+              }
               className="inline-flex items-center justify-center gap-2 rounded-md bg-gradient-bg-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
             >
-              <CirclePlus className="h-4 w-4" /> Add User
+              <CirclePlus className="h-4 w-4" />{" "}
+              {activeTab === "users" ? "Add User" : "Add Role"}
             </button>
           </div>
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
-          <div className="flex flex-col gap-3 lg:flex-row">
-            <label className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                className="w-full rounded-md border border-slate-200 py-2 pl-9 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                placeholder="Search users by name or email..."
-              />
-            </label>
-            <select
-              value={role}
-              onChange={(event) => setRole(event.target.value)}
-              className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none focus:border-emerald-500"
-            >
-              <option value="All Roles">All Roles</option>
-              {availableRoles.map((r) => (
-                <option key={r._id} value={r.roleName}>
-                  {r.roleName}
-                </option>
-              ))}
-            </select>
-            <select
-              value={status}
-              onChange={(event) => setStatus(event.target.value)}
-              className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none focus:border-emerald-500"
-            >
-              <option value="All">All</option>
-              {availableStatuses.map((s) => (
-                <option key={s.value} value={s.label}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="mb-4 flex border-b border-slate-200">
+          <button
+            type="button"
+            onClick={() => setActiveTab("users")}
+            className={`border-b-2 px-4 py-2 text-sm font-semibold ${activeTab === "users" ? "border-blue-600 text-blue-700" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+          >
+            Users
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("roles")}
+            className={`border-b-2 px-4 py-2 text-sm font-semibold ${activeTab === "roles" ? "border-blue-600 text-blue-700" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+          >
+            Roles
+          </button>
         </div>
 
-        <div className="mt-5 overflow-hidden border border-slate-200 bg-white shadow-sm">
-          {isLoading ? (
-            <div className="flex items-center justify-center p-8">
-              <svg className="animate-spin h-6 w-6 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
+        {activeTab === "users" && (
+          <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+            <div className="flex flex-col gap-3 lg:flex-row">
+              <label className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  className="w-full rounded-md border border-slate-200 py-2 pl-9 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                  placeholder="Search users by name or email..."
+                />
+              </label>
+              <select
+                value={role}
+                onChange={(event) => setRole(event.target.value)}
+                className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none focus:border-emerald-500"
+              >
+                <option value="All Roles">All Roles</option>
+                {availableRoles.map((r) => (
+                  <option key={r._id} value={r.roleName}>
+                    {r.roleName}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={status}
+                onChange={(event) => setStatus(event.target.value)}
+                className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none focus:border-emerald-500"
+              >
+                <option value="All">All</option>
+                {availableStatuses.map((s) => (
+                  <option key={s.value} value={s.label}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
             </div>
-          ) : error ? (
-            <div className="flex items-center justify-center p-8">
-              <div className="text-sm text-red-500">
-                Error loading users. Please try again.
+          </div>
+        )}
+
+        {activeTab === "users" && (
+          <div className="mt-5 overflow-hidden border border-slate-200 bg-white shadow-sm">
+            {isLoading ? (
+              <div className="flex items-center justify-center p-8">
+                <svg
+                  className="animate-spin h-6 w-6 text-slate-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
               </div>
-            </div>
-          ) : filteredUsers.length === 0 ? (
-            <div className="flex items-center justify-center p-8">
-              <div className="text-sm text-slate-500">
-                No user data
+            ) : error ? (
+              <div className="flex items-center justify-center p-8">
+                <div className="text-sm text-red-500">
+                  Error loading users. Please try again.
+                </div>
               </div>
-            </div>
-          ) : (
-            <GlobalTable
-              columns={userColumns}
-              data={filteredUsers}
-              ariaLabel="User management table"
-              className=""
-              rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
-              emptyContent="No users match your search."
-            />
-          )}
-        </div>
+            ) : filteredUsers.length === 0 ? (
+              <div className="flex items-center justify-center p-8">
+                <div className="text-sm text-slate-500">No user data</div>
+              </div>
+            ) : (
+              <GlobalTable
+                columns={userColumns}
+                data={filteredUsers}
+                ariaLabel="User management table"
+                className=""
+                rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+                emptyContent="No users match your search."
+              />
+            )}
+          </div>
+        )}
+
+        {activeTab === "roles" && <Roles />}
 
         <section className="mt-5">
           <h2 className="mb-2 text-base font-bold text-BLUE-dark">
@@ -269,7 +333,7 @@ function UsersRoles() {
                 </p>
               </div>
               <span className="rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-accent-blue">
-                2 Users
+                {filteredUsers?.length || "0"} Users
               </span>
             </div>
             <button
