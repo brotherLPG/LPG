@@ -11,9 +11,18 @@ import { getRoles } from '../api/roles.api.js'
 import { getFillingBatches } from '../api/fillingBatches.api.js'
 import { getEmployees } from '../api/employees.api.js'
 import { getPermissions } from '../api/permissions.api.js'
+import { getCurrentUser } from '../api/auth.api.js'
 
 export const prefetchDashboard = async queryClient => {
   await Promise.all([
+    // ========================================
+    // Current User
+    // ========================================
+
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.auth.currentUser(),
+      queryFn: getCurrentUser
+    }),
 
     // ========================================
     // Notifications

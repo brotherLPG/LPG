@@ -1,5 +1,12 @@
 export const queryKeys = {
   // =========================
+  // Authentication
+  // =========================
+  auth: {
+    currentUser: () => ['auth', 'current-user']
+  },
+
+  // =========================
   // Notifications
   // =========================
   notifications: {
