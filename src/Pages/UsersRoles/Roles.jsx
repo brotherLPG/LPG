@@ -15,6 +15,7 @@ function Roles() {
   const { data: rolesData, isLoading, error } = useRoles({ page: 1, limit: 100 });
   const roles = rolesData?.data?.items || [];
   const deleteMutation = useDeleteRole();
+  
 
   const filteredRoles = useMemo(() => roles.filter((role) => {
     const roleName = role.roleName || role.name || role.title || role.displayName || "";
@@ -43,21 +44,27 @@ function Roles() {
       isRowHeader: true,
       className: "text-[13px] font-bold text-tertiary",
       cellClassName: "px-4 py-3",
-      renderCell: (role) => <span className="font-semibold text-BLUE-dark text-[13px]">{role.roleName || role.name || role.title || "—"}</span>,
+      renderCell: (role) => (
+        <span className="font-semibold text-BLUE-dark text-[13px]">
+          {role.roleName || role.name || role.title || "—"}
+        </span>
+      ),
     },
     {
       key: "roleDescription",
       label: "Description",
       className: "text-[13px] font-bold text-tertiary",
       cellClassName: "px-4 py-3 text-slate-500 text-[13px]",
-      renderCell: (role) => role.roleDescription || role.description || "No description",
+      renderCell: (role) =>
+        role.roleDescription || role.description || "No description",
     },
     {
       key: "permissions",
       label: "Permissions",
       className: "text-[13px] font-bold text-tertiary",
       cellClassName: "px-4 py-3 text-slate-600 text-[13px]",
-      renderCell: (role) => role.permissionsPreview?.length || role.permissions?.length || 0,
+      renderCell: (role) =>
+        role.permissionIds?.length || role.permissions?.length || 0,
     },
     {
       key: "isActive",
@@ -65,7 +72,9 @@ function Roles() {
       className: "text-[13px] font-bold text-tertiary",
       cellClassName: "px-4 py-3",
       renderCell: (role) => (
-        <span className={`rounded-full px-2 py-1 text-xs font-medium ${role.isActive ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-500"}`}>
+        <span
+          className={`rounded-full px-2 py-1 text-xs font-medium ${role.isActive ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-500"}`}
+        >
           {role.isActive ? "Active" : "Inactive"}
         </span>
       ),
@@ -75,7 +84,8 @@ function Roles() {
       label: "Created",
       className: "text-[13px] font-bold text-tertiary",
       cellClassName: "px-4 py-3 text-slate-500 text-[13px]",
-      renderCell: (role) => role.createdAt ? new Date(role.createdAt).toLocaleDateString() : "—",
+      renderCell: (role) =>
+        role.createdAt ? new Date(role.createdAt).toLocaleDateString() : "—",
     },
     {
       key: "actions",
@@ -86,7 +96,9 @@ function Roles() {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => navigate(`/users-roles/Permissions?role=${role._id}`)}
+            onClick={() =>
+              navigate(`/users-roles/Permissions?role=${role._id}`)
+            }
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-blue hover:text-blue-800"
           >
             <ShieldCheck className="h-4 w-4" /> Manage Permissions
