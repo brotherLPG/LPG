@@ -215,7 +215,11 @@ function Customers() {
                           </span>
                         </Table.Cell>
                         <Table.Cell>
-                          <button className="font-semibold text-[#1a56db] hover:underline text-[13px]">
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/customers/view/${customer._id}`)}
+                            className="font-semibold text-[#1a56db] hover:underline text-[13px]"
+                          >
                             {customer.name}
                           </button>
                         </Table.Cell>
@@ -250,6 +254,7 @@ function Customers() {
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
+                              onClick={() => navigate(`/customers/view/${customer._id}`)}
                               aria-label={`View ${customer.name}`}
                               className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
                             >
