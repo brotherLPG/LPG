@@ -94,15 +94,7 @@ function Roles() {
       cellClassName: "px-4 py-3",
       renderCell: (role) => (
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() =>
-              navigate(`/users-roles/Permissions?role=${role._id}`)
-            }
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-blue hover:text-blue-800"
-          >
-            <ShieldCheck className="h-4 w-4" /> Manage Permissions
-          </button>
+        
           <button
             type="button"
             onClick={() => navigate(`/users-roles/edit-role/${role._id}`)}

@@ -319,7 +319,7 @@ function UsersRoles() {
 
         {activeTab === "roles" && <Roles />}
 
-        <section className="mt-5">
+        {/* <section className="mt-5">
           <h2 className="mb-2 text-base font-bold text-BLUE-dark">
             Role Configuration Summary
           </h2>
@@ -344,7 +344,7 @@ function UsersRoles() {
               Manage Permissions <span aria-hidden="true">›</span>
             </button>
           </article>
-        </section>
+        </section> */}
 
         <DeleteConfirmationModal
           isOpen={deleteModal.isOpen}
