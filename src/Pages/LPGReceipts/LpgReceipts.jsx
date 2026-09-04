@@ -103,7 +103,11 @@ function LpgReceipts() {
       className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-4",
       renderCell: (item) => (
-        <button className="font-semibold text-[#1a56db] hover:underline text-[13px]">
+        <button
+          type="button"
+          onClick={() => navigate(`/lpg-receipts/view/${item._id}`)}
+          className="font-semibold text-[#1a56db] hover:underline text-[13px]"
+        >
           {item.supplier}
         </button>
       ),
@@ -173,6 +177,7 @@ function LpgReceipts() {
           <button
             type="button"
             aria-label={`View ${item.receiptNo}`}
+            onClick={() => navigate(`/lpg-receipts/view/${item._id}`)}
             className="text-[#1a56db] hover:text-blue-800 transition-colors"
           >
             <Eye className="h-4 w-4" strokeWidth={2.5} />
