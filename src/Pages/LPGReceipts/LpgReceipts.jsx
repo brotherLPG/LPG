@@ -44,11 +44,19 @@ function LpgReceipts() {
 
   const mappedReceipts = useMemo(() => apiReceipts.map((r) => {
     const receivedDate = r.receivedAt ? new Date(r.receivedAt) : null;
+    const receiptSupplierId = r.supplierId?._id || r.supplierId || r.supplier?._id || "";
+    const supplierRecord = suppliersList.find((item) => item._id === receiptSupplierId);
 
     return {
       _id: r._id,
       receiptNo: r.receiptNumber,
-      supplier: r.supplierId?.supplierName || "",
+      supplier:
+        r.supplierName ||
+        r.supplierId?.supplierName ||
+        r.supplier?.supplierName ||
+        supplierRecord?.supplierName ||
+        supplierRecord?.supplierCode ||
+        "-",
       date: receivedDate
         ? `${receivedDate.getDate().toString().padStart(2, '0')}/${(receivedDate.getMonth() + 1).toString().padStart(2, '0')}/${receivedDate.getFullYear()}`
         : "",
@@ -59,7 +67,7 @@ function LpgReceipts() {
       totalCost: r.totalPurchaseAmount,
       status: r.status || 'Confirmed',
     };
-  }), [apiReceipts]);
+  }), [apiReceipts, suppliersList]);
 
   const filteredReceipts = useMemo(() => mappedReceipts.filter((receipt) => {
     const matchesQuery = `${receipt.receiptNo} ${receipt.supplier} ${receipt.truckReg}`.toLowerCase().includes(query.toLowerCase());
@@ -103,7 +111,11 @@ function LpgReceipts() {
       className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-4",
       renderCell: (item) => (
-        <button className="font-semibold text-[#1a56db] hover:underline text-[13px]">
+        <button
+          type="button"
+          onClick={() => navigate(`/lpg-receipts/view/${item._id}`)}
+          className="font-semibold text-[#1a56db] hover:underline text-[13px]"
+        >
           {item.supplier}
         </button>
       ),
@@ -173,6 +185,7 @@ function LpgReceipts() {
           <button
             type="button"
             aria-label={`View ${item.receiptNo}`}
+            onClick={() => navigate(`/lpg-receipts/view/${item._id}`)}
             className="text-[#1a56db] hover:text-blue-800 transition-colors"
           >
             <Eye className="h-4 w-4" strokeWidth={2.5} />
@@ -185,14 +198,14 @@ function LpgReceipts() {
           >
             <Edit3 className="h-4 w-4" strokeWidth={2.5} />
           </button>
-          <button
+          {/* <button
             type="button"
             aria-label={`Delete ${item.receiptNo}`}
             onClick={() => setDeleteModal({ isOpen: true, item })}
             className="text-rose-600 hover:text-rose-800 transition-colors"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M8 6v14a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-          </button>
+          </button> */}
         </div>
       ),
     },

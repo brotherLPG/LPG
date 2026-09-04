@@ -4,6 +4,17 @@ import { CheckCircle2, ChevronDown } from "lucide-react";
 import { useToast } from "../../utils/GlobalToast";
 import { useLpgReceiptById, useUpdateLpgReceipt } from "../../queries/lpgReceipts/lpgReceipts.queries";
 import { useSuppliers } from "../../queries/suppliers/suppliers.queries";
+import { useEmployees } from "../../queries/employees/employees.queries";
+
+const toDateTimeLocal = (value) => {
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const pad = (part) => String(part).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
 
 function UpdateLpgReceipt() {
   const { id } = useParams();
@@ -14,6 +25,7 @@ function UpdateLpgReceipt() {
   const updateMutation = useUpdateLpgReceipt();
 
   const [supplierId, setSupplierId] = useState("");
+  const [receivedByEmployeeId, setReceivedByEmployeeId] = useState("");
   const [storageTankId, setStorageTankId] = useState("");
   const [quantity, setQuantity] = useState(0);
   const [rate, setRate] = useState(0);
@@ -25,26 +37,52 @@ function UpdateLpgReceipt() {
   useEffect(() => {
     if (data?.data) {
       const s = data.data;
-      setSupplierId(s.supplierId?._id || "");
+      setSupplierId(s.supplierId?._id || s.supplierId || s.supplier?._id || "");
       setStorageTankId(s.storageTankId?._id || "");
       setQuantity(s.receivedQuantityKg || 0);
       setRate(s.purchaseRatePerKg || 0);
       setTruckReg(s.truckRegistrationNumber || "");
       setSupplierInvoice(s.supplierInvoiceNumber || "");
-      setReceivedAt(s.receivedAt || "");
+      setReceivedAt(toDateTimeLocal(s.receivedAt));
+      setReceivedByEmployeeId(
+        s.receivedByEmployeeId?._id || s.receivedByEmployeeId || s.receivedBy?._id || "",
+      );
+      console.log(s);
+      
       setRemarks(s.remarks || "");
     }
   }, [data]);
 
   const { data: suppliersData } = useSuppliers({ search: "", isActive: undefined, page: 1, limit: 100 });
   const suppliers = suppliersData?.data?.items || [];
+  const receiptSupplier = data?.data?.supplierId;
+  const receiptSupplierId = receiptSupplier?._id || receiptSupplier || data?.data?.supplier?._id || "";
+  const receiptSupplierName =
+    data?.data?.supplierName ||
+    receiptSupplier?.supplierName ||
+    data?.data?.supplier?.supplierName ||
+    data?.data?.supplierCode ||
+    "Selected Supplier";
+  const supplierOptions = suppliers.some((supplier) => supplier._id === receiptSupplierId)
+    ? suppliers
+    : receiptSupplierId
+      ? [{ _id: receiptSupplierId, supplierName: receiptSupplierName }, ...suppliers]
+      : suppliers;
+  const { data: employeesData } = useEmployees({ search: "", employmentStatus: "active", page: 1, limit: 100 });
+  const employees = employeesData?.data?.items || [];
 
-  useEffect(() => {
-    if (!supplierId && suppliers.length) {
-      // if supplier not set from API, default to first
-      setSupplierId(suppliers[0]._id);
-    }
-  }, [suppliers]);
+  // useEffect(() => {
+  //   if (!supplierId && suppliers.length) {
+  //     // if supplier not set from API, default to first
+  //     setSupplierId(suppliers[0]._id);
+  //   }
+  // }, [suppliers]);
+
+  // useEffect(() => {
+  //   if (!receivedByEmployeeId && employees.length) {
+  //     setReceivedByEmployeeId(employees[0]._id);
+  //   }
+  // }, [employees, receivedByEmployeeId]);
 
   if (isFetching) {
     return (
@@ -60,11 +98,14 @@ function UpdateLpgReceipt() {
   const handleSave = async () => {
     const payload = {
       supplierId,
-      storageTankId,
+      receivedByEmployeeId,
+      // storageTankId,
       receivedQuantityKg: parseFloat(quantity) || 0,
       purchaseRatePerKg: parseFloat(rate) || 0,
       truckRegistrationNumber: truckReg,
-      receivedAt: receivedAt || new Date().toISOString(),
+      receivedAt: receivedAt
+        ? new Date(receivedAt).toISOString()
+        : new Date().toISOString(),
       supplierInvoiceNumber: supplierInvoice,
       remarks,
     };
@@ -127,7 +168,7 @@ function UpdateLpgReceipt() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Supplier Dropdown <span className="text-rose-500">*</span>
+                  Supplier <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
                   <select
@@ -136,7 +177,7 @@ function UpdateLpgReceipt() {
                     className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   >
                     <option value="">Select Supplier</option>
-                    {suppliers.map((s) => (
+                    {supplierOptions.map((s) => (
                       <option key={s._id} value={s._id}>
                         {s.supplierName || s.supplierCode || s.name}
                       </option>
@@ -181,7 +222,7 @@ function UpdateLpgReceipt() {
               </h2>
             </div>
             <div className="p-5 space-y-5">
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Route to Storage Tank <span className="text-rose-500">*</span>
                 </label>
@@ -197,7 +238,7 @@ function UpdateLpgReceipt() {
                     </option>
                   </select>
                 </div>
-              </div>
+              </div> */}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
@@ -233,15 +274,16 @@ function UpdateLpgReceipt() {
                   </label>
                   <div className="relative">
                     <select
-                      defaultValue="Asif Afridi (Plant Supervisor)"
+                      value={receivedByEmployeeId}
+                      onChange={(e) => setReceivedByEmployeeId(e.target.value)}
                       className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     >
-                      <option value="Asif Afridi (Plant Supervisor)">
-                        Asif Afridi (Plant Supervisor)
-                      </option>
-                      <option value="Ahmad Hassan (Operations)">
-                        Ahmad Hassan (Operations)
-                      </option>
+                      <option value="">Select Employee</option>
+                      {employees.map((employee) => (
+                        <option key={employee._id} value={employee._id}>
+                          {employee.fullName || employee.employeeCode}
+                        </option>
+                      ))}
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                   </div>
@@ -252,10 +294,10 @@ function UpdateLpgReceipt() {
                     Received At (Date & Time)
                   </label>
                   <input
-                    type="text"
+                    type="datetime-local"
                     value={receivedAt}
                     onChange={(e) => setReceivedAt(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed"
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
               </div>

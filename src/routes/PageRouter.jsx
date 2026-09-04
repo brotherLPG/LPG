@@ -53,6 +53,7 @@ import UpdateSupplier from '../Pages/Suppliers/updateSupplier';
 import SupplierDetails from '../Pages/Suppliers/SupplierDetails';
 import UpdateCylinderType from '../Pages/Cylinders/updateCylinderType';
 import UpdateLpgReceipt from '../Pages/LPGReceipts/updateLpgReceipt';
+import LpgReceiptDetails from '../Pages/LPGReceipts/LpgReceiptDetails';
 
 function PageRouter() {
   // Router container
@@ -103,6 +104,7 @@ function PageRouter() {
         <Route path="/inventory/add" element={<AddInventoryItem />} />
         <Route path="/lpg-receipts" element={<LpgReceipts />} />
         <Route path="/lpg-receipts/receive" element={<ReceiveLpg />} />
+        <Route path="/lpg-receipts/view/:id" element={<LpgReceiptDetails />} />
         <Route path="/lpg-receipts/edit/:id" element={<UpdateLpgReceipt />} />
         <Route path="/employees" element={<Employees />} />
         <Route path="/employees/add" element={<AddEmployee />} />
