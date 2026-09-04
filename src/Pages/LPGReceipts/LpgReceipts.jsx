@@ -44,11 +44,19 @@ function LpgReceipts() {
 
   const mappedReceipts = useMemo(() => apiReceipts.map((r) => {
     const receivedDate = r.receivedAt ? new Date(r.receivedAt) : null;
+    const receiptSupplierId = r.supplierId?._id || r.supplierId || r.supplier?._id || "";
+    const supplierRecord = suppliersList.find((item) => item._id === receiptSupplierId);
 
     return {
       _id: r._id,
       receiptNo: r.receiptNumber,
-      supplier: r.supplierId?.supplierName || "",
+      supplier:
+        r.supplierName ||
+        r.supplierId?.supplierName ||
+        r.supplier?.supplierName ||
+        supplierRecord?.supplierName ||
+        supplierRecord?.supplierCode ||
+        "-",
       date: receivedDate
         ? `${receivedDate.getDate().toString().padStart(2, '0')}/${(receivedDate.getMonth() + 1).toString().padStart(2, '0')}/${receivedDate.getFullYear()}`
         : "",
@@ -59,7 +67,7 @@ function LpgReceipts() {
       totalCost: r.totalPurchaseAmount,
       status: r.status || 'Confirmed',
     };
-  }), [apiReceipts]);
+  }), [apiReceipts, suppliersList]);
 
   const filteredReceipts = useMemo(() => mappedReceipts.filter((receipt) => {
     const matchesQuery = `${receipt.receiptNo} ${receipt.supplier} ${receipt.truckReg}`.toLowerCase().includes(query.toLowerCase());
