@@ -129,10 +129,10 @@ function Accounting() {
           </button>
           <button
             type="button"
-            onClick={() => navigate(`/accounting/details/${item.accountId}`)}
+            onClick={() => navigate(`/accounting/view/${item.accountId}`)}
             className="flex items-center gap-1.5 rounded-full bg-blue-50/70 border border-blue-200/60 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
           >
-            <Eye className="h-3.5 w-3.5" /> Details
+            <Eye className="h-3.5 w-3.5" /> View
           </button>
         </div>
       ),
