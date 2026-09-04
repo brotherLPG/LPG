@@ -152,4 +152,17 @@ export const queryKeys = {
     detail: id => ['filling-batches', 'detail', id],
   },
 
+  // =========================
+  // Accounts
+  // =========================
+  accounts: {
+    all: ['accounts'],
+
+    lists: () => ['accounts', 'list'],
+
+    list: (params) => ['accounts', 'list', params],
+
+    detail: id => ['accounts', 'detail', id]
+  },
+
 }

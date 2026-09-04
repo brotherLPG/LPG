@@ -1,17 +1,22 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useCreateAccount } from "../../queries/accounts/accounts.queries";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useUpdateAccount } from "../../queries/accounts/accounts.queries";
+import { useGetAccountById } from "../../queries/accounts/accounts.queries";
 import { useGetAccounts } from "../../queries/accounts/accounts.queries";
 import { useToast } from "../../utils/GlobalToast";
 import { AlertCircle, Loader } from "lucide-react";
 
-function AddAccount() {
+function UpdateAccount() {
   const navigate = useNavigate();
-  const createMutation = useCreateAccount();
+  const { id } = useParams();
+  const updateMutation = useUpdateAccount();
   const toast = useToast();
 
   // Fetch accounts to get form options from meta
   const { data: accountsData } = useGetAccounts();
+
+  // Fetch existing account data
+  const { data: accountData, isLoading: isLoadingAccount } = useGetAccountById(id);
 
   const [formData, setFormData] = useState({
     accountName: "",
@@ -31,6 +36,29 @@ function AddAccount() {
   });
 
   const [formErrors, setFormErrors] = useState({});
+
+  // Populate form with existing data when account is loaded
+  useEffect(() => {
+    if (accountData?.data) {
+      const account = accountData.data;
+      setFormData({
+        accountName: account.accountName || "",
+        accountType: account.accountType || "",
+        accountCategory: account.accountCategory || "",
+        parentAccountId: account.parentAccountId || null,
+        bankName: account.bankName || "",
+        branchName: account.branchName || "",
+        accountNumber: account.accountNumber || "",
+        ibanOrSwift: account.ibanOrSwift || "",
+        openingBalanceAmount: account.openingBalanceAmount || "",
+        openedAt: account.openedAt ? account.openedAt.split('T')[0] : "",
+        description: account.description || "",
+        isActive: account.isActive ? "active" : "inactive",
+        allowManualEntries: account.allowManualEntries ?? true,
+        isPrimary: account.isPrimary ?? false,
+      });
+    }
+  }, [accountData]);
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -65,32 +93,43 @@ function AddAccount() {
     const submitData = {
       accountName: formData.accountName,
       accountType: formData.accountType,
-      accountCategory: formData.accountCategory,
+      // accountCategory: formData.accountCategory,
       parentAccountId: formData.parentAccountId || null,
-      description: formData.description,
-      bankName: formData.bankName,
-      branchName: formData.branchName,
-      accountNumber: formData.accountNumber,
-      ibanOrSwift: formData.ibanOrSwift,
+      // description: formData.description,
+      // bankName: formData.bankName,
+      // branchName: formData.branchName,
+      // accountNumber: formData.accountNumber,
+      // ibanOrSwift: formData.ibanOrSwift,
       openingBalanceAmount: formData.openingBalanceAmount ? parseFloat(formData.openingBalanceAmount) : 0,
-      openedAt: formData.openedAt || null,
+      // openedAt: formData.openedAt || null,
       isActive: formData.isActive === "active",
-      allowManualEntries: formData.allowManualEntries,
-      isPrimary: formData.isPrimary,
+      // allowManualEntries: formData.allowManualEntries,
+      // isPrimary: formData.isPrimary,
     };
 
-    createMutation.mutate(submitData, {
+    updateMutation.mutate({ id, data: submitData }, {
       onSuccess: (response) => {
-        toast.success(response.message || "Account created successfully");
-        setTimeout(() => {
-          navigate("/accounting");
-        }, 1500);
+        toast.success(response.message || "Account updated successfully");
+        navigate("/accounting");
       },
       onError: (error) => {
-        toast.error(error?.response?.data?.message || error?.message || "Failed to create account");
+        toast.error(error?.response?.data?.message || error?.message || "Failed to update account");
       },
     });
   };
+
+  if (isLoadingAccount) {
+    return (
+      <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+        <div className="flex items-center justify-center h-96">
+          <div className="flex flex-col items-center gap-3">
+            <Loader className="h-8 w-8 animate-spin text-slate-400" />
+            <p className="text-sm text-slate-500">Loading account...</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
@@ -110,14 +149,14 @@ function AddAccount() {
             Accounts
           </span>{" "}
           <span className="px-1 text-slate-400">/</span>{" "}
-          <span className="font-semibold text-slate-600">Add Account</span>
+          <span className="font-semibold text-slate-600">Update Account</span>
         </p>
 
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-          Add Account
+          Update Account
         </h1>
         <p className="text-sm text-tertiary">
-          Create a new ledger account for the Rawalpindi plant chart of accounts
+          Update the ledger account details
         </p>
       </div>
 
@@ -136,10 +175,9 @@ function AddAccount() {
                 </label>
                 <input
                   type="text"
-                  // value={formData.accountCode}
-                  // onChange={(e) => handleChange("accountCode", e.target.value)}
-                  placeholder="Auto-generated on save"
+                  value={accountData?.data?.accountCode || ""}
                   disabled
+                  placeholder="Auto-generated"
                   className="w-full rounded-md border border-slate-200 bg-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
@@ -417,18 +455,18 @@ function AddAccount() {
           <button
             type="button"
             onClick={() => navigate("/accounting")}
-            disabled={createMutation.isPending}
+            disabled={updateMutation.isPending}
             className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>
           <button
             type="submit"
-            disabled={createMutation.isPending}
+            disabled={updateMutation.isPending}
             className="inline-flex items-center gap-2 rounded-lg bg-[#008951] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#007545] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {createMutation.isPending && <Loader className="h-4 w-4 animate-spin" />}
-            {createMutation.isPending ? "Saving..." : "Save Account"}
+            {updateMutation.isPending && <Loader className="h-4 w-4 animate-spin" />}
+            {updateMutation.isPending ? "Updating..." : "Update Account"}
           </button>
         </div>
       </form>
@@ -436,4 +474,4 @@ function AddAccount() {
   );
 }
 
-export default AddAccount;
+export default UpdateAccount;
