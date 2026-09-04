@@ -84,7 +84,7 @@ function LpgReceiptDetails() {
         <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
           <h2 className="border-b border-slate-100 px-4 py-3 text-base font-bold text-slate-800">Receiving Details</h2>
           <dl className="grid gap-5 p-5 sm:grid-cols-2">
-            <DetailItem label="Storage Tank" value={tankName} />
+            {/* <DetailItem label="Storage Tank" value={tankName} /> */}
             <DetailItem label="Truck Registration Number" value={receipt.truckRegistrationNumber} />
             <DetailItem label="Received Quantity" value={receipt.receivedQuantityKg ? `${receipt.receivedQuantityKg.toLocaleString()} KG` : undefined} />
             <DetailItem label="Purchase Rate" value={receipt.purchaseRatePerKg ? `Rs. ${receipt.purchaseRatePerKg.toLocaleString()}` : undefined} />

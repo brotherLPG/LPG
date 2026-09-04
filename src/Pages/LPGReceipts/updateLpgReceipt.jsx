@@ -47,6 +47,8 @@ function UpdateLpgReceipt() {
       setReceivedByEmployeeId(
         s.receivedByEmployeeId?._id || s.receivedByEmployeeId || s.receivedBy?._id || "",
       );
+      console.log(s);
+      
       setRemarks(s.remarks || "");
     }
   }, [data]);
@@ -69,18 +71,18 @@ function UpdateLpgReceipt() {
   const { data: employeesData } = useEmployees({ search: "", employmentStatus: "active", page: 1, limit: 100 });
   const employees = employeesData?.data?.items || [];
 
-  useEffect(() => {
-    if (!supplierId && suppliers.length) {
-      // if supplier not set from API, default to first
-      setSupplierId(suppliers[0]._id);
-    }
-  }, [suppliers]);
+  // useEffect(() => {
+  //   if (!supplierId && suppliers.length) {
+  //     // if supplier not set from API, default to first
+  //     setSupplierId(suppliers[0]._id);
+  //   }
+  // }, [suppliers]);
 
-  useEffect(() => {
-    if (!receivedByEmployeeId && employees.length) {
-      setReceivedByEmployeeId(employees[0]._id);
-    }
-  }, [employees, receivedByEmployeeId]);
+  // useEffect(() => {
+  //   if (!receivedByEmployeeId && employees.length) {
+  //     setReceivedByEmployeeId(employees[0]._id);
+  //   }
+  // }, [employees, receivedByEmployeeId]);
 
   if (isFetching) {
     return (
