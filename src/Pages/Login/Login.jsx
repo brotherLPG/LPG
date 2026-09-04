@@ -103,7 +103,7 @@ function Login() {
                     Access Denied
                   </p>
                   <p className="text-sm mt-1 text-error-dark">
-                    {loginMutation.error.response.data.message || "Something went wrong. Please try again."}
+                    {loginMutation?.error?.response?.data?.message || "Something went wrong. Please try again."}
                   </p>
                 </div>
               </div>
