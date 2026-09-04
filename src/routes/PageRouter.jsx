@@ -47,6 +47,8 @@ import Payments from '../Pages/Payments/Payments';
 import AddPayment from '../Pages/Payments/addPayment';
 import FillingBatches from '../Pages/FillingBatches/FillingBatches';
 import CreateBatch from '../Pages/FillingBatches/CreateBatch';
+import UpdateBatch from '../Pages/FillingBatches/UpdateBatch';
+import FillingBatchDetails from '../Pages/FillingBatches/FillingBatchDetails';
 import MaintenanceAssets from '../Pages/MaintenanceAssets/MaintenanceAssets';
 import LogMaintenance from '../Pages/MaintenanceAssets/LogMaintenance';
 import UpdateSupplier from '../Pages/Suppliers/updateSupplier';
@@ -116,7 +118,8 @@ function PageRouter() {
         <Route path="/audit-logs" element={<AuditLogs />} />
         <Route path="/filling-batches" element={<FillingBatches />} />
         <Route path="/filling-batches/create" element={<CreateBatch />} />
-        <Route path="/filling-batches/edit/:id" element={<CreateBatch />} />
+        <Route path="/filling-batches/view/:id" element={<FillingBatchDetails />} />
+        <Route path="/filling-batches/edit/:id" element={<UpdateBatch />} />
         <Route path="/maintenance-assets" element={<MaintenanceAssets />} />
         <Route path="/maintenance-assets/log" element={<LogMaintenance />} />
       </Routes>
