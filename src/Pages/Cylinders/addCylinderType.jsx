@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Switch } from "@heroui/react";
 import { ChevronDown } from "lucide-react";
 import { useToast } from "../../utils/GlobalToast";
-import { useCreateCylinderType } from "../../queries/cylinderTypes/cylinderTypes.queries";
+import { useCreateCylinderType, useCylinderTypes } from "../../queries/cylinderTypes/cylinderTypes.queries";
 
 function AddCylinderType() {
   const navigate = useNavigate();
@@ -25,6 +25,9 @@ function AddCylinderType() {
   const [safetyCert, setSafetyCert] = useState("");
 
   const createMutation = useCreateCylinderType();
+  const { data: cylinderTypesData } = useCylinderTypes({ limit: 1 });
+
+  const meta = cylinderTypesData?.data?.meta;
 
 
      const handleSubmit = async (e) => {
@@ -33,15 +36,15 @@ function AddCylinderType() {
        try {
        const payload = {
          typeName,
-         category,
+         cylinderCategory: category,
          capacityKg: parseFloat(capacityKg) || 0,
          tareWeightKg: parseFloat(tareWeightKg) || 0,
          colorCode,
          isActive,
          sellingPricePerCylinder: parseFloat(sellingPrice) || 0,
-         purchasePricePerCylinder: parseFloat(purchasePrice) || 0,
-         refillPricePerCylinder: parseFloat(refillPrice) || 0,
-         securityDeposit: parseFloat(securityDeposit) || 0,
+         purchasePriceAmount: parseFloat(purchasePrice) || 0,
+         refillPriceAmount: parseFloat(refillPrice) || 0,
+         securityDepositAmount: parseFloat(securityDeposit) || 0,
          description,
          valveType,
          material,
@@ -141,9 +144,11 @@ function AddCylinderType() {
                     <option value="" disabled>
                       Select Category
                     </option>
-                    <option value="Commercial">Commercial</option>
-                    <option value="Domestic">Domestic</option>
-                    <option value="Industrial">Industrial</option>
+                    {meta?.categories?.map((cat) => (
+                      <option key={cat.value} value={cat.value}>
+                        {cat.label}
+                      </option>
+                    ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
@@ -189,11 +194,11 @@ function AddCylinderType() {
                     <option value="" disabled>
                       Select Color Identification
                     </option>
-                    <option value="Red">Red</option>
-                    <option value="Blue">Blue</option>
-                    <option value="Green">Green</option>
-                    <option value="Silver / Gray">Silver / Gray</option>
-                    <option value="Yellow">Yellow</option>
+                    {meta?.colorCodes?.map((color) => (
+                      <option key={color.value} value={color.value}>
+                        {color.label}
+                      </option>
+                    ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
@@ -339,16 +344,11 @@ function AddCylinderType() {
                     <option value="" disabled>
                       Select Valve Type
                     </option>
-                    <option value="Compact Valve (20mm)">
-                      Compact Valve (20mm)
-                    </option>
-                    <option value="Jumbo Valve (22mm)">
-                      Jumbo Valve (22mm)
-                    </option>
-                    <option value="Threaded Valve">Threaded Valve</option>
-                    <option value="Standard POL Valve">
-                      Standard POL Valve
-                    </option>
+                    {meta?.valveTypes?.map((valve) => (
+                      <option key={valve.value} value={valve.value}>
+                        {valve.label}
+                      </option>
+                    ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
@@ -367,11 +367,11 @@ function AddCylinderType() {
                     <option value="" disabled>
                       Select Material
                     </option>
-                    <option value="Steel (High Tensile)">
-                      Steel (High Tensile)
-                    </option>
-                    <option value="Composite / Fiber">Composite / Fiber</option>
-                    <option value="Aluminum Alloy">Aluminum Alloy</option>
+                    {meta?.materials?.map((mat) => (
+                      <option key={mat.value} value={mat.value}>
+                        {mat.label}
+                      </option>
+                    ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>

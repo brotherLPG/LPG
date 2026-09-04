@@ -6,15 +6,6 @@ import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
 import { useCylinderTypes, useDeleteCylinderType } from "../../queries/cylinderTypes/cylinderTypes.queries";
 
-const initialCylinderTypes = [
-  { code: "CYL-001", name: "Commercial LPG 11KG", capacity: "11.0 KG", tare: "8.5 KG", price: "Rs. 2,850", status: "Active" },
-  { code: "CYL-002", name: "Commercial LPG 22KG", capacity: "22.0 KG", tare: "15.0 KG", price: "Rs. 5,500", status: "Active" },
-  { code: "CYL-003", name: "Industrial LPG 45KG", capacity: "45.0 KG", tare: "33.0 KG", price: "Rs. 11,200", status: "Active" },
-  { code: "CYL-004", name: "Domestic LPG 5KG", capacity: "5.0 KG", tare: "4.2 KG", price: "Rs. 1,450", status: "Active" },
-  { code: "CYL-005", name: "Commercial LPG 11KG (Old)", capacity: "11.0 KG", tare: "9.0 KG", price: "Rs. 2,650", status: "Inactive" },
-  { code: "CYL-006", name: "Industrial LPG 50KG", capacity: "50.0 KG", tare: "38.0 KG", price: "Rs. 12,500", status: "Active" },
-  { code: "CYL-007", name: "Domestic LPG 3KG", capacity: "3.0 KG", tare: "2.8 KG", price: "Rs. 950", status: "Active" },
-];
 
 function CylinderTypes() {
   const navigate = useNavigate();
@@ -43,6 +34,8 @@ function CylinderTypes() {
     capacity: `${s.capacityKg?.toFixed?.(1) || s.capacityKg} KG`,
     tare: `${s.tareWeightKg?.toFixed?.(1) || s.tareWeightKg} KG`,
     price: s.sellingPricePerCylinder?.toLocaleString ? `Rs. ${s.sellingPricePerCylinder.toLocaleString()}` : s.sellingPricePerCylinder,
+    purchasePrice: s.purchasePriceAmount?.toLocaleString ? `Rs. ${s.purchasePriceAmount.toLocaleString()}` : s.purchasePriceAmount,
+    refillPrice: s.refillPriceAmount?.toLocaleString ? `Rs. ${s.refillPriceAmount.toLocaleString()}` : s.refillPriceAmount,
     status: s.isActive ? "Active" : "Inactive",
     _id: s._id,
   })), [cylinderTypes]);
@@ -119,6 +112,24 @@ function CylinderTypes() {
       ),
     },
     {
+      key: "purchasePrice",
+      label: "Purchase Price",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3",
+      renderCell: (item) => (
+        <span className="text-slate-700 font-semibold text-[13px]">{item.purchasePrice}</span>
+      ),
+    },
+    {
+      key: "refillPrice",
+      label: "Refill Price",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-3",
+      renderCell: (item) => (
+        <span className="text-slate-700 font-semibold text-[13px]">{item.refillPrice}</span>
+      ),
+    },
+    {
       key: "status",
       label: "Status",
       className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 ",
@@ -145,6 +156,7 @@ function CylinderTypes() {
           <button
             type="button"
             aria-label={`View ${item.name}`}
+            onClick={() => navigate(`/cylinders/view-type/${item._id}`)}
             className="flex items-center gap-1.5 rounded-full bg-blue-50/70 border border-blue-200/60 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
           >
             <Eye className="h-3.5 w-3.5" /> View

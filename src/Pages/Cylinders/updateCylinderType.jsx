@@ -12,6 +12,9 @@ function UpdateCylinderType() {
   const { data, isLoading: isFetching } = useCylinderTypeById(id);
   const updateMutation = useUpdateCylinderType();
 
+  const cylinderData = data?.data?._doc;
+  const meta = data?.data?.form;
+
   const [typeName, setTypeName] = useState("");
   const [category, setCategory] = useState("");
   const [capacityKg, setCapacityKg] = useState("");
@@ -28,37 +31,36 @@ function UpdateCylinderType() {
   const [safetyCert, setSafetyCert] = useState("");
 
   useEffect(() => {
-    if (data?.data) {
-      const s = data.data;
-      setTypeName(s.typeName || "");
-      setCategory(s.category || "");
-      setCapacityKg(s.capacityKg ?? "");
-      setTareWeightKg(s.tareWeightKg ?? "");
-      setColorCode(s.colorCode || "");
-      setIsActive(typeof s.isActive === "boolean" ? s.isActive : true);
-      setSellingPrice(s.sellingPricePerCylinder ?? "");
-      setPurchasePrice(s.purchasePricePerCylinder ?? "");
-      setRefillPrice(s.refillPricePerCylinder ?? "");
-      setSecurityDeposit(s.securityDeposit ?? "");
-      setDescription(s.description || "");
-      setValveType(s.valveType || "");
-      setMaterial(s.material || "");
-      setSafetyCert(s.safetyCertificationNumber || "");
+    if (cylinderData) {
+      setTypeName(cylinderData.typeName || "");
+      setCategory(cylinderData.cylinderCategory || "");
+      setCapacityKg(cylinderData.capacityKg ?? "");
+      setTareWeightKg(cylinderData.tareWeightKg ?? "");
+      setColorCode(cylinderData.colorCode || "");
+      setIsActive(typeof cylinderData.isActive === "boolean" ? cylinderData.isActive : true);
+      setSellingPrice(cylinderData.sellingPricePerCylinder ?? "");
+      setPurchasePrice(cylinderData.purchasePriceAmount ?? "");
+      setRefillPrice(cylinderData.refillPriceAmount ?? "");
+      setSecurityDeposit(cylinderData.securityDepositAmount ?? "");
+      setDescription(cylinderData.description || "");
+      setValveType(cylinderData.valveType || "");
+      setMaterial(cylinderData.material || "");
+      setSafetyCert(cylinderData.safetyCertificationNumber || "");
     }
-  }, [data]);
+  }, [cylinderData]);
 
   const handleSave = async () => {
     const payload = {
       typeName,
-      category,
+      cylinderCategory: category,
       capacityKg: parseFloat(capacityKg) || 0,
       tareWeightKg: parseFloat(tareWeightKg) || 0,
       colorCode,
       isActive,
       sellingPricePerCylinder: parseFloat(sellingPrice) || 0,
-      purchasePricePerCylinder: parseFloat(purchasePrice) || 0,
-      refillPricePerCylinder: parseFloat(refillPrice) || 0,
-      securityDeposit: parseFloat(securityDeposit) || 0,
+      purchasePriceAmount: parseFloat(purchasePrice) || 0,
+      refillPriceAmount: parseFloat(refillPrice) || 0,
+      securityDepositAmount: parseFloat(securityDeposit) || 0,
       description,
       valveType,
       material,
@@ -118,7 +120,7 @@ function UpdateCylinderType() {
             <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Type Code</label>
-                <input type="text" disabled value={data?.data?.typeCode || ""} className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed" />
+                <input type="text" disabled value={cylinderData?.typeCode || ""} className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed" />
               </div>
 
               <div>
@@ -131,9 +133,11 @@ function UpdateCylinderType() {
                 <div className="relative">
                   <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100">
                     <option value="" disabled>Select Category</option>
-                    <option value="Commercial">Commercial</option>
-                    <option value="Domestic">Domestic</option>
-                    <option value="Industrial">Industrial</option>
+                    {meta?.categories?.map((cat) => (
+                      <option key={cat.value} value={cat.value}>
+                        {cat.label}
+                      </option>
+                    ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
@@ -154,11 +158,11 @@ function UpdateCylinderType() {
                 <div className="relative">
                   <select value={colorCode} onChange={(e) => setColorCode(e.target.value)} className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100">
                     <option value="" disabled>Select Color Identification</option>
-                    <option value="Red">Red</option>
-                    <option value="Blue">Blue</option>
-                    <option value="Green">Green</option>
-                    <option value="Silver / Gray">Silver / Gray</option>
-                    <option value="Yellow">Yellow</option>
+                    {meta?.colorCodes?.map((color) => (
+                      <option key={color.value} value={color.value}>
+                        {color.label}
+                      </option>
+                    ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
@@ -223,11 +227,13 @@ function UpdateCylinderType() {
                 <div className="relative">
                   <select value={valveType} onChange={(e) => setValveType(e.target.value)} className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100">
                     <option value="" disabled>Select Valve Type</option>
-                    <option value="Compact Valve (20mm)">Compact Valve (20mm)</option>
-                    <option value="Jumbo Valve (22mm)">Jumbo Valve (22mm)</option>
-                    <option value="Threaded Valve">Threaded Valve</option>
-                    <option value="Standard POL Valve">Standard POL Valve</option>
+                    {meta?.valveTypes?.map((valve) => (
+                      <option key={valve.value} value={valve.value}>
+                        {valve.label}
+                      </option>
+                    ))}
                   </select>
+                  <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
               </div>
               <div>
@@ -235,10 +241,13 @@ function UpdateCylinderType() {
                 <div className="relative">
                   <select value={material} onChange={(e) => setMaterial(e.target.value)} className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100">
                     <option value="" disabled>Select Material</option>
-                    <option value="Steel (High Tensile)">Steel (High Tensile)</option>
-                    <option value="Composite / Fiber">Composite / Fiber</option>
-                    <option value="Aluminum Alloy">Aluminum Alloy</option>
+                    {meta?.materials?.map((mat) => (
+                      <option key={mat.value} value={mat.value}>
+                        {mat.label}
+                      </option>
+                    ))}
                   </select>
+                  <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
               </div>
               <div>

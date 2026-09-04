@@ -41,6 +41,8 @@ import AddEmployee from '../Pages/Employees/addEmployee';
 import UpdateEmployee from '../Pages/Employees/updateEmployee';
 import AddSupplier from '../Pages/Suppliers/addSupplier';
 import AddCylinderType from '../Pages/Cylinders/addCylinderType';
+import UpdateCylinderType from '../Pages/Cylinders/updateCylinderType';
+import ViewCylinderType from '../Pages/Cylinders/ViewCylinderType';
 import Inventory from '../Pages/Inventory/inventory';
 import AddInventoryItem from '../Pages/Inventory/AddInventoryItem';
 import LpgReceipts from '../Pages/LPGReceipts/LpgReceipts';
@@ -55,7 +57,6 @@ import MaintenanceAssets from '../Pages/MaintenanceAssets/MaintenanceAssets';
 import LogMaintenance from '../Pages/MaintenanceAssets/LogMaintenance';
 import UpdateSupplier from '../Pages/Suppliers/updateSupplier';
 import SupplierDetails from '../Pages/Suppliers/SupplierDetails';
-import UpdateCylinderType from '../Pages/Cylinders/updateCylinderType';
 import UpdateLpgReceipt from '../Pages/LPGReceipts/updateLpgReceipt';
 import LpgReceiptDetails from '../Pages/LPGReceipts/LpgReceiptDetails';
 
@@ -104,6 +105,10 @@ function PageRouter() {
         <Route
           path="/cylinders/edit-type/:id"
           element={<UpdateCylinderType />}
+        />
+        <Route
+          path="/cylinders/view-type/:id"
+          element={<ViewCylinderType />}
         />
         <Route path="/storage-tanks" element={<StorageTanks />} />
         <Route path="/inventory" element={<Inventory />} />
