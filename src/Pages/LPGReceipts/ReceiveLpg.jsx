@@ -45,7 +45,7 @@ function ReceiveLpg() {
  const payload = {
    supplierId,
    receivedByEmployeeId,
-   storageTankId,
+  //  storageTankId,
    receivedQuantityKg: parseFloat(quantity) || 0,
    purchaseRatePerKg: parseFloat(rate) || 0,
    truckRegistrationNumber: truckReg,
@@ -175,7 +175,7 @@ function ReceiveLpg() {
               </h2>
             </div>
             <div className="p-5 space-y-5">
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Route to Storage Tank <span className="text-rose-500">*</span>
                 </label>
@@ -191,7 +191,7 @@ function ReceiveLpg() {
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
-              </div>
+              </div> */}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>

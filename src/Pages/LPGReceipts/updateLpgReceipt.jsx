@@ -97,7 +97,7 @@ function UpdateLpgReceipt() {
     const payload = {
       supplierId,
       receivedByEmployeeId,
-      storageTankId,
+      // storageTankId,
       receivedQuantityKg: parseFloat(quantity) || 0,
       purchaseRatePerKg: parseFloat(rate) || 0,
       truckRegistrationNumber: truckReg,
@@ -220,7 +220,7 @@ function UpdateLpgReceipt() {
               </h2>
             </div>
             <div className="p-5 space-y-5">
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Route to Storage Tank <span className="text-rose-500">*</span>
                 </label>
@@ -236,7 +236,7 @@ function UpdateLpgReceipt() {
                     </option>
                   </select>
                 </div>
-              </div>
+              </div> */}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
