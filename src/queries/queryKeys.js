@@ -143,11 +143,26 @@ export const queryKeys = {
   fillingBatches: {
     all: ['filling-batches'],
 
+    formOptions: () => ['filling-batches', 'form-options'],
+
     lists: () => ['filling-batches', 'list'],
 
     list: (params) => ['filling-batches', 'list', params],
 
     detail: id => ['filling-batches', 'detail', id],
+  },
+
+  // =========================
+  // Accounts
+  // =========================
+  accounts: {
+    all: ['accounts'],
+
+    lists: () => ['accounts', 'list'],
+
+    list: (params) => ['accounts', 'list', params],
+
+    detail: id => ['accounts', 'detail', id]
   },
 
 }

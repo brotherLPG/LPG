@@ -12,6 +12,7 @@ import { getFillingBatches } from '../api/fillingBatches.api.js'
 import { getEmployees } from '../api/employees.api.js'
 import { getPermissions } from '../api/permissions.api.js'
 import { getCurrentUser } from '../api/auth.api.js'
+import { getAccounts } from '../api/accounts.api.js'
 
 export const prefetchDashboard = async queryClient => {
   await Promise.all([
@@ -182,6 +183,17 @@ export const prefetchDashboard = async queryClient => {
 
       queryFn: () =>
         getPermissions()
+    }),
+
+    // ========================================
+    // Accounts
+    // ========================================
+
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.accounts.list({ page: 1, limit: 10 }),
+
+      queryFn: () =>
+        getAccounts({ page: 1, limit: 10 })
     }),
   ])
 }

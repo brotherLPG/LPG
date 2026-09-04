@@ -30,6 +30,8 @@ function FillingBatches() {
   const deleteMutation = useDeleteFillingBatch();
 
   const apiBatches = batchesData?.data?.items || [];
+  const responseSummary = batchesData?.data?.summary;
+  const responseStatuses = batchesData?.data?.meta?.statuses || [];
   const pagination = batchesData?.data?.pagination || { total: 0, page: 1, limit: 10, totalPages: 1 };
 
   const mappedBatches = useMemo(
@@ -39,20 +41,22 @@ function FillingBatches() {
 
         return {
           _id: batch._id,
+          id: batch._id,
           batchNo: batch.batchNumber,
-          tank: batch.storageTankId?.tankName || batch.storageTankId?.tankCode || "-",
-          cylinderType: batch.cylinderTypeId?.typeName || batch.cylinderTypeId?.typeCode || "-",
-          quantity: batch.cylinderCount,
+          tank: batch.sourceTankName || batch.tank?.displayName || "-",
+          cylinderType: batch.cylinderTypeName || batch.cylinderType?.typeName || "-",
+          quantity: Number(batch.cylinderCount) || 0,
           actualLpgUsedKg: batch.actualLpgUsedKg,
           targetFillWeightKg: batch.targetFillWeightKg,
-          operator: batch.operatorEmployeeId?.fullName || batch.operatorEmployeeId?.employeeCode || "-",
+          operator: batch.operatorName || batch.operator?.fullName || "-",
           date: parsedDate
             ? `${parsedDate.getDate().toString().padStart(2, "0")}/${(parsedDate.getMonth() + 1)
                 .toString()
                 .padStart(2, "0")}/${parsedDate.getFullYear()}`
             : "",
           receivedDate: parsedDate ? parsedDate.toISOString().slice(0, 10) : "",
-          status: batch.batchStatus || "Completed",
+          status: batch.batchStatus || "pending",
+          statusLabel: batch.batchStatusLabel || batch.batchStatus || "Pending",
         };
       }),
     [apiBatches]
@@ -70,18 +74,17 @@ function FillingBatches() {
   }, [mappedBatches, query, status, selectedDate]);
 
   const summaryStats = useMemo(() => {
-    const totalQuantity = mappedBatches.reduce((sum, item) => sum + (item.actualLpgUsedKg || 0), 0);
-    const completedCount = mappedBatches.filter((item) => item.status === "Completed").length;
-    const inProgressCount = mappedBatches.filter((item) => item.status === "In Progress").length;
-    const pendingCount = mappedBatches.filter((item) => item.status === "Pending").length;
+    const totalQuantity = responseSummary?.totalQuantityKg ?? mappedBatches.reduce((sum, item) => sum + (Number(item.actualLpgUsedKg) || 0), 0);
+    const completedCount = responseSummary?.completed ?? mappedBatches.filter((item) => item.status === "completed").length;
+    const pendingCount = responseSummary?.pending ?? mappedBatches.filter((item) => item.status === "pending").length;
 
     return {
-      totalBatches: pagination.total || mappedBatches.length,
+      totalBatches: responseSummary?.totalBatches ?? (pagination.total || mappedBatches.length),
       totalQuantity,
       completedCount,
-      pendingCount: pendingCount + inProgressCount,
+      pendingCount,
     };
-  }, [mappedBatches, pagination.total]);
+  }, [mappedBatches, pagination.total, responseSummary]);
 
   const batchColumns = [
     {
@@ -140,16 +143,16 @@ function FillingBatches() {
       cellClassName: "px-4 py-4",
       renderCell: (item) => {
         const statusStyles = {
-          Completed: "bg-emerald-50 text-emerald-600 border border-emerald-100",
-          "In Progress": "bg-blue-50 text-blue-600 border border-blue-100",
-          Pending: "bg-amber-50 text-amber-600 border border-amber-100",
+          completed: "bg-emerald-50 text-emerald-600 border border-emerald-100",
+          "in-progress": "bg-blue-50 text-blue-600 border border-blue-100",
+          pending: "bg-amber-50 text-amber-600 border border-amber-100",
         };
 
         return (
           <span
             className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusStyles[item.status] || "bg-slate-50 text-slate-600 border border-slate-200"}`}
           >
-            {item.status}
+            {item.statusLabel}
           </span>
         );
       },
@@ -164,6 +167,7 @@ function FillingBatches() {
           <button
             type="button"
             aria-label={`View ${item.batchNo}`}
+            onClick={() => navigate(`/filling-batches/view/${item._id}`)}
             className="text-[#1a56db] hover:text-blue-800 transition-colors"
           >
             <Eye className="h-4 w-4" strokeWidth={2.5} />
@@ -176,14 +180,14 @@ function FillingBatches() {
           >
             <Edit3 className="h-4 w-4" strokeWidth={2.5} />
           </button>
-          <button
+          {/* <button
             type="button"
             aria-label={`Delete ${item.batchNo}`}
             onClick={() => setDeleteModal({ isOpen: true, item })}
             className="text-rose-600 hover:text-rose-800 transition-colors"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M8 6v14a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-          </button>
+          </button> */}
         </div>
       ),
     },
@@ -285,9 +289,9 @@ function FillingBatches() {
                   className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-40 lg:w-44"
                 >
                   <option value="All">Status: All</option>
-                  <option value="Completed">Completed</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Pending">Pending</option>
+                  {responseStatuses.map((item) => (
+                    <option key={item.value} value={item.value}>{item.label}</option>
+                  ))}
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
               </div>

@@ -14,6 +14,8 @@ import CreateReturn from '../Pages/Sales/CreateReturn';
 import Invoices from '../Pages/Invoices/Invoices';
 import Accounting from '../Pages/Accounting/Accounting';
 import AddAccount from '../Pages/Accounting/AddAccount';
+import UpdateAccount from '../Pages/Accounting/UpdateAccount';
+import ViewAccount from '../Pages/Accounting/ViewAccount';
 import AccountDetails from '../Pages/Accounting/AccountDetails';
 import Branches from '../Pages/Branches/Branches';
 import Notifications from '../Pages/Notifications/Notifications';
@@ -47,6 +49,8 @@ import Payments from '../Pages/Payments/Payments';
 import AddPayment from '../Pages/Payments/addPayment';
 import FillingBatches from '../Pages/FillingBatches/FillingBatches';
 import CreateBatch from '../Pages/FillingBatches/CreateBatch';
+import UpdateBatch from '../Pages/FillingBatches/UpdateBatch';
+import FillingBatchDetails from '../Pages/FillingBatches/FillingBatchDetails';
 import MaintenanceAssets from '../Pages/MaintenanceAssets/MaintenanceAssets';
 import LogMaintenance from '../Pages/MaintenanceAssets/LogMaintenance';
 import UpdateSupplier from '../Pages/Suppliers/updateSupplier';
@@ -82,6 +86,8 @@ function PageRouter() {
         <Route path="/invoices" element={<Invoices />} />
         <Route path="/accounting" element={<Accounting />} />
         <Route path="/accounting/add" element={<AddAccount />} />
+        <Route path="/accounting/edit/:id" element={<UpdateAccount />} />
+        <Route path="/accounting/view/:id" element={<ViewAccount />} />
         <Route path="/accounting/details/:id" element={<AccountDetails />} />
         <Route path="/branches" element={<Branches />} />
         <Route path="/notifications" element={<Notifications />} />
@@ -116,7 +122,8 @@ function PageRouter() {
         <Route path="/audit-logs" element={<AuditLogs />} />
         <Route path="/filling-batches" element={<FillingBatches />} />
         <Route path="/filling-batches/create" element={<CreateBatch />} />
-        <Route path="/filling-batches/edit/:id" element={<CreateBatch />} />
+        <Route path="/filling-batches/view/:id" element={<FillingBatchDetails />} />
+        <Route path="/filling-batches/edit/:id" element={<UpdateBatch />} />
         <Route path="/maintenance-assets" element={<MaintenanceAssets />} />
         <Route path="/maintenance-assets/log" element={<LogMaintenance />} />
       </Routes>

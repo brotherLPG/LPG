@@ -2,11 +2,19 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../queryKeys";
 import {
   getFillingBatches,
+  getFillingBatchFormOptions,
   deleteFillingBatch,
   createFillingBatch,
   updateFillingBatch,
   getFillingBatchById,
 } from "../../api/fillingBatches.api";
+
+export const useFillingBatchFormOptions = () => {
+  return useQuery({
+    queryKey: queryKeys.fillingBatches.formOptions(),
+    queryFn: getFillingBatchFormOptions,
+  });
+};
 
 export const useFillingBatches = (params) => {
   return useQuery({

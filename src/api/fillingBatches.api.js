@@ -5,6 +5,11 @@ export const getFillingBatches = async (params) => {
   return response.data
 }
 
+export const getFillingBatchFormOptions = async () => {
+  const response = await api.get('/filling-batches/form-options')
+  return response.data
+}
+
 export const deleteFillingBatch = async (id) => {
   const response = await api.delete(`/filling-batches/${id}`)
   return response.data
@@ -27,6 +32,7 @@ export const getFillingBatchById = async (id) => {
 
 export default {
   getFillingBatches,
+  getFillingBatchFormOptions,
   deleteFillingBatch,
   createFillingBatch,
   updateFillingBatch,
