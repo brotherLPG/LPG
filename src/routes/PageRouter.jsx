@@ -50,6 +50,7 @@ import CreateBatch from '../Pages/FillingBatches/CreateBatch';
 import MaintenanceAssets from '../Pages/MaintenanceAssets/MaintenanceAssets';
 import LogMaintenance from '../Pages/MaintenanceAssets/LogMaintenance';
 import UpdateSupplier from '../Pages/Suppliers/updateSupplier';
+import SupplierDetails from '../Pages/Suppliers/SupplierDetails';
 import UpdateCylinderType from '../Pages/Cylinders/updateCylinderType';
 import UpdateLpgReceipt from '../Pages/LPGReceipts/updateLpgReceipt';
 
@@ -89,6 +90,7 @@ function PageRouter() {
         <Route path="/customers/edit/:id" element={<UpdateCustomer />} />
         <Route path="/suppliers" element={<Suppliers />} />
         <Route path="/suppliers/add" element={<AddSupplier />} />
+        <Route path="/suppliers/view/:id" element={<SupplierDetails />} />
         <Route path="/suppliers/edit/:id" element={<UpdateSupplier />} />
         <Route path="/cylinder-types" element={<CylinderTypes />} />
         <Route path="/cylinders/add-type" element={<AddCylinderType />} />

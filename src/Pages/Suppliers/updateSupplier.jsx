@@ -24,11 +24,11 @@ function UpdateSupplier() {
     paymentTermDays: 30,
     openingBalanceAmount: 0,
     city: "",
-    state: "",
+    stateProvince: "",
     creditLimitAmount: "",
     bankName: "",
-    accountTitle: "",
-    accountNumber: "",
+    bankAccountTitle: "",
+    bankAccountNumber: "",
     iban: "",
   });
 
@@ -44,11 +44,11 @@ function UpdateSupplier() {
         paymentTermDays: supplier.paymentTermDays || 30,
         openingBalanceAmount: supplier.openingBalanceAmount || 0,
         city: supplier.city || "",
-        state: supplier.state || "",
+        stateProvince: supplier.stateProvince || supplier.state || "",
         creditLimitAmount: supplier.creditLimitAmount || "",
         bankName: supplier.bankName || "",
-        accountTitle: supplier.accountTitle || "",
-        accountNumber: supplier.accountNumber || "",
+        bankAccountTitle: supplier.bankAccountTitle || supplier.accountTitle || "",
+        bankAccountNumber: supplier.bankAccountNumber || supplier.accountNumber || "",
         iban: supplier.iban || "",
       });
       setIsActive(supplier.isActive !== undefined ? supplier.isActive : true);
@@ -64,18 +64,18 @@ function UpdateSupplier() {
         contactPersonName: formData.contactPersonName,
         phoneNumber: formData.phoneNumber,
         emailAddress: formData.emailAddress,
-        businessAddress: formData.businessAddress,
-        taxRegistrationNumber: formData.taxRegistrationNumber,
-        paymentTermDays: Number(formData.paymentTermDays) || 30,
+        isActive,
+        paymentTermDays: Number(formData.paymentTermDays),
+        creditLimitAmount: Number(formData.creditLimitAmount) || 0,
         openingBalanceAmount: Number(formData.openingBalanceAmount) || 0,
-        // city: formData.city,
-        // state: formData.state,
-        // creditLimitAmount: Number(formData.creditLimitAmount) || 0,
-        // bankName: formData.bankName,
-        // accountTitle: formData.accountTitle,
-        // accountNumber: formData.accountNumber,
-        // iban: formData.iban,
-        isActive: isActive,
+        businessAddress: formData.businessAddress,
+        city: formData.city,
+        stateProvince: formData.stateProvince,
+        taxRegistrationNumber: formData.taxRegistrationNumber,
+        bankName: formData.bankName,
+        bankAccountTitle: formData.bankAccountTitle,
+        bankAccountNumber: formData.bankAccountNumber,
+        iban: formData.iban,
       };
 
       await updateSupplierMutation.mutateAsync({ id, data: payload });
@@ -349,8 +349,8 @@ function UpdateSupplier() {
                   </label>
                   <input
                     type="text"
-                    value={formData.state}
-                    onChange={(e) => handleInputChange("state", e.target.value)}
+                    value={formData.stateProvince}
+                    onChange={(e) => handleInputChange("stateProvince", e.target.value)}
                     placeholder="e.g. Punjab"
                     className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
@@ -400,9 +400,9 @@ function UpdateSupplier() {
                 </label>
                 <input
                   type="text"
-                  value={formData.accountTitle}
+                  value={formData.bankAccountTitle}
                   onChange={(e) =>
-                    handleInputChange("accountTitle", e.target.value)
+                    handleInputChange("bankAccountTitle", e.target.value)
                   }
                   placeholder="e.g. Attock Gas Accounts"
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
@@ -414,9 +414,9 @@ function UpdateSupplier() {
                 </label>
                 <input
                   type="text"
-                  value={formData.accountNumber}
+                  value={formData.bankAccountNumber}
                   onChange={(e) =>
-                    handleInputChange("accountNumber", e.target.value)
+                    handleInputChange("bankAccountNumber", e.target.value)
                   }
                   placeholder="e.g. 12345678901234"
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"

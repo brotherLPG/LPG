@@ -88,7 +88,11 @@ function Suppliers() {
       className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
-        <button className="font-semibold text-[#1a56db] hover:underline text-[13px]">
+        <button
+          type="button"
+          onClick={() => navigate(`/suppliers/view/${item._id}`)}
+          className="font-semibold text-[#1a56db] hover:underline text-[13px]"
+        >
           {item.name}
         </button>
       ),
@@ -146,6 +150,7 @@ function Suppliers() {
         <div className="flex items-center gap-2">
           <button
             type="button"
+            onClick={() => navigate(`/suppliers/view/${item._id}`)}
             aria-label={`View ${item.name}`}
             className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
           >
