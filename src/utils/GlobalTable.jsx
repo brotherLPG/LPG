@@ -99,7 +99,14 @@ const GlobalTable = ({
           </Table.Header>
 
           {/* Body */}
-          <Table.Body items={paginatedData} emptyContent={emptyContent}>
+          <Table.Body
+            items={paginatedData}
+            renderEmptyState={() => (
+              <div className="flex min-h-50 w-full items-center justify-center text-center text-sm text-slate-500">
+                {emptyContent}
+              </div>
+            )}
+          >
             {(item) => (
               <Table.Row key={item.id || item.key} className={rowClassName}>
                 {columns.map((column) => (

@@ -1,4 +1,4 @@
-import { PlusCircle, Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
+import { PlusCircle, Eye, Edit3, Trash2, ChevronDown, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalTable from "../../utils/GlobalTable";
@@ -88,7 +88,11 @@ function Suppliers() {
       className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
-        <button className="font-semibold text-[#1a56db] hover:underline text-[13px]">
+        <button
+          type="button"
+          onClick={() => navigate(`/suppliers/view/${item._id}`)}
+          className="font-semibold text-[#1a56db] hover:underline text-[13px]"
+        >
           {item.name}
         </button>
       ),
@@ -146,6 +150,7 @@ function Suppliers() {
         <div className="flex items-center gap-2">
           <button
             type="button"
+            onClick={() => navigate(`/suppliers/view/${item._id}`)}
             aria-label={`View ${item.name}`}
             className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
           >
@@ -208,7 +213,7 @@ function Suppliers() {
         <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
             <label className="relative flex-1">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full bg-slate-300"></div>
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}

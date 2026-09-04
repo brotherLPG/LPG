@@ -15,9 +15,16 @@ function AddSupplier() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [emailAddress, setEmailAddress] = useState("");
   const [businessAddress, setBusinessAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [stateProvince, setStateProvince] = useState("");
   const [taxRegistrationNumber, setTaxRegistrationNumber] = useState("");
   const [paymentTermDays, setPaymentTermDays] = useState("30");
+  const [creditLimitAmount, setCreditLimitAmount] = useState("");
   const [openingBalanceAmount, setOpeningBalanceAmount] = useState(0);
+  const [bankName, setBankName] = useState("");
+    const [bankAccountTitle, setBankAccountTitle] = useState("");
+  const [bankAccountNumber, setBankAccountNumber] = useState("");
+  const [iban, setIban] = useState("");
 
   const createMutation = useCreateSupplier();
 
@@ -32,17 +39,24 @@ function AddSupplier() {
            contactPersonName,
            phoneNumber,
            emailAddress,
-           businessAddress,
-           taxRegistrationNumber,
+           isActive,
            paymentTermDays:
              paymentTermDays === "COD" ? 0 : parseInt(paymentTermDays, 10),
+           creditLimitAmount: Number(creditLimitAmount) || 0,
            openingBalanceAmount: Number(openingBalanceAmount) || 0,
-           isActive,
+           businessAddress,
+           city,
+           stateProvince,
+           taxRegistrationNumber,
+           bankName,
+           bankAccountTitle,
+           bankAccountNumber,
+           iban,
          };
 
-        await createMutation.mutate(payload);
+        await createMutation.mutateAsync(payload);
         toast.success("supplier created successfully!");
-        navigate("/supplier");
+        navigate("/suppliers");
       } catch (error) {
         toast.error(
           error.response?.data?.message ||
@@ -219,11 +233,13 @@ function AddSupplier() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Credit Limit (Rs.)
                 </label>
-                <input
-                  type="text"
-                  placeholder="e.g. 1,500,000"
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                />
+                  <input
+                    type="text"
+                    placeholder="e.g. 1,500,000"
+                    value={creditLimitAmount}
+                    onChange={(e) => setCreditLimitAmount(e.target.value)}
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  />
               </div>
 
               <div>
@@ -266,21 +282,25 @@ function AddSupplier() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   City
                 </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Islamabad"
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                />
+                  <input
+                    type="text"
+                    placeholder="e.g. Islamabad"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   State/Province
                 </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Punjab"
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                />
+                  <input
+                    type="text"
+                    placeholder="e.g. Punjab"
+                    value={stateProvince}
+                    onChange={(e) => setStateProvince(e.target.value)}
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
@@ -310,41 +330,49 @@ function AddSupplier() {
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Bank Name
               </label>
-              <input
-                type="text"
-                placeholder="e.g. Habib Bank Limited"
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-              />
+                  <input
+                    type="text"
+                    placeholder="e.g. Habib Bank Limited"
+                    value={bankName}
+                    onChange={(e) => setBankName(e.target.value)}
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Account Title
               </label>
-              <input
-                type="text"
-                placeholder="e.g. Attock Gas Accounts"
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-              />
+                  <input
+                    type="text"
+                    placeholder="e.g. Attock Gas Accounts"
+                    value={bankAccountTitle}
+                    onChange={(e) => setBankAccountTitle(e.target.value)}
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Account Number
               </label>
-              <input
-                type="text"
-                placeholder="e.g. 12345678901234"
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-              />
+                  <input
+                    type="text"
+                    placeholder="e.g. 12345678901234"
+                    value={bankAccountNumber}
+                    onChange={(e) => setBankAccountNumber(e.target.value)}
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 IBAN
               </label>
-              <input
-                type="text"
-                placeholder="e.g. PK00 HABB 0000 0012 3456 78"
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-              />
+                  <input
+                    type="text"
+                    placeholder="e.g. PK00 HABB 0000 0012 3456 78"
+                    value={iban}
+                    onChange={(e) => setIban(e.target.value)}
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  />
             </div>
           </div>
         </div>
