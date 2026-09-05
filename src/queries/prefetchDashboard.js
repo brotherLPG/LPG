@@ -13,6 +13,7 @@ import { getEmployees } from '../api/employees.api.js'
 import { getPermissions } from '../api/permissions.api.js'
 import { getCurrentUser } from '../api/auth.api.js'
 import { getAccounts } from '../api/accounts.api.js'
+import { getInventoryItems } from '../api/inventory.api.js'
 
 export const prefetchDashboard = async queryClient => {
   await Promise.all([
@@ -194,6 +195,21 @@ export const prefetchDashboard = async queryClient => {
 
       queryFn: () =>
         getAccounts({ page: 1, limit: 10 })
+    }),
+
+    // ========================================
+    // Inventory
+    // ========================================
+
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.inventory.list({ search: "", page: 1, limit: 10 }),
+
+      queryFn: () =>
+        getInventoryItems({
+          search: "",
+          page: 1,
+          limit: 10,
+        })
     }),
   ])
 }

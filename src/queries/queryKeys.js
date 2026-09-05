@@ -165,4 +165,19 @@ export const queryKeys = {
     detail: id => ['accounts', 'detail', id]
   },
 
+  // =========================
+  // Inventory
+  // =========================
+  inventory: {
+    all: ['inventory'],
+
+    lists: () => ['inventory', 'list'],
+
+    list: (params) => ['inventory', 'list', params],
+
+    detail: id => ['inventory', 'detail', id],
+
+    formOptions: () => ['inventory', 'form-options']
+  },
+
 }

@@ -45,6 +45,8 @@ import UpdateCylinderType from '../Pages/Cylinders/updateCylinderType';
 import ViewCylinderType from '../Pages/Cylinders/ViewCylinderType';
 import Inventory from '../Pages/Inventory/inventory';
 import AddInventoryItem from '../Pages/Inventory/AddInventoryItem';
+import UpdateInventoryItem from '../Pages/Inventory/UpdateInventoryItem';
+import ViewInventoryItem from '../Pages/Inventory/ViewInventoryItem';
 import LpgReceipts from '../Pages/LPGReceipts/LpgReceipts';
 import ReceiveLpg from '../Pages/LPGReceipts/ReceiveLpg';
 import Payments from '../Pages/Payments/Payments';
@@ -113,6 +115,8 @@ function PageRouter() {
         <Route path="/storage-tanks" element={<StorageTanks />} />
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/inventory/add" element={<AddInventoryItem />} />
+        <Route path="/inventory/edit/:id" element={<UpdateInventoryItem />} />
+        <Route path="/inventory/view/:id" element={<ViewInventoryItem />} />
         <Route path="/lpg-receipts" element={<LpgReceipts />} />
         <Route path="/lpg-receipts/receive" element={<ReceiveLpg />} />
         <Route path="/lpg-receipts/view/:id" element={<LpgReceiptDetails />} />

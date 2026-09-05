@@ -1,127 +1,188 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { PlusCircle, Search, Eye, Edit3, ChevronDown } from "lucide-react";
+import { PlusCircle, Search, Eye, Edit3, ChevronDown, Trash2 } from "lucide-react";
 import GlobalTable from "../../utils/GlobalTable";
+import { useInventoryItems, useDeleteInventoryItem } from "../../queries/inventory/inventory.queries";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import { useToast } from "../../utils/GlobalToast";
 
-const initialInventory = [
-  { code: "FILLED-CYL-11KG", name: "Filled 11.8KG Domestic", category: "Filled Cylinder", volume: "11.8 KG", current: 185, min: 50, max: 400, status: "In Stock" },
-  { code: "FILLED-CYL-22KG", name: "Filled 22.0KG Commercial", category: "Filled Cylinder", volume: "22.0 KG", current: 157, min: 30, max: 250, status: "In Stock" },
-  { code: "EMPTY-CYL-11KG", name: "Empty 11.8KG Domestic", category: "Empty Cylinder", volume: "11.8 KG", current: 45, min: 100, max: 500, status: "Low Stock" },
-  { code: "EMPTY-CYL-22KG", name: "Empty 22.0KG Commercial", category: "Empty Cylinder", volume: "22.0 KG", current: 92, min: 40, max: 300, status: "In Stock" },
-  { code: "VALVE-KIT-11KG", name: "Standard Brass Valves (11KG)", category: "Spare Parts", volume: "N/A", current: 18, min: 30, max: 150, status: "Low Stock" },
-  { code: "SEAL-RING-STD", name: "Rubber Seal Rings Standard", category: "Consumables", volume: "N/A", current: 320, min: 100, max: 1000, status: "In Stock" },
-  { code: "SAFETY-CAP-UNI", name: "Plastic Safety Caps (Yellow)", category: "Consumables", volume: "N/A", current: 420, min: 150, max: 1200, status: "In Stock" },
-  { code: "O-RING-SET", name: "Manifold O-Ring Refill Kit", category: "Spare Parts", volume: "N/A", current: 4, min: 10, max: 50, status: "Low Stock" },
-];
 
 function Inventory() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
 
-  const filteredData = useMemo(() => initialInventory.filter((item) => {
-    const matchesQuery = `${item.code} ${item.name}`.toLowerCase().includes(query.toLowerCase());
-    const matchesCategory = category === "All" || item.category === category;
-    const matchesStatus = statusFilter === "All" || item.status === statusFilter;
-    return matchesQuery && matchesCategory && matchesStatus;
-  }), [query, category, statusFilter]);
+  const { data: inventoryData, isLoading, error } = useInventoryItems({ search: query, page: 1, limit: 100 });
+  const deleteMutation = useDeleteInventoryItem();
+
+  const filteredData = useMemo(() => {
+    const items = inventoryData?.data?.items || [];
+    return items.filter((item) => {
+      const matchesQuery = `${item.itemCode} ${item.itemName}`.toLowerCase().includes(query.toLowerCase());
+      const matchesCategory = category === "All" || item.categoryLabel === category;
+      const matchesStatus = statusFilter === "All" || item.stockStatusLabel === statusFilter;
+      return matchesQuery && matchesCategory && matchesStatus;
+    });
+  }, [inventoryData, query, category, statusFilter]);
+
+  const handleDeleteClick = (item) => {
+    setDeleteModal({ isOpen: true, item });
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deleteModal.item) {
+      const id = deleteModal.item._id;
+      deleteMutation.mutate(id, {
+        onSuccess: () => {
+          toast.success(`Inventory item ${deleteModal.item.itemName} has been deleted successfully`);
+          setDeleteModal({ isOpen: false, item: null });
+        },
+        onError: () => {
+          toast.error("Failed to delete inventory item. Please try again.");
+        }
+      });
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModal({ isOpen: false, item: null });
+  };
+
+  const categories = inventoryData?.data?.meta?.categories || [];
+  const stockStatuses = inventoryData?.data?.meta?.stockStatuses || [];
+  const cylinderCards = inventoryData?.data?.summary?.cylinderCards || [];
 
   const columns = [
     {
       key: "code",
       label: "Item Code",
       isRowHeader: true,
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100 whitespace-nowrap",
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
-        <span className="font-semibold text-slate-800 text-[13px]">{item.code}</span>
+        <span className="font-semibold text-slate-800 text-[13px] whitespace-nowrap text-nowrap">
+          {item.itemCode}
+        </span>
       ),
     },
     {
       key: "name",
       label: "Item Name",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100 whitespace-nowrap",
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
-        <button className="font-semibold text-[#1a56db] hover:underline text-[13px]">
-          {item.name}
+        <button className="font-semibold text-[#1a56db] hover:underline text-[13px] whitespace-nowrap">
+          {item.itemName}
         </button>
       ),
     },
     {
       key: "category",
       label: "Category",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100",
-      cellClassName: "px-4 py-3 text-slate-600 text-sm",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100 whitespace-nowrap text-nowrap",
+      cellClassName:
+        "px-4 py-3 text-slate-600 text-sm whitespace-nowrap text-nowrap",
+      renderCell: (item) => item.categoryLabel,
     },
     {
       key: "volume",
       label: "Cyl. Volume",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100",
-      cellClassName: "px-4 py-3 text-slate-600 text-sm",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100 whitespace-nowrap",
+      cellClassName:
+        "px-4 py-3 text-slate-600 text-sm whitespace-nowrap text-nowrap",
+      renderCell: (item) => item.cylinderVolume,
     },
     {
       key: "current",
       label: "Current Qty",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100",
-      cellClassName: "px-4 py-3",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100  whitespace-nowrap text-nowrap",
+      cellClassName: "px-4 py-3 whitespace-nowrap text-nowrap",
       renderCell: (item) => (
-        <span className={`text-[13px] font-bold ${item.status === 'Low Stock' ? 'text-amber-600' : 'text-slate-900'}`}>
-          {item.current}
+        <span
+          className={`text-[13px] font-bold ${item.stockStatusLabel === "Low Stock" ? "text-amber-600" : "text-slate-900"}`}
+        >
+          {item.currentQuantity}
         </span>
       ),
     },
     {
       key: "min",
       label: "Min Stock",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100",
-      cellClassName: "px-4 py-3 text-slate-600 text-sm",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100  whitespace-nowrap text-nowrap",
+      cellClassName:
+        "px-4 py-3 text-slate-600 text-sm whitespace-nowrap text-nowrap  whitespace-nowrap text-nowrap",
+      renderCell: (item) => item.minimumStockLevel,
     },
     {
       key: "max",
       label: "Max Stock",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100",
-      cellClassName: "px-4 py-3 text-slate-600 text-sm",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100  whitespace-nowrap text-nowrap",
+      cellClassName:
+        "px-4 py-3 text-slate-600 text-sm whitespace-nowrap text-nowrap",
+      renderCell: (item) => item.maximumStockLevel,
     },
     {
       key: "status",
       label: "Status",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100",
-      cellClassName: "px-4 py-3",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100 ",
+      cellClassName: "px-4 py-3 whitespace-nowrap text-nowrap",
       renderCell: (item) => (
         <span
           className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-            item.status === "In Stock"
+            item.stockStatusLabel === "In Stock"
               ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
-              : "bg-amber-100 text-amber-800 border border-amber-200"
+              : item.stockStatusLabel === "Low Stock"
+                ? "bg-amber-100 text-amber-800 border border-amber-200"
+                : "bg-red-50 text-red-600 border border-red-100"
           }`}
         >
-          {item.status}
+          {item.stockStatusLabel}
         </span>
       ),
     },
     {
       key: "actions",
       label: "Actions",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100",
-      cellClassName: "px-4 py-3",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100",
+      cellClassName: "px-4 py-3 whitespace-nowrap text-nowrap",
       renderCell: (item) => (
         <div className="flex items-center gap-2">
           <button
             type="button"
-            aria-label={`View ${item.name}`}
+            onClick={() => navigate(`/inventory/view/${item._id}`)}
+            aria-label={`View ${item.itemName}`}
             className="flex items-center gap-1.5 rounded-full bg-blue-50/70 border border-blue-200/60 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
           >
             <Eye className="h-3.5 w-3.5" /> View
           </button>
           <button
             type="button"
-            aria-label={`Edit ${item.name}`}
+            onClick={() => navigate(`/inventory/edit/${item._id}`)}
+            aria-label={`Edit ${item.itemName}`}
             className="flex items-center gap-1.5 rounded-full bg-emerald-50/70 border border-emerald-200/60 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
           >
             <Edit3 className="h-3.5 w-3.5" /> Edit
           </button>
+          {/* <button
+            type="button"
+            onClick={() => handleDeleteClick(item)}
+            aria-label={`Delete ${item.itemName}`}
+            className="flex items-center gap-1.5 rounded-full bg-rose-50/70 border border-rose-200/60 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition-colors"
+          >
+            <Trash2 className="h-3.5 w-3.5" /> Delete
+          </button> */}
         </div>
       ),
     },
@@ -159,44 +220,51 @@ function Inventory() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h3 className="text-xs font-semibold text-slate-600">Filled 11KG Cylinders</h3>
-          <p className="mt-2 text-2xl font-bold text-emerald-600">185 Units</p>
-          <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
-            <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
-            Normal operational levels
+        {cylinderCards.map((card) => (
+          <div
+            key={card.itemId}
+            className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-semibold text-slate-600">
+                {card.title}
+              </h3>
+              {card.stockStatusLabel === "Low Stock" && (
+                <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                  Low Stock
+                </span>
+              )}
+              {card.stockStatusLabel === "Out of Stock" && (
+                <span className="bg-red-100 text-red-800 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                  Out of Stock
+                </span>
+              )}
+            </div>
+            <p
+              className={`mt-2 text-2xl font-bold ${
+                card.stockStatusLabel === "In Stock"
+                  ? "text-emerald-600"
+                  : card.stockStatusLabel === "Low Stock"
+                    ? "text-amber-500"
+                    : "text-red-500"
+              }`}
+            >
+              {card.currentQuantity} Units
+            </p>
+            <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  card.stockStatusLabel === "In Stock"
+                    ? "bg-emerald-500"
+                    : card.stockStatusLabel === "Low Stock"
+                      ? "bg-amber-500"
+                      : "bg-red-500"
+                }`}
+              ></span>
+              {card.hint}
+            </div>
           </div>
-        </div>
-        
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h3 className="text-xs font-semibold text-slate-600">Filled 22KG Cylinders</h3>
-          <p className="mt-2 text-2xl font-bold text-emerald-600">157 Units</p>
-          <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
-            <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
-            Ready for commercial delivery
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-semibold text-slate-600">Empty 11KG Cylinders</h3>
-            <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.5 rounded">Low Stock</span>
-          </div>
-          <p className="mt-2 text-2xl font-bold text-amber-500">45 Units</p>
-          <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
-            <span className="h-2 w-2 rounded-full bg-amber-500"></span>
-            Requires bulk collection run
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h3 className="text-xs font-semibold text-slate-600">Empty 22KG Cylinders</h3>
-          <p className="mt-2 text-2xl font-bold text-slate-900">92 Units</p>
-          <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
-            <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
-            Sufficient for next 2 batches
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* Filter Bar */}
@@ -210,7 +278,7 @@ function Inventory() {
             placeholder="Search by item code or description..."
           />
         </label>
-        
+
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
           <div className="relative">
             <select
@@ -218,25 +286,28 @@ function Inventory() {
               onChange={(event) => setCategory(event.target.value)}
               className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48"
             >
-              <option value="All">Category: All</option>
-              <option value="Filled Cylinder">Category: Filled Cylinder</option>
-              <option value="Empty Cylinder">Category: Empty Cylinder</option>
-              <option value="Spare Parts">Category: Spare Parts</option>
-              <option value="Consumables">Category: Consumables</option>
+              <option value="All">All Category</option>
+              {categories.map((cat) => (
+                <option key={cat.value} value={cat.label}>
+                  {cat.label}
+                </option>
+              ))}
             </select>
             <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
           </div>
-          
+
           <div className="relative">
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value)}
               className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48"
             >
-              <option value="All">Stock Status: All</option>
-              <option value="In Stock">Stock Status: In Stock</option>
-              <option value="Low Stock">Stock Status: Low Stock</option>
-              <option value="Out of Stock">Stock Status: Out of Stock</option>
+              <option value="All">All Status</option>
+              {stockStatuses.map((status) => (
+                <option key={status.value} value={status.label}>
+                  {status.label}
+                </option>
+              ))}
             </select>
             <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
           </div>
@@ -250,12 +321,22 @@ function Inventory() {
           data={filteredData}
           ariaLabel="Inventory Table"
           className=""
-          rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+          rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors whitespace-nowrap text-nowrap"
           emptyContent="No inventory items match your search."
           pagination={true}
-          rowsPerPage={5}
+          rowsPerPage={10}
         />
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Inventory Item"
+        message="Are you sure you want to delete this inventory item? This action cannot be undone and will permanently remove the item from the system."
+        itemName={deleteModal.item ? `${deleteModal.item.itemCode} - ${deleteModal.item.itemName}` : ""}
+      />
     </main>
   );
 }

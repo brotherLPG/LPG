@@ -1,12 +1,18 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
-import { useCreateInventoryItem, useInventoryFormOptions } from "../../queries/inventory/inventory.queries";
+import { useUpdateInventoryItem, useInventoryItemById, useInventoryFormOptions } from "../../queries/inventory/inventory.queries";
+import { useToast } from "../../utils/GlobalToast";
 
-function AddInventoryItem() {
+function UpdateInventoryItem() {
   const navigate = useNavigate();
-  const createMutation = useCreateInventoryItem();
+  const toast = useToast();
+  const { id } = useParams();
+  const updateMutation = useUpdateInventoryItem();
   const { data: formOptions, isLoading: optionsLoading } = useInventoryFormOptions();
+  
+  const { data: inventoryData, isLoading: itemLoading } = useInventoryItemById(id);
+  const item = inventoryData?.data;
   
   const [formData, setFormData] = useState({
     itemName: "",
@@ -31,7 +37,29 @@ function AddInventoryItem() {
   const unitsOfMeasure = formOptions?.data?.unitsOfMeasure || [];
   const suppliers = formOptions?.data?.suppliers || [];
   const cylinderTypes = formOptions?.data?.cylinderTypes || [];
-  const nextItemCode = formOptions?.data?.nextItemCode || "";
+
+  useEffect(() => {
+    if (item) {
+      setFormData({
+        itemName: item.itemName || "",
+        itemCategory: item.itemCategory || "",
+        unitOfMeasure: item.unitOfMeasure || "",
+        cylinderTypeId: item.cylinderTypeId || "",
+        description: item.description || "",
+        currentQuantity: item.currentQuantity || 0,
+        minimumStockLevel: item.minimumStockLevel || 0,
+        maximumStockLevel: item.maximumStockLevel || 0,
+        reorderQuantity: item.reorderQuantity || 0,
+        preferredSupplierId: item.preferredSupplierId || "",
+        unitPurchasePriceAmount: item.unitPurchasePriceAmount || 0,
+        unitSellingPriceAmount: item.unitSellingPriceAmount || 0,
+        lastPurchaseDate: item.lastPurchaseDate ? item.lastPurchaseDate.split('T')[0] : "",
+        rackBayNumber: item.rackBayNumber || "",
+        storageNotes: item.storageNotes || "",
+        isActive: item.isActive !== undefined ? item.isActive : true
+      });
+    }
+  }, [item]);
 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
@@ -63,15 +91,27 @@ function AddInventoryItem() {
       isActive: formData.isActive
     };
 
-    createMutation.mutate(payload, {
+    updateMutation.mutate({ id, data: payload }, {
       onSuccess: () => {
+        toast.success("Inventory item updated successfully");
         navigate("/inventory");
       },
       onError: (error) => {
-        console.error("Error creating inventory item:", error);
+        console.error("Error updating inventory item:", error);
+        toast.error("Failed to update inventory item");
       }
     });
   };
+
+  if (itemLoading) {
+    return (
+      <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
+        <div className="text-center py-12">
+          <p className="text-slate-500">Loading inventory item...</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
@@ -92,13 +132,13 @@ function AddInventoryItem() {
             Inventory
           </span>{" "}
           <span className="px-1 text-slate-400">/</span>{" "}
-          <span className="font-semibold text-slate-600">Add Inventory Item</span>
+          <span className="font-semibold text-slate-600">Update Inventory Item</span>
         </p>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-          Add Inventory Item
+          Update Inventory Item
         </h1>
         <p className="mt-1 text-sm text-slate-500">
-          Register a new inventory item and set stock levels
+          Edit inventory item details and stock levels
         </p>
       </div>
 
@@ -116,8 +156,7 @@ function AddInventoryItem() {
               <input
                 type="text"
                 disabled
-                value={nextItemCode}
-                placeholder="Loading..."
+                value={item?.itemCode || ""}
                 className="w-full rounded-lg border border-gray-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed"
               />
             </div>
@@ -442,10 +481,10 @@ function AddInventoryItem() {
         </button>
         <button
           onClick={handleSubmit}
-          disabled={createMutation.isPending}
+          disabled={updateMutation.isPending}
           className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {createMutation.isPending ? 'Saving...' : 'Save Item'}
+          {updateMutation.isPending ? 'Updating...' : 'Update Item'}
         </button>
       </div>
 
@@ -453,4 +492,4 @@ function AddInventoryItem() {
   );
 }
 
-export default AddInventoryItem;
+export default UpdateInventoryItem;
