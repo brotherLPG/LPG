@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { DollarSign, CreditCard, Search, CirclePlus, TrendingUp, ArrowLeft, Eye, Edit3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import GlobalTable from "../../utils/GlobalTable";
+import GlobalTable from "../../../utils/GlobalTable";
 
 const initialSales = [
   { id: "SAL-001", invoiceId: "INV-2026-0456", customer: "Ahmed Khan", type: "Cash", amount: 12500, date: "2026-01-15", items: 5 },
