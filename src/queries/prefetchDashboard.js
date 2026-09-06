@@ -14,6 +14,7 @@ import { getPermissions } from '../api/permissions.api.js'
 import { getCurrentUser } from '../api/auth.api.js'
 import { getAccounts } from '../api/accounts.api.js'
 import { getInventoryItems } from '../api/inventory.api.js'
+import { getStorageTankDashboard } from '../api/storageTanks.api.js'
 
 export const prefetchDashboard = async queryClient => {
   await Promise.all([
@@ -210,6 +211,16 @@ export const prefetchDashboard = async queryClient => {
           page: 1,
           limit: 10,
         })
+    }),
+
+    // ========================================
+    // Storage Tanks
+    // ========================================
+
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.storageTanks.dashboard(),
+
+      queryFn: getStorageTankDashboard
     }),
   ])
 }

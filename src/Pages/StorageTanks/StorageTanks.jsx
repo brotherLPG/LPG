@@ -3,40 +3,68 @@ import { useNavigate } from "react-router-dom";
 import { AlertTriangle, Edit, History } from "lucide-react";
 import StorageTanksimage from "../../assets/Images/StorageTanks.jpg"
 import GlobalTable from "../../utils/GlobalTable"
+import { useStorageTankDashboard } from "../../queries/storageTanks/storageTanks.queries"
 
 function StorageTanks() {
   const navigate = useNavigate();
+  const { data: tankData, isLoading, error } = useStorageTankDashboard();
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  };
+
+  const formatNumber = (num) => {
+    return num?.toLocaleString() || '0';
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen w-full bg-slate-50 flex items-center justify-center">
+        <p className="text-tertiary">Loading tank data...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen w-full bg-slate-50 flex items-center justify-center">
+        <p className="text-error">Error loading tank data: {error.message}</p>
+      </div>
+    );
+  }
 
   const tankParameters = {
-    tankCode: "TNK-001",
-    installationDate: "15 Mar 2022",
-    maxSafeCapacity: "48,000 KG",
-    location: "Zone-A, Main Yard",
-    minSafeQuantity: "5,000 KG",
-    totalRatedVolume: "50,000 KG",
+    tankCode: tankData?.data?.tankCode || "N/A",
+    installationDate: tankData?.data?.installationDate ? formatDate(tankData.data.installationDate) : "N/A",
+    maxSafeCapacity: `${formatNumber(tankData?.data?.maximumSafeQuantityKg)} KG`,
+    location: tankData?.data?.locationDescription || "N/A",
+    minSafeQuantity: `${formatNumber(tankData?.data?.minimumSafeQuantityKg)} KG`,
+    totalRatedVolume: `${formatNumber(tankData?.data?.capacityKg)} KG`,
   };
 
   const currentStock = {
-    amount: "12,500 KG",
-    percentage: 25,
-    warning: "Tank approaching minimum safe threshold level of 5,000 KG.",
+    amount: `${formatNumber(tankData?.data?.currentQuantityKg)} KG`,
+    percentage: tankData?.data?.fillPercent || 0,
+    warning: tankData?.data?.stockAlert || "Stock status normal",
   };
 
-  const recentReceipts = [
-    { receipt: "REC-2026-001", supplier: "Pakistan Petroleum Ltd.", quantity: "15,000 KG", amount: "4,275,000" },
-    { receipt: "REC-2026-002", supplier: "Sui Southern Gas Co.", quantity: "12,000 KG", amount: "3,420,000" },
-    { receipt: "REC-2026-003", supplier: "Pak Petroleum Ltd.", quantity: "18,000 KG", amount: "5,130,000" },
-    { receipt: "REC-2026-004", supplier: "OGDCL", quantity: "10,000 KG", amount: "2,850,000" },
-    { receipt: "REC-2026-005", supplier: "Pakistan Petroleum Ltd.", quantity: "14,500 KG", amount: "4,132,500" },
-  ];
+  const recentReceipts = tankData?.data?.recentReceipts?.map(receipt => ({
+    receipt: receipt.receiptNumber,
+    supplier: receipt.supplierName,
+    quantity: `${formatNumber(receipt.receivedQuantityKg)} KG`,
+    date: receipt.receivedAt
+  })) || [];
 
-  const fillingBatches = [
-    { batch: "FD-2026-0122", description: "11.8 KG Domestic", units: "100 units", quantity: "2,124 KG" },
-    { batch: "FD-2026-0121", description: "45.4 KG Commercial", units: "50 units", quantity: "2,890 KG" },
-    { batch: "FD-2026-0120", description: "11.8 KG Domestic", units: "150 units", quantity: "3,186 KG" },
-    { batch: "FD-2026-0119", description: "15 KG Domestic", units: "80 units", quantity: "1,840 KG" },
-    { batch: "FD-2026-0118", description: "11.8 KG Domestic", units: "120 units", quantity: "2,548 KG" },
-  ];
+  const fillingBatches = tankData?.data?.recentFillingBatches?.map(batch => ({
+    batch: batch.batchNumber,
+    description: batch.typeName,
+    typeName: batch.typeName,
+    units: `${batch.cylinderCount} units`,
+    quantity: batch.cylinderDescription,
+    date: batch.fillingDate
+  })) || [];
 
   // Column definitions for receipts table
   const receiptColumns = [
@@ -49,7 +77,7 @@ function StorageTanks() {
       renderCell: (item) => (
         <div className="flex flex-col">
           <span className="text-[12px] font-bold text-6th-color">{item.receipt}</span>
-          <span className="text-4th-color text-[10px] font-regular">10 May 2026</span>
+          <span className="text-4th-color text-[10px] font-regular">{formatDate(item.date)}</span>
         </div>
       ),
     },
@@ -65,12 +93,6 @@ function StorageTanks() {
       className: "px-2 py-1.5 text-left font-bold text-tertiary",
       cellClassName: "px-2 py-2 text-[12px] font-bold text-BLUE-dark",
     },
-    {
-      key: "amount",
-      label: "Amount (Rs.)",
-      className: "px-2 py-1.5 text-left font-bold text-tertiary",
-      cellClassName: "px-2 py-2 text-[12px] font-bold text-5th-color",
-    },
   ];
 
   // Column definitions for filling batches table
@@ -84,7 +106,7 @@ function StorageTanks() {
       renderCell: (item) => (
         <div className="flex flex-col">
           <span className="text-[12px] font-bold text-6th-color">{item.batch}</span>
-          <span className="text-4th-color text-[10px] font-regular">10 May 2026</span>
+          <span className="text-4th-color text-[10px] font-regular">{formatDate(item.date)}</span>
         </div>
       ),
     },
@@ -95,16 +117,16 @@ function StorageTanks() {
       cellClassName: "px-2 py-2 text-[12px] text-tertiary",
     },
     {
+      key: "typeName",
+      label: "Type Name",
+      className: "px-2 py-1.5 text-left font-bold text-tertiary",
+      cellClassName: "px-2 py-2 text-[12px] text-tertiary",
+    },
+    {
       key: "units",
       label: "Units",
       className: "px-2 py-1.5 text-left font-bold text-tertiary",
       cellClassName: "px-2 py-2 text-[12px] font-bold text-BLUE-dark",
-    },
-    {
-      key: "quantity",
-      label: "Quantity",
-      className: "px-2 py-1.5 text-left font-bold text-tertiary",
-      cellClassName: "px-2 py-1.5 text-left font-bold text-error",
     },
   ];
 
@@ -133,7 +155,7 @@ function StorageTanks() {
 
           <span className="mx-1">/</span>
 
-          <span>Tank-A (Main Bulk)</span>
+          <span>{tankData?.data?.tankName || 'Tank'}</span>
         </div>
 
         {/* =========================================
@@ -141,7 +163,7 @@ function StorageTanks() {
         ========================================= */}
         <div className="pb-2 my-1">
           <h1 className=" text-2xl font-bold tracking-tight text-BLUE-dark">
-            Tank-A (Main Bulk Storage)
+            {tankData?.data?.tankName || 'Tank'}
           </h1>
 
           <p className="text-sm text-tertiary">
@@ -161,10 +183,14 @@ function StorageTanks() {
           <div className="absolute bottom-0 left-0 right-0  from-black/60 to-transparent p-4">
             <div className="flex justify-between">
               <h5 className="text-white text-lg font-bold">
-                Tank-A (Main Bulk Storage)
+                {tankData?.data?.tankName || 'Tank'}
               </h5>
-              <p className="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full border border-green-300">
-                Operational
+              <p className={`px-3 py-1 text-xs font-semibold rounded-full border ${
+                tankData?.data?.tankStatus === 'operational'
+                  ? 'bg-green-100 text-green-700 border-green-300'
+                  : 'bg-red-100 text-red-700 border-red-300'
+              }`}>
+                {tankData?.data?.tankStatusLabel || 'Unknown'}
               </p>
             </div>
           </div>
@@ -235,7 +261,7 @@ function StorageTanks() {
               </div>
             </div>
 
-            <div className="flex gap-2 mt-4">
+            {/* <div className="flex gap-2 mt-4">
               <button className="flex items-center gap-1 text-[13px] font-semibold text-tertiary px-3 py-2 border border-accent-blue rounded hover:bg-blue-50 transition">
                 <Edit className="w-4 h-4" />
                 Edit Tank Specs
@@ -244,7 +270,7 @@ function StorageTanks() {
                 <History className="w-4 h-4" />
                 View Maintenance History
               </button>
-            </div>
+            </div> */}
           </div>
 
           {/* Capacity Level Gauge */}
@@ -275,7 +301,7 @@ function StorageTanks() {
                 <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-[11px] font-semibold rounded-full border border-orange-300">
                   {currentStock.percentage}% Filled
                 </span>
-                <span className="text-[12px] text-tertiary">50,000 KG</span>
+                <span className="text-[12px] text-tertiary">{formatNumber(tankData?.data?.capacityKg)} KG</span>
               </div>
             </div>
 

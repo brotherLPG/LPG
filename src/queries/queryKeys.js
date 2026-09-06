@@ -180,4 +180,13 @@ export const queryKeys = {
     formOptions: () => ['inventory', 'form-options']
   },
 
+  // =========================
+  // Storage Tanks
+  // =========================
+  storageTanks: {
+    all: ['storage-tanks'],
+
+    dashboard: () => ['storage-tanks', 'dashboard'],
+  },
+
 }
