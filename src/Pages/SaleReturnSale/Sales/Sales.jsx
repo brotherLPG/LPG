@@ -2,123 +2,232 @@ import React, { useState, useMemo } from "react";
 import { DollarSign, CreditCard, Search, CirclePlus, TrendingUp, ArrowLeft, Eye, Edit3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import GlobalTable from "../../../utils/GlobalTable";
-
-const initialSales = [
-  { id: "SAL-001", invoiceId: "INV-2026-0456", customer: "Ahmed Khan", type: "Cash", amount: 12500, date: "2026-01-15", items: 5 },
-  { id: "SAL-002", invoiceId: "INV-2026-0457", customer: "Fatima Ali", type: "Credit", amount: 25000, date: "2026-01-15", items: 10 },
-  { id: "SAL-003", invoiceId: "INV-2026-0458", customer: "Usman Ahmed", type: "Cash", amount: 7500, date: "2026-01-14", items: 3 },
-  { id: "SAL-004", invoiceId: "INV-2026-0459", customer: "Bilal Khan", type: "Credit", amount: 50000, date: "2026-01-14", items: 20 },
-];
+import { useSales } from "../../../queries/sales/sales.queries";
 
 function Sales() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [type, setType] = useState("All");
+  const [saleStatus, setSaleStatus] = useState("");
+  const [paymentStatus, setPaymentStatus] = useState("");
+  const [customerId, setCustomerId] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [page, setPage] = useState(1);
 
-  const filteredSales = useMemo(() => initialSales.filter(sale => {
-    const matchesSearch = sale.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sale.invoiceId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = type === "All" || sale.type === type;
-    return matchesSearch && matchesType;
-  }), [searchTerm, type]);
+  const params = {
+    page,
+    limit: 20,
+    ...(searchTerm && { search: searchTerm }),
+    ...(saleStatus && { saleStatus }),
+    ...(paymentStatus && { paymentStatus }),
+    ...(customerId && { customerId }),
+    ...(startDate && { startDate }),
+    ...(endDate && { endDate }),
+  };
 
-  // Calculate summary statistics
-  const summaryStats = useMemo(() => {
-    const totalAmount = initialSales.reduce((sum, sale) => sum + sale.amount, 0);
-    const cashAmount = initialSales.filter(sale => sale.type === "Cash").reduce((sum, sale) => sum + sale.amount, 0);
-    const creditAmount = initialSales.filter(sale => sale.type === "Credit").reduce((sum, sale) => sum + sale.amount, 0);
-    const pendingCredit = initialSales.filter(sale => sale.type === "Credit").reduce((sum, sale) => sum + sale.amount, 0);
+  const { data: salesData, isLoading } = useSales(params);
 
-    return {
-      total: totalAmount,
-      cash: cashAmount,
-      credit: creditAmount,
-      pendingCredit: pendingCredit,
-      totalCount: initialSales.length,
-      cashCount: initialSales.filter(sale => sale.type === "Cash").length,
-      creditCount: initialSales.filter(sale => sale.type === "Credit").length,
-    };
-  }, []);
+  const sales = salesData?.data?.items || [];
+  const pagination = salesData?.data?.pagination || { total: 0, totalPages: 0, page: 1, limit: 20 };
+  const summary = salesData?.data?.summary || {
+    todaySalesAmount: 0,
+    todaySalesCount: 0,
+    cashSalesAmount: 0,
+    cashSalesCount: 0,
+    creditSalesAmount: 0,
+    creditSalesCount: 0,
+    pendingCreditAmount: 0,
+  };
+  const meta = salesData?.data?.meta || {
+    saleTypes: [],
+    paymentStatuses: [],
+    saleStatuses: [],
+  };
+
+  const summaryStats = {
+    total: summary.todaySalesAmount,
+    cash: summary.cashSalesAmount,
+    credit: summary.creditSalesAmount,
+    pendingCredit: summary.pendingCreditAmount,
+    totalCount: summary.todaySalesCount,
+    cashCount: summary.cashSalesCount,
+    creditCount: summary.creditSalesCount,
+  };
 
   // Column definitions for sales table
   const salesColumns = [
     {
-      key: "id",
-      label: "Sale ID",
+      key: "saleNumber",
+      label: "Sale Number",
       isRowHeader: true,
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-4",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+      cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
       renderCell: (item) => (
-        <span className="font-bold text-slate-800 text-[13px]">{item.id}</span>
+        <span className="font-bold text-slate-800 text-[13px]">
+          {item.saleNumber}
+        </span>
       ),
     },
     {
-      key: "invoiceId",
-      label: "Invoice ID",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
+      key: "invoiceNumber",
+      label: "Invoice Number",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+      cellClassName:
+        "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap text-nowrap",
     },
     {
-      key: "customer",
+      key: "customerName",
       label: "Customer",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+      cellClassName:
+        "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap text-nowrap",
     },
     {
-      key: "type",
+      key: "saleTypeLabel",
       label: "Type",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-4",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+      cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
       renderCell: (item) => {
         const typeStyles = {
           Cash: "bg-emerald-50 text-emerald-600 border border-emerald-100",
           Credit: "bg-blue-50 text-blue-600 border border-blue-100",
         };
         return (
-          <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${typeStyles[item.type]}`}>
-            {item.type}
+          <span
+            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${typeStyles[item.saleTypeLabel] || "bg-slate-50 text-slate-600 border border-slate-100"}`}
+          >
+            {item.saleTypeLabel}
           </span>
         );
       },
     },
     {
-      key: "amount",
+      key: "totalAmount",
       label: "Amount",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-4",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+      cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
       renderCell: (item) => (
-        <span className="text-slate-900 font-bold text-[13px]">PKR {item.amount.toLocaleString()}</span>
+        <span className="text-slate-900 font-bold text-[13px]">
+          PKR {item.totalAmount.toLocaleString()}
+        </span>
       ),
     },
     {
-      key: "items",
+      key: "itemCount",
       label: "Items",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+      cellClassName:
+        "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap text-nowrap",
     },
     {
-      key: "date",
+      key: "paidAmount",
+      label: "Paid Amount",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+      cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
+      renderCell: (item) => (
+        <span className="text-emerald-600 font-bold text-[13px]">
+          PKR {item.paidAmount?.toLocaleString() || 0}
+        </span>
+      ),
+    },
+    {
+      key: "returnedAmount",
+      label: "Returned Amount",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+      cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
+      renderCell: (item) => (
+        <span className="text-orange-600 font-bold text-[13px]">
+          PKR {item.returnedAmount?.toLocaleString() || 0}
+        </span>
+      ),
+    },
+    {
+      key: "invoiceDate",
       label: "Date",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+      cellClassName:
+        "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap text-nowrap",
+      renderCell: (item) => {
+        const date = new Date(item.invoiceDate);
+        return date.toLocaleDateString();
+      },
+    },
+    {
+      key: "paymentStatusLabel",
+      label: "Payment Status",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+      cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
+      renderCell: (item) => {
+        const statusStyles = {
+          Paid: "bg-emerald-50 text-emerald-600 border border-emerald-100",
+          Partial: "bg-amber-50 text-amber-600 border border-amber-100",
+          Unpaid: "bg-red-50 text-red-600 border border-red-100",
+          "Refund Due": "bg-purple-50 text-purple-600 border border-purple-100",
+        };
+        return (
+          <span
+            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusStyles[item.paymentStatusLabel] || "bg-slate-50 text-slate-600 border border-slate-100"}`}
+          >
+            {item.paymentStatusLabel}
+          </span>
+        );
+      },
+    },
+    {
+      key: "saleStatusLabel",
+      label: "Sale Status",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+      cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
+      renderCell: (item) => {
+        const statusStyles = {
+          Confirmed: "bg-emerald-50 text-emerald-600 border border-emerald-100",
+          Draft: "bg-slate-50 text-slate-600 border border-slate-100",
+          "Partially Returned":
+            "bg-amber-50 text-amber-600 border border-amber-100",
+          Returned: "bg-blue-50 text-blue-600 border border-blue-100",
+          Cancelled: "bg-red-50 text-red-600 border border-red-100",
+        };
+        return (
+          <span
+            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusStyles[item.saleStatusLabel] || "bg-slate-50 text-slate-600 border border-slate-100"}`}
+          >
+            {item.saleStatusLabel}
+          </span>
+        );
+      },
     },
     {
       key: "actions",
       label: "Actions",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 text-right pr-6",
+      className:
+        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 text-right pr-6",
       cellClassName: "px-4 py-4 pr-6",
       renderCell: (item) => (
         <div className="flex items-center justify-end gap-3">
           <button
             type="button"
-            aria-label={`View ${item.id}`}
+            onClick={() => navigate(`/sales/view/${item._id}`)}
+            aria-label={`View ${item.saleNumber}`}
             className="text-[#1a56db] hover:text-blue-800 transition-colors"
           >
             <Eye className="h-4 w-4" strokeWidth={2.5} />
           </button>
           <button
             type="button"
-            aria-label={`Edit ${item.id}`}
+            onClick={() => navigate(`/sales/edit/${item._id}`)}
+            aria-label={`Edit ${item.saleNumber}`}
             className="text-[#008951] hover:text-emerald-800 transition-colors"
           >
             <Edit3 className="h-4 w-4" strokeWidth={2.5} />
@@ -236,8 +345,8 @@ function Sales() {
 
         {/* Filters */}
         <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-            <label className="relative flex-1">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:items-center">
+            <label className="relative flex-1 col-span-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
               <input
                 value={searchTerm}
@@ -253,10 +362,59 @@ function Sales() {
                 className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
               >
                 <option value="All">Type: All</option>
-                <option value="Cash">Cash</option>
-                <option value="Credit">Credit</option>
+                {meta.saleTypes.map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
               </select>
               <ArrowLeft className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 rotate-180 pointer-events-none" />
+            </div>
+            {/* <div className="relative">
+              <select
+                value={saleStatus}
+                onChange={(event) => setSaleStatus(event.target.value)}
+                className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
+              >
+                <option value="">Sale Status: All</option>
+                {meta.saleStatuses.map((status) => (
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
+                ))}
+              </select>
+              <ArrowLeft className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 rotate-180 pointer-events-none" />
+            </div> */}
+            <div className="relative">
+              <select
+                value={paymentStatus}
+                onChange={(event) => setPaymentStatus(event.target.value)}
+                className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
+              >
+                <option value="">Payment Status: All</option>
+                {meta.paymentStatuses.map((status) => (
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
+                ))}
+              </select>
+              <ArrowLeft className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 rotate-180 pointer-events-none" />
+            </div>
+            <div>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(event) => setStartDate(event.target.value)}
+                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
+              />
+            </div>
+            <div>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(event) => setEndDate(event.target.value)}
+                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
+              />
             </div>
           </div>
         </div>
@@ -265,13 +423,18 @@ function Sales() {
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
           <GlobalTable
             columns={salesColumns}
-            data={filteredSales}
+            data={sales}
             ariaLabel="Sales Table"
             className=""
-            rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
-            emptyContent="No sales match your search."
+            rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors whitespace-nowrap text-nowrap"
+            emptyContent={
+              isLoading ? "Loading sales..." : "No sales match your search."
+            }
             pagination={true}
-            rowsPerPage={5}
+            rowsPerPage={pagination.limit || 10}
+            currentPage={pagination.page}
+            totalPages={pagination.totalPages}
+            onPageChange={(newPage) => setPage(newPage)}
           />
         </div>
       </section>

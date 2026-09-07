@@ -10,6 +10,8 @@ import Cylinders from '../Pages/Cylinders/Cylinders';
 import Registration from '../Pages/Registration/Registration';
 import Sales from '../Pages/SaleReturnSale/Sales/Sales';
 import AddSales from '../Pages/SaleReturnSale/Sales/AddSales';
+import UpdateSales from '../Pages/SaleReturnSale/Sales/UpdateSales';
+import ViewSales from '../Pages/SaleReturnSale/Sales/ViewSales';
 import CreateReturn from '../Pages/SaleReturnSale/ReturnSales/CreateReturn';
 import Invoices from '../Pages/Invoices/Invoices';
 import Accounting from '../Pages/Accounting/Accounting';
@@ -85,6 +87,8 @@ function PageRouter() {
         <Route path="/registration" element={<Registration />} />
         <Route path="/sales" element={<Sales />} />
         <Route path="/sales/add" element={<AddSales />} />
+        <Route path="/sales/edit/:id" element={<UpdateSales />} />
+        <Route path="/sales/view/:id" element={<ViewSales />} />
         <Route path="/sales/return" element={<CreateReturn />} />
         <Route path="/invoices" element={<Invoices />} />
         <Route path="/accounting" element={<Accounting />} />

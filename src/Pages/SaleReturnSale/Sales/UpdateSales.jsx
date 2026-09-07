@@ -1,14 +1,16 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import { Table } from "@heroui/react";
 import { useInventoryItems } from "../../../queries/inventory/inventory.queries";
 import { useCustomers } from "../../../queries/customers/customers.queries";
-import { useCreateSale } from "../../../queries/sales/sales.queries";
+import { useSaleById, useUpdateSale } from "../../../queries/sales/sales.queries";
 import { useToast } from "../../../utils/GlobalToast";
+import { useGetAccounts } from "../../../queries/accounts/accounts.queries";
 
-function AddSales() {
+function UpdateSales() {
   const navigate = useNavigate();
+  const { id } = useParams();
   const toast = useToast();
   const [lineItems, setLineItems] = useState([
     { id: 1, product: "", cylinderType: "", quantity: "", unitPrice: "", discount: "", taxRate: 17, total: "" }
@@ -18,7 +20,10 @@ function AddSales() {
   const [invoiceDate, setInvoiceDate] = useState("");
   const [paymentTermDays, setPaymentTermDays] = useState(0);
   const [remarks, setRemarks] = useState("");
-  const [saveAsDraft, setSaveAsDraft] = useState(false);
+  const [saleType, setSaleType] = useState("");
+  const [paymentAccountId, setPaymentAccountId] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [referenceNumber, setReferenceNumber] = useState("");
 
   const { data: inventoryData } = useInventoryItems({ search: "", page: 1, limit: 100 });
   const inventoryItems = inventoryData?.data?.items || [];
@@ -26,7 +31,40 @@ function AddSales() {
   const { data: customersData } = useCustomers({ search: "", page: 1, limit: 100 });
   const customers = customersData?.data?.items || [];
 
-  const createSaleMutation = useCreateSale();
+  const { data: accountsData } = useGetAccounts({ search: "", page: 1, limit: 100 });
+  const accounts = accountsData?.data?.items || [];
+
+  const { data: saleData, isLoading: isLoadingSale } = useSaleById(id);
+  const updateSaleMutation = useUpdateSale();
+
+  const paymentTermsOptions = saleData?.data?.form?.paymentTerms || [];
+  const saleTypesOptions = saleData?.data?.form?.saleTypes || [];
+
+  useEffect(() => {
+    if (saleData?.data) {
+      const sale = saleData.data;
+      setCustomerId(sale.customerId);
+      setInvoiceDate(sale.invoiceDate?.split('T')[0] || "");
+      setPaymentTermDays(sale.paymentTermDays || 0);
+      setRemarks(sale.remarks || "");
+      setSaleType(sale.saleType || "");
+      setAmountPaid(sale.paidAmount || 0);
+
+      if (sale.lineItems && sale.lineItems.length > 0) {
+        const mappedLineItems = sale.lineItems.map((item, index) => ({
+          id: index + 1,
+          product: item.inventoryItemId,
+          cylinderType: "",
+          quantity: item.quantity,
+          unitPrice: item.unitPriceAmount,
+          discount: item.discountAmount,
+          taxRate: sale.taxRate * 100 || 17,
+          total: item.lineTotalAmount,
+        }));
+        setLineItems(mappedLineItems);
+      }
+    }
+  }, [saleData]);
 
   const calculateRow = (item) => {
     const qty = Number(item.quantity) || 0;
@@ -103,33 +141,47 @@ function AddSales() {
 
   const paymentStatus = getPaymentStatus();
 
-  const handleSubmit = async (isDraft = false) => {
+  const handleSubmit = async () => {
     const saleData = {
       customerId,
       invoiceDate: invoiceDate || new Date().toISOString().split('T')[0],
-      paymentTermDays,
+      remarks,
       lineItems: lineItems
         .filter(item => item.product && item.quantity)
         .map(item => ({
           inventoryItemId: item.product,
+          itemDescription: inventoryItems.find(inv => inv._id === item.product)?.itemName || "",
           quantity: Number(item.quantity),
           unitPriceAmount: Number(item.unitPrice),
           discountAmount: Number(item.discount) || 0,
+          taxAmount: 0,
         })),
-      tradeDiscountAmount: 0,
-      amountPaid: amountPaid,
-      remarks,
-      saveAsDraft: isDraft,
+      payment: amountPaid > 0 ? {
+        accountId: paymentAccountId,
+        paymentAmount: amountPaid,
+        paymentMethod: paymentMethod,
+        referenceNumber: referenceNumber || "",
+      } : undefined,
     };
 
     try {
-      await createSaleMutation.mutateAsync(saleData);
-      toast.success(isDraft ? "Sale saved as draft successfully!" : "Sale created successfully!");
+      await updateSaleMutation.mutateAsync({ id, data: saleData });
+      toast.success("Sale updated successfully!");
       navigate("/sales");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to create sale. Please try again.");
+      toast.error(error.response?.data?.message || "Failed to update sale. Please try again.");
     }
   };
+
+  if (isLoadingSale) {
+    return (
+      <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+        <div className="text-center py-20">
+          <p className="text-slate-600">Loading sale details...</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
@@ -150,13 +202,13 @@ function AddSales() {
             Sales
           </span>{" "}
           <span className="px-1 text-slate-400">/</span>{" "}
-          <span className="font-semibold">Create Sales Invoice</span>
+          <span className="font-semibold">Update Sales Invoice</span>
         </p>
         <h1 className="text-2xl font-bold tracking-tight text-BLUE-dark">
-          Create Sales Invoice
+          Update Sales Invoice
         </h1>
         <p className="text-sm text-tertiary">
-          Generate a new sales invoice and allocate inventory
+          Update sales invoice and modify inventory allocation
         </p>
       </div>
 
@@ -179,7 +231,7 @@ function AddSales() {
                   <input
                     type="text"
                     disabled
-                    value="INV-2026-0459 (Auto-generated)"
+                    value={saleData?.data?.invoiceNumber || ""}
                     className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed"
                   />
                 </div>
@@ -199,15 +251,23 @@ function AddSales() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Payment Terms (Days) <span className="text-rose-500">*</span>
+                    Payment Terms <span className="text-rose-500">*</span>
                   </label>
-                  <input
-                    type="number"
-                    value={paymentTermDays}
-                    onChange={(e) => setPaymentTermDays(Number(e.target.value))}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                    placeholder="0"
-                  />
+                  <div className="relative">
+                    <select
+                      value={paymentTermDays}
+                      onChange={(e) => setPaymentTermDays(Number(e.target.value))}
+                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    >
+                      <option value="">Select payment terms</option>
+                      {paymentTermsOptions.map((term) => (
+                        <option key={term.value} value={term.value}>
+                          {term.label}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
@@ -223,6 +283,29 @@ function AddSales() {
                       {customers.map((customer) => (
                         <option key={customer._id} value={customer._id}>
                           {customer.customerCode} - {customer.customerName}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Sale Type <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={saleType}
+                      onChange={(e) => setSaleType(e.target.value)}
+                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    >
+                      <option value="">Select sale type</option>
+                      {saleTypesOptions.map((type) => (
+                        <option key={type.value} value={type.value}>
+                          {type.label}
                         </option>
                       ))}
                     </select>
@@ -255,7 +338,7 @@ function AddSales() {
                       <Table.Column className="text-xs font-semibold text-slate-600">Qty</Table.Column>
                       <Table.Column className="text-xs font-semibold text-slate-600">Unit Price (Rs.)</Table.Column>
                       <Table.Column className="text-xs font-semibold text-slate-600">Discount (Rs.)</Table.Column>
-                      <Table.Column className="text-xs font-semibold text-slate-600">Tax (17%)</Table.Column>
+                      <Table.Column className="text-xs font-semibold text-slate-600">Tax (%)</Table.Column>
                       <Table.Column className="text-xs font-semibold text-slate-600">Total (Rs.)</Table.Column>
                       <Table.Column className="text-xs font-semibold text-slate-600"></Table.Column>
                     </Table.Header>
@@ -412,6 +495,47 @@ function AddSales() {
                   className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951] text-right"
                 />
               </div>
+              {amountPaid > 0 && (
+                <>
+                  <div className="flex flex-col gap-2 pt-2 border-t border-slate-200">
+                    <label className="block text-sm font-medium text-slate-700">Payment Account</label>
+                    <select
+                      value={paymentAccountId}
+                      onChange={(e) => setPaymentAccountId(e.target.value)}
+                      className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#008951]"
+                    >
+                      <option value="">Select account</option>
+                      {accounts.map((account) => (
+                        <option key={account._id} value={account._id}>
+                          {account.accountCode} - {account.accountName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="block text-sm font-medium text-slate-700">Payment Method</label>
+                    <select
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#008951]"
+                    >
+                      <option value="cash">Cash</option>
+                      <option value="bank_transfer">Bank Transfer</option>
+                      <option value="cheque">Cheque</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="block text-sm font-medium text-slate-700">Reference Number</label>
+                    <input
+                      type="text"
+                      value={referenceNumber}
+                      onChange={(e) => setReferenceNumber(e.target.value)}
+                      placeholder="Enter reference number"
+                      className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951]"
+                    />
+                  </div>
+                </>
+              )}
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-600">Outstanding</span>
                 <span className="text-sm font-medium text-orange">
@@ -469,22 +593,15 @@ function AddSales() {
           Cancel
         </button>
         <button
-          onClick={() => handleSubmit(true)}
-          disabled={createSaleMutation.isPending}
-          className="rounded-lg border border-[#1E40AF] bg-white px-5 py-2 text-sm font-medium text-accent-blue transition hover:bg-slate-50 disabled:opacity-50"
-        >
-          {createSaleMutation.isPending ? "Saving..." : "Save as Draft"}
-        </button>
-        <button
-          onClick={() => handleSubmit(false)}
-          disabled={createSaleMutation.isPending}
+          onClick={handleSubmit}
+          disabled={updateSaleMutation.isPending}
           className="rounded-lg bg-gradient-bg-blue  px-6 py-2 text-sm font-medium text-white transition hover:bg-[#007545] disabled:opacity-50"
         >
-          {createSaleMutation.isPending ? "Creating..." : "Create Invoice"}
+          {updateSaleMutation.isPending ? "Updating..." : "Update Invoice"}
         </button>
       </div>
     </main>
   );
 }
 
-export default AddSales;
+export default UpdateSales;

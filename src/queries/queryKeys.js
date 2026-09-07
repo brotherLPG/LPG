@@ -189,4 +189,17 @@ export const queryKeys = {
     dashboard: () => ['storage-tanks', 'dashboard'],
   },
 
+  // =========================
+  // Sales
+  // =========================
+  sales: {
+    all: ['sales'],
+
+    lists: () => ['sales', 'list'],
+
+    list: (params) => ['sales', 'list', params],
+
+    detail: id => ['sales', 'detail', id]
+  },
+
 }
