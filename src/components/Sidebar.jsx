@@ -9,7 +9,8 @@ import {
   Receipt,
   Layers,
   CreditCard,
-  Wrench
+  Wrench,
+  Building
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -84,6 +85,11 @@ const Sidebar = () => {
       icon: Wrench,
       label: "Maintenance Assets",
       path: "/maintenance-assets",
+    },
+    {
+      icon: Building,
+      label: "Fixed Assets",
+      path: "/assets",
     },
     {
       icon: Users,

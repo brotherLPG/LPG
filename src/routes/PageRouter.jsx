@@ -63,6 +63,8 @@ import UpdateSupplier from '../Pages/Suppliers/updateSupplier';
 import SupplierDetails from '../Pages/Suppliers/SupplierDetails';
 import UpdateLpgReceipt from '../Pages/LPGReceipts/updateLpgReceipt';
 import LpgReceiptDetails from '../Pages/LPGReceipts/LpgReceiptDetails';
+import Assets from '../Pages/Assets/Assets';
+import AddAsset from '../Pages/Assets/AddAsset';
 
 function PageRouter() {
   // Router container
@@ -139,6 +141,8 @@ function PageRouter() {
         <Route path="/filling-batches/edit/:id" element={<UpdateBatch />} />
         <Route path="/maintenance-assets" element={<MaintenanceAssets />} />
         <Route path="/maintenance-assets/log" element={<LogMaintenance />} />
+        <Route path="/assets" element={<Assets />} />
+        <Route path="/assets/add" element={<AddAsset />} />
       </Routes>
     </div>
   );
