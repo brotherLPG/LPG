@@ -16,6 +16,7 @@ import { getAccounts } from '../api/accounts.api.js'
 import { getInventoryItems } from '../api/inventory.api.js'
 import { getStorageTankDashboard } from '../api/storageTanks.api.js'
 import { getSales } from '../api/sales.api.js'
+import { getReturnSales } from '../api/returnsale.api.js'
 
 export const prefetchDashboard = async queryClient => {
   await Promise.all([
@@ -233,6 +234,20 @@ export const prefetchDashboard = async queryClient => {
 
       queryFn: () =>
         getSales({
+          page: 1,
+          limit: 10,
+        })
+    }),
+
+    // ========================================
+    // Return Sales
+    // ========================================
+
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.returnSales.list({ page: 1, limit: 10 }),
+
+      queryFn: () =>
+        getReturnSales({
           page: 1,
           limit: 10,
         })

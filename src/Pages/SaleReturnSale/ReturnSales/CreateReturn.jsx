@@ -1,13 +1,24 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import { Table } from "@heroui/react";
+import { useReturnSaleFormOptions } from "../../../queries/returnsales/returnsales.queries";
 
 function CreateReturn() {
   const navigate = useNavigate();
+  const { data: formOptions, isLoading } = useReturnSaleFormOptions();
   const [returnedItems, setReturnedItems] = useState([
     { id: 1, itemName: "", originalQty: "", returnQty: "", unitPrice: "", returnAmount: "" }
   ]);
+  const [selectedCustomer, setSelectedCustomer] = useState("");
+  const [selectedReason, setSelectedReason] = useState("");
+  const [returnDate, setReturnDate] = useState("");
+  const [originalInvoiceNumber, setOriginalInvoiceNumber] = useState("");
+  const [inspectionNotes, setInspectionNotes] = useState("");
+
+  const customers = formOptions?.data?.customers || [];
+  const returnReasons = formOptions?.data?.returnReasons || [];
+  const actionType = formOptions?.data?.actionType;
+  const nextReturnNumber = formOptions?.data?.nextReturnNumber;
 
   return (
     <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
@@ -57,7 +68,7 @@ function CreateReturn() {
                   <input
                     type="text"
                     disabled
-                    value="RET-2026-0042 (Auto-generated)"
+                    value={nextReturnNumber || "(Loading...)"}
                     className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed"
                   />
                 </div>
@@ -67,6 +78,8 @@ function CreateReturn() {
                   </label>
                   <input
                     type="date"
+                    value={returnDate}
+                    onChange={(e) => setReturnDate(e.target.value)}
                     className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
@@ -76,13 +89,18 @@ function CreateReturn() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Customer entity <span className="text-rose-500">*</span>
                 </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Karachi LPG Distributors"
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                  />
-                </div>
+                <select
+                  value={selectedCustomer}
+                  onChange={(e) => setSelectedCustomer(e.target.value)}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                >
+                  <option value="">Select Customer</option>
+                  {customers.map((customer) => (
+                    <option key={customer._id} value={customer._id}>
+                      {customer.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>
@@ -102,6 +120,8 @@ function CreateReturn() {
                 </label>
                 <input
                   type="text"
+                  value={originalInvoiceNumber}
+                  onChange={(e) => setOriginalInvoiceNumber(e.target.value)}
                   placeholder="e.g. INV-2026-0456"
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
@@ -204,18 +224,25 @@ function CreateReturn() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Reason for Return <span className="text-rose-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  placeholder="Defective Cylinder (Valves Leaking)"
+                <select
+                  value={selectedReason}
+                  onChange={(e) => setSelectedReason(e.target.value)}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                />
+                >
+                  <option value="">Select Reason</option>
+                  {returnReasons.map((reason) => (
+                    <option key={reason.value} value={reason.value}>
+                      {reason.label}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-4th-color">
                   Action Type
                 </label>
                 <p className="text-sm BLUE-dark font-medium">
-                  Credit to Customer Ledger Account
+                  {actionType?.label || "Credit to Customer Ledger Account"}
                 </p>
               </div>
               <div className="flex flex-row justify-between my-auto items-center">
@@ -241,6 +268,8 @@ function CreateReturn() {
                 </label>
                 <textarea
                   rows="4"
+                  value={inspectionNotes}
+                  onChange={(e) => setInspectionNotes(e.target.value)}
                   placeholder="Document quality control findings and inspection results..."
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
                 />

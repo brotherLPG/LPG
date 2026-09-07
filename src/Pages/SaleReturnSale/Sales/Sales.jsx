@@ -3,9 +3,11 @@ import { DollarSign, CreditCard, Search, CirclePlus, TrendingUp, ArrowLeft, Eye,
 import { useNavigate } from "react-router-dom";
 import GlobalTable from "../../../utils/GlobalTable";
 import { useSales } from "../../../queries/sales/sales.queries";
+import Returnsales from "../ReturnSales/Returnsales";
 
 function Sales() {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("sales");
   const [searchTerm, setSearchTerm] = useState("");
   const [type, setType] = useState("All");
   const [saleStatus, setSaleStatus] = useState("");
@@ -251,23 +253,25 @@ function Sales() {
                 Dashboard
               </span>{" "}
               <span className="px-1 text-slate-400">/</span>{" "}
-              <span className="font-semibold">Sales</span>
+              <span className="font-semibold">{activeTab === "sales" ? "Sales" : "Return Sales"}</span>
             </p>
             <h1 className="text-2xl font-bold tracking-tight text-BLUE-dark">
-              Sales Management
+              {activeTab === "sales" ? "Sales Management" : "Return Sales Management"}
             </h1>
             <p className="text-sm text-tertiary">
-              Track cash and credit sales for LPG and other gases
+              {activeTab === "sales" ? "Track cash and credit sales for LPG and other gases" : "Track and manage customer returns and credit notes"}
             </p>
           </div>
           <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => navigate("/sales/add")}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#008951] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#007545]"
-            >
-              <CirclePlus className="h-4 w-4" strokeWidth={3} /> Add Sales
-            </button>
+            {activeTab === "sales" && (
+              <button
+                type="button"
+                onClick={() => navigate("/sales/add")}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#008951] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#007545]"
+              >
+                <CirclePlus className="h-4 w-4" strokeWidth={3} /> Add Sales
+              </button>
+            )}
             <button
               type="button"
               onClick={() => navigate("/sales/return")}
@@ -278,6 +282,26 @@ function Sales() {
           </div>
         </div>
 
+        {/* Tabs */}
+        <div className="mb-4 flex border-b border-slate-200">
+          <button
+            type="button"
+            onClick={() => setActiveTab("sales")}
+            className={`border-b-2 px-4 py-2 text-sm font-semibold ${activeTab === "sales" ? "border-blue-600 text-blue-700" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+          >
+            Sales
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("returns")}
+            className={`border-b-2 px-4 py-2 text-sm font-semibold ${activeTab === "returns" ? "border-blue-600 text-blue-700" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+          >
+            Return Sales
+          </button>
+        </div>
+
+        {activeTab === "sales" && (
+          <>
         {/* Summary Cards */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -437,6 +461,12 @@ function Sales() {
             onPageChange={(newPage) => setPage(newPage)}
           />
         </div>
+          </>
+        )}
+
+        {activeTab === "returns" && (
+          <Returnsales />
+        )}
       </section>
     </main>
   );

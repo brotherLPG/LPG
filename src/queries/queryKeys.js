@@ -202,4 +202,19 @@ export const queryKeys = {
     detail: id => ['sales', 'detail', id]
   },
 
+  // =========================
+  // Return Sales
+  // =========================
+  returnSales: {
+    all: ['return-sales'],
+
+    lists: () => ['return-sales', 'list'],
+
+    list: (params) => ['return-sales', 'list', params],
+
+    detail: id => ['return-sales', 'detail', id],
+
+    formOptions: () => ['return-sales', 'form-options']
+  },
+
 }
