@@ -87,6 +87,11 @@ const Sidebar = () => {
       path: "/maintenance-assets",
     },
     {
+      icon: Wrench,
+      label: "Maintenance Records",
+      path: "/maintenance-records",
+    },
+    {
       icon: Building,
       label: "Fixed Assets",
       path: "/assets",

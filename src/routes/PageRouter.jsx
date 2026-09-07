@@ -59,6 +59,8 @@ import UpdateBatch from '../Pages/FillingBatches/UpdateBatch';
 import FillingBatchDetails from '../Pages/FillingBatches/FillingBatchDetails';
 import MaintenanceAssets from '../Pages/MaintenanceAssets/MaintenanceAssets';
 import LogMaintenance from '../Pages/MaintenanceAssets/LogMaintenance';
+import MaintenanceRecords from '../Pages/MaintenanceAssets/MaintenanceRecords';
+import AddMaintenanceRecord from '../Pages/MaintenanceAssets/AddMaintenanceRecord';
 import UpdateSupplier from '../Pages/Suppliers/updateSupplier';
 import SupplierDetails from '../Pages/Suppliers/SupplierDetails';
 import UpdateLpgReceipt from '../Pages/LPGReceipts/updateLpgReceipt';
@@ -141,6 +143,8 @@ function PageRouter() {
         <Route path="/filling-batches/edit/:id" element={<UpdateBatch />} />
         <Route path="/maintenance-assets" element={<MaintenanceAssets />} />
         <Route path="/maintenance-assets/log" element={<LogMaintenance />} />
+        <Route path="/maintenance-records" element={<MaintenanceRecords />} />
+        <Route path="/maintenance-records/add" element={<AddMaintenanceRecord />} />
         <Route path="/assets" element={<Assets />} />
         <Route path="/assets/add" element={<AddAsset />} />
       </Routes>
