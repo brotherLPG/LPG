@@ -33,7 +33,7 @@ function CreateReturn() {
           </span>{" "}
           <span className="px-1 text-slate-400">/</span>{" "}
           <span
-            onClick={() => navigate("/sales")}
+            onClick={() => navigate("/sales?tab=returns")}
             className="cursor-pointer font-medium text-4th-color transition-colors duration-200"
           >
             Sales

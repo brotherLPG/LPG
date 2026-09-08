@@ -1,13 +1,15 @@
 import React, { useState, useMemo } from "react";
 import { DollarSign, CreditCard, Search, CirclePlus, TrendingUp, ArrowLeft, Eye, Edit3 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import GlobalTable from "../../../utils/GlobalTable";
 import { useSales } from "../../../queries/sales/sales.queries";
 import Returnsales from "../ReturnSales/Returnsales";
 
 function Sales() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("sales");
+  // const [activeTab, setActiveTab] = useState("sales");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") || "sales";
   const [searchTerm, setSearchTerm] = useState("");
   const [type, setType] = useState("All");
   const [saleStatus, setSaleStatus] = useState("");
@@ -286,14 +288,16 @@ function Sales() {
         <div className="mb-4 flex border-b border-slate-200">
           <button
             type="button"
-            onClick={() => setActiveTab("sales")}
+            // onClick={() => setActiveTab("sales")}
+            onClick={() => setSearchParams({ tab: "sales" })}
             className={`border-b-2 px-4 py-2 text-sm font-semibold ${activeTab === "sales" ? "border-blue-600 text-blue-700" : "border-transparent text-slate-500 hover:text-slate-700"}`}
           >
             Sales
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab("returns")}
+            // onClick={() => setActiveTab("returns")}
+            onClick={() => setSearchParams({ tab: "returns" })}
             className={`border-b-2 px-4 py-2 text-sm font-semibold ${activeTab === "returns" ? "border-blue-600 text-blue-700" : "border-transparent text-slate-500 hover:text-slate-700"}`}
           >
             Return Sales
