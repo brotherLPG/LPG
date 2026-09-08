@@ -157,7 +157,7 @@ const Sidebar = () => {
         </ul>
       </nav>
       {/* User Section */}
-      <div className="p-2 border-t border-white/10 shrink-0">
+      {/* <div className="p-2 border-t border-white/10 shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
             <span className="text-white font-bold text-sm">A</span>
@@ -169,7 +169,7 @@ const Sidebar = () => {
             <p className="text-white/50 text-xs truncate">admin@lpgplant.com</p>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
