@@ -282,13 +282,13 @@ function CreateReturn() {
       {/* Bottom Action Bar */}
       <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <button
-          onClick={() => navigate("/sales")}
+          onClick={() => navigate("/sales?tab=returns")}
           className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
         >
           Cancel
         </button>
         <button
-          onClick={() => navigate("/sales")}
+          onClick={() => navigate("/sales?tab=returns")}
           className="rounded-lg bg-gradient-bg-blue  px-6 py-2 text-sm font-medium text-white transition hover:bg-[#007545]"
         >
           Process Return (Issue Credit)
