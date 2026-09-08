@@ -67,6 +67,7 @@ import UpdateLpgReceipt from '../Pages/LPGReceipts/updateLpgReceipt';
 import LpgReceiptDetails from '../Pages/LPGReceipts/LpgReceiptDetails';
 import Assets from '../Pages/Assets/Assets';
 import AddAsset from '../Pages/Assets/AddAsset';
+import AssetsTab from '../Pages/Assets/AssetsTab';
 
 function PageRouter() {
   // Router container
@@ -116,10 +117,7 @@ function PageRouter() {
           path="/cylinders/edit-type/:id"
           element={<UpdateCylinderType />}
         />
-        <Route
-          path="/cylinders/view-type/:id"
-          element={<ViewCylinderType />}
-        />
+        <Route path="/cylinders/view-type/:id" element={<ViewCylinderType />} />
         <Route path="/storage-tanks" element={<StorageTanks />} />
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/inventory/add" element={<AddInventoryItem />} />
@@ -139,13 +137,20 @@ function PageRouter() {
         <Route path="/audit-logs" element={<AuditLogs />} />
         <Route path="/filling-batches" element={<FillingBatches />} />
         <Route path="/filling-batches/create" element={<CreateBatch />} />
-        <Route path="/filling-batches/view/:id" element={<FillingBatchDetails />} />
+        <Route
+          path="/filling-batches/view/:id"
+          element={<FillingBatchDetails />}
+        />
         <Route path="/filling-batches/edit/:id" element={<UpdateBatch />} />
-        <Route path="/maintenance-assets" element={<MaintenanceAssets />} />
+
+        {/* <Route path="/maintenance-assets" element={<MaintenanceAssets />} /> */}
         <Route path="/maintenance-assets/log" element={<LogMaintenance />} />
-        <Route path="/maintenance-records" element={<MaintenanceRecords />} />
-        <Route path="/maintenance-records/add" element={<AddMaintenanceRecord />} />
-        <Route path="/assets" element={<Assets />} />
+        {/* <Route path="/maintenance-records" element={<MaintenanceRecords />} /> */}
+        <Route
+          path="/maintenance-records/add"
+          element={<AddMaintenanceRecord />}
+        />
+        <Route path="/assets" element={<AssetsTab />} />
         <Route path="/assets/add" element={<AddAsset />} />
       </Routes>
     </div>

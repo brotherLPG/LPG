@@ -164,7 +164,8 @@ function LogMaintenance() {
               </span>{" "}
               <span className="px-1 text-slate-400">/</span>{" "}
               <span
-                onClick={() => navigate("/maintenance-assets")}
+                // onClick={() => navigate("/maintenance-assets")}
+                onClick={() => navigate("/assets?tab=maintenance-assets")}
                 className="cursor-pointer font-medium text-4th-color transition-colors duration-200"
               >
                 Maintenance Assets

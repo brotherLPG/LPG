@@ -161,15 +161,13 @@ function AddMaintenanceRecord() {
               </span>{" "}
               <span className="px-1 text-slate-400">/</span>{" "}
               <span
-                onClick={() => navigate("/maintenance-records")}
+                onClick={() => navigate("/assets?tab=maintenance-records")}
                 className="cursor-pointer font-medium text-4th-color transition-colors duration-200"
               >
                 Maintenance Records
               </span>{" "}
               <span className="px-1 text-slate-400">/</span>{" "}
-              <span className="font-semibold text-slate-700">
-                Add Record
-              </span>
+              <span className="font-semibold text-slate-700">Add Record</span>
             </p>
             <h1 className="text-2xl font-bold tracking-tight text-BLUE-dark mt-2">
               Log Maintenance Record
@@ -224,9 +222,11 @@ function AddMaintenanceRecord() {
                 <div className="space-y-2">
                   <input
                     type="text"
-                    value={formData.selectedAsset
-                      ? `${formData.selectedAsset.assetCode}—${formData.selectedAsset.assetName}`
-                      : ""}
+                    value={
+                      formData.selectedAsset
+                        ? `${formData.selectedAsset.assetCode}—${formData.selectedAsset.assetName}`
+                        : ""
+                    }
                     readOnly
                     onClick={() => setShowAssetTable(!showAssetTable)}
                     placeholder="Click to select an asset..."
@@ -237,18 +237,23 @@ function AddMaintenanceRecord() {
                     <div className="rounded-md bg-blue-50 border border-blue-100 p-3">
                       <div className="flex flex-wrap gap-4 text-xs">
                         <span className="text-slate-700">
-                          <span className="font-semibold">CATEGORY:</span> {formData.selectedAsset.category}
+                          <span className="font-semibold">CATEGORY:</span>{" "}
+                          {formData.selectedAsset.category}
                         </span>
                         <span className="text-slate-700">
-                          <span className="font-semibold">ZONE:</span> {formData.selectedAsset.zone}
+                          <span className="font-semibold">ZONE:</span>{" "}
+                          {formData.selectedAsset.zone}
                         </span>
                         <span className="text-slate-700">
                           <span className="font-semibold">CURRENT STATUS:</span>{" "}
-                          <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                            formData.selectedAsset.currentStatus === "Operational" 
-                              ? "bg-emerald-100 text-emerald-700" 
-                              : "bg-amber-100 text-amber-700"
-                          }`}>
+                          <span
+                            className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                              formData.selectedAsset.currentStatus ===
+                              "Operational"
+                                ? "bg-emerald-100 text-emerald-700"
+                                : "bg-amber-100 text-amber-700"
+                            }`}
+                          >
                             {formData.selectedAsset.currentStatus}
                           </span>
                         </span>
@@ -335,7 +340,8 @@ function AddMaintenanceRecord() {
               {/* Maintenance Cost */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Maintenance Cost (Rs.) <span className="text-rose-500">*</span>
+                  Maintenance Cost (Rs.){" "}
+                  <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"

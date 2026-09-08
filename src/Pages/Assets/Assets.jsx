@@ -256,37 +256,9 @@ function Assets() {
   ];
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+    <main className="">
       <section>
-        {/* Header & Breadcrumbs */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs">
-              <span
-                onClick={() => navigate("/dashboard")}
-                className="cursor-pointer font-medium text-4th-color transition-colors duration-200"
-              >
-                Dashboard
-              </span>{" "}
-              <span className="px-1 text-slate-400">/</span>{" "}
-              <span className="font-semibold ">Fixed Assets</span>
-            </p>
-            <h1 className="text-2xl font-bold tracking-tight text-BLUE-dark">
-              Fixed Assets
-            </h1>
-            <p className="text-sm text-tertiary">
-              Track and manage company fixed assets and depreciation
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => navigate("/assets/add")}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-bg-blue px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#007545]"
-          >
-            <CirclePlus className="h-4 w-4" strokeWidth={3} /> Add Asset
-          </button>
-        </div>
-
+       
         {/* Summary Cards */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -361,7 +333,9 @@ function Assets() {
                   className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-40 lg:w-44"
                 >
                   {categoryOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
                   ))}
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
@@ -373,7 +347,9 @@ function Assets() {
                   className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-40 lg:w-44"
                 >
                   {locationOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
                   ))}
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
@@ -385,7 +361,9 @@ function Assets() {
                   className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-40 lg:w-44"
                 >
                   {statusOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
                   ))}
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
@@ -406,6 +384,8 @@ function Assets() {
             pagination={false}
           />
         </div>
+
+        
       </section>
     </main>
   );

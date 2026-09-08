@@ -230,39 +230,9 @@ function MaintenanceAssets() {
   ];
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+    <main className="">
       <section>
-        {/* Header & Breadcrumbs */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs">
-              <span
-                onClick={() => navigate("/dashboard")}
-                className="cursor-pointer font-medium text-4th-color transition-colors duration-200"
-              >
-                Dashboard
-              </span>{" "}
-              <span className="px-1 text-slate-400">/</span>{" "}
-              <span className="font-semibold text-slate-700">
-                Maintenance Assets
-              </span>
-            </p>
-            <h1 className="text-2xl font-bold tracking-tight text-BLUE-dark mt-2">
-              Maintenance Assets
-            </h1>
-            <p className="text-sm text-tertiary">
-              Manage and track maintenance assets across all facilities
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => navigate("/maintenance-assets/log")}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#008951] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#007545]"
-          >
-            <PlusCircle className="h-4 w-4" /> Add Asset
-          </button>
-        </div>
-
+        
         {/* Statistics Cards */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (
