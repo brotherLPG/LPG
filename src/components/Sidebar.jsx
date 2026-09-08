@@ -81,16 +81,16 @@ const Sidebar = () => {
       label: "Payments",
       path: "/payments",
     },
-    {
-      icon: Wrench,
-      label: "Maintenance Assets",
-      path: "/maintenance-assets",
-    },
-    {
-      icon: Wrench,
-      label: "Maintenance Records",
-      path: "/maintenance-records",
-    },
+    // {
+    //   icon: Wrench,
+    //   label: "Maintenance Assets",
+    //   path: "/maintenance-assets",
+    // },
+    // {
+    //   icon: Wrench,
+    //   label: "Maintenance Records",
+    //   path: "/maintenance-records",
+    // },
     {
       icon: Building,
       label: "Fixed Assets",
