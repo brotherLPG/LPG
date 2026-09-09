@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Switch } from "@heroui/react";
 import { ChevronDown } from "lucide-react";
 import { useEmployeeById, useUpdateEmployee } from "../../queries/employees/employees.queries";
 import { useToast } from "../../utils/GlobalToast";
@@ -14,12 +13,19 @@ function UpdateEmployee() {
   const [isActive, setIsActive] = useState(true);
   const [formData, setFormData] = useState({
     fullName: "",
+    fatherHusbandName: "",
+    cnicNumber: "",
+    dateOfBirth: "",
+    gender: "",
     departmentName: "",
     jobTitle: "",
-    phoneNumber: "",
-    emailAddress: "",
     joiningDate: "",
     monthlySalaryAmount: "",
+    phoneNumber: "",
+    emailAddress: "",
+    emergencyContactName: "",
+    emergencyContactPhone: "",
+    homeAddress: "",
   });
 
   useEffect(() => {
@@ -28,12 +34,19 @@ function UpdateEmployee() {
 
     setFormData({
       fullName: employee.fullName || "",
+      fatherHusbandName: employee.fatherHusbandName || "",
+      cnicNumber: employee.cnicNumber || "",
+      dateOfBirth: employee.dateOfBirth ? employee.dateOfBirth.slice(0, 10) : "",
+      gender: employee.gender || "",
       departmentName: employee.departmentName || "",
       jobTitle: employee.jobTitle || "",
-      phoneNumber: employee.phoneNumber || "",
-      emailAddress: employee.emailAddress || "",
       joiningDate: employee.joiningDate ? employee.joiningDate.slice(0, 10) : "",
       monthlySalaryAmount: employee.monthlySalaryAmount ?? "",
+      phoneNumber: employee.phoneNumber || "",
+      emailAddress: employee.emailAddress || "",
+      emergencyContactName: employee.emergencyContactName || "",
+      emergencyContactPhone: employee.emergencyContactPhone || "",
+      homeAddress: employee.homeAddress || "",
     });
     setIsActive(employee.employmentStatus === "active");
   }, [data]);
@@ -48,9 +61,20 @@ function UpdateEmployee() {
       await updateMutation.mutateAsync({
         id,
         data: {
-          ...formData,
-          monthlySalaryAmount: Number(formData.monthlySalaryAmount) || 0,
+          fullName: formData.fullName,
+          fatherHusbandName: formData.fatherHusbandName,
+          cnicNumber: formData.cnicNumber,
+          dateOfBirth: formData.dateOfBirth || null,
+          gender: formData.gender,
+          departmentName: formData.departmentName,
+          jobTitle: formData.jobTitle,
           joiningDate: formData.joiningDate || null,
+          monthlySalaryAmount: Number(formData.monthlySalaryAmount) || 0,
+          phoneNumber: formData.phoneNumber,
+          emailAddress: formData.emailAddress,
+          emergencyContactName: formData.emergencyContactName,
+          emergencyContactPhone: formData.emergencyContactPhone,
+          homeAddress: formData.homeAddress,
           employmentStatus: isActive ? "active" : "inactive",
         },
       });
@@ -98,16 +122,16 @@ function UpdateEmployee() {
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-slate-700">Father / Husband Name</label>
-                <input placeholder="Enter relative full name" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
+                <input value={formData.fatherHusbandName} onChange={(event) => handleInputChange("fatherHusbandName", event.target.value)} placeholder="Enter relative full name" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-slate-700">CNIC Number</label>
-                <input placeholder="e.g. 37405-1234567-1" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
+                <input value={formData.cnicNumber} onChange={(event) => handleInputChange("cnicNumber", event.target.value)} placeholder="e.g. 37405-1234567-1" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
               </div>
               <div className="grid grid-cols-1 gap-5 md:col-span-2 md:grid-cols-3">
-                <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Date of Birth</label><input placeholder="YYYY-MM-DD" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
-                <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Gender</label><div className="relative"><select defaultValue="" className="w-full appearance-none rounded-md border border-slate-200 bg-white py-2 pl-3 pr-10 text-sm text-slate-700 outline-none"><option value="" disabled>Select gender</option><option>Male</option><option>Female</option><option>Other</option></select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /></div></div>
-                <div><label className="mb-2 block text-sm font-medium text-slate-700">Status</label><div className="flex items-center gap-3"><Switch isSelected={isActive} onValueChange={setIsActive} classNames={{ wrapper: isActive ? "bg-[#008951]" : "bg-slate-200" }} size="sm" /><span className={`text-sm font-semibold ${isActive ? "text-[#008951]" : "text-slate-500"}`}>{isActive ? "Active Employee" : "Inactive Employee"}</span></div></div>
+                <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Date of Birth</label><input type="date" value={formData.dateOfBirth} onChange={(event) => handleInputChange("dateOfBirth", event.target.value)} className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
+                <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Gender</label><div className="relative"><select value={formData.gender} onChange={(event) => handleInputChange("gender", event.target.value)} className="w-full appearance-none rounded-md border border-slate-200 bg-white py-2 pl-3 pr-10 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"><option value="" disabled>Select gender</option>{data?.data?.form?.genders?.map((gender) => (<option key={gender.value} value={gender.value}>{gender.label}</option>))}</select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /></div></div>
+                <div><label className="mb-2 block text-sm font-medium text-slate-700">Status</label><div className="relative"><select value={isActive ? "active" : "inactive"} onChange={(event) => setIsActive(event.target.value === "active")} className="w-full appearance-none rounded-md border border-slate-200 bg-white py-2 pl-3 pr-10 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100">{data?.data?.form?.statuses?.map((status) => (<option key={status.value} value={status.value}>{status.label}</option>))}</select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /></div></div>
               </div>
             </div>
           </div>
@@ -117,10 +141,10 @@ function UpdateEmployee() {
           <div className="h-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
             <div className="border-b border-slate-200 p-4"><h2 className="text-sm font-semibold text-slate-800">Employment Details</h2></div>
             <div className="space-y-5 p-5">
-              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Department</label><div className="relative"><select value={formData.departmentName} onChange={(event) => handleInputChange("departmentName", event.target.value)} className="w-full appearance-none rounded-md border border-slate-200 bg-white py-2 pl-3 pr-10 text-sm text-slate-700 outline-none"><option value="">Select Department</option><option>Operations</option><option>Finance</option><option>Maintenance</option><option>Admin</option><option>Sales</option><option>Security</option><option>HR</option></select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /></div></div>
-              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Job Title / Designation</label><input value={formData.jobTitle} onChange={(event) => handleInputChange("jobTitle", event.target.value)} placeholder="e.g. Plant Operator" className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#008951]" /></div>
-              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Date of Joining</label><input type="date" value={formData.joiningDate} onChange={(event) => handleInputChange("joiningDate", event.target.value)} className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#008951]" /></div>
-              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Monthly Salary (Rs.)</label><input type="number" value={formData.monthlySalaryAmount} onChange={(event) => handleInputChange("monthlySalaryAmount", event.target.value)} placeholder="e.g. 45,000" className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#008951]" /></div>
+              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Department</label><div className="relative"><select value={formData.departmentName} onChange={(event) => handleInputChange("departmentName", event.target.value)} className="w-full appearance-none rounded-md border border-slate-200 bg-white py-2 pl-3 pr-10 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"><option value="">Select Department</option>{data?.data?.form?.departments?.map((dept) => (<option key={dept.value} value={dept.value}>{dept.label}</option>))}</select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /></div></div>
+              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Job Title / Designation</label><input value={formData.jobTitle} onChange={(event) => handleInputChange("jobTitle", event.target.value)} placeholder="e.g. Plant Operator" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
+              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Date of Joining</label><input type="date" value={formData.joiningDate} onChange={(event) => handleInputChange("joiningDate", event.target.value)} className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
+              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Monthly Salary (Rs.)</label><input type="number" value={formData.monthlySalaryAmount} onChange={(event) => handleInputChange("monthlySalaryAmount", event.target.value)} placeholder="e.g. 45,000" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
             </div>
           </div>
         </div>
@@ -128,11 +152,11 @@ function UpdateEmployee() {
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm lg:col-span-3">
           <div className="border-b border-slate-200 p-4"><h2 className="text-sm font-semibold text-slate-800">Contact & Emergency Details</h2></div>
           <div className="grid grid-cols-1 gap-5 p-5 md:grid-cols-2">
-            <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Phone Number <span className="text-rose-500">*</span></label><input required value={formData.phoneNumber} onChange={(event) => handleInputChange("phoneNumber", event.target.value)} placeholder="e.g. 0300-5550011" className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#008951]" /></div>
-            <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Email Address</label><input type="email" value={formData.emailAddress} onChange={(event) => handleInputChange("emailAddress", event.target.value)} placeholder="e.g. ahmad.h@brotherlpg.com" className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#008951]" /></div>
-            <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Emergency Contact Name</label><input placeholder="e.g. Muhammad Hassan (Brother)" className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#008951]" /></div>
-            <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Emergency Contact Phone</label><input placeholder="e.g. 0301-9998877" className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#008951]" /></div>
-            <div className="md:col-span-2"><label className="mb-1.5 block text-sm font-medium text-slate-700">Home Address</label><input placeholder="Street Address, Sector/Area, City" className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#008951]" /></div>
+            <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Phone Number <span className="text-rose-500">*</span></label><input required value={formData.phoneNumber} onChange={(event) => handleInputChange("phoneNumber", event.target.value)} placeholder="e.g. 0300-5550011" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
+            <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Email Address</label><input type="email" value={formData.emailAddress} onChange={(event) => handleInputChange("emailAddress", event.target.value)} placeholder="e.g. ahmad.h@brotherlpg.com" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
+            <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Emergency Contact Name</label><input value={formData.emergencyContactName} onChange={(event) => handleInputChange("emergencyContactName", event.target.value)} placeholder="e.g. Muhammad Hassan (Brother)" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
+            <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Emergency Contact Phone</label><input value={formData.emergencyContactPhone} onChange={(event) => handleInputChange("emergencyContactPhone", event.target.value)} placeholder="e.g. 0301-9998877" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
+            <div className="md:col-span-2"><label className="mb-1.5 block text-sm font-medium text-slate-700">Home Address</label><input value={formData.homeAddress} onChange={(event) => handleInputChange("homeAddress", event.target.value)} placeholder="Street Address, Sector/Area, City" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
           </div>
         </div>
 

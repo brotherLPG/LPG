@@ -75,7 +75,9 @@ function Employees() {
       renderCell: (item) => (
         <button className="flex flex-row  items-start font-bold text-[#1a56db] hover:underline text-[13px] text-left leading-tight">
           <span>{item.name.split(" ")[0]}</span>
-          <span className="ms-1">{item.name.split(" ").slice(1).join(" ")}</span>
+          <span className="ms-1">
+            {item.name.split(" ").slice(1).join(" ")}
+          </span>
         </button>
       ),
     },
@@ -141,6 +143,7 @@ function Employees() {
           <button
             type="button"
             aria-label={`View ${item.name}`}
+            onClick={() => navigate(`/employees/view/${item._id}`)}
             className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
           >
             <Eye className="h-4 w-4" strokeWidth={2.5} /> View

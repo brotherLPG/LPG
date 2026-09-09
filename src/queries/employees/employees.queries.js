@@ -6,6 +6,7 @@ import {
   getEmployeeById,
   getEmployees,
   updateEmployee,
+  getEmployeeFormOptions,
 } from '../../api/employees.api'
 
 export const useEmployees = (params) => useQuery({
@@ -45,3 +46,8 @@ export const useDeleteEmployee = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.employees.all }),
   })
 }
+
+export const useEmployeeFormOptions = () => useQuery({
+  queryKey: ['employeeFormOptions'],
+  queryFn: getEmployeeFormOptions,
+})

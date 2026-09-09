@@ -41,6 +41,7 @@ import Expenses from '../Pages/Expenses/Expenses';
 import AddExpenses from '../Pages/Expenses/addExpenses';
 import AddEmployee from '../Pages/Employees/addEmployee';
 import UpdateEmployee from '../Pages/Employees/updateEmployee';
+import EmployeeDetails from '../Pages/Employees/EmployeeDetails';
 import AddSupplier from '../Pages/Suppliers/addSupplier';
 import AddCylinderType from '../Pages/Cylinders/addCylinderType';
 import UpdateCylinderType from '../Pages/Cylinders/updateCylinderType';
@@ -130,6 +131,7 @@ function PageRouter() {
         <Route path="/employees" element={<Employees />} />
         <Route path="/employees/add" element={<AddEmployee />} />
         <Route path="/employees/edit/:id" element={<UpdateEmployee />} />
+        <Route path="/employees/view/:id" element={<EmployeeDetails />} />
         <Route path="/expenses" element={<Expenses />} />
         <Route path="/expenses/add" element={<AddExpenses />} />
         <Route path="/payments" element={<Payments />} />

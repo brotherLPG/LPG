@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Switch } from "@heroui/react";
 import { ChevronDown } from "lucide-react";
-import { useCreateEmployee } from "../../queries/employees/employees.queries";
+import { useCreateEmployee, useEmployeeFormOptions } from "../../queries/employees/employees.queries";
 import { useToast } from "../../utils/GlobalToast";
 
 function AddEmployee() {
@@ -10,14 +9,22 @@ function AddEmployee() {
   const toast = useToast();
   const [isActive, setIsActive] = useState(true);
   const createMutation = useCreateEmployee();
+  const { data: formOptions, isLoading: optionsLoading } = useEmployeeFormOptions();
   const [formData, setFormData] = useState({
     fullName: "",
+    fatherHusbandName: "",
+    cnicNumber: "",
+    dateOfBirth: "",
+    gender: "",
     departmentName: "",
     jobTitle: "",
-    phoneNumber: "",
-    emailAddress: "",
     joiningDate: "",
     monthlySalaryAmount: "",
+    phoneNumber: "",
+    emailAddress: "",
+    emergencyContactName: "",
+    emergencyContactPhone: "",
+    homeAddress: "",
   });
 
   const handleInputChange = (field, value) => {
@@ -28,9 +35,20 @@ function AddEmployee() {
     event.preventDefault();
     try {
       await createMutation.mutateAsync({
-        ...formData,
-        monthlySalaryAmount: Number(formData.monthlySalaryAmount) || 0,
+        fullName: formData.fullName,
+        fatherHusbandName: formData.fatherHusbandName,
+        cnicNumber: formData.cnicNumber,
+        dateOfBirth: formData.dateOfBirth || null,
+        gender: formData.gender,
+        departmentName: formData.departmentName,
+        jobTitle: formData.jobTitle,
         joiningDate: formData.joiningDate || null,
+        monthlySalaryAmount: Number(formData.monthlySalaryAmount) || 0,
+        phoneNumber: formData.phoneNumber,
+        emailAddress: formData.emailAddress,
+        emergencyContactName: formData.emergencyContactName,
+        emergencyContactPhone: formData.emergencyContactPhone,
+        homeAddress: formData.homeAddress,
         employmentStatus: isActive ? "active" : "inactive",
       });
       toast.success("Employee created successfully!");
@@ -88,7 +106,7 @@ function AddEmployee() {
                 <input
                   type="text"
                   disabled
-                  value="EMP-009 (Auto-generated)"
+                  value={formOptions?.data?.nextEmployeeCode || "Loading..."}
                   className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed"
                 />
               </div>
@@ -112,6 +130,8 @@ function AddEmployee() {
                 </label>
                 <input
                   type="text"
+                  value={formData.fatherHusbandName}
+                  onChange={(event) => handleInputChange("fatherHusbandName", event.target.value)}
                   placeholder="Enter relative full name"
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
@@ -123,6 +143,8 @@ function AddEmployee() {
                 </label>
                 <input
                   type="text"
+                  value={formData.cnicNumber}
+                  onChange={(event) => handleInputChange("cnicNumber", event.target.value)}
                   placeholder="e.g. 37405-1234567-1"
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
@@ -134,10 +156,9 @@ function AddEmployee() {
                     Date of Birth
                   </label>
                   <input
-                    type="text"
-                    value={formData.departmentName}
-                    onChange={(event) => handleInputChange("departmentName", event.target.value)}
-                    placeholder="YYYY-MM-DD"
+                    type="date"
+                    value={formData.dateOfBirth}
+                    onChange={(event) => handleInputChange("dateOfBirth", event.target.value)}
                     className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
@@ -147,13 +168,17 @@ function AddEmployee() {
                   </label>
                   <div className="relative">
                     <select
-                      defaultValue=""
+                      value={formData.gender}
+                      onChange={(event) => handleInputChange("gender", event.target.value)}
+                      disabled={optionsLoading}
                       className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     >
                       <option value="" disabled>Select gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
+                      {formOptions?.data?.genders?.map((gender) => (
+                        <option key={gender.value} value={gender.value}>
+                          {gender.label}
+                        </option>
+                      ))}
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                   </div>
@@ -162,18 +187,20 @@ function AddEmployee() {
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Status
                   </label>
-                  <div className="flex items-center gap-3">
-                    <Switch
-                      isSelected={isActive}
-                      onValueChange={setIsActive}
-                      classNames={{
-                        wrapper: isActive ? "bg-[#008951]" : "bg-slate-200",
-                      }}
-                      size="sm"
-                    />
-                    <span className={`text-sm font-semibold ${isActive ? "text-[#008951]" : "text-slate-500"}`}>
-                      Active Employee
-                    </span>
+                  <div className="relative">
+                    <select
+                      value={isActive ? "active" : "inactive"}
+                      onChange={(event) => setIsActive(event.target.value === "active")}
+                      disabled={optionsLoading}
+                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    >
+                      {formOptions?.data?.statuses?.map((status) => (
+                        <option key={status.value} value={status.value}>
+                          {status.label}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                   </div>
                 </div>
               </div>
@@ -197,17 +224,17 @@ function AddEmployee() {
                 </label>
                 <div className="relative">
                   <select
-                    defaultValue=""
+                    value={formData.departmentName}
+                    onChange={(event) => handleInputChange("departmentName", event.target.value)}
+                    disabled={optionsLoading}
                     className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   >
                     <option value="" disabled>Select Department</option>
-                    <option value="Operations">Operations</option>
-                    <option value="Finance">Finance</option>
-                    <option value="Maintenance">Maintenance</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Sales">Sales</option>
-                    <option value="Security">Security</option>
-                    <option value="HR">HR</option>
+                    {formOptions?.data?.departments?.map((dept) => (
+                      <option key={dept.value} value={dept.value}>
+                        {dept.label}
+                      </option>
+                    ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
@@ -293,6 +320,8 @@ function AddEmployee() {
               </label>
               <input
                 type="text"
+                value={formData.emergencyContactName}
+                onChange={(event) => handleInputChange("emergencyContactName", event.target.value)}
                 placeholder="e.g. Muhammad Hassan (Brother)"
                 className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
               />
@@ -303,6 +332,8 @@ function AddEmployee() {
               </label>
               <input
                 type="text"
+                value={formData.emergencyContactPhone}
+                onChange={(event) => handleInputChange("emergencyContactPhone", event.target.value)}
                 placeholder="e.g. 0301-9998877"
                 className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
               />
@@ -314,6 +345,8 @@ function AddEmployee() {
               </label>
               <input
                 type="text"
+                value={formData.homeAddress}
+                onChange={(event) => handleInputChange("homeAddress", event.target.value)}
                 placeholder="Street Address, Sector/Area, City"
                 className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
               />
