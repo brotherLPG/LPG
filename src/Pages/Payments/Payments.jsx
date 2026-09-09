@@ -1,17 +1,10 @@
-import { PlusCircle, Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
+import { PlusCircle, Eye, Edit3, Trash2, ChevronDown, Loader } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalTable from "../../utils/GlobalTable";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
-
-const initialPayments = [
-  { voucherNo: "PAY-2026-0312", date: "21 Aug 2026", party: "Islamabad Gas Agency", amount: "Rs. 50,000", method: "Bank Transfer", direction: "Inward", status: "Recorded" },
-  { voucherNo: "PAY-2026-0311", date: "20 Aug 2026", party: "Pakistan Petroleum Ltd.", amount: "Rs. 125,000", method: "Cheque", direction: "Outward", status: "Recorded" },
-  { voucherNo: "PAY-2026-0310", date: "19 Aug 2026", party: "Sui Northern Gas", amount: "Rs. 75,000", method: "Bank Transfer", direction: "Outward", status: "Pending" },
-  { voucherNo: "PAY-2026-0309", date: "18 Aug 2026", party: "Attock Refinery Ltd.", amount: "Rs. 200,000", method: "Cash", direction: "Outward", status: "Recorded" },
-  { voucherNo: "PAY-2026-0308", date: "17 Aug 2026", party: "Rawalpindi Gas Station", amount: "Rs. 45,000", method: "Bank Transfer", direction: "Inward", status: "Recorded" },
-];
+import { useGetPayments, useDeletePayment } from "../../queries/payments/payments.queries";
 
 function Payments() {
   const navigate = useNavigate();
@@ -20,26 +13,50 @@ function Payments() {
   const [status, setStatus] = useState("All");
   const [direction, setDirection] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
+  const [limit] = useState(10);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
-  const [payments, setPayments] = useState(initialPayments);
 
-  const filteredPayments = useMemo(() => payments.filter((payment) => {
-    const matchesQuery = `${payment.voucherNo} ${payment.party}`.toLowerCase().includes(query.toLowerCase());
-    const matchesStatus = status === "All" || payment.status === status;
-    const matchesDirection = direction === "All" || payment.direction === direction;
-    return matchesQuery && matchesStatus && matchesDirection;
-  }), [query, status, direction, payments]);
+  // Fetch payments from API
+  const { data: paymentsResponse, isLoading, isError, error } = useGetPayments({
+    search: query,
+    paymentStatus: status !== "All" ? status : undefined,
+    direction: direction !== "All" ? direction : undefined,
+    page: currentPage,
+    limit,
+  });
+
+  const paymentRecords = paymentsResponse?.data?.items || [];
+  const pagination = paymentsResponse?.data?.pagination || {};
+  const meta = paymentsResponse?.data?.meta || {};
+
+  const deletePaymentMutation = useDeletePayment();
+
+  const filteredPayments = useMemo(() => {
+    return paymentRecords.map((payment) => ({
+      id: payment._id,
+      voucherNo: payment.paymentNumber,
+      date: new Date(payment.paymentDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+      party: payment.partyName,
+      amount: `Rs. ${payment.paymentAmount.toLocaleString()}`,
+      method: payment.paymentMethodLabel || payment.paymentMethod,
+      direction: payment.direction === 'receive' ? 'Inward' : 'Outward',
+      status: payment.paymentStatusLabel || payment.paymentStatus,
+    }));
+  }, [paymentRecords]);
 
   const handleDeleteClick = (item) => {
     setDeleteModal({ isOpen: true, item });
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (deleteModal.item) {
-      setPayments(payments.filter(p => p.voucherNo !== deleteModal.item.voucherNo));
-      toast.success(`Payment voucher ${deleteModal.item.voucherNo} has been deleted successfully`);
-      setDeleteModal({ isOpen: false, item: null });
-      
+      try {
+        await deletePaymentMutation.mutateAsync(deleteModal.item.id);
+        toast.success(`Payment voucher ${deleteModal.item.voucherNo} has been deleted successfully`);
+        setDeleteModal({ isOpen: false, item: null });
+      } catch (error) {
+        toast.error('Failed to delete payment voucher');
+      }
     }
   };
 
@@ -134,11 +151,12 @@ function Payments() {
           <button
             type="button"
             aria-label={`View ${item.voucherNo}`}
+            onClick={() => navigate(`/payments/view/${item.id}`)}
             className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
           >
             <Eye className="h-3.5 w-3.5" /> View
           </button>
-          <button
+          {/* <button
             type="button"
             aria-label={`Edit ${item.voucherNo}`}
             className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
@@ -152,7 +170,7 @@ function Payments() {
             className="flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition-colors"
           >
             <Trash2 className="h-3.5 w-3.5" /> Delete
-          </button>
+          </button> */}
         </div>
       ),
     },
@@ -197,7 +215,10 @@ function Payments() {
               <div className="absolute left-3 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full bg-slate-300"></div>
               <input
                 value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setCurrentPage(1);
+                }}
                 className="w-full rounded-md border border-slate-200 bg-slate-50/50 py-2.5 pl-8 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-500 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
                 placeholder="Search by voucher number or party name..."
               />
@@ -206,24 +227,36 @@ function Payments() {
               <div className="relative">
                 <select
                   value={status}
-                  onChange={(event) => setStatus(event.target.value)}
+                  onChange={(event) => {
+                    setStatus(event.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-40 lg:w-44"
                 >
                   <option value="All">Status: All</option>
-                  <option value="Recorded">Status: Recorded</option>
-                  <option value="Pending">Status: Pending</option>
+                  {meta.statuses?.map((status) => (
+                    <option key={status.value} value={status.value}>
+                      Status: {status.label}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
               </div>
               <div className="relative">
                 <select
                   value={direction}
-                  onChange={(event) => setDirection(event.target.value)}
+                  onChange={(event) => {
+                    setDirection(event.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
                 >
                   <option value="All">Direction: All</option>
-                  <option value="Inward">Direction: Inward</option>
-                  <option value="Outward">Direction: Outward</option>
+                  {meta.directions?.map((dir) => (
+                    <option key={dir.value} value={dir.value}>
+                      Direction: {dir.label}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
               </div>
@@ -233,16 +266,36 @@ function Payments() {
 
         {/* Table */}
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <GlobalTable
-            columns={paymentColumns}
-            data={filteredPayments}
-            ariaLabel="Payments Table"
-            className=""
-            rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
-            emptyContent="No payments match your search."
-            pagination={true}
-            rowsPerPage={5}
-          />
+          {isLoading ? (
+            <div className="flex items-center justify-center h-96">
+              <div className="flex flex-col items-center gap-3">
+                <Loader className="h-8 w-8 animate-spin text-slate-400" />
+                <p className="text-sm text-slate-500">Loading payments...</p>
+              </div>
+            </div>
+          ) : isError ? (
+            <div className="flex items-center justify-center h-96">
+              <div className="text-center">
+                <p className="text-sm text-red-600 font-medium">
+                  Error loading payments
+                </p>
+                <p className="text-xs text-red-500 mt-1">{error?.message}</p>
+              </div>
+            </div>
+          ) : (
+            <GlobalTable
+              columns={paymentColumns}
+              data={filteredPayments}
+              ariaLabel="Payments Table"
+              className=""
+              rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+              emptyContent="No payments match your search."
+              pagination={true}
+              rowsPerPage={pagination.limit || 10}
+              totalCount={pagination.total}
+              onPageChange={(p) => setCurrentPage(p)}
+            />
+          )}
         </div>
       </section>
 

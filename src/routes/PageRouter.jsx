@@ -69,6 +69,7 @@ import LpgReceiptDetails from '../Pages/LPGReceipts/LpgReceiptDetails';
 import Assets from '../Pages/Assets/Assets';
 import AddAsset from '../Pages/Assets/AddAsset';
 import AssetsTab from '../Pages/Assets/AssetsTab';
+import PaymentDetails from '../Pages/Payments/PaymentDetails';
 
 function PageRouter() {
   // Router container
@@ -136,6 +137,7 @@ function PageRouter() {
         <Route path="/expenses/add" element={<AddExpenses />} />
         <Route path="/payments" element={<Payments />} />
         <Route path="/payments/add" element={<AddPayment />} />
+        <Route path="/payments/view/:id" element={<PaymentDetails />} />
         <Route path="/audit-logs" element={<AuditLogs />} />
         <Route path="/filling-batches" element={<FillingBatches />} />
         <Route path="/filling-batches/create" element={<CreateBatch />} />

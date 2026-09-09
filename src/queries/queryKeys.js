@@ -217,4 +217,19 @@ export const queryKeys = {
     formOptions: () => ['return-sales', 'form-options']
   },
 
+  // =========================
+  // Payments
+  // =========================
+  payments: {
+    all: ['payments'],
+
+    lists: () => ['payments', 'list'],
+
+    list: (params) => ['payments', 'list', params],
+
+    detail: id => ['payments', 'detail', id],
+
+    formOptions: () => ['payments', 'form-options']
+  },
+
 }
