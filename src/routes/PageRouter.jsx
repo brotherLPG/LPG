@@ -68,6 +68,8 @@ import UpdateLpgReceipt from '../Pages/LPGReceipts/updateLpgReceipt';
 import LpgReceiptDetails from '../Pages/LPGReceipts/LpgReceiptDetails';
 import Assets from '../Pages/Assets/Assets';
 import AddAsset from '../Pages/Assets/AddAsset';
+import UpdateAsset from '../Pages/Assets/UpdateAsset';
+import ViewAsset from '../Pages/Assets/ViewAsset';
 import AssetsTab from '../Pages/Assets/AssetsTab';
 import PaymentDetails from '../Pages/Payments/PaymentDetails';
 
@@ -156,6 +158,8 @@ function PageRouter() {
         />
         <Route path="/assets" element={<AssetsTab />} />
         <Route path="/assets/add" element={<AddAsset />} />
+        <Route path="/assets/edit/:id" element={<UpdateAsset />} />
+        <Route path="/assets/view/:id" element={<ViewAsset />} />
       </Routes>
     </div>
   );

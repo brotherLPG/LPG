@@ -18,6 +18,7 @@ import { getStorageTankDashboard } from '../api/storageTanks.api.js'
 import { getSales } from '../api/sales.api.js'
 import { getReturnSales } from '../api/returnsale.api.js'
 import { getPayments } from '../api/payments.api.js'
+import { getAssets } from '../api/assets.api.js'
 
 export const prefetchDashboard = async queryClient => {
   await Promise.all([
@@ -263,6 +264,27 @@ export const prefetchDashboard = async queryClient => {
 
       queryFn: () =>
         getPayments({
+          page: 1,
+          limit: 10,
+        })
+    }),
+
+    // ========================================
+    // Assets
+    // ========================================
+
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.assets.list({
+        search: undefined,
+        assetCategory: undefined,
+        locationName: undefined,
+        assetStatus: undefined,
+        page: 1,
+        limit: 10,
+      }),
+
+      queryFn: () =>
+        getAssets({
           page: 1,
           limit: 10,
         })

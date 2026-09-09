@@ -1,156 +1,132 @@
-import { CirclePlus, Eye, Edit3, ChevronDown } from "lucide-react";
+import { CirclePlus, Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalTable from "../../utils/GlobalTable";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import { useAssets, useDeleteAsset } from "../../queries/assets/assets.queries";
+import { useToast } from "../../utils/GlobalToast";
 
-const mockAssets = [
-  {
-    _id: "1",
-    assetCode: "FA-001",
-    category: "Plant Equipment",
-    purchaseDate: "2024-01-15",
-    purchaseCost: 2500000,
-    depreciationMethod: "Straight Line",
-    bookValue: 2250000,
-    location: "Zone-A",
-    status: "Active",
-  },
-  {
-    _id: "2",
-    assetCode: "FA-002",
-    category: "Vehicles",
-    purchaseDate: "2024-02-20",
-    purchaseCost: 1800000,
-    depreciationMethod: "Reducing Balance",
-    bookValue: 1620000,
-    location: "Zone-B",
-    status: "Active",
-  },
-  {
-    _id: "3",
-    assetCode: "FA-003",
-    category: "Office Equipment",
-    purchaseDate: "2024-03-10",
-    purchaseCost: 500000,
-    depreciationMethod: "Straight Line",
-    bookValue: 475000,
-    location: "Zone-A",
-    status: "Active",
-  },
-  {
-    _id: "4",
-    assetCode: "FA-004",
-    category: "Plant Equipment",
-    purchaseDate: "2024-04-05",
-    purchaseCost: 3200000,
-    depreciationMethod: "Straight Line",
-    bookValue: 3040000,
-    location: "Zone-C",
-    status: "Under Maintenance",
-  },
-  {
-    _id: "5",
-    assetCode: "FA-005",
-    category: "Furniture",
-    purchaseDate: "2024-05-12",
-    purchaseCost: 750000,
-    depreciationMethod: "Straight Line",
-    bookValue: 712500,
-    location: "Zone-A",
-    status: "Active",
-  },
-  {
-    _id: "6",
-    assetCode: "FA-006",
-    category: "Vehicles",
-    purchaseDate: "2024-06-18",
-    purchaseCost: 2100000,
-    depreciationMethod: "Reducing Balance",
-    bookValue: 1995000,
-    location: "Zone-B",
-    status: "Active",
-  },
-  {
-    _id: "7",
-    assetCode: "FA-007",
-    category: "Plant Equipment",
-    purchaseDate: "2024-07-22",
-    purchaseCost: 1500000,
-    depreciationMethod: "Straight Line",
-    bookValue: 1425000,
-    location: "Zone-C",
-    status: "Retired",
-  },
-];
+const formatLabel = (str) => {
+  if (!str) return "-";
+  return str
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
 
 function Assets() {
   const navigate = useNavigate();
+  const toast = useToast();
+
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
   const [location, setLocation] = useState("All");
   const [status, setStatus] = useState("All");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
+
+  const { data: assetsResponse, isLoading, error } = useAssets({
+    search: query || undefined,
+    assetCategory: category === "All" ? undefined : category,
+    locationName: location === "All" ? undefined : location,
+    assetStatus: status === "All" ? undefined : status,
+    page: currentPage,
+    limit: 10,
+  });
+
+  const deleteMutation = useDeleteAsset();
+
+  const assets = assetsResponse?.data?.items || [];
+  const pagination = assetsResponse?.data?.pagination || { total: 0, page: 1, totalPages: 1 };
+  const meta = assetsResponse?.data?.meta || {};
 
   const categoryOptions = [
-    { label: "All", value: "All" },
-    { label: "Plant Equipment", value: "Plant Equipment" },
-    { label: "Vehicles", value: "Vehicles" },
-    { label: "Office Equipment", value: "Office Equipment" },
-    { label: "Furniture", value: "Furniture" },
-  ];
-
-  const locationOptions = [
-    { label: "All", value: "All" },
-    { label: "Zone-A", value: "Zone-A" },
-    { label: "Zone-B", value: "Zone-B" },
-    { label: "Zone-C", value: "Zone-C" },
+    { label: "All Categories", value: "All" },
+    ...(meta.assetCategories || [
+      "plant",
+      "vehicle",
+      "filling-machine",
+      "compressor",
+      "tank",
+      "building",
+      "furniture",
+      "other",
+    ]).map((cat) => ({
+      label: formatLabel(cat),
+      value: cat,
+    })),
   ];
 
   const statusOptions = [
-    { label: "All", value: "All" },
-    { label: "Active", value: "Active" },
-    { label: "Under Maintenance", value: "Under Maintenance" },
-    { label: "Retired", value: "Retired" },
+    { label: "All Statuses", value: "All" },
+    ...(meta.assetStatuses || [
+      "in-use",
+      "idle",
+      "under-maintenance",
+      "disposed",
+    ]).map((st) => ({
+      label: formatLabel(st),
+      value: st,
+    })),
   ];
 
-  const mappedAssets = useMemo(() => mockAssets.map((asset) => {
-    const purchaseDate = asset.purchaseDate ? new Date(asset.purchaseDate) : null;
+  const locations = useMemo(() => {
+    const locSet = new Set(assets.map((a) => a.locationName).filter(Boolean));
+    return Array.from(locSet);
+  }, [assets]);
 
-    return {
-      _id: asset._id,
-      assetCode: asset.assetCode,
-      category: asset.category,
-      date: purchaseDate
-        ? `${purchaseDate.getDate().toString().padStart(2, '0')}/${(purchaseDate.getMonth() + 1).toString().padStart(2, '0')}/${purchaseDate.getFullYear()}`
-        : "",
-      purchaseCost: asset.purchaseCost,
-      depreciationMethod: asset.depreciationMethod,
-      bookValue: asset.bookValue,
-      location: asset.location,
-      status: asset.status,
-    };
-  }), []);
+  const mappedAssets = useMemo(() => {
+    return assets.map((asset) => {
+      const pDate = asset.purchaseDate ? new Date(asset.purchaseDate) : null;
+      const assignedEmpName =
+        asset.assignedEmployeeId && typeof asset.assignedEmployeeId === "object"
+          ? asset.assignedEmployeeId.fullName
+          : "-";
 
-  const filteredAssets = useMemo(() => mappedAssets.filter((asset) => {
-    const matchesQuery = `${asset.assetCode} ${asset.category}`.toLowerCase().includes(query.toLowerCase());
-    const matchesCategory = category === "All" || asset.category === category;
-    const matchesLocation = location === "All" || asset.location === location;
-    const matchesStatus = status === "All" || asset.status === status;
-    return matchesQuery && matchesCategory && matchesLocation && matchesStatus;
-  }), [query, category, location, status, mappedAssets]);
+      return {
+        _id: asset._id,
+        assetCode: asset.assetCode || "-",
+        assetName: asset.assetName || "-",
+        category: formatLabel(asset.assetCategory),
+        rawCategory: asset.assetCategory,
+        date: pDate
+          ? `${pDate.getDate().toString().padStart(2, "0")}/${(pDate.getMonth() + 1)
+              .toString()
+              .padStart(2, "0")}/${pDate.getFullYear()}`
+          : "-",
+        purchaseCost: asset.purchaseCostAmount || 0,
+        depreciationMethod: formatLabel(asset.depreciationMethod),
+        bookValue: asset.currentBookValueAmount || 0,
+        location: asset.locationName || "-",
+        assignedEmployee: assignedEmpName,
+        status: asset.assetStatus || "in-use",
+      };
+    });
+  }, [assets]);
 
   const summaryStats = useMemo(() => {
     const totalAssetValue = mappedAssets.reduce((sum, asset) => sum + (asset.purchaseCost || 0), 0);
     const totalBookValue = mappedAssets.reduce((sum, asset) => sum + (asset.bookValue || 0), 0);
-    const thisYearDepreciation = totalAssetValue - totalBookValue;
-    const activeCount = mappedAssets.filter(a => a.status === "Active").length;
+    const totalDepreciation = totalAssetValue - totalBookValue;
 
     return {
       totalAssetValue,
-      thisYearDepreciation,
+      totalDepreciation,
       netBookValue: totalBookValue,
-      activeAssets: activeCount,
     };
   }, [mappedAssets]);
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteModal.item) return;
+
+    try {
+      await deleteMutation.mutateAsync(deleteModal.item._id);
+      toast.success(`Asset ${deleteModal.item.assetCode} deleted successfully`);
+      setDeleteModal({ isOpen: false, item: null });
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to delete asset. Please try again.");
+    }
+  };
 
   const assetColumns = [
     {
@@ -160,7 +136,12 @@ function Assets() {
       className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-4",
       renderCell: (item) => (
-        <span className="font-bold text-slate-800 text-[13px]">{item.assetCode}</span>
+        <div>
+          <span className="font-bold text-slate-800 text-[13px]">{item.assetCode}</span>
+          {item.assetName !== "-" && (
+            <p className="text-xs text-slate-500 font-normal">{item.assetName}</p>
+          )}
+        </div>
       ),
     },
     {
@@ -171,11 +152,25 @@ function Assets() {
       renderCell: (item) => item.category,
     },
     {
+      key: "location",
+      label: "Location",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
+      renderCell: (item) => item.location,
+    },
+    {
+      key: "assignedEmployee",
+      label: "Assigned To",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
+      renderCell: (item) => item.assignedEmployee,
+    },
+    {
       key: "date",
       label: "Purchase Date",
       className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
-      renderCell: (item) => item.date || "-",
+      renderCell: (item) => item.date,
     },
     {
       key: "purchaseCost",
@@ -185,27 +180,15 @@ function Assets() {
       renderCell: (item) => item.purchaseCost.toLocaleString(),
     },
     {
-      key: "depreciationMethod",
-      label: "Depreciation Method",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
-      renderCell: (item) => item.depreciationMethod,
-    },
-    {
       key: "bookValue",
       label: "Book Value (Rs.)",
       className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-4",
       renderCell: (item) => (
-        <span className="text-slate-900 font-bold text-[13px]">Rs. {item.bookValue.toLocaleString()}</span>
+        <span className="text-slate-900 font-bold text-[13px]">
+          Rs. {item.bookValue.toLocaleString()}
+        </span>
       ),
-    },
-    {
-      key: "location",
-      label: "Location",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
-      renderCell: (item) => item.location,
     },
     {
       key: "status",
@@ -214,15 +197,18 @@ function Assets() {
       cellClassName: "px-4 py-4",
       renderCell: (item) => {
         const statusStyles = {
-          Active: "bg-emerald-50 text-emerald-600 border border-emerald-100",
-          "Under Maintenance": "bg-amber-50 text-amber-600 border border-amber-100",
-          Retired: "bg-slate-50 text-slate-600 border border-slate-200",
+          "in-use": "bg-emerald-50 text-emerald-600 border border-emerald-100",
+          idle: "bg-blue-50 text-blue-600 border border-blue-100",
+          "under-maintenance": "bg-amber-50 text-amber-600 border border-amber-100",
+          disposed: "bg-rose-50 text-rose-600 border border-rose-100",
         };
         return (
           <span
-            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusStyles[item.status] || statusStyles.Active}`}
+            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+              statusStyles[item.status] || "bg-slate-50 text-slate-600 border border-slate-200"
+            }`}
           >
-            {item.status}
+            {formatLabel(item.status)}
           </span>
         );
       },
@@ -230,25 +216,33 @@ function Assets() {
     {
       key: "actions",
       label: "Actions",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 text-right pr-6",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 text-center pr-6",
       cellClassName: "px-4 py-4 pr-6",
       renderCell: (item) => (
-        <div className="flex items-center justify-end gap-3">
+        <div className="flex items-center justify-end gap-2">
           <button
             type="button"
             aria-label={`View ${item.assetCode}`}
             onClick={() => navigate(`/assets/view/${item._id}`)}
-            className="text-[#1a56db] hover:text-blue-800 transition-colors"
+            className="flex items-center gap-1 rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
           >
-            <Eye className="h-4 w-4" strokeWidth={2.5} />
+            <Eye className="h-3.5 w-3.5" strokeWidth={2.5} /> View
           </button>
           <button
             type="button"
             aria-label={`Edit ${item.assetCode}`}
             onClick={() => navigate(`/assets/edit/${item._id}`)}
-            className="text-[#008951] hover:text-emerald-800 transition-colors"
+            className="flex items-center gap-1 rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
           >
-            <Edit3 className="h-4 w-4" strokeWidth={2.5} />
+            <Edit3 className="h-3.5 w-3.5" strokeWidth={2.5} /> Edit
+          </button>
+          <button
+            type="button"
+            aria-label={`Delete ${item.assetCode}`}
+            onClick={() => setDeleteModal({ isOpen: true, item })}
+            className="flex items-center gap-1 rounded-md bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors"
+          >
+            <Trash2 className="h-3.5 w-3.5" strokeWidth={2.5} /> Delete
           </button>
         </div>
       ),
@@ -258,19 +252,16 @@ function Assets() {
   return (
     <main className="">
       <section>
-       
         {/* Summary Cards */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-slate-600">
-                  Total Asset Value
-                </p>
+                <p className="text-sm font-semibold text-slate-600">Total Asset Value</p>
                 <p className="mt-2 text-2xl font-extrabold text-6th-color">
                   Rs. {summaryStats.totalAssetValue.toLocaleString()}
                 </p>
-                <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary my-auto">
+                <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary">
                   <span className="h-2 w-2 rounded-full bg-[#2563EB]"></span>
                   Total purchase cost
                 </div>
@@ -281,13 +272,11 @@ function Assets() {
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-slate-600">
-                  This Year Depreciation
-                </p>
+                <p className="text-sm font-semibold text-slate-600">Total Depreciation</p>
                 <p className="mt-2 text-2xl font-extrabold text-5th-color">
-                  Rs. {summaryStats.thisYearDepreciation.toLocaleString()}
+                  Rs. {summaryStats.totalDepreciation.toLocaleString()}
                 </p>
-                <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary my-auto">
+                <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary">
                   <span className="h-2 w-2 rounded-full bg-[#10B981]"></span>
                   Accumulated depreciation
                 </div>
@@ -298,13 +287,11 @@ function Assets() {
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-slate-600">
-                  Net Book Value
-                </p>
+                <p className="text-sm font-semibold text-slate-600">Net Book Value</p>
                 <p className="mt-2 text-2xl font-extrabold text-slate-900">
                   Rs. {summaryStats.netBookValue.toLocaleString()}
                 </p>
-                <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary my-auto">
+                <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary">
                   <span className="h-2 w-2 rounded-full bg-[#4B5563]"></span>
                   Current asset value
                 </div>
@@ -320,17 +307,23 @@ function Assets() {
               <div className="absolute left-3 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full border-2 border-slate-300"></div>
               <input
                 value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setCurrentPage(1);
+                }}
                 className="w-full rounded-md border border-slate-200 bg-slate-50/50 py-2.5 pl-8 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-500 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
-                placeholder="Search by asset code or category..."
+                placeholder="Search by asset code or name..."
               />
             </label>
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="relative">
                 <select
                   value={category}
-                  onChange={(event) => setCategory(event.target.value)}
-                  className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-40 lg:w-44"
+                  onChange={(event) => {
+                    setCategory(event.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-44 lg:w-48"
                 >
                   {categoryOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -343,12 +336,16 @@ function Assets() {
               <div className="relative">
                 <select
                   value={location}
-                  onChange={(event) => setLocation(event.target.value)}
+                  onChange={(event) => {
+                    setLocation(event.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-40 lg:w-44"
                 >
-                  {locationOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
+                  <option value="All">All Locations</option>
+                  {locations.map((loc) => (
+                    <option key={loc} value={loc}>
+                      {loc}
                     </option>
                   ))}
                 </select>
@@ -357,7 +354,10 @@ function Assets() {
               <div className="relative">
                 <select
                   value={status}
-                  onChange={(event) => setStatus(event.target.value)}
+                  onChange={(event) => {
+                    setStatus(event.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-40 lg:w-44"
                 >
                   {statusOptions.map((opt) => (
@@ -374,19 +374,39 @@ function Assets() {
 
         {/* Table */}
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <GlobalTable
-            columns={assetColumns}
-            data={filteredAssets}
-            ariaLabel="Fixed Assets Table"
-            className=""
-            rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
-            emptyContent="No assets match your search."
-            pagination={false}
-          />
+          {isLoading ? (
+            <div className="p-8 text-center text-sm text-slate-500">Loading assets...</div>
+          ) : error ? (
+            <div className="p-8 text-center text-sm text-red-500">
+              Error loading assets. Please try again.
+            </div>
+          ) : (
+            <GlobalTable
+              columns={assetColumns}
+              data={mappedAssets}
+              ariaLabel="Fixed Assets Table"
+              className=""
+              rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+              emptyContent="No assets match your search."
+              pagination={true}
+              rowsPerPage={pagination.limit || 10}
+              totalCount={pagination.total}
+              page={currentPage}
+              onPageChange={setCurrentPage}
+            />
+          )}
         </div>
-
-        
       </section>
+
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, item: null })}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Asset"
+        message="Are you sure you want to delete this asset? This action cannot be undone."
+        itemName={deleteModal.item ? `${deleteModal.item.assetCode} - ${deleteModal.item.assetName}` : ""}
+        isDeleting={deleteMutation.isPending}
+      />
     </main>
   );
 }

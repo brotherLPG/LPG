@@ -232,4 +232,16 @@ export const queryKeys = {
     formOptions: () => ['payments', 'form-options']
   },
 
+  // =========================
+  // Assets
+  // =========================
+  assets: {
+    all: ['assets'],
+
+    lists: () => ['assets', 'list'],
+
+    list: (params) => ['assets', 'list', params],
+
+    detail: id => ['assets', 'detail', id]
+  },
 }

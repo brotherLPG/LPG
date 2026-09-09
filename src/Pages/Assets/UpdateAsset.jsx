@@ -1,17 +1,22 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useCreateAsset } from "../../queries/assets/assets.queries";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useAssetById, useUpdateAsset } from "../../queries/assets/assets.queries";
 import { useEmployees } from "../../queries/employees/employees.queries";
 import { useToast } from "../../utils/GlobalToast";
 
-function AddAsset() {
+function UpdateAsset() {
+  const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
 
-  const createAssetMutation = useCreateAsset();
+  const { data: assetResponse, isLoading, error } = useAssetById(id);
+  const updateAssetMutation = useUpdateAsset();
   const { data: employeesData } = useEmployees({ limit: 100 });
   const employeeList = employeesData?.data?.items || [];
 
+  const asset = assetResponse?.data;
+
+  const [assetCode, setAssetCode] = useState("");
   const [assetName, setAssetName] = useState("");
   const [assetCategory, setAssetCategory] = useState("vehicle");
   const [manufacturerName, setManufacturerName] = useState("");
@@ -24,6 +29,37 @@ function AddAsset() {
   const [depreciationMethod, setDepreciationMethod] = useState("straight-line");
   const [assignedEmployeeId, setAssignedEmployeeId] = useState("");
   const [currentBookValueAmount, setCurrentBookValueAmount] = useState("");
+
+  useEffect(() => {
+    if (asset) {
+      setAssetCode(asset.assetCode || "");
+      setAssetName(asset.assetName || "");
+      setAssetCategory(asset.assetCategory || "vehicle");
+      setManufacturerName(asset.manufacturerName || "");
+      setModelNumber(asset.modelNumber || "");
+      setSerialNumber(asset.serialNumber || "");
+      setLocationName(asset.locationName || "");
+      setAssetStatus(asset.assetStatus || "in-use");
+
+      if (asset.purchaseDate) {
+        const d = new Date(asset.purchaseDate);
+        if (!isNaN(d.getTime())) {
+          setPurchaseDate(d.toISOString().split("T")[0]);
+        }
+      }
+
+      setPurchaseCostAmount(asset.purchaseCostAmount !== undefined && asset.purchaseCostAmount !== null ? String(asset.purchaseCostAmount) : "");
+      setCurrentBookValueAmount(asset.currentBookValueAmount !== undefined && asset.currentBookValueAmount !== null ? String(asset.currentBookValueAmount) : "");
+      setDepreciationMethod(asset.depreciationMethod || "straight-line");
+
+      const empId = asset.assignedEmployeeId
+        ? typeof asset.assignedEmployeeId === "object"
+          ? asset.assignedEmployeeId._id
+          : asset.assignedEmployeeId
+        : "";
+      setAssignedEmployeeId(empId || "");
+    }
+  }, [asset]);
 
   const categoryOptions = [
     { label: "Plant", value: "plant" },
@@ -49,7 +85,7 @@ function AddAsset() {
     { label: "None", value: "none" },
   ];
 
-  const handleSave = async (e) => {
+  const handleUpdate = async (e) => {
     e.preventDefault();
 
     if (!assetName.trim()) {
@@ -81,13 +117,35 @@ function AddAsset() {
     };
 
     try {
-      await createAssetMutation.mutateAsync(payload);
-      toast.success("Asset created successfully");
+      await updateAssetMutation.mutateAsync({ id, data: payload });
+      toast.success("Asset updated successfully");
       navigate("/assets");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to create asset. Please try again.");
+      toast.error(err.response?.data?.message || "Failed to update asset. Please try again.");
     }
   };
+
+  if (isLoading) {
+    return (
+      <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+        <p className="text-slate-500 text-sm">Loading asset details...</p>
+      </main>
+    );
+  }
+
+  if (error || !asset) {
+    return (
+      <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+        <p className="text-red-500 text-sm">Failed to load asset details.</p>
+        <button
+          onClick={() => navigate("/assets")}
+          className="mt-4 rounded-lg bg-slate-200 px-4 py-2 text-sm text-slate-700 hover:bg-slate-300"
+        >
+          Back to Assets
+        </button>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
@@ -108,17 +166,17 @@ function AddAsset() {
             Fixed Assets
           </span>{" "}
           <span className="px-1 text-slate-400">/</span>{" "}
-          <span className="font-semibold">Add Asset</span>
+          <span className="font-semibold">Edit Asset</span>
         </p>
         <h1 className="text-2xl font-bold tracking-tight text-BLUE-dark">
-          Add Asset
+          Edit Asset ({assetCode})
         </h1>
         <p className="text-sm text-tertiary">
-          Register a new fixed asset to the company inventory
+          Update fixed asset information and assignment
         </p>
       </div>
 
-      <form onSubmit={handleSave}>
+      <form onSubmit={handleUpdate}>
         <div className="space-y-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Card 1: Asset Information */}
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden col-span-2">
@@ -129,6 +187,18 @@ function AddAsset() {
             </div>
             <div className="p-5 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Asset Code
+                  </label>
+                  <input
+                    type="text"
+                    disabled
+                    value={assetCode}
+                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed font-medium"
+                  />
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Asset Name <span className="text-rose-500">*</span>
@@ -142,7 +212,9 @@ function AddAsset() {
                     className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Asset Category <span className="text-rose-500">*</span>
@@ -159,9 +231,7 @@ function AddAsset() {
                     ))}
                   </select>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Manufacturer Name
@@ -174,7 +244,9 @@ function AddAsset() {
                     className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Model Number
@@ -281,7 +353,7 @@ function AddAsset() {
                   min="0"
                   value={currentBookValueAmount}
                   onChange={(e) => setCurrentBookValueAmount(e.target.value)}
-                  placeholder={purchaseCostAmount ? `Default: ${purchaseCostAmount}` : "e.g. 2100000"}
+                  placeholder="e.g. 2100000"
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
@@ -335,10 +407,10 @@ function AddAsset() {
           </button>
           <button
             type="submit"
-            disabled={createAssetMutation.isPending}
+            disabled={updateAssetMutation.isPending}
             className="rounded-lg bg-gradient-bg-blue px-6 py-2 text-sm font-medium text-white transition hover:bg-[#007545] disabled:opacity-50"
           >
-            {createAssetMutation.isPending ? "Saving..." : "Save Asset"}
+            {updateAssetMutation.isPending ? "Updating..." : "Update Asset"}
           </button>
         </div>
       </form>
@@ -346,4 +418,4 @@ function AddAsset() {
   );
 }
 
-export default AddAsset;
+export default UpdateAsset;
