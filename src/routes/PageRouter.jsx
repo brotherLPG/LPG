@@ -62,6 +62,8 @@ import MaintenanceAssets from '../Pages/MaintenanceAssets/MaintenanceAssets';
 import LogMaintenance from '../Pages/MaintenanceAssets/LogMaintenance';
 import MaintenanceRecords from '../Pages/MaintenanceAssets/MaintenanceRecords';
 import AddMaintenanceRecord from '../Pages/MaintenanceAssets/AddMaintenanceRecord';
+import UpdateMaintenanceRecord from '../Pages/MaintenanceAssets/UpdateMaintenanceRecord';
+import ViewMaintenanceRecord from '../Pages/MaintenanceAssets/ViewMaintenanceRecord';
 import UpdateSupplier from '../Pages/Suppliers/updateSupplier';
 import SupplierDetails from '../Pages/Suppliers/SupplierDetails';
 import UpdateLpgReceipt from '../Pages/LPGReceipts/updateLpgReceipt';
@@ -155,6 +157,14 @@ function PageRouter() {
         <Route
           path="/maintenance-records/add"
           element={<AddMaintenanceRecord />}
+        />
+        <Route
+          path="/maintenance-records/edit/:id"
+          element={<UpdateMaintenanceRecord />}
+        />
+        <Route
+          path="/maintenance-records/view/:id"
+          element={<ViewMaintenanceRecord />}
         />
         <Route path="/assets" element={<AssetsTab />} />
         <Route path="/assets/add" element={<AddAsset />} />

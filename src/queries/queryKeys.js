@@ -244,4 +244,17 @@ export const queryKeys = {
 
     detail: id => ['assets', 'detail', id]
   },
+
+  // =========================
+  // Maintenance Records
+  // =========================
+  maintenanceRecords: {
+    all: ['maintenance-records'],
+
+    lists: () => ['maintenance-records', 'list'],
+
+    list: (params) => ['maintenance-records', 'list', params],
+
+    detail: id => ['maintenance-records', 'detail', id]
+  },
 }

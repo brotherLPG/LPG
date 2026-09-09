@@ -1,47 +1,115 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAssets } from "../../queries/assets/assets.queries";
 import { useEmployees } from "../../queries/employees/employees.queries";
-import { useCreateMaintenanceRecord } from "../../queries/maintenanceRecords/maintenanceRecords.queries";
+import {
+  useMaintenanceRecordById,
+  useUpdateMaintenanceRecord,
+} from "../../queries/maintenanceRecords/maintenanceRecords.queries";
 import { useToast } from "../../utils/GlobalToast";
 
-function AddMaintenanceRecord() {
+function UpdateMaintenanceRecord() {
+  const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
 
+  const { data: recordResponse, isLoading, error } = useMaintenanceRecordById(id);
+  const updateMutation = useUpdateMaintenanceRecord();
   const { data: assetsData, isLoading: isLoadingAssets } = useAssets({ limit: 100 });
   const { data: employeesData, isLoading: isLoadingEmployees } = useEmployees({ limit: 100 });
-  const createMutation = useCreateMaintenanceRecord();
 
+  const record = recordResponse?.data;
   const assetList = assetsData?.data?.items || [];
   const employeeList = employeesData?.data?.items || [];
 
-  const [assetId, setassetId] = useState("");
+  const [maintenanceNumber, setMaintenanceNumber] = useState("");
+  const [maintenanceAssetId, setMaintenanceAssetId] = useState("");
   const [maintenanceType, setMaintenanceType] = useState("preventive");
-  const [maintenanceDate, setMaintenanceDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [maintenanceDate, setMaintenanceDate] = useState("");
   const [problemDescription, setProblemDescription] = useState("");
   const [workPerformed, setWorkPerformed] = useState("");
   const [maintenanceCostAmount, setMaintenanceCostAmount] = useState("");
   const [nextMaintenanceDate, setNextMaintenanceDate] = useState("");
   const [performedByEmployeeId, setPerformedByEmployeeId] = useState("");
 
-  const selectedAsset = assetList.find((a) => a._id === assetId);
+  useEffect(() => {
+    if (record) {
+      setMaintenanceNumber(record.maintenanceNumber || "");
 
-  const resetForm = () => {
-    setassetId("");
-    setMaintenanceType("preventive");
-    setMaintenanceDate(new Date().toISOString().split("T")[0]);
-    setProblemDescription("");
-    setWorkPerformed("");
-    setMaintenanceCostAmount("");
-    setNextMaintenanceDate("");
-    setPerformedByEmployeeId("");
-  };
+      const rawAsset = record.assetId || record.maintenanceAssetId;
+      const assetIdVal =
+        rawAsset && typeof rawAsset === "object"
+          ? rawAsset._id
+          : rawAsset;
+      setMaintenanceAssetId(assetIdVal || "");
 
-  const buildPayload = () => {
-    return {
-      assetId,
-      maintenanceAssetId: assetId,
+      setMaintenanceType(record.maintenanceType || "preventive");
+
+      if (record.maintenanceDate) {
+        const d = new Date(record.maintenanceDate);
+        if (!isNaN(d.getTime())) {
+          setMaintenanceDate(d.toISOString().split("T")[0]);
+        }
+      }
+
+      setProblemDescription(record.problemDescription || "");
+      setWorkPerformed(record.workPerformed || "");
+      setMaintenanceCostAmount(
+        record.maintenanceCostAmount !== undefined && record.maintenanceCostAmount !== null
+          ? String(record.maintenanceCostAmount)
+          : ""
+      );
+
+      if (record.nextMaintenanceDate) {
+        const nd = new Date(record.nextMaintenanceDate);
+        if (!isNaN(nd.getTime())) {
+          setNextMaintenanceDate(nd.toISOString().split("T")[0]);
+        }
+      } else {
+        setNextMaintenanceDate("");
+      }
+
+      const empId =
+        record.performedByEmployeeId && typeof record.performedByEmployeeId === "object"
+          ? record.performedByEmployeeId._id
+          : record.performedByEmployeeId;
+      setPerformedByEmployeeId(empId || "");
+    }
+  }, [record]);
+
+  const selectedAsset = assetList.find((a) => a._id === maintenanceAssetId);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!maintenanceAssetId) {
+      toast.error("Please select an asset");
+      return;
+    }
+    if (!maintenanceType) {
+      toast.error("Please select maintenance type");
+      return;
+    }
+    if (!maintenanceDate) {
+      toast.error("Please select maintenance date");
+      return;
+    }
+    if (!workPerformed.trim()) {
+      toast.error("Please describe work performed");
+      return;
+    }
+    if (!maintenanceCostAmount) {
+      toast.error("Please enter maintenance cost");
+      return;
+    }
+    if (!performedByEmployeeId) {
+      toast.error("Please select performed by employee");
+      return;
+    }
+
+    const payload = {
+      assetId: maintenanceAssetId,
+      maintenanceAssetId,
       maintenanceType,
       maintenanceDate: maintenanceDate || undefined,
       problemDescription: problemDescription.trim() || undefined,
@@ -50,61 +118,37 @@ function AddMaintenanceRecord() {
       nextMaintenanceDate: nextMaintenanceDate || null,
       performedByEmployeeId,
     };
-  };
-
-  const validate = () => {
-    if (!assetId) {
-      toast.error("Please select an asset");
-      return false;
-    }
-    if (!maintenanceType) {
-      toast.error("Please select maintenance type");
-      return false;
-    }
-    if (!maintenanceDate) {
-      toast.error("Please select maintenance date");
-      return false;
-    }
-    if (!workPerformed.trim()) {
-      toast.error("Please describe work performed");
-      return false;
-    }
-    if (!maintenanceCostAmount) {
-      toast.error("Please enter maintenance cost");
-      return false;
-    }
-    if (!performedByEmployeeId) {
-      toast.error("Please select performed by employee");
-      return false;
-    }
-    return true;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
 
     try {
-      await createMutation.mutateAsync(buildPayload());
-      toast.success("Maintenance record logged successfully");
+      await updateMutation.mutateAsync({ id, data: payload });
+      toast.success("Maintenance record updated successfully");
       navigate("/assets?tab=maintenance-records");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to log maintenance record. Please try again.");
+      toast.error(err.response?.data?.message || "Failed to update maintenance record. Please try again.");
     }
   };
 
-  const handleSaveAndAddAnother = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
+  if (isLoading) {
+    return (
+      <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+        <p className="text-slate-500 text-sm">Loading maintenance record details...</p>
+      </main>
+    );
+  }
 
-    try {
-      await createMutation.mutateAsync(buildPayload());
-      toast.success("Maintenance record logged successfully");
-      resetForm();
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to log maintenance record. Please try again.");
-    }
-  };
+  if (error || !record) {
+    return (
+      <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+        <p className="text-red-500 text-sm">Failed to load maintenance record details.</p>
+        <button
+          onClick={() => navigate("/assets?tab=maintenance-records")}
+          className="mt-4 rounded-lg bg-slate-200 px-4 py-2 text-sm text-slate-700 hover:bg-slate-300"
+        >
+          Back to Maintenance Records
+        </button>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
@@ -126,13 +170,13 @@ function AddMaintenanceRecord() {
               Maintenance Records
             </span>{" "}
             <span className="px-1 text-slate-400">/</span>{" "}
-            <span className="font-semibold text-slate-700">Add Record</span>
+            <span className="font-semibold text-slate-700">Edit Record</span>
           </p>
           <h1 className="text-2xl font-bold tracking-tight text-BLUE-dark">
-            Log Maintenance Record
+            Edit Maintenance Record ({maintenanceNumber})
           </h1>
           <p className="text-sm text-tertiary">
-            Create a new entry for service or repair work on plant machinery
+            Update maintenance details, costs, and service logs
           </p>
         </div>
 
@@ -146,8 +190,8 @@ function AddMaintenanceRecord() {
                   Select Asset <span className="text-rose-500">*</span>
                 </label>
                 <select
-                  value={assetId}
-                  onChange={(e) => setassetId(e.target.value)}
+                  value={maintenanceAssetId}
+                  onChange={(e) => setMaintenanceAssetId(e.target.value)}
                   required
                   disabled={isLoadingAssets}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
@@ -172,9 +216,6 @@ function AddMaintenanceRecord() {
                     </span>
                     <span>
                       <strong className="font-semibold">Location:</strong> {selectedAsset.locationName || "-"}
-                    </span>
-                    <span>
-                      <strong className="font-semibold">Status:</strong> {selectedAsset.assetStatus || "-"}
                     </span>
                   </div>
                 )}
@@ -295,28 +336,20 @@ function AddMaintenanceRecord() {
             </div>
 
             {/* Actions */}
-            <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end sm:gap-3">
+            <div className="mt-8 flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => navigate("/assets?tab=maintenance-records")}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+                className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
               >
                 Cancel
               </button>
               <button
-                type="button"
-                disabled={createMutation.isPending}
-                onClick={handleSaveAndAddAnother}
-                className="rounded-lg border border-[#1a56db] bg-white px-4 py-2.5 text-sm font-medium text-[#1a56db] shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
-              >
-                Save & Add Another
-              </button>
-              <button
                 type="submit"
-                disabled={createMutation.isPending}
+                disabled={updateMutation.isPending}
                 className="rounded-lg bg-gradient-bg-blue px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0f326e] disabled:opacity-50"
               >
-                {createMutation.isPending ? "Saving..." : "Save Record"}
+                {updateMutation.isPending ? "Updating..." : "Update Record"}
               </button>
             </div>
           </form>
@@ -326,4 +359,4 @@ function AddMaintenanceRecord() {
   );
 }
 
-export default AddMaintenanceRecord;
+export default UpdateMaintenanceRecord;
