@@ -257,4 +257,19 @@ export const queryKeys = {
 
     detail: id => ['maintenance-records', 'detail', id]
   },
+
+  // =========================
+  // Expenses
+  // =========================
+  expenses: {
+    all: ['expenses'],
+
+    lists: () => ['expenses', 'list'],
+
+    list: (params) => ['expenses', 'list', params],
+
+    detail: id => ['expenses', 'detail', id],
+
+    formOptions: () => ['expenses', 'form-options'],
+  },
 }

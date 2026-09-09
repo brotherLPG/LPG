@@ -1,32 +1,35 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import {
-  useExpenseFormOptions,
-  useCreateExpense,
+  useExpenseById,
+  useUpdateExpense,
 } from "../../queries/expenses/expenses.queries";
 import { useToast } from "../../utils/GlobalToast";
 
-function AddExpenses() {
+function UpdateExpenses() {
+  const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
 
-  const { data: formOptionsResponse, isLoading: isLoadingOptions } = useExpenseFormOptions();
-  const createMutation = useCreateExpense();
+  const { data: expenseResponse, isLoading, error } = useExpenseById(id);
+  const updateMutation = useUpdateExpense();
 
-  const formOptions = formOptionsResponse?.data || {};
+  const expense = expenseResponse?.data;
+
+  // Form options from get-by-id response (includes form object)
+  const formOptions = expense?.form || {};
   const categories = formOptions.categories || [];
   const paymentMethods = formOptions.paymentMethods || [];
   const accounts = formOptions.accounts || [];
   const statuses = formOptions.statuses || [];
-  const nextExpenseNumber = formOptions.nextExpenseNumber || "Auto-generated";
 
   // Form state
   const [expenseCategoryId, setExpenseCategoryId] = useState("");
-  const [expenseDate, setExpenseDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [expenseDate, setExpenseDate] = useState("");
   const [vendorPayeeName, setVendorPayeeName] = useState("");
   const [expenseDescription, setExpenseDescription] = useState("");
-  const [expenseStatus, setExpenseStatus] = useState("pending");
+  const [expenseStatus, setExpenseStatus] = useState("");
   const [isApproved, setIsApproved] = useState(true);
   const [expenseAmount, setExpenseAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
@@ -35,83 +38,98 @@ function AddExpenses() {
   const [paymentDate, setPaymentDate] = useState("");
   const [remarks, setRemarks] = useState("");
 
-  const resetForm = () => {
-    setExpenseStatus("pending");
-    setExpenseCategoryId("");
-    setExpenseDate(new Date().toISOString().split("T")[0]);
-    setVendorPayeeName("");
-    setExpenseDescription("");
-    setIsApproved(true);
-    setExpenseAmount("");
-    setPaymentMethod("");
-    setPaidFromAccountId("");
-    setReferenceNumber("");
-    setPaymentDate("");
-    setRemarks("");
-  };
-
-  const buildPayload = () => ({
-    expenseCategoryId: expenseCategoryId || undefined,
-    expenseStatus: expenseStatus || undefined,
-    expenseDate: expenseDate || undefined,
-    vendorPayeeName: vendorPayeeName.trim() || undefined,
-    expenseDescription: expenseDescription.trim() || undefined,
-    isApproved,
-    expenseAmount: Number(expenseAmount) || 0,
-    paymentMethod: paymentMethod || undefined,
-    paidFromAccountId: paidFromAccountId || undefined,
-    referenceNumber: referenceNumber.trim() || undefined,
-    paymentDate: paymentDate || undefined,
-    remarks: remarks.trim() || undefined,
-  });
-
-  const validate = () => {
-    if (!expenseCategoryId) {
-      toast.error("Please select a category");
-      return false;
+  useEffect(() => {
+    if (expense) {
+      setExpenseCategoryId(expense.expenseCategoryId || "");
+      if (expense.expenseDate) {
+        const d = new Date(expense.expenseDate);
+        if (!isNaN(d.getTime())) setExpenseDate(d.toISOString().split("T")[0]);
+      }
+      setVendorPayeeName(expense.vendorPayeeName || "");
+      setExpenseDescription(expense.expenseDescription || "");
+      setExpenseStatus(expense.expenseStatus || "");
+      setIsApproved(expense.isApproved ?? true);
+      setExpenseAmount(expense.expenseAmount !== undefined ? String(expense.expenseAmount) : "");
+      setPaymentMethod(expense.paymentMethod || "");
+      setPaidFromAccountId(expense.paidFromAccountId || "");
+      setReferenceNumber(expense.referenceNumber || "");
+      if (expense.paymentDate) {
+        const pd = new Date(expense.paymentDate);
+        if (!isNaN(pd.getTime())) setPaymentDate(pd.toISOString().split("T")[0]);
+      }
+      setRemarks(expense.remarks || "");
     }
-    if (!expenseDate) {
-      toast.error("Please select an expense date");
-      return false;
-    }
-    if (!expenseAmount || Number(expenseAmount) <= 0) {
-      toast.error("Please enter a valid amount");
-      return false;
-    }
-    if (!paymentMethod) {
-      toast.error("Please select a payment method");
-      return false;
-    }
-    if (!paidFromAccountId) {
-      toast.error("Please select a source account");
-      return false;
-    }
-    return true;
-  };
+  }, [expense]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
+
+    if (!expenseCategoryId) {
+      toast.error("Please select a category");
+      return;
+    }
+    if (!expenseDate) {
+      toast.error("Please select an expense date");
+      return;
+    }
+    if (!expenseAmount || Number(expenseAmount) <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+    if (!paymentMethod) {
+      toast.error("Please select a payment method");
+      return;
+    }
+    if (!paidFromAccountId) {
+      toast.error("Please select a source account");
+      return;
+    }
+
+    const payload = {
+      expenseCategoryId,
+      expenseStatus: expenseStatus || undefined,
+      expenseDate,
+      vendorPayeeName: vendorPayeeName.trim() || undefined,
+      expenseDescription: expenseDescription.trim() || undefined,
+      isApproved,
+      expenseAmount: Number(expenseAmount) || 0,
+      paymentMethod,
+      paidFromAccountId,
+      referenceNumber: referenceNumber.trim() || undefined,
+      paymentDate: paymentDate || undefined,
+      remarks: remarks.trim() || undefined,
+    };
+
     try {
-      await createMutation.mutateAsync(buildPayload());
-      toast.success("Expense recorded successfully");
+      await updateMutation.mutateAsync({ id, data: payload });
+      toast.success("Expense updated successfully");
       navigate("/expenses");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to record expense. Please try again.");
+      toast.error(err.response?.data?.message || "Failed to update expense. Please try again.");
     }
   };
 
-  const handleSaveAndAddAnother = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
-    try {
-      await createMutation.mutateAsync(buildPayload());
-      toast.success("Expense recorded successfully");
-      resetForm();
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to record expense. Please try again.");
-    }
-  };
+  if (isLoading) {
+    return (
+      <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+        <p className="text-slate-500 text-sm">Loading expense details...</p>
+      </main>
+    );
+  }
+
+  if (error || !expense) {
+    return (
+      <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+        <p className="text-red-500 text-sm">Failed to load expense details.</p>
+        <button
+          onClick={() => navigate("/expenses")}
+          className="mt-4 rounded-lg bg-slate-200 px-4 py-2 text-sm text-slate-700 hover:bg-slate-300"
+        >
+          Back to Expenses
+        </button>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
@@ -133,11 +151,13 @@ function AddExpenses() {
               Expenses
             </span>{" "}
             <span className="px-1 text-slate-400">/</span>{" "}
-            <span className="font-semibold text-slate-600">Add Expense</span>
+            <span className="font-semibold text-slate-600">Edit Expense</span>
           </p>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Add Expense</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            Edit Expense ({expense.expenseNumber})
+          </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Record a new expense and categorize for accounting
+            Update expense details, payment information and categorization
           </p>
         </div>
 
@@ -149,7 +169,7 @@ function AddExpenses() {
                 <h2 className="text-sm font-semibold text-slate-800">Expense Details</h2>
               </div>
               <div className="p-5 space-y-4">
-                {/* Expense Number */}
+                {/* Expense Number (read-only) */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Expense Number
@@ -157,7 +177,7 @@ function AddExpenses() {
                   <input
                     type="text"
                     disabled
-                    value={isLoadingOptions ? "Loading..." : `${nextExpenseNumber} (Auto-generated)`}
+                    value={expense.expenseNumber || ""}
                     className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed"
                   />
                 </div>
@@ -171,10 +191,9 @@ function AddExpenses() {
                     <select
                       value={expenseCategoryId}
                       onChange={(e) => setExpenseCategoryId(e.target.value)}
-                      disabled={isLoadingOptions}
-                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
+                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     >
-                      <option value="">{isLoadingOptions ? "Loading categories..." : "Select category"}</option>
+                      <option value="">Select category</option>
                       {categories.map((cat) => (
                         <option key={cat._id} value={cat._id}>
                           {cat.categoryName}
@@ -221,7 +240,7 @@ function AddExpenses() {
                     rows={3}
                     value={expenseDescription}
                     onChange={(e) => setExpenseDescription(e.target.value)}
-                    placeholder="Electricity bill for Rawalpindi plant facility for the month of August 2026"
+                    placeholder="Describe the expense..."
                     className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
                   />
                 </div>
@@ -235,10 +254,9 @@ function AddExpenses() {
                     <select
                       value={expenseStatus}
                       onChange={(e) => setExpenseStatus(e.target.value)}
-                      disabled={isLoadingOptions}
-                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
+                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     >
-                      <option value="">{isLoadingOptions ? "Loading..." : "Select status"}</option>
+                      <option value="">Select status</option>
                       {statuses.map((s) => (
                         <option key={s.value} value={s.value}>
                           {s.label}
@@ -321,10 +339,9 @@ function AddExpenses() {
                     <select
                       value={paymentMethod}
                       onChange={(e) => setPaymentMethod(e.target.value)}
-                      disabled={isLoadingOptions}
-                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
+                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     >
-                      <option value="">{isLoadingOptions ? "Loading..." : "Select payment method"}</option>
+                      <option value="">Select payment method</option>
                       {paymentMethods.map((m) => (
                         <option key={m.value} value={m.value}>
                           {m.label}
@@ -344,10 +361,9 @@ function AddExpenses() {
                     <select
                       value={paidFromAccountId}
                       onChange={(e) => setPaidFromAccountId(e.target.value)}
-                      disabled={isLoadingOptions}
-                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
+                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     >
-                      <option value="">{isLoadingOptions ? "Loading..." : "Select source account"}</option>
+                      <option value="">Select source account</option>
                       {accounts.map((acc) => (
                         <option key={acc._id} value={acc._id}>
                           {acc.label}
@@ -390,7 +406,7 @@ function AddExpenses() {
         </div>
 
         {/* Bottom Action Bar */}
-        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end sm:gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <button
             type="button"
             onClick={() => navigate("/expenses")}
@@ -400,19 +416,11 @@ function AddExpenses() {
           </button>
           <button
             type="button"
-            disabled={createMutation.isPending}
-            onClick={handleSaveAndAddAnother}
-            className="rounded-lg border border-[#1a56db] bg-white px-4 py-2 text-sm font-medium text-[#1a56db] shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
-          >
-            Save & Add Another
-          </button>
-          <button
-            type="button"
-            disabled={createMutation.isPending}
+            disabled={updateMutation.isPending}
             onClick={handleSubmit}
-            className="rounded-lg bg-[#008951] px-6 py-2 text-sm font-medium text-white transition hover:bg-[#007545] disabled:opacity-50"
+            className="rounded-lg bg-[#008951] px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#007545] disabled:opacity-50"
           >
-            {createMutation.isPending ? "Saving..." : "Save Expense"}
+            {updateMutation.isPending ? "Updating..." : "Update Expense"}
           </button>
         </div>
       </section>
@@ -420,4 +428,4 @@ function AddExpenses() {
   );
 }
 
-export default AddExpenses;
+export default UpdateExpenses;

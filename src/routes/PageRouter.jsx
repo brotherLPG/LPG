@@ -39,6 +39,8 @@ import AuditLogs from '../Pages/AuditLogs/AuditLogs';
 import StorageTanks from '../Pages/StorageTanks/StorageTanks';
 import Expenses from '../Pages/Expenses/Expenses';
 import AddExpenses from '../Pages/Expenses/addExpenses';
+import UpdateExpenses from '../Pages/Expenses/UpdateExpenses';
+import ViewExpense from '../Pages/Expenses/ViewExpense';
 import AddEmployee from '../Pages/Employees/addEmployee';
 import UpdateEmployee from '../Pages/Employees/updateEmployee';
 import EmployeeDetails from '../Pages/Employees/EmployeeDetails';
@@ -139,6 +141,8 @@ function PageRouter() {
         <Route path="/employees/view/:id" element={<EmployeeDetails />} />
         <Route path="/expenses" element={<Expenses />} />
         <Route path="/expenses/add" element={<AddExpenses />} />
+        <Route path="/expenses/edit/:id" element={<UpdateExpenses />} />
+        <Route path="/expenses/view/:id" element={<ViewExpense />} />
         <Route path="/payments" element={<Payments />} />
         <Route path="/payments/add" element={<AddPayment />} />
         <Route path="/payments/view/:id" element={<PaymentDetails />} />
