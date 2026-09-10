@@ -235,7 +235,9 @@ function Expenses() {
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div>
-              <p className="text-sm font-semibold text-tertiary">This Month Total</p>
+              <p className="text-sm font-semibold text-tertiary">
+                This Month Total
+              </p>
               <p className="mt-2 text-2xl font-extrabold text-accent-blue">
                 Rs. {(summary.thisMonthTotalAmount || 0).toLocaleString()}
               </p>
@@ -246,19 +248,24 @@ function Expenses() {
           </div>
 
           {(summary.categoryCards || []).slice(0, 3).map((card, idx) => {
-            const colors = [
-              "text-orange",
-              "text-error",
-              "text-slate-900",
-            ];
+            const colors = ["text-orange", "text-error", "text-slate-900"];
             return (
-              <div key={idx} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div
+                key={idx}
+                className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+              >
                 <div>
-                  <p className="text-sm font-semibold text-tertiary">{card.categoryName}</p>
-                  <p className={`mt-2 text-2xl font-extrabold ${colors[idx] || "text-slate-900"}`}>
+                  <p className="text-sm font-semibold text-tertiary">
+                    {card.categoryName}
+                  </p>
+                  <p
+                    className={`mt-2 text-2xl font-extrabold ${colors[idx] || "text-slate-900"}`}
+                  >
                     Rs. {(card.amount || 0).toLocaleString()}
                   </p>
-                  <p className="mt-1 text-xs text-tertiary">{card.count || 0} expenses</p>
+                  <p className="mt-1 text-xs text-tertiary">
+                    {card.count || 0} expenses
+                  </p>
                 </div>
               </div>
             );
@@ -269,18 +276,22 @@ function Expenses() {
             <>
               <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div>
-                  <p className="text-sm font-semibold text-tertiary">Total Records</p>
+                  <p className="text-sm font-semibold text-tertiary">
+                    Total Records
+                  </p>
                   <p className="mt-2 text-2xl font-extrabold text-orange">
                     {pagination.total || 0}
                   </p>
-                  <p className="mt-1 text-xs text-tertiary">All time expenses</p>
+                  <p className="mt-1 text-xs text-tertiary">
+                    All time expenses
+                  </p>
                 </div>
               </div>
               <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div>
                   <p className="text-sm font-semibold text-tertiary">Paid</p>
                   <p className="mt-2 text-2xl font-extrabold text-[#008951]">
-                    {expenses.filter(e => e.expenseStatus === "paid").length}
+                    {expenses.filter((e) => e.expenseStatus === "paid").length}
                   </p>
                   <p className="mt-1 text-xs text-tertiary">Paid expenses</p>
                 </div>
@@ -289,7 +300,10 @@ function Expenses() {
                 <div>
                   <p className="text-sm font-semibold text-tertiary">Pending</p>
                   <p className="mt-2 text-2xl font-extrabold text-amber-500">
-                    {expenses.filter(e => e.expenseStatus === "pending").length}
+                    {
+                      expenses.filter((e) => e.expenseStatus === "pending")
+                        .length
+                    }
                   </p>
                   <p className="mt-1 text-xs text-tertiary">Pending expenses</p>
                 </div>
@@ -357,7 +371,9 @@ function Expenses() {
         {/* Table */}
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
           {isLoading ? (
-            <div className="p-8 text-center text-sm text-slate-500">Loading expenses...</div>
+            <div className="p-8 text-center text-sm text-slate-500">
+              Loading expenses...
+            </div>
           ) : error ? (
             <div className="p-8 text-center text-sm text-red-500">
               Error loading expenses. Please try again.
@@ -386,7 +402,11 @@ function Expenses() {
         onConfirm={handleDeleteConfirm}
         title="Delete Expense"
         message="Are you sure you want to delete this expense? This action cannot be undone."
-        itemName={deleteModal.item ? `${deleteModal.item.expenseNumber} – ${deleteModal.item.expenseDescription || ""}` : ""}
+        itemName={
+          deleteModal.item
+            ? `${deleteModal.item.expenseNumber} – ${deleteModal.item.expenseDescription || ""}`
+            : ""
+        }
         isDeleting={deleteMutation.isPending}
       />
     </main>

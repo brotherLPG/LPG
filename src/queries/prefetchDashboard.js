@@ -20,6 +20,7 @@ import { getReturnSales } from '../api/returnsale.api.js'
 import { getPayments } from '../api/payments.api.js'
 import { getAssets } from '../api/assets.api.js'
 import { getMaintenanceRecords } from '../api/maintenanceRecords.api.js'
+import { getExpenses } from '../api/expenses.api.js'
 
 export const prefetchDashboard = async queryClient => {
   await Promise.all([
@@ -305,6 +306,21 @@ export const prefetchDashboard = async queryClient => {
 
       queryFn: () =>
         getMaintenanceRecords({
+          page: 1,
+          limit: 10,
+        })
+    }),
+
+    // ========================================
+    // Expenses
+    // ========================================
+
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.expenses.list({ search: undefined, page: 1, limit: 10 }),
+
+      queryFn: () =>
+        getExpenses({
+          search: undefined,
           page: 1,
           limit: 10,
         })
