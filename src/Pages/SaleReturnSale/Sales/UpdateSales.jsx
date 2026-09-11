@@ -159,7 +159,7 @@ function UpdateSales() {
       payment: amountPaid > 0 ? {
         accountId: paymentAccountId,
         paymentAmount: amountPaid,
-        paymentMethod: paymentMethod,
+        paymentMethod: saleType,
         referenceNumber: referenceNumber || "",
       } : undefined,
     };
@@ -256,6 +256,7 @@ function UpdateSales() {
                   <div className="relative">
                     <select
                       value={paymentTermDays}
+                      disabled
                       onChange={(e) => setPaymentTermDays(Number(e.target.value))}
                       className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     >
@@ -276,6 +277,7 @@ function UpdateSales() {
                   <div className="relative">
                     <select
                       value={customerId}
+                      disabled
                       onChange={(e) => setCustomerId(e.target.value)}
                       className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     >
@@ -294,7 +296,7 @@ function UpdateSales() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Sale Type <span className="text-rose-500">*</span>
+                    Payment Method 
                   </label>
                   <div className="relative">
                     <select
@@ -302,7 +304,7 @@ function UpdateSales() {
                       onChange={(e) => setSaleType(e.target.value)}
                       className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     >
-                      <option value="">Select sale type</option>
+                      <option value="">Select Payment Method</option>
                       {saleTypesOptions.map((type) => (
                         <option key={type.value} value={type.value}>
                           {type.label}
@@ -512,18 +514,7 @@ function UpdateSales() {
                       ))}
                     </select>
                   </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="block text-sm font-medium text-slate-700">Payment Method</label>
-                    <select
-                      value={paymentMethod}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#008951]"
-                    >
-                      <option value="cash">Cash</option>
-                      <option value="bank_transfer">Bank Transfer</option>
-                      <option value="cheque">Cheque</option>
-                    </select>
-                  </div>
+                 
                   <div className="flex flex-col gap-2">
                     <label className="block text-sm font-medium text-slate-700">Reference Number</label>
                     <input
