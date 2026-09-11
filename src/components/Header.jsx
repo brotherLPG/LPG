@@ -1,7 +1,48 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown, UserRound, LogOut, Bell, Menu, X, Search, Building2, MapPin, CheckCircle, AlertTriangle, Info } from 'lucide-react';
+import { ChevronDown, UserRound, LogOut, Bell, Search, MapPin, CheckCircle, AlertTriangle, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import {
+  useNotifications,
+  useMarkNotificationAsRead,
+} from '../queries/Notification/notificationQueries';
+
+function formatRelativeTime(value) {
+  if (!value) return '—';
+
+  const date = new Date(value);
+  const diffMs = Date.now() - date.getTime();
+  const minutes = Math.floor(diffMs / 60000);
+
+  if (minutes < 1) return 'Just now';
+  if (minutes < 60) return `${minutes} min ago`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} day${days === 1 ? '' : 's'} ago`;
+
+  return date.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+function getHeaderNotificationType(type) {
+  const normalized = String(type || '').toLowerCase();
+
+  if (['inventory', 'stock', 'alert', 'warning', 'maintenance'].includes(normalized)) {
+    return 'warning';
+  }
+
+  if (['payment', 'filling', 'batch'].includes(normalized)) {
+    return 'success';
+  }
+
+  return 'info';
+}
 
 function Header({ onToggleSidebar, isSidebarOpen }) {
   const navigate = useNavigate();
@@ -20,40 +61,19 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
     'Peshware Plant',
   ];
 
-  const notifications = [
-    {
-      id: 1,
-      type: 'success',
-      title: 'Cylinder Registered Successfully',
-      message: 'LPG-2459 has been registered with barcode',
-      time: '2 min ago',
-      read: false
-    },
-    {
-      id: 2,
-      type: 'warning',
-      title: 'Low Stock Alert',
-      message: 'Cylinder stock below threshold at Branch #2',
-      time: '15 min ago',
-      read: false
-    },
-    {
-      id: 3,
-      type: 'info',
-      title: 'New Invoice Generated',
-      message: 'INV-2026-0460 has been created',
-      time: '1 hour ago',
-      read: true
-    },
-    {
-      id: 4,
-      type: 'success',
-      title: 'Payment Received',
-      message: 'PKR 25,000 received from customer #1234',
-      time: '2 hours ago',
-      read: true
-    },
-  ];
+  const { data: notificationsResponse, isLoading: areNotificationsLoading } = useNotifications(1, 10);
+  const markAsReadMutation = useMarkNotificationAsRead();
+  const notificationData = notificationsResponse?.data || {};
+  const notifications = notificationData.items || [];
+  const unreadCount = notificationData.unreadCount || 0;
+
+  const handleNotificationClick = (notification) => {
+    if (!notification.isRead) {
+      markAsReadMutation.mutate(notification._id);
+    }
+    setIsNotificationOpen(false);
+    navigate('/notifications', { state: { selectedNotification: notification } });
+  };
 
   useEffect(() => {
     // Load user data from localStorage
@@ -145,9 +165,11 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
               className="relative p-2.5 rounded-xl hover:bg-slate-100 transition-colors"
             >
               <Bell className="w-5 h-5 text-slate-600" />
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center font-bold text-white">
-                2
-              </span>
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 bg-red-500 rounded-full text-xs flex items-center justify-center font-bold text-white">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
             </button>
 
             {isNotificationOpen && (
@@ -156,53 +178,68 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
                   <h3 className="font-semibold text-slate-800">
                     Notifications
                   </h3>
-                  <span className="text-xs text-slate-500">2 unread</span>
+                  <span className="text-xs text-slate-500">
+                    {unreadCount} unread
+                  </span>
                 </div>
                 <div className="max-h-80 overflow-y-auto">
-                  {notifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`p-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100 transition-colors ${
-                        !notification.read ? "bg-blue-50/50" : ""
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div
-                          className={`p-2 rounded-full ${
-                            notification.type === "success"
-                              ? "bg-green-100"
-                              : notification.type === "warning"
-                                ? "bg-orange-100"
-                                : "bg-blue-100"
-                          }`}
-                        >
-                          {notification.type === "success" && (
-                            <CheckCircle className="w-4 h-4 text-green-600" />
-                          )}
-                          {notification.type === "warning" && (
-                            <AlertTriangle className="w-4 h-4 text-orange-600" />
-                          )}
-                          {notification.type === "info" && (
-                            <Info className="w-4 h-4 text-blue-600" />
+                  {areNotificationsLoading && (
+                    <p className="p-4 text-sm text-slate-500">Loading notifications...</p>
+                  )}
+
+                  {!areNotificationsLoading && notifications.length === 0 && (
+                    <p className="p-4 text-sm text-slate-500">No notifications found</p>
+                  )}
+
+                  {notifications.map((notification) => {
+                    const type = getHeaderNotificationType(notification.notificationType);
+
+                    return (
+                      <div
+                        key={notification._id}
+                        onClick={() => handleNotificationClick(notification)}
+                        className={`p-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100 transition-colors ${
+                          !notification.isRead ? "bg-blue-50/50" : ""
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div
+                            className={`p-2 rounded-full ${
+                              type === "success"
+                                ? "bg-green-100"
+                                : type === "warning"
+                                  ? "bg-orange-100"
+                                  : "bg-blue-100"
+                            }`}
+                          >
+                            {type === "success" && (
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                            )}
+                            {type === "warning" && (
+                              <AlertTriangle className="w-4 h-4 text-orange-600" />
+                            )}
+                            {type === "info" && (
+                              <Info className="w-4 h-4 text-blue-600" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-slate-800">
+                              {notification.notificationTitle}
+                            </p>
+                            <p className="text-xs text-slate-600 mt-1">
+                              {notification.notificationMessage}
+                            </p>
+                            <p className="text-xs text-slate-400 mt-1">
+                              {formatRelativeTime(notification.createdAt)}
+                            </p>
+                          </div>
+                          {!notification.isRead && (
+                            <div className="w-2 h-2 bg-blue-500 rounded-full shrink-0 mt-2"></div>
                           )}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-slate-800">
-                            {notification.title}
-                          </p>
-                          <p className="text-xs text-slate-600 mt-1">
-                            {notification.message}
-                          </p>
-                          <p className="text-xs text-slate-400 mt-1">
-                            {notification.time}
-                          </p>
-                        </div>
-                        {!notification.read && (
-                          <div className="w-2 h-2 bg-blue-500 rounded-full shrink-0 mt-2"></div>
-                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <div className="p-3 border-t border-slate-200 bg-slate-50">
                   <button
