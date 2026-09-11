@@ -9,7 +9,7 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isPlantDropdownOpen, setIsPlantDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedPlant, setSelectedPlant] = useState('Rawalpindi Plant');
+  const [selectedPlant, setSelectedPlant] = useState('Peshware Plant');
   const [user, setUser] = useState(null);
   
   const profileMenuRef = useRef(null);
@@ -17,10 +17,7 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
   const plantDropdownRef = useRef(null);
 
   const plants = [
-    'Rawalpindi Plant',
-    'Islamabad Plant',
-    'Lahore Plant',
-    'Karachi Plant'
+    'Peshware Plant',
   ];
 
   const notifications = [

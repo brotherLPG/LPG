@@ -3,7 +3,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { getCurrentUser, loginUser } from "../../api/auth.api";
+import { changePassword, getCurrentUser, loginUser } from "../../api/auth.api";
 import { queryKeys } from "../queryKeys";
 
 export const useCurrentUser = () => {
@@ -14,6 +14,12 @@ export const useCurrentUser = () => {
     queryFn: getCurrentUser,
     enabled: hasToken,
     staleTime: 5 * 60 * 1000,
+  });
+};
+
+export const useChangePassword = () => {
+  return useMutation({
+    mutationFn: changePassword,
   });
 };
 

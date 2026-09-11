@@ -1,20 +1,131 @@
 import { useState } from "react";
-import { Building2, Coins, Layout, Bell, Shield, Database, ChevronRight, Save } from "lucide-react";
+import { Building2, Coins, Layout, Bell, Shield, Database, KeyRound, ChevronRight, Save, Eye, EyeOff } from "lucide-react";
 import { Switch } from "@heroui/react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import { useChangePassword, useCurrentUser } from "../../queries/auth/auth.queries";
+import { useUpdateUser } from "../../queries/users/users.queries";
+import { queryKeys } from "../../queries/queryKeys";
+import { useToast } from "../../utils/GlobalToast";
+
+function formatDate(value) {
+  if (!value) return "—";
+  return new Date(value).toLocaleString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 function Settings() {
   const [activeTab, setActiveTab] = useState("company");
   const [autoBackup, setAutoBackup] = useState(true);
-    const navigate = useNavigate();
+  const [editedFields, setEditedFields] = useState({});
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    next: false,
+    confirm: false,
+  });
+  const navigate = useNavigate();
+  const toast = useToast();
+  const queryClient = useQueryClient();
+  const { data: currentUserResponse, isLoading, error } = useCurrentUser();
+  const updateMutation = useUpdateUser();
+  const changePasswordMutation = useChangePassword();
+  const user = currentUserResponse?.data;
+  const form = {
+    fullName: editedFields.fullName ?? user?.fullName ?? "",
+    email: editedFields.email ?? user?.emailAddress ?? "",
+    phone: user?.phoneNumber ?? "",
+    cnic: user?.cnicNumber ?? "",
+    username: user?.username ?? "",
+    role: user?.role?.roleName ?? "",
+  };
+
+  const updateField = (key) => (event) =>
+    setEditedFields((current) => ({ ...current, [key]: event.target.value }));
+
+  const updatePasswordField = (key) => (event) =>
+    setPasswordForm((current) => ({ ...current, [key]: event.target.value }));
+
+  const togglePasswordVisibility = (key) =>
+    setShowPasswords((current) => ({ ...current, [key]: !current[key] }));
+
+  const handleUpdateProfile = async (event) => {
+    event.preventDefault();
+    if (!user?._id) return;
+
+    try {
+      await updateMutation.mutateAsync({
+        id: user._id,
+        data: {
+          fullName: form.fullName,
+          emailAddress: form.email,
+          roleId: user.roleId || user.role?._id,
+          employeeId: user.employeeId?._id || user.employeeId || "",
+          isActive: Boolean(user.isActive),
+        },
+      });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.auth.currentUser(),
+      });
+      setEditedFields({});
+      toast.success("Profile updated successfully!");
+    } catch (updateError) {
+      toast.error(
+        updateError.response?.data?.message ||
+          "Failed to update profile. Please try again."
+      );
+    }
+  };
+
+  const handleChangePassword = async (event) => {
+    event.preventDefault();
+
+    if (!passwordForm.currentPassword || !passwordForm.newPassword) {
+      toast.error("Current password and new password are required.");
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error("New password and confirm password do not match.");
+      return;
+    }
+
+    try {
+      await changePasswordMutation.mutateAsync({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+      });
+      setPasswordForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      toast.success("Password changed successfully!");
+    } catch (passwordError) {
+      toast.error(
+        passwordError.response?.data?.message ||
+          "Failed to change password. Please try again."
+      );
+    }
+  };
 
   const tabs = [
     { id: "company", icon: Building2, label: "Company Information" },
-    { id: "currency", icon: Coins, label: "Currency & Units" },
-    { id: "invoice", icon: Layout, label: "Invoice Layouts" },
-    { id: "notification", icon: Bell, label: "Notification Channels" },
-    { id: "security", icon: Shield, label: "Security & Roles" },
-    { id: "backup", icon: Database, label: "Database Backups" },
+    // { id: "currency", icon: Coins, label: "Currency & Units" },
+    // { id: "invoice", icon: Layout, label: "Invoice Layouts" },
+    // { id: "notification", icon: Bell, label: "Notification Channels" },
+    // { id: "security", icon: Shield, label: "Security & Roles" },
+    { id: "password", icon: KeyRound, label: "Change Password" },
+    // { id: "backup", icon: Database, label: "Database Backups" },
   ];
 
   return (
@@ -79,88 +190,242 @@ function Settings() {
           {/* Main Content */}
           <div className="flex-1 p-3 overflow-y-auto col-span-2">
             <div className="max-w-4xl mx-auto space-y-6">
-              {/* Company Profile Details */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              {activeTab !== "password" && (
+              <form
+                onSubmit={handleUpdateProfile}
+                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+              >
                 <h2 className="text-xl font-bold text-gray-800 mb-2">
-                  Company Profile Details
+                  Account Profile Details
                 </h2>
+
+                {isLoading && (
+                  <p className="py-6 text-sm text-slate-500">Loading current user...</p>
+                )}
+
+                {error && !isLoading && (
+                  <p className="py-6 text-sm text-red-500">
+                    Unable to load current user.
+                  </p>
+                )}
+
+                {!isLoading && !error && user && (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Full Name
+                        </label>
+                        <input
+                          type="text"
+                          value={form.fullName}
+                          onChange={updateField("fullName")}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Username
+                        </label>
+                        <input
+                          type="text"
+                          value={form.username}
+                          readOnly
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-slate-50 outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Official Email Address
+                        </label>
+                        <input
+                          type="email"
+                          value={form.email}
+                          onChange={updateField("email")}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Contact Phone
+                        </label>
+                        <input
+                          type="text"
+                          value={form.phone}
+                          readOnly
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-slate-50 outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          CNIC Number
+                        </label>
+                        <input
+                          type="text"
+                          value={form.cnic}
+                          readOnly
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-slate-50 outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Assigned Role
+                        </label>
+                        <input
+                          type="text"
+                          value={form.role}
+                          readOnly
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-slate-50 outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Status
+                        </label>
+                        <input
+                          type="text"
+                          value={user.isActive ? "Active" : "Inactive"}
+                          readOnly
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-slate-50 outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Last Login
+                        </label>
+                        <input
+                          type="text"
+                          value={formatDate(user.lastLoginAt)}
+                          readOnly
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-slate-50 outline-none"
+                        />
+                      </div>
+                    </div>
+
+                   
+                  </>
+                )}
+              </form>
+              )}
+
+              {activeTab === "password" && (
+              <form
+                onSubmit={handleChangePassword}
+                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+              >
+                <h2 className="text-xl font-bold text-gray-800 mb-2">
+                  Change Password
+                </h2>
+                <p className="text-sm text-gray-500 mb-4">
+                  Enter your current password and choose a new one.
+                </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Company Name
+                      Current Password
                     </label>
-                    <input
-                      type="text"
-                      defaultValue="Al-Madina LPG Plant"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    />
+                    <span className="relative block">
+                      <input
+                        type={showPasswords.current ? "text" : "password"}
+                        value={passwordForm.currentPassword}
+                        onChange={updatePasswordField("currentPassword")}
+                        placeholder="Enter current password"
+                        className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => togglePasswordVisibility("current")}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      >
+                        {showPasswords.current ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </span>
+                  </div>
+
+                  <div className="hidden md:block" />
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      New Password
+                    </label>
+                    <span className="relative block">
+                      <input
+                        type={showPasswords.next ? "text" : "password"}
+                        value={passwordForm.newPassword}
+                        onChange={updatePasswordField("newPassword")}
+                        placeholder="Enter new password"
+                        className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => togglePasswordVisibility("next")}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      >
+                        {showPasswords.next ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </span>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Business Registration No.
+                      Confirm New Password
                     </label>
-                    <input
-                      type="text"
-                      defaultValue="BR-2024-158-4521"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      National Tax Number (NTN)
-                    </label>
-                    <input
-                      type="text"
-                      defaultValue="4521387-9"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Contact Phone
-                    </label>
-                    <input
-                      type="text"
-                      defaultValue="+92-51-4851234"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Physical Office Address
-                    </label>
-                    <input
-                      type="text"
-                      defaultValue="Plot 45-B, Industrial Area, Sector 1-9, Islamabad, Pakistan"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Official Email Address
-                    </label>
-                    <input
-                      type="email"
-                      defaultValue="admin@almadina-lpg.pk"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    />
+                    <span className="relative block">
+                      <input
+                        type={showPasswords.confirm ? "text" : "password"}
+                        value={passwordForm.confirmPassword}
+                        onChange={updatePasswordField("confirmPassword")}
+                        placeholder="Confirm new password"
+                        className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => togglePasswordVisibility("confirm")}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      >
+                        {showPasswords.confirm ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </span>
                   </div>
                 </div>
 
                 <div className="mt-6 flex justify-end">
-                  <button className="flex items-center gap-2 bg-gradient-bg-blue text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                  <button
+                    type="submit"
+                    disabled={changePasswordMutation.isPending}
+                    className="flex items-center gap-2 bg-gradient-bg-blue text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-60"
+                  >
                     <Save className="h-4 w-4" />
-                    Update Profile
+                    {changePasswordMutation.isPending
+                      ? "Updating..."
+                      : "Change Password"}
                   </button>
                 </div>
-              </div>
+              </form>
+              )}
 
+              {activeTab !== "password" && (
+              <>
               {/* Operational & Financial Settings */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h2 className="text-xl font-bold text-gray-800 mb-2">
@@ -302,8 +567,9 @@ function Settings() {
 
                 <div className="mt-6 flex justify-between items-center my-auto">
                   <p className="text-[#9CA3AF] text-[11px]">
-                    Last Settings update by Admin (Muhammad Ahmad) on 20 Aug
-                    2026
+                    Last Settings update by {user?.fullName || "—"}
+                    {user?.username ? ` (${user.username})` : ""} on{" "}
+                    {formatDate(user?.updatedAt)}
                   </p>
                   <button className="flex items-center gap-2 bg-[#10B981] text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
                     <Save className="h-4 w-4" />
@@ -311,6 +577,8 @@ function Settings() {
                   </button>
                 </div>
               </div>
+              </>
+              )}
             </div>
           </div>
         </div>
