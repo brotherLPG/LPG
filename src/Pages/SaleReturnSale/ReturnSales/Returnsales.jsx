@@ -3,9 +3,11 @@ import { Search, Eye, Edit3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import GlobalTable from "../../../utils/GlobalTable";
 import { useReturnSales } from "../../../queries/returnsales/returnsales.queries";
+import { usePermissions } from "../../../contexts/PermissionContext";
 
 function Returnsales() {
   const navigate = useNavigate();
+  const { can } = usePermissions();
   const [searchTerm, setSearchTerm] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -110,6 +112,7 @@ function Returnsales() {
       cellClassName: "px-4 py-4 pr-6",
       renderCell: (item) => (
         <div className="flex items-center justify-end gap-3">
+          {can("sales-returns", "read") && (
           <button
             type="button"
             onClick={() => navigate(`/sales/return/view/${item._id}`)}
@@ -118,6 +121,8 @@ function Returnsales() {
           >
             <Eye className="h-4 w-4" strokeWidth={2.5} />
           </button>
+          )}
+          {can("sales-returns", "update") && (
           <button
             type="button"
             onClick={() => navigate(`/sales/return/edit/${item._id}`)}
@@ -126,6 +131,7 @@ function Returnsales() {
           >
             <Edit3 className="h-4 w-4" strokeWidth={2.5} />
           </button>
+          )}
         </div>
       ),
     },

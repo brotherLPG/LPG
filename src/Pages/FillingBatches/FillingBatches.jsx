@@ -8,10 +8,12 @@ import {
   useDeleteFillingBatch,
   useFillingBatches,
 } from "../../queries/fillingBatches/fillingBatches.queries";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 function FillingBatches() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { can } = usePermissions();
 
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
@@ -164,6 +166,7 @@ function FillingBatches() {
       cellClassName: "px-4 py-4 pr-6",
       renderCell: (item) => (
         <div className="flex items-center justify-end gap-3">
+          {can("filling-batches", "read") && (
           <button
             type="button"
             aria-label={`View ${item.batchNo}`}
@@ -172,6 +175,8 @@ function FillingBatches() {
           >
             <Eye className="h-4 w-4" strokeWidth={2.5} />
           </button>
+          )}
+          {can("filling-batches", "update") && (
           <button
             type="button"
             aria-label={`Edit ${item.batchNo}`}
@@ -180,6 +185,7 @@ function FillingBatches() {
           >
             <Edit3 className="h-4 w-4" strokeWidth={2.5} />
           </button>
+          )}
           {/* <button
             type="button"
             aria-label={`Delete ${item.batchNo}`}
@@ -215,6 +221,7 @@ function FillingBatches() {
               Manage automated LPG gas cylinder refilling process batch runs
             </p>
           </div>
+          {can("filling-batches", "create") && (
           <button
             type="button"
             onClick={() => navigate("/filling-batches/create")}
@@ -222,6 +229,7 @@ function FillingBatches() {
           >
             <CirclePlus className="h-4 w-4" strokeWidth={3} /> Create Batch
           </button>
+          )}
         </div>
 
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

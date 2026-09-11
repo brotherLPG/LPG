@@ -1,6 +1,7 @@
 import { ArrowLeft, Pencil } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useInventoryItemById } from "../../queries/inventory/inventory.queries";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 function DetailItem({ label, value }) {
     return (
@@ -13,6 +14,7 @@ function DetailItem({ label, value }) {
 
 function ViewInventoryItem() {
     const navigate = useNavigate();
+    const { can } = usePermissions();
     const { id } = useParams();
     const { data, isLoading, error } = useInventoryItemById(id);
     const item = data?.data;
@@ -47,9 +49,11 @@ function ViewInventoryItem() {
                     <p className="mt-1 text-sm text-slate-500">Inventory item details, stock levels, and supplier information</p>
                 </div>
                 <div className="flex gap-2">
+                    {can("inventory-items", "update") && (
                     <button type="button" onClick={() => navigate(`/inventory/edit/${item._id}`)} className="inline-flex items-center gap-2 rounded-md bg-[#008951] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
                         <Pencil className="h-4 w-4" /> Edit Item
                     </button>
+                    )}
                 </div>
             </div>
 

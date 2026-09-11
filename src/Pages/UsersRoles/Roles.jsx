@@ -1,21 +1,22 @@
-import { Search, ShieldCheck, Trash2, Pencil } from "lucide-react";
+import { Search, Trash2, Pencil, Eye } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalTable from "../../utils/GlobalTable";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useDeleteRole, useRoles } from "../../queries/roles/roles.queries";
 import { useToast } from "../../utils/GlobalToast";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 function Roles() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { can } = usePermissions();
   const [roleQuery, setRoleQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("All Roles");
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, role: null });
   const { data: rolesData, isLoading, error } = useRoles({ page: 1, limit: 100 });
   const roles = rolesData?.data?.items || [];
   const deleteMutation = useDeleteRole();
-  
 
   const filteredRoles = useMemo(() => roles.filter((role) => {
     const roleName = role.roleName || role.name || role.title || role.displayName || "";
@@ -45,9 +46,19 @@ function Roles() {
       className: "text-[13px] font-bold text-tertiary",
       cellClassName: "px-4 py-3",
       renderCell: (role) => (
-        <span className="font-semibold text-BLUE-dark text-[13px]">
-          {role.roleName || role.name || role.title || "—"}
-        </span>
+        can("roles", "read") ? (
+          <button
+            type="button"
+            onClick={() => navigate(`/users-roles/view-role/${role._id}`)}
+            className="font-semibold text-[#1a56db] hover:underline text-[13px]"
+          >
+            {role.roleName || role.name || role.title || "—"}
+          </button>
+        ) : (
+          <span className="font-semibold text-BLUE-dark text-[13px]">
+            {role.roleName || role.name || role.title || "—"}
+          </span>
+        )
       ),
     },
     {
@@ -94,7 +105,17 @@ function Roles() {
       cellClassName: "px-4 py-3",
       renderCell: (role) => (
         <div className="flex items-center gap-3">
-        
+          {can("roles", "read") && (
+          <button
+            type="button"
+            onClick={() => navigate(`/users-roles/view-role/${role._id}`)}
+            aria-label={`View ${role.roleName || role.name || "role"}`}
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-800"
+          >
+            <Eye className="h-4 w-4" /> View
+          </button>
+          )}
+          {can("roles", "update") && (
           <button
             type="button"
             onClick={() => navigate(`/users-roles/edit-role/${role._id}`)}
@@ -103,6 +124,8 @@ function Roles() {
           >
             <Pencil className="h-4 w-4" /> Edit
           </button>
+          )}
+          {can("roles", "delete") && (
           <button
             type="button"
             onClick={() => setDeleteModal({ isOpen: true, role })}
@@ -111,6 +134,7 @@ function Roles() {
           >
             <Trash2 className="h-4 w-4" /> Delete
           </button>
+          )}
         </div>
       ),
     },

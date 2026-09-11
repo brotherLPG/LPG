@@ -5,6 +5,7 @@ import GlobalTable from "../../utils/GlobalTable";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useAssets, useDeleteAsset } from "../../queries/assets/assets.queries";
 import { useToast } from "../../utils/GlobalToast";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 const formatLabel = (str) => {
   if (!str) return "-";
@@ -17,6 +18,7 @@ const formatLabel = (str) => {
 function Assets() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { can } = usePermissions();
 
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
@@ -220,6 +222,7 @@ function Assets() {
       cellClassName: "px-4 py-4 pr-6",
       renderCell: (item) => (
         <div className="flex items-center justify-end gap-2">
+          {can("assets", "read") && (
           <button
             type="button"
             aria-label={`View ${item.assetCode}`}
@@ -228,6 +231,8 @@ function Assets() {
           >
             <Eye className="h-3.5 w-3.5" strokeWidth={2.5} /> View
           </button>
+          )}
+          {can("assets", "update") && (
           <button
             type="button"
             aria-label={`Edit ${item.assetCode}`}
@@ -236,6 +241,8 @@ function Assets() {
           >
             <Edit3 className="h-3.5 w-3.5" strokeWidth={2.5} /> Edit
           </button>
+          )}
+          {can("assets", "delete") && (
           <button
             type="button"
             aria-label={`Delete ${item.assetCode}`}
@@ -244,6 +251,7 @@ function Assets() {
           >
             <Trash2 className="h-3.5 w-3.5" strokeWidth={2.5} /> Delete
           </button>
+          )}
         </div>
       ),
     },

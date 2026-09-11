@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Search, Eye, ChevronDown, Plus, Loader, Pencil } from "lucide-react";
 import GlobalTable from "../../utils/GlobalTable";
 import { useGetAccounts } from "../../queries/accounts/accounts.queries";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 function Accounting() {
   const navigate = useNavigate();
+  const { can } = usePermissions();
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [categoryFilter, setCategoryFilter] = useState("All");
@@ -120,6 +122,7 @@ function Accounting() {
       cellClassName: "px-4 py-4",
       renderCell: (item) => (
         <div className="flex items-center gap-2">
+          {can("accounts", "update") && (
           <button
             type="button"
             onClick={() => navigate(`/accounting/edit/${item.accountId}`)}
@@ -127,6 +130,8 @@ function Accounting() {
           >
             <Pencil className="h-3.5 w-3.5" /> Edit
           </button>
+          )}
+          {can("accounts", "read") && (
           <button
             type="button"
             onClick={() => navigate(`/accounting/view/${item.accountId}`)}
@@ -134,6 +139,7 @@ function Accounting() {
           >
             <Eye className="h-3.5 w-3.5" /> View
           </button>
+          )}
         </div>
       ),
     },
@@ -179,6 +185,7 @@ function Accounting() {
           </p>
         </div>
 
+        {can("accounts", "create") && (
         <button
           type="button"
           onClick={() => navigate("/accounting/add")}
@@ -187,6 +194,7 @@ function Accounting() {
           <Plus className="h-4 w-4" />
           Add Account
         </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

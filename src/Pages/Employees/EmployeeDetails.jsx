@@ -1,6 +1,7 @@
 import { ArrowLeft, Pencil } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEmployeeById } from "../../queries/employees/employees.queries";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 function DetailItem({ label, value }) {
   return (
@@ -13,6 +14,7 @@ function DetailItem({ label, value }) {
 
 function EmployeeDetails() {
   const navigate = useNavigate();
+  const { can } = usePermissions();
   const { id } = useParams();
   const { data, isLoading, error } = useEmployeeById(id);
   const employee = data?.data;
@@ -65,9 +67,11 @@ function EmployeeDetails() {
           <p className="mt-1 text-sm text-slate-500">Employee profile, employment details, and contact information</p>
         </div>
         <div className="flex gap-2">
+          {can("employees", "update") && (
           <button type="button" onClick={() => navigate(`/employees/edit/${employee._id}`)} className="inline-flex items-center gap-2 rounded-md bg-[#008951] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
             <Pencil className="h-4 w-4" /> Edit Employee
           </button>
+          )}
         </div>
       </div>
 

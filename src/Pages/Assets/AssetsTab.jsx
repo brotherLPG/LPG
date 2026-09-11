@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import Assets from './Assets';
 import MaintenanceAssets from '../MaintenanceAssets/MaintenanceAssets';
 import MaintenanceRecords from '../MaintenanceAssets/MaintenanceRecords';
+import { usePermissions } from '../../contexts/PermissionContext';
 
 
 const tabs = [
@@ -29,6 +30,7 @@ function AssetsTab() {
   const activeTab = searchParams.get("tab") || "assets";
 
   const navigate = useNavigate();
+  const { can } = usePermissions();
   return (
     <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
       <section>
@@ -53,6 +55,7 @@ function AssetsTab() {
                   Track and manage company fixed assets and depreciation
                 </p>
               </div>
+              {can("assets", "create") && (
               <button
                 type="button"
                 onClick={() => navigate("/assets/add")}
@@ -60,6 +63,7 @@ function AssetsTab() {
               >
                 <CirclePlus className="h-4 w-4" strokeWidth={3} /> Add Asset
               </button>
+              )}
             </div>
           </>
         )
@@ -123,6 +127,7 @@ function AssetsTab() {
                   </p>
                 </div>
 
+                {can("maintenance-records", "create") && (
                 <button
                   type="button"
                   onClick={() => navigate("/maintenance-records/add")}
@@ -131,6 +136,7 @@ function AssetsTab() {
                   <CirclePlus className="h-4 w-4" strokeWidth={3} />
                   Add Maintenance Record
                 </button>
+                )}
               </div>
             </>
           ) : null}

@@ -2,6 +2,7 @@ import { ArrowLeft, Pencil } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useRoleById } from "../../queries/roles/roles.queries";
 import { useUserById } from "../../queries/users/users.queries";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 const badgeColors = {
   emerald: "bg-emerald-50 text-emerald-600",
@@ -20,6 +21,7 @@ function DetailItem({ label, value }) {
 
 function UserDetails() {
   const navigate = useNavigate();
+  const { can } = usePermissions();
   const { id } = useParams();
   const { data, isLoading, error } = useUserById(id);
   const user = data?.data?.user || data?.data;
@@ -68,9 +70,11 @@ function UserDetails() {
           </p>
           </div>
         </div>
+        {can("users", "update") && (
         <button type="button" onClick={() => navigate(`/users-roles/edit/${user._id}`)} className="inline-flex items-center gap-2 rounded-md bg-gradient-bg-blue px-4 py-2 text-sm font-semibold text-white">
           <Pencil className="h-4 w-4" /> Edit User
         </button>
+        )}
        
       </div>
 

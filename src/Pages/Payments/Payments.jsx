@@ -5,10 +5,12 @@ import GlobalTable from "../../utils/GlobalTable";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
 import { useGetPayments, useDeletePayment } from "../../queries/payments/payments.queries";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 function Payments() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { can } = usePermissions();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [direction, setDirection] = useState("All");
@@ -148,6 +150,7 @@ function Payments() {
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
         <div className="flex items-center gap-2">
+          {can("payments", "read") && (
           <button
             type="button"
             aria-label={`View ${item.voucherNo}`}
@@ -156,6 +159,7 @@ function Payments() {
           >
             <Eye className="h-3.5 w-3.5" /> View
           </button>
+          )}
           {/* <button
             type="button"
             aria-label={`Edit ${item.voucherNo}`}
@@ -199,6 +203,7 @@ function Payments() {
               Manage payment vouchers and financial transactions
             </p>
           </div>
+          {can("payments", "create") && (
           <button
             type="button"
             onClick={() => navigate("/payments/add")}
@@ -206,6 +211,7 @@ function Payments() {
           >
             <PlusCircle className="h-4 w-4" /> Add Payment
           </button>
+          )}
         </div>
 
         {/* Filters */}

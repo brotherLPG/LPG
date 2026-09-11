@@ -6,6 +6,7 @@ import GlobalTable from "../../utils/GlobalTable";
 import { useToast } from "../../utils/GlobalToast";
 import { useDeleteUser, useUsers } from "../../queries/users/users.queries";
 import Roles from "./Roles";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 const statusStyles = {
   Active: "bg-emerald-50 text-emerald-600",
@@ -16,6 +17,7 @@ const statusStyles = {
 function UsersRoles() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { can } = usePermissions();
   const [query, setQuery] = useState("");
   const [role, setRole] = useState("All Roles");
   const [status, setStatus] = useState("All");
@@ -144,6 +146,7 @@ function UsersRoles() {
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
         <div className="flex items-center gap-2">
+          {can("users", "read") && (
           <button
             type="button"
             aria-label={`View ${item.fullName}`}
@@ -152,6 +155,8 @@ function UsersRoles() {
           >
             <Eye className="h-4 w-4" />
           </button>
+          )}
+          {can("users", "update") && (
           <button
             type="button"
             aria-label={`Edit ${item.fullName}`}
@@ -160,6 +165,7 @@ function UsersRoles() {
           >
             <Pencil className="h-4 w-4" />
           </button>
+          )}
           {/* <button
             type="button"
             aria-label={`Delete ${item.fullName}`}
@@ -195,6 +201,7 @@ function UsersRoles() {
             </p>
           </div>
           <div className="my-auto ">
+            {(activeTab === "users" ? can("users", "create") : can("roles", "create")) && (
             <button
               type="button"
               onClick={() =>
@@ -209,6 +216,7 @@ function UsersRoles() {
               <CirclePlus className="h-4 w-4" />{" "}
               {activeTab === "users" ? "Add User" : "Add Role"}
             </button>
+            )}
           </div>
         </div>
 

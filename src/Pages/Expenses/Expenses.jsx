@@ -8,10 +8,12 @@ import {
   useDeleteExpense,
 } from "../../queries/expenses/expenses.queries";
 import { useToast } from "../../utils/GlobalToast";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 function Expenses() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { can } = usePermissions();
 
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
@@ -170,6 +172,7 @@ function Expenses() {
       cellClassName: "px-4 py-4 pr-6 text-nowrap whitespace-nowrap",
       renderCell: (item) => (
         <div className="flex items-center gap-2">
+          {can("expenses", "read") && (
           <button
             type="button"
             aria-label={`View ${item.expenseNumber}`}
@@ -178,6 +181,8 @@ function Expenses() {
           >
             <Eye className="h-3.5 w-3.5" strokeWidth={2.5} /> View
           </button>
+          )}
+          {can("expenses", "update") && (
           <button
             type="button"
             aria-label={`Edit ${item.expenseNumber}`}
@@ -186,6 +191,8 @@ function Expenses() {
           >
             <Edit3 className="h-3.5 w-3.5" strokeWidth={2.5} /> Edit
           </button>
+          )}
+          {can("expenses", "delete") && (
           <button
             type="button"
             aria-label={`Delete ${item.expenseNumber}`}
@@ -194,6 +201,7 @@ function Expenses() {
           >
             <Trash2 className="h-3.5 w-3.5" strokeWidth={2.5} /> Delete
           </button>
+          )}
         </div>
       ),
     },
@@ -222,6 +230,7 @@ function Expenses() {
               Track and manage plant operational expenses and payments
             </p>
           </div>
+          {can("expenses", "create") && (
           <button
             type="button"
             onClick={() => navigate("/expenses/add")}
@@ -229,6 +238,7 @@ function Expenses() {
           >
             <Plus className="h-4 w-4" strokeWidth={3} /> Add Expense
           </button>
+          )}
         </div>
 
         {/* Summary Cards */}

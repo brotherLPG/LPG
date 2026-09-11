@@ -6,6 +6,7 @@ import './index.css'
 import App from './App.jsx'
 import ToastProvider from './utils/GlobalToast';
 import ConfirmationProvider from './utils/GlobalConfirmation';
+import { PermissionProvider } from './contexts/PermissionContext';
 
 const queryClient = new QueryClient();
 
@@ -15,7 +16,9 @@ createRoot(document.getElementById("root")).render(
       <BrowserRouter>
         <ToastProvider>
           <ConfirmationProvider>
-            <App />
+            <PermissionProvider>
+              <App />
+            </PermissionProvider>
           </ConfirmationProvider>
         </ToastProvider>
       </BrowserRouter>

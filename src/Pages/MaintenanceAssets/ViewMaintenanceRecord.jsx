@@ -1,6 +1,7 @@
 import { ArrowLeft, Edit3, Wrench, Calendar, DollarSign, UserCheck, Tag, FileText } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMaintenanceRecordById } from "../../queries/maintenanceRecords/maintenanceRecords.queries";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 function DetailItem({ label, value, icon: Icon }) {
   return (
@@ -24,6 +25,7 @@ const formatLabel = (str) => {
 
 function ViewMaintenanceRecord() {
   const navigate = useNavigate();
+  const { can } = usePermissions();
   const { id } = useParams();
   const { data: recordResponse, isLoading, error } = useMaintenanceRecordById(id);
   const record = recordResponse?.data;
@@ -117,6 +119,7 @@ function ViewMaintenanceRecord() {
             </p>
           </div>
           <div className="flex gap-2">
+            {can("maintenance-records", "update") && (
             <button
               type="button"
               onClick={() => navigate(`/maintenance-records/edit/${record._id}`)}
@@ -124,6 +127,7 @@ function ViewMaintenanceRecord() {
             >
               <Edit3 className="h-4 w-4" /> Edit Record
             </button>
+            )}
           </div>
         </div>
 

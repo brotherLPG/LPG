@@ -1,9 +1,11 @@
 import { ArrowLeft, Edit, Package, DollarSign, CheckCircle, XCircle, Calendar } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCylinderTypeById } from "../../queries/cylinderTypes/cylinderTypes.queries";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 function ViewCylinderType() {
   const navigate = useNavigate();
+  const { can } = usePermissions();
   const { id } = useParams();
 
   const { data: cylinderTypeData, isLoading, isError } = useCylinderTypeById(id);
@@ -59,6 +61,7 @@ function ViewCylinderType() {
             <p className="mt-1 text-sm text-slate-500">{cylinderData.typeCode}</p>
           </div>
           <div className="flex gap-2">
+            {can("cylinder-types", "update") && (
             <button
               onClick={() => navigate(`/cylinders/edit-type/${id}`)}
               className="rounded-lg bg-[#008951] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#007545] transition-colors"
@@ -66,6 +69,7 @@ function ViewCylinderType() {
               <Edit className="h-4 w-4 inline mr-2" />
               Edit Cylinder Type
             </button>
+            )}
           </div>
         </div>
       </div>

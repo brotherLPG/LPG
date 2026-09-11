@@ -5,11 +5,13 @@ import GlobalTable from "../../utils/GlobalTable";
 import { useInventoryItems, useDeleteInventoryItem } from "../../queries/inventory/inventory.queries";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 
 function Inventory() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { can } = usePermissions();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -159,6 +161,7 @@ function Inventory() {
       cellClassName: "px-4 py-3 whitespace-nowrap text-nowrap",
       renderCell: (item) => (
         <div className="flex items-center gap-2">
+          {can("inventory-items", "read") && (
           <button
             type="button"
             onClick={() => navigate(`/inventory/view/${item._id}`)}
@@ -167,6 +170,8 @@ function Inventory() {
           >
             <Eye className="h-3.5 w-3.5" /> View
           </button>
+          )}
+          {can("inventory-items", "update") && (
           <button
             type="button"
             onClick={() => navigate(`/inventory/edit/${item._id}`)}
@@ -175,6 +180,7 @@ function Inventory() {
           >
             <Edit3 className="h-3.5 w-3.5" /> Edit
           </button>
+          )}
           {/* <button
             type="button"
             onClick={() => handleDeleteClick(item)}
@@ -210,12 +216,14 @@ function Inventory() {
             Track cylinder stock levels, spare parts, and system accessories
           </p>
         </div>
+        {can("inventory-items", "create") && (
         <button
           onClick={() => navigate("/inventory/add")}
           className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#008951] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#007545]"
         >
           <PlusCircle className="h-4 w-4" /> Add Inventory Item
         </button>
+        )}
       </div>
 
       {/* KPI Cards */}

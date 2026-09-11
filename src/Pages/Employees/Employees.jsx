@@ -5,10 +5,12 @@ import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import GlobalTable from "../../utils/GlobalTable";
 import { useEmployees, useDeleteEmployee } from "../../queries/employees/employees.queries";
 import { useToast } from "../../utils/GlobalToast";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 function Employees() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { can } = usePermissions();
   const [query, setQuery] = useState("");
   const [department, setDepartment] = useState("All");
   const [status, setStatus] = useState("All");
@@ -140,6 +142,7 @@ function Employees() {
       cellClassName: "px-4 py-4 pr-6",
       renderCell: (item) => (
         <div className="flex items-center justify-end gap-3">
+          {can("employees", "read") && (
           <button
             type="button"
             aria-label={`View ${item.name}`}
@@ -148,6 +151,8 @@ function Employees() {
           >
             <Eye className="h-4 w-4" strokeWidth={2.5} /> View
           </button>
+          )}
+          {can("employees", "update") && (
           <button
             type="button"
             onClick={() => navigate(`/employees/edit/${item._id}`)}
@@ -156,6 +161,8 @@ function Employees() {
           >
             <Edit3 className="h-4 w-4" strokeWidth={2.5} /> Edit
           </button>
+          )}
+          {can("employees", "delete") && (
           <button
             type="button"
             onClick={() => setDeleteModal({ isOpen: true, item })}
@@ -164,6 +171,7 @@ function Employees() {
           >
             <Trash2 className="h-4 w-4" strokeWidth={2.5} /> Delete
           </button>
+          )}
         </div>
       ),
     },
@@ -192,6 +200,7 @@ function Employees() {
               Manage plant staff, operators, and personnel records
             </p>
           </div>
+          {can("employees", "create") && (
           <button
             type="button"
             onClick={() => navigate("/employees/add")}
@@ -199,6 +208,7 @@ function Employees() {
           >
             <Plus className="h-4 w-4" strokeWidth={3} /> Add Employee
           </button>
+          )}
         </div>
 
         {/* Filters */}

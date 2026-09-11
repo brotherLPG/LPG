@@ -5,11 +5,13 @@ import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
 import GlobalTable from "../../utils/GlobalTable";
 import { useCustomers, useDeleteCustomer } from "../../queries/customers/customers.queries";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 
 function Customers() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { can } = usePermissions();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   // const [paymentTerm, setPaymentTerm] = useState("All");
@@ -85,15 +87,18 @@ function Customers() {
       label: "Customer Name",
       className:
         "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      renderCell: (customer) => (
-        <button
-          type="button"
-          onClick={() => navigate(`/customers/view/${customer._id}`)}
-          className="font-semibold text-[#1a56db] hover:underline text-[13px]"
-        >
-          {customer.name}
-        </button>
-      ),
+      renderCell: (customer) =>
+        can("customers", "read") ? (
+          <button
+            type="button"
+            onClick={() => navigate(`/customers/view/${customer._id}`)}
+            className="font-semibold text-[#1a56db] hover:underline text-[13px]"
+          >
+            {customer.name}
+          </button>
+        ) : (
+          <span className="font-semibold text-slate-800 text-[13px]">{customer.name}</span>
+        ),
     },
     {
       key: "contact",
@@ -141,6 +146,7 @@ function Customers() {
        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 text-center",
       renderCell: (customer) => (
         <div className="flex items-center gap-2">
+          {can("customers", "read") && (
           <button
             type="button"
             onClick={() => navigate(`/customers/view/${customer._id}`)}
@@ -149,6 +155,8 @@ function Customers() {
           >
             <Eye className="h-3.5 w-3.5" /> View
           </button>
+          )}
+          {can("customers", "update") && (
           <button
             type="button"
             onClick={() => navigate(`/customers/edit/${customer._id}`)}
@@ -157,6 +165,8 @@ function Customers() {
           >
             <Edit3 className="h-3.5 w-3.5" /> Edit
           </button>
+          )}
+          {can("customers", "delete") && (
           <button
             type="button"
             onClick={() => handleDeleteClick(customer)}
@@ -165,6 +175,7 @@ function Customers() {
           >
             <Trash2 className="h-3.5 w-3.5" /> Delete
           </button>
+          )}
         </div>
       ),
     },
@@ -194,6 +205,7 @@ function Customers() {
               statuses
             </p>
           </div>
+          {can("customers", "create") && (
           <button
             type="button"
             onClick={() => navigate("/customers/add")}
@@ -201,6 +213,7 @@ function Customers() {
           >
             <PlusCircle className="h-4 w-4" /> Add Customer
           </button>
+          )}
         </div>
 
         {/* Filters */}

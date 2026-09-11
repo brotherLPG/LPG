@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useExpenseById } from "../../queries/expenses/expenses.queries";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 function DetailItem({ label, value, icon: Icon }) {
   return (
@@ -28,6 +29,7 @@ function DetailItem({ label, value, icon: Icon }) {
 
 function ViewExpense() {
   const navigate = useNavigate();
+  const { can } = usePermissions();
   const { id } = useParams();
   const { data: expenseResponse, isLoading, error } = useExpenseById(id);
   const expense = expenseResponse?.data;
@@ -113,6 +115,7 @@ function ViewExpense() {
             >
               <ArrowLeft className="h-4 w-4" /> Back
             </button> */}
+            {can("expenses", "update") && (
             <button
               type="button"
               onClick={() => navigate(`/expenses/edit/${expense._id}`)}
@@ -120,6 +123,7 @@ function ViewExpense() {
             >
               <Edit3 className="h-4 w-4" /> Edit Expense
             </button>
+            )}
           </div>
         </div>
 

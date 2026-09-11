@@ -1,9 +1,21 @@
 import {
   useMutation,
+  useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { loginUser } from "../../api/auth.api";
+import { getCurrentUser, loginUser } from "../../api/auth.api";
+import { queryKeys } from "../queryKeys";
 
+export const useCurrentUser = () => {
+  const hasToken = Boolean(localStorage.getItem("token"));
+
+  return useQuery({
+    queryKey: queryKeys.auth.currentUser(),
+    queryFn: getCurrentUser,
+    enabled: hasToken,
+    staleTime: 5 * 60 * 1000,
+  });
+};
 
 export const useLogin = () => {
   const queryClient = useQueryClient();

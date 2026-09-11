@@ -28,6 +28,7 @@ import AddRole from '../Pages/UsersRoles/AddRole';
 import UpdateRole from '../Pages/UsersRoles/UpdateRole';
 import UpdateUser from '../Pages/UsersRoles/UpdateUser';
 import UserDetails from '../Pages/UsersRoles/UserDetails';
+import RoleDetails from '../Pages/UsersRoles/RoleDetails';
 import Customers from '../Pages/Customers/Customers';
 import AddCustomers from '../Pages/Customers/addCustomers';
 import UpdateCustomer from '../Pages/Customers/updateCustomer';
@@ -92,6 +93,7 @@ function PageRouter() {
         <Route path="/users-roles/edit-role/:id" element={<UpdateRole />} />
         <Route path="/users-roles/edit/:id" element={<UpdateUser />} />
         <Route path="/users-roles/view/:id" element={<UserDetails />} />
+        <Route path="/users-roles/view-role/:id" element={<RoleDetails />} />
         <Route path="/users-roles/Permissions" element={<RolePermissions />} />
         <Route path="/Events" element={<Events />} />
         <Route path="/reports" element={<Reports />} />

@@ -1,9 +1,11 @@
 import { ArrowLeft, Edit, Building2, Landmark, Wallet, Calendar, FileText, CheckCircle, XCircle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetAccountById } from "../../queries/accounts/accounts.queries";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 function ViewAccount() {
   const navigate = useNavigate();
+  const { can } = usePermissions();
   const { id } = useParams();
 
   const { data: accountData, isLoading, isError } = useGetAccountById(id);
@@ -60,6 +62,7 @@ function ViewAccount() {
           </div>
           <div className="flex gap-2">
            
+            {can("accounts", "update") && (
             <button
               onClick={() => navigate(`/accounting/edit/${id}`)}
               className="rounded-lg bg-[#008951] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#007545] transition-colors"
@@ -67,6 +70,7 @@ function ViewAccount() {
               <Edit className="h-4 w-4 inline mr-2" />
               Edit Account
             </button>
+            )}
           </div>
         </div>
       </div>

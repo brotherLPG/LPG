@@ -1,6 +1,7 @@
 import { ArrowLeft, Edit3 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAssetById } from "../../queries/assets/assets.queries";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 function DetailItem({ label, value }) {
   return (
@@ -21,6 +22,7 @@ const formatLabel = (str) => {
 
 function ViewAsset() {
   const navigate = useNavigate();
+  const { can } = usePermissions();
   const { id } = useParams();
   const { data, isLoading, error } = useAssetById(id);
   const asset = data?.data;
@@ -91,6 +93,7 @@ function ViewAsset() {
           </p>
         </div>
         <div className="flex gap-2">
+          {can("assets", "update") && (
           <button
             type="button"
             onClick={() => navigate(`/assets/edit/${asset._id}`)}
@@ -98,6 +101,7 @@ function ViewAsset() {
           >
             <Edit3 className="h-4 w-4" /> Edit Asset
           </button>
+          )}
         </div>
       </div>
 

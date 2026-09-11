@@ -1,6 +1,7 @@
 import { ArrowLeft, Pencil } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useFillingBatchById } from "../../queries/fillingBatches/fillingBatches.queries";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 function DetailItem({ label, value }) {
     return (
@@ -19,6 +20,7 @@ function formatDate(value) {
 
 function FillingBatchDetails() {
     const navigate = useNavigate();
+    const { can } = usePermissions();
     const { id } = useParams();
     const { data, isLoading, error } = useFillingBatchById(id);
     const batch = data?.data;
@@ -64,9 +66,11 @@ function FillingBatchDetails() {
                     <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">{batch.batchNumber || "Filling Batch"}</h1>
                     <p className="mt-1 text-sm text-slate-500">Details of this LPG cylinder filling run</p>
                 </div>
+                {can("filling-batches", "update") && (
                 <button type="button" onClick={() => navigate(`/filling-batches/edit/${batch._id}`)} className="inline-flex items-center gap-2 rounded-md bg-[#008951] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
                     <Pencil className="h-4 w-4" /> Edit Batch
                 </button>
+                )}
             </div>
 
             <div className="grid gap-5 lg:grid-cols-2">

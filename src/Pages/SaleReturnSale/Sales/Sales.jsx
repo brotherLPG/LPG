@@ -4,9 +4,11 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import GlobalTable from "../../../utils/GlobalTable";
 import { useSales } from "../../../queries/sales/sales.queries";
 import Returnsales from "../ReturnSales/Returnsales";
+import { usePermissions } from "../../../contexts/PermissionContext";
 
 function Sales() {
   const navigate = useNavigate();
+  const { can } = usePermissions();
   // const [activeTab, setActiveTab] = useState("sales");
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "sales";
@@ -220,6 +222,7 @@ function Sales() {
       cellClassName: "px-4 py-4 pr-6",
       renderCell: (item) => (
         <div className="flex items-center justify-end gap-3">
+          {can("sales", "read") && (
           <button
             type="button"
             onClick={() => navigate(`/sales/view/${item._id}`)}
@@ -228,6 +231,8 @@ function Sales() {
           >
             <Eye className="h-4 w-4" strokeWidth={2.5} />
           </button>
+          )}
+          {can("sales", "update") && (
           <button
             type="button"
             onClick={() => navigate(`/sales/edit/${item._id}`)}
@@ -236,6 +241,7 @@ function Sales() {
           >
             <Edit3 className="h-4 w-4" strokeWidth={2.5} />
           </button>
+          )}
         </div>
       ),
     },
@@ -265,7 +271,7 @@ function Sales() {
             </p>
           </div>
           <div className="flex gap-3">
-            {activeTab === "sales" && (
+            {activeTab === "sales" && can("sales", "create") && (
               <button
                 type="button"
                 onClick={() => navigate("/sales/add")}
@@ -274,6 +280,7 @@ function Sales() {
                 <CirclePlus className="h-4 w-4" strokeWidth={3} /> Add Sales
               </button>
             )}
+            {can("sales-returns", "create") && (
             <button
               type="button"
               onClick={() => navigate("/sales/return")}
@@ -281,6 +288,7 @@ function Sales() {
             >
               <ArrowLeft className="h-4 w-4 rotate-180" /> Create Return
             </button>
+            )}
           </div>
         </div>
 

@@ -1,6 +1,7 @@
 import { ArrowLeft, Pencil } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLpgReceiptById } from "../../queries/lpgReceipts/lpgReceipts.queries";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 function DetailItem({ label, value }) {
   return (
@@ -19,6 +20,7 @@ function formatDate(value) {
 
 function LpgReceiptDetails() {
   const navigate = useNavigate();
+  const { can } = usePermissions();
   const { id } = useParams();
   const { data, isLoading, error } = useLpgReceiptById(id);
   const receipt = data?.data;
@@ -62,9 +64,11 @@ function LpgReceiptDetails() {
         </div>
         <div className="flex gap-2">
          
+          {can("lpg-receipts", "update") && (
           <button type="button" onClick={() => navigate(`/lpg-receipts/edit/${receipt._id}`)} className="inline-flex items-center gap-2 rounded-md bg-[#008951] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
             <Pencil className="h-4 w-4" /> Edit Receipt
           </button>
+          )}
         </div>
       </div>
 

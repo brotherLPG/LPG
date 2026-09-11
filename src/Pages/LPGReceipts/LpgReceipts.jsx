@@ -6,12 +6,14 @@ import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
 import { useLpgReceipts, useDeleteLpgReceipt } from "../../queries/lpgReceipts/lpgReceipts.queries";
 import { useSuppliers } from "../../queries/suppliers/suppliers.queries";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 
 const initialReceipts = [];
 
 function LpgReceipts() {
   const navigate = useNavigate();
+  const { can } = usePermissions();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [supplier, setSupplier] = useState("All");
@@ -110,15 +112,18 @@ function LpgReceipts() {
       label: "Supplier Name",
       className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-4",
-      renderCell: (item) => (
-        <button
-          type="button"
-          onClick={() => navigate(`/lpg-receipts/view/${item._id}`)}
-          className="font-semibold text-[#1a56db] hover:underline text-[13px]"
-        >
-          {item.supplier}
-        </button>
-      ),
+      renderCell: (item) =>
+        can("lpg-receipts", "read") ? (
+          <button
+            type="button"
+            onClick={() => navigate(`/lpg-receipts/view/${item._id}`)}
+            className="font-semibold text-[#1a56db] hover:underline text-[13px]"
+          >
+            {item.supplier}
+          </button>
+        ) : (
+          <span className="font-semibold text-slate-800 text-[13px]">{item.supplier}</span>
+        ),
     },
     {
       key: "date",
@@ -182,6 +187,7 @@ function LpgReceipts() {
       cellClassName: "px-4 py-4 pr-6",
       renderCell: (item) => (
         <div className="flex items-center justify-end gap-3">
+          {can("lpg-receipts", "read") && (
           <button
             type="button"
             aria-label={`View ${item.receiptNo}`}
@@ -190,6 +196,8 @@ function LpgReceipts() {
           >
             <Eye className="h-4 w-4" strokeWidth={2.5} />
           </button>
+          )}
+          {can("lpg-receipts", "update") && (
           <button
             type="button"
             aria-label={`Edit ${item.receiptNo}`}
@@ -198,6 +206,7 @@ function LpgReceipts() {
           >
             <Edit3 className="h-4 w-4" strokeWidth={2.5} />
           </button>
+          )}
           {/* <button
             type="button"
             aria-label={`Delete ${item.receiptNo}`}
@@ -234,6 +243,7 @@ function LpgReceipts() {
               Track incoming LPG tanker deliveries and receipt records
             </p>
           </div>
+          {can("lpg-receipts", "create") && (
           <button
             type="button"
             onClick={() => navigate("/lpg-receipts/receive")}
@@ -241,6 +251,7 @@ function LpgReceipts() {
           >
             <CirclePlus className="h-4 w-4" strokeWidth={3} /> Receive LPG
           </button>
+          )}
         </div>
 
         {/* Summary Cards */}

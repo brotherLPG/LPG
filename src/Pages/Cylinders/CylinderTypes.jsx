@@ -5,11 +5,13 @@ import GlobalTable from "../../utils/GlobalTable";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
 import { useCylinderTypes, useDeleteCylinderType } from "../../queries/cylinderTypes/cylinderTypes.queries";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 
 function CylinderTypes() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { can } = usePermissions();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [capacity, setCapacity] = useState("All");
@@ -153,6 +155,7 @@ function CylinderTypes() {
       cellClassName: "py-3",
       renderCell: (item) => (
         <div className="flex items-center gap-2">
+          {can("cylinder-types", "read") && (
           <button
             type="button"
             aria-label={`View ${item.name}`}
@@ -161,6 +164,8 @@ function CylinderTypes() {
           >
             <Eye className="h-3.5 w-3.5" /> View
           </button>
+          )}
+          {can("cylinder-types", "update") && (
           <button
             type="button"
             aria-label={`Edit ${item.name}`}
@@ -169,6 +174,8 @@ function CylinderTypes() {
           >
             <Edit3 className="h-3.5 w-3.5" /> Edit
           </button>
+          )}
+          {can("cylinder-types", "delete") && (
           <button
             type="button"
             onClick={() => handleDeleteClick(item)}
@@ -177,6 +184,7 @@ function CylinderTypes() {
           >
             <Trash2 className="h-3.5 w-3.5" /> Delete
           </button>
+          )}
         </div>
       ),
     },
@@ -207,6 +215,7 @@ function CylinderTypes() {
               Manage cylinder specifications and pricing
             </p>
           </div>
+          {can("cylinder-types", "create") && (
           <button
             type="button"
             onClick={() => navigate("/cylinders/add-type")}
@@ -214,6 +223,7 @@ function CylinderTypes() {
           >
             <PlusCircle className="h-4 w-4" /> Add Cylinder Type
           </button>
+          )}
         </div>
 
         {/* Filters */}

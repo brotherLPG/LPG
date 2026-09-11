@@ -8,6 +8,7 @@ import {
   useDeleteMaintenanceRecord,
 } from "../../queries/maintenanceRecords/maintenanceRecords.queries";
 import { useToast } from "../../utils/GlobalToast";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 const formatLabel = (str) => {
   if (!str) return "-";
@@ -20,6 +21,7 @@ const formatLabel = (str) => {
 function MaintenanceRecords() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { can } = usePermissions();
 
   const [query, setQuery] = useState("");
   const [type, setType] = useState("All");
@@ -223,6 +225,7 @@ function MaintenanceRecords() {
       cellClassName: "px-4 py-4 pr-6 text-nowrap whitespace-nowrap",
       renderCell: (item) => (
         <div className="flex items-center gap-2">
+          {can("maintenance-records", "read") && (
           <button
             type="button"
             aria-label={`View ${item.maintenanceNumber}`}
@@ -231,6 +234,8 @@ function MaintenanceRecords() {
           >
             <Eye className="h-3.5 w-3.5" strokeWidth={2.5} /> View
           </button>
+          )}
+          {can("maintenance-records", "update") && (
           <button
             type="button"
             aria-label={`Edit ${item.maintenanceNumber}`}
@@ -239,6 +244,7 @@ function MaintenanceRecords() {
           >
             <Edit3 className="h-3.5 w-3.5" strokeWidth={2.5} /> Edit
           </button>
+          )}
           {/* <button
             type="button"
             aria-label={`Delete ${item.maintenanceNumber}`}

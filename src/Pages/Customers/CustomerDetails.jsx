@@ -1,6 +1,7 @@
 import { ArrowLeft, Pencil } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCustomerById } from "../../queries/customers/customers.queries";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 function DetailItem({ label, value }) {
   return (
@@ -13,6 +14,7 @@ function DetailItem({ label, value }) {
 
 function CustomerDetails() {
   const navigate = useNavigate();
+  const { can } = usePermissions();
   const { id } = useParams();
   const { data, isLoading, error } = useCustomerById(id);
   const customer = data?.data;
@@ -60,9 +62,11 @@ function CustomerDetails() {
         </div>
         <div className="flex gap-2">
         
+          {can("customers", "update") && (
           <button type="button" onClick={() => navigate(`/customers/edit/${customer._id}`)} className="inline-flex items-center gap-2 rounded-md bg-[#008951] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
             <Pencil className="h-4 w-4" /> Edit Customer
           </button>
+          )}
         </div>
       </div>
 

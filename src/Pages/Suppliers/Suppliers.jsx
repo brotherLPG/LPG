@@ -5,12 +5,14 @@ import GlobalTable from "../../utils/GlobalTable";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
 import { useSuppliers, useDeleteSupplier } from "../../queries/suppliers/suppliers.queries";
+import { usePermissions } from "../../contexts/PermissionContext";
 
 // Data comes from API via react-query
 
 function Suppliers() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { can } = usePermissions();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [paymentTerm, setPaymentTerm] = useState("All");
@@ -87,15 +89,18 @@ function Suppliers() {
       label: "Supplier Name",
       className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       cellClassName: "px-4 py-3",
-      renderCell: (item) => (
-        <button
-          type="button"
-          onClick={() => navigate(`/suppliers/view/${item._id}`)}
-          className="font-semibold text-[#1a56db] hover:underline text-[13px]"
-        >
-          {item.name}
-        </button>
-      ),
+      renderCell: (item) =>
+        can("suppliers", "read") ? (
+          <button
+            type="button"
+            onClick={() => navigate(`/suppliers/view/${item._id}`)}
+            className="font-semibold text-[#1a56db] hover:underline text-[13px]"
+          >
+            {item.name}
+          </button>
+        ) : (
+          <span className="font-semibold text-slate-800 text-[13px]">{item.name}</span>
+        ),
     },
     {
       key: "contact",
@@ -148,6 +153,7 @@ function Suppliers() {
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
         <div className="flex items-center gap-2">
+          {can("suppliers", "read") && (
           <button
             type="button"
             onClick={() => navigate(`/suppliers/view/${item._id}`)}
@@ -156,6 +162,8 @@ function Suppliers() {
           >
             <Eye className="h-3.5 w-3.5" /> View
           </button>
+          )}
+          {can("suppliers", "update") && (
           <button
             type="button"
             onClick={() => navigate(`/suppliers/edit/${item._id}`)}
@@ -164,6 +172,8 @@ function Suppliers() {
           >
             <Edit3 className="h-3.5 w-3.5" /> Edit
           </button>
+          )}
+          {can("suppliers", "delete") && (
           <button
             type="button"
             onClick={() => handleDeleteClick(item)}
@@ -172,6 +182,7 @@ function Suppliers() {
           >
             <Trash2 className="h-3.5 w-3.5" /> Delete
           </button>
+          )}
         </div>
       ),
     },
@@ -200,6 +211,7 @@ function Suppliers() {
               Manage LPG suppliers and purchase accounts
             </p>
           </div>
+          {can("suppliers", "create") && (
           <button
             type="button"
             onClick={() => navigate("/suppliers/add")}
@@ -207,6 +219,7 @@ function Suppliers() {
           >
             <PlusCircle className="h-4 w-4" /> Add Supplier
           </button>
+          )}
         </div>
 
         {/* Filters */}
