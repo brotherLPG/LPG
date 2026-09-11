@@ -1,11 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   CheckCircle,
   AlertTriangle,
   Info,
-  Package,
-  FileText,
   CreditCard,
   Settings,
   UserPlus,
@@ -19,144 +17,100 @@ import {
   useMarkNotificationAsRead,
   useMarkAllNotificationsAsRead,
 } from "../../queries/Notification/notificationQueries";
+import { useToast } from "../../utils/GlobalToast";
+
+function formatRelativeTime(value) {
+  if (!value) return "—";
+
+  const date = new Date(value);
+  const diffMs = Date.now() - date.getTime();
+  const minutes = Math.floor(diffMs / 60000);
+
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes} min ago`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} day${days === 1 ? "" : "s"} ago`;
+
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function getNotificationMeta(type) {
+  const normalized = String(type || "").toLowerCase();
+
+  if (["inventory", "stock", "alert", "warning"].includes(normalized)) {
+    return { styleType: "warning", icon: AlertTriangle, category: "alerts" };
+  }
+
+  if (normalized === "maintenance") {
+    return { styleType: "maintenance", icon: Wrench, category: "alerts" };
+  }
+
+  if (normalized === "payment") {
+    return { styleType: "success", icon: CreditCard, category: "transactions" };
+  }
+
+  if (["lpg", "receipt", "shipment"].includes(normalized)) {
+    return { styleType: "info", icon: Truck, category: "transactions" };
+  }
+
+  if (["sale", "invoice"].includes(normalized)) {
+    return { styleType: "info", icon: Receipt, category: "transactions" };
+  }
+
+  if (["account", "user"].includes(normalized)) {
+    return { styleType: "system", icon: UserPlus, category: "system" };
+  }
+
+  if (["filling", "batch"].includes(normalized)) {
+    return { styleType: "success", icon: CheckCircle, category: "system" };
+  }
+
+  return { styleType: "system", icon: Settings, category: "system" };
+}
 
 function Notifications() {
   const [selectedTab, setSelectedTab] = useState("all");
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
+  const toast = useToast();
   const limit = 10;
 
-  // =====================================================
-  // GET NOTIFICATIONS
-  // =====================================================
-
-  const { data, isLoading, isError, error } = useNotifications(page, limit);
-
-  // =====================================================
-  // MUTATIONS
-  // =====================================================
-
+  const { data, isLoading, isError } = useNotifications(page, limit);
   const markAsReadMutation = useMarkNotificationAsRead();
-
   const markAllMutation = useMarkAllNotificationsAsRead();
 
-  const notifications = [
-    {
-      id: 1,
-      type: "warning",
-      category: "alerts",
-      title: "Low Stock Alert - Cylinder",
-      message:
-        "Empty 11KG cylinder stock has fallen to 45 units, below minimum threshold of 100. Reorder recommended.",
-      time: "5 min ago",
-      action: "View Inventory",
-      icon: AlertTriangle,
-    },
-    {
-      id: 2,
-      type: "maintenance",
-      category: "alerts",
-      title: "Maintenance Overdue: Bulk Storage Compressor",
-      message:
-        "Scheduled maintenance for M-002 was due on 18 Aug 2026. Asset currently under maintenance.",
-      time: "1 hour ago",
-      action: "View Asset",
-      icon: Wrench,
-    },
-    {
-      id: 3,
-      type: "success",
-      category: "transactions",
-      title: "Payment Received: Rs. 50,000",
-      message:
-        "Customer payment PAY-2026-0312 received from Islamabad Gas Agency via Bank Transfer.",
-      time: "2 hours ago",
-      action: "View Payment",
-      icon: CreditCard,
-    },
-    {
-      id: 4,
-      type: "info",
-      category: "transactions",
-      title: "New LPG Shipment Received",
-      message:
-        "Receipt REC-2026-0089: 25,000 KG received from Pakistan Petroleum Ltd. Tank TNK-001 updated.",
-      time: "3 hours ago",
-      action: "View Receipt",
-      icon: Truck,
-    },
-    {
-      id: 5,
-      type: "warning",
-      category: "alerts",
-      title: "Invoice Overdue: INV-9741",
-      message:
-        "Invoice for Lahore Fuel Traders (Rs. 74,000) is 15 days past due date.",
-      time: "5 hours ago",
-      action: "View Invoice",
-      icon: Receipt,
-    },
-    {
-      id: 6,
-      type: "system",
-      category: "system",
-      title: "Filling Batch Completed",
-      message: "Batch FB-2026-0233: 2000 units of 11KG filled successfully.",
-      time: "Yesterday",
-      icon: CheckCircle,
-    },
-    {
-      id: 7,
-      type: "system",
-      category: "system",
-      title: "System Backup Completed",
-      message: "Daily backup completed successfully at 02:00 AM.",
-      time: "Yesterday",
-      icon: Settings,
-    },
-    {
-      id: 8,
-      type: "system",
-      category: "system",
-      title: "New Employee Added",
-      message: "Sana Parvez (HR Officer) profile created.",
-      time: "2 days ago",
-      icon: UserPlus,
-    },
-  ];
+  const notificationData = data?.data || {};
+  const notifications = notificationData.items || [];
+  const pagination = notificationData.pagination || {
+    total: 0,
+    page: 1,
+    limit,
+    totalPages: 1,
+  };
+  const unreadCount = notificationData.unreadCount || 0;
 
   const tabs = [
-    {
-      key: "all",
-      label: "All Notifications",
-    },
-    {
-      key: "unread",
-      label: "Unread",
-      count: 3,
-    },
-    {
-      key: "alerts",
-      label: "Stock Alerts",
-    },
-    {
-      key: "transactions",
-      label: "Transactions",
-    },
-    {
-      key: "system",
-      label: "System Logs",
-    },
+    { key: "all", label: "All Notifications" },
+    { key: "unread", label: "Unread", count: unreadCount },
+    { key: "alerts", label: "Stock Alerts" },
+    { key: "transactions", label: "Transactions" },
+    { key: "system", label: "System Logs" },
   ];
 
   const filteredNotifications = notifications.filter((notification) => {
+    const { category } = getNotificationMeta(notification.notificationType);
+
     if (selectedTab === "all") return true;
-
-    if (selectedTab === "unread") {
-      return notification.id <= 3;
-    }
-
-    return notification.category === selectedTab;
+    if (selectedTab === "unread") return !notification.isRead;
+    return category === selectedTab;
   });
 
   const getNotificationStyles = (type) => {
@@ -168,7 +122,6 @@ function Notifications() {
           iconBg: "bg-orange-50",
           iconColor: "text-orange-600",
         };
-
       case "success":
         return {
           border: "border-l-emerald-500",
@@ -176,7 +129,6 @@ function Notifications() {
           iconBg: "bg-emerald-50",
           iconColor: "text-emerald-600",
         };
-
       case "maintenance":
         return {
           border: "border-l-red-500",
@@ -184,7 +136,6 @@ function Notifications() {
           iconBg: "bg-red-50",
           iconColor: "text-red-600",
         };
-
       case "info":
         return {
           border: "border-l-blue-500",
@@ -192,7 +143,6 @@ function Notifications() {
           iconBg: "bg-blue-50",
           iconColor: "text-blue-600",
         };
-
       case "system":
       default:
         return {
@@ -202,6 +152,38 @@ function Notifications() {
           iconColor: "text-slate-600",
         };
     }
+  };
+
+  const handleTabChange = (tabKey) => {
+    setSelectedTab(tabKey);
+    setPage(1);
+  };
+
+  const handleMarkAsRead = (notification) => {
+    if (notification.isRead) return;
+
+    markAsReadMutation.mutate(notification._id, {
+      onError: (error) => {
+        toast.error(
+          error?.response?.data?.message || "Failed to mark notification as read."
+        );
+      },
+    });
+  };
+
+  const handleMarkAllAsRead = () => {
+    if (!unreadCount) return;
+
+    markAllMutation.mutate(undefined, {
+      onSuccess: () => {
+        toast.success("All notifications marked as read.");
+      },
+      onError: (error) => {
+        toast.error(
+          error?.response?.data?.message || "Failed to mark all notifications as read."
+        );
+      },
+    });
   };
 
   return (
@@ -216,7 +198,6 @@ function Notifications() {
           </span>{" "}
           <span className="mx-1">/</span> Notifications
         </div>
-        {/* Header */}
         <div className="flex items-center justify-between gap-4 mb-4">
           <div>
             <h1 className="text-[18px] md:text-[20px] font-bold text-slate-800">
@@ -230,6 +211,9 @@ function Notifications() {
           </div>
 
           <button
+            type="button"
+            onClick={handleMarkAllAsRead}
+            disabled={!unreadCount || markAllMutation.isPending}
             className="
               px-3 py-1.5
               text-[10px] font-medium
@@ -239,13 +223,14 @@ function Notifications() {
               rounded
               hover:bg-slate-50
               transition
+              disabled:cursor-not-allowed
+              disabled:opacity-50
             "
           >
-            Mark All as Read
+            {markAllMutation.isPending ? "Marking..." : "Mark All as Read"}
           </button>
         </div>
 
-        {/* Tabs */}
         <div className="flex items-center gap-1.5 mb-4 overflow-x-auto pb-1">
           {tabs.map((tab) => {
             const active = selectedTab === tab.key;
@@ -253,7 +238,8 @@ function Notifications() {
             return (
               <button
                 key={tab.key}
-                onClick={() => setSelectedTab(tab.key)}
+                type="button"
+                onClick={() => handleTabChange(tab.key)}
                 className={`
                   flex items-center gap-1.5
                   whitespace-nowrap
@@ -271,7 +257,7 @@ function Notifications() {
               >
                 {tab.label}
 
-                {tab.count && (
+                {tab.count > 0 && (
                   <span
                     className={`
                       min-w-4.5
@@ -298,134 +284,152 @@ function Notifications() {
           })}
         </div>
 
-        {/* Notification List */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className="space-y-2"
-        >
-          {filteredNotifications.map((notification, index) => {
-            const styles = getNotificationStyles(notification.type);
-            const Icon = notification.icon;
+        {isLoading && (
+          <p className="py-12 text-center text-xs text-slate-500">
+            Loading notifications...
+          </p>
+        )}
 
-            return (
-              <motion.div
-                key={notification.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.25,
-                  delay: index * 0.04,
-                }}
-                className={`
-                  relative
-                  bg-white
-                  border
-                  border-slate-200
-                  border-l-4
-                  ${styles.border}
-                  rounded
-                  px-4
-                  py-3
-                  hover:bg-slate-50
-                  transition
-                  shadow-sm
-                `}
-              >
-                <div className="flex items-start gap-3">
-                  {/* Status Dot */}
-                  <div className="pt-1 shrink-0">
-                    <div
-                      className={`
-                        w-2
-                        h-2
-                        rounded-full
-                        ${styles.dot}
-                      `}
-                    />
-                  </div>
+        {isError && !isLoading && (
+          <p className="py-12 text-center text-xs text-red-500">
+            Unable to load notifications.
+          </p>
+        )}
 
-                  {/* Icon */}
-                  <div
+        {!isLoading && !isError && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-2"
+            >
+              {filteredNotifications.map((notification, index) => {
+                const meta = getNotificationMeta(notification.notificationType);
+                const styles = getNotificationStyles(meta.styleType);
+                const Icon = meta.icon;
+
+                return (
+                  <motion.div
+                    key={notification._id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.25,
+                      delay: index * 0.04,
+                    }}
+                    onClick={() => handleMarkAsRead(notification)}
                     className={`
-                      flex
-                      w-8
-                      h-8
-                      rounded-lg
-                      items-center
-                      justify-center
-                      shrink-0
-                      ${styles.iconBg}
+                      relative
+                      bg-white
+                      border
+                      border-slate-200
+                      border-l-4
+                      ${styles.border}
+                      rounded
+                      px-4
+                      py-3
+                      hover:bg-slate-50
+                      transition
+                      shadow-sm
+                      cursor-pointer
+                      ${!notification.isRead ? "bg-blue-50/40" : ""}
                     `}
                   >
-                    <Icon className={`w-4 h-4 ${styles.iconColor}`} />
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0 flex-1">
-                        <h3 className="text-xs md:text-sm font-semibold text-BLUE-dark leading-tight">
-                          {notification.title}
-                        </h3>
-
-                        <p className="text-[10px] md:text-[11px] text-slate-500 leading-relaxed mt-1">
-                          {notification.message}
-                        </p>
-
-                        {/* Action */}
-                        {notification.action && (
-                          <button
-                            className="
-                              mt-2
-                              px-2
-                              py-1
-                              text-[10px]
-                              font-medium
-                              text-blue-600
-                              bg-blue-50
-                              border
-                              border-blue-200
-                              rounded
-                              hover:bg-blue-100
-                              transition
-                            "
-                          >
-                            {notification.action}
-                          </button>
-                        )}
+                    <div className="flex items-start gap-3">
+                      <div className="pt-1 shrink-0">
+                        <div
+                          className={`
+                            w-2
+                            h-2
+                            rounded-full
+                            ${notification.isRead ? "bg-slate-300" : styles.dot}
+                          `}
+                        />
                       </div>
 
-                      {/* Time */}
-                      <span
-                        className="
+                      <div
+                        className={`
+                          flex
+                          w-8
+                          h-8
+                          rounded-lg
+                          items-center
+                          justify-center
                           shrink-0
-                          text-[10px]
-                          text-slate-400
-                          whitespace-nowrap
-                          pt-0.5
-                        "
+                          ${styles.iconBg}
+                        `}
                       >
-                        {notification.time}
-                      </span>
+                        <Icon className={`w-4 h-4 ${styles.iconColor}`} />
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="min-w-0 flex-1">
+                            <h3 className="text-xs md:text-sm font-semibold text-BLUE-dark leading-tight">
+                              {notification.notificationTitle}
+                            </h3>
+
+                            <p className="text-[10px] md:text-[11px] text-slate-500 leading-relaxed mt-1">
+                              {notification.notificationMessage}
+                            </p>
+                          </div>
+
+                          <span
+                            className="
+                              shrink-0
+                              text-[10px]
+                              text-slate-400
+                              whitespace-nowrap
+                              pt-0.5
+                            "
+                          >
+                            {formatRelativeTime(notification.createdAt)}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+
+            {filteredNotifications.length === 0 && (
+              <div className="border border-slate-200 rounded-sm py-12 text-center">
+                <Info className="w-7 h-7 text-slate-300 mx-auto mb-2" />
+
+                <p className="text-xs font-medium text-slate-500">
+                  No notifications found
+                </p>
+              </div>
+            )}
+
+            {pagination.totalPages > 1 && selectedTab === "all" && (
+              <div className="mt-4 flex items-center justify-between">
+                <p className="text-[11px] text-slate-400">
+                  Page {pagination.page} of {pagination.totalPages}
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={page <= 1}
+                    onClick={() => setPage((current) => Math.max(1, current - 1))}
+                    className="px-3 py-1.5 text-[10px] font-medium text-slate-600 bg-white border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    disabled={page >= pagination.totalPages}
+                    onClick={() => setPage((current) => current + 1)}
+                    className="px-3 py-1.5 text-[10px] font-medium text-slate-600 bg-white border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50"
+                  >
+                    Next
+                  </button>
                 </div>
-              </motion.div>
-            );
-          })}
-        </motion.div>
-
-        {/* Empty State */}
-        {filteredNotifications.length === 0 && (
-          <div className="border border-slate-200 rounded-sm py-12 text-center">
-            <Info className="w-7 h-7 text-slate-300 mx-auto mb-2" />
-
-            <p className="text-xs font-medium text-slate-500">
-              No notifications found
-            </p>
-          </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
