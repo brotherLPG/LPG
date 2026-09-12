@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
-import { Table } from "@heroui/react";
 import { useCreateSale, useGetSaleFormOptions } from "../../../queries/sales/sales.queries";
 import { useToast } from "../../../utils/GlobalToast";
-import { useGetAccounts } from "../../../queries/accounts/accounts.queries";
+// import { useGetAccounts } from "../../../queries/accounts/accounts.queries";
 
 function AddSales() {
   const navigate = useNavigate();
@@ -22,36 +21,38 @@ function AddSales() {
   const [remarks, setRemarks] = useState("");
   // const [saveAsDraft, setSaveAsDraft] = useState(false);
 
-  const { data: accountsData } = useGetAccounts({ search: "", page: 1, limit: 100 });
-  const accounts = accountsData?.data?.items || [];
-
-  useEffect(() => {
-    if (accountId || accounts.length === 0) return;
-
-    const cashAccount = accounts.find((account) => {
-      const code = String(account.accountCode || "").toUpperCase();
-      const name = String(account.accountName || "").toLowerCase();
-      const label = String(account.label || "").toLowerCase();
-      return (
-        code === "CASH" ||
-        name.includes("cash on hand") ||
-        label.includes("cash on hand")
-      );
-    });
-
-    if (cashAccount?._id) {
-      setAccountId(cashAccount._id);
-    }
-  }, [accounts, accountId]);
+  // const { data: accountsData } = useGetAccounts({ search: "", page: 1, limit: 100 });
+  // const accounts = accountsData?.data?.items || [];
 
   const { data: formOptionsResponse, isLoading: optionsLoading } = useGetSaleFormOptions();
   const formOptions = formOptionsResponse?.data || {};
   const customers = formOptions.customers || [];
   const inventoryItems = formOptions.inventoryItems || [];
-  // const accounts = formOptions.accounts || [];
+  const accounts = formOptions.accounts || [];
   const paymentTerms = formOptions.paymentTerms || [];
 
   const createSaleMutation = useCreateSale();
+
+
+  useEffect(() => {
+  if (accountId || accounts.length === 0) return
+
+  const cashAccount = accounts.find(account => {
+    const code = String(account.accountCode || '').toUpperCase()
+    const name = String(account.accountName || '').toLowerCase()
+    const label = String(account.label || '').toLowerCase()
+    return (
+      code === 'CASH' ||
+      name.includes('cash on hand') ||
+      label.includes('cash on hand')
+    )
+  })
+
+  if (cashAccount?._id) {
+    setAccountId(cashAccount._id)
+  }
+}, [accounts, accountId])
+
 
   const calculateRow = (item) => {
     const qty = Number(item.quantity) || 0;
@@ -316,106 +317,111 @@ function AddSales() {
                 <Plus className="w-4 h-4" /> Add Item
               </button>
             </div>
-            <div className="p-5">
-              <Table aria-label="Line items table">
-                <Table.ScrollContainer>
-                  <Table.Content>
-                    <Table.Header>
-                      <Table.Column className="text-xs font-semibold text-slate-600">Item Name</Table.Column>
-                      <Table.Column className="text-xs font-semibold text-slate-600">Qty</Table.Column>
-                      <Table.Column className="text-xs font-semibold text-slate-600">Unit Price (Rs.)</Table.Column>
-                      <Table.Column className="text-xs font-semibold text-slate-600">Discount (Rs.)</Table.Column>
-                      <Table.Column className="text-xs font-semibold text-slate-600">Total (Rs.)</Table.Column>
-                      <Table.Column className="text-xs font-semibold text-slate-600"></Table.Column>
-                    </Table.Header>
-                    <Table.Body items={lineItems}>
-                      {(item) => {
-                        const row = calculateRow(item);
+            <div className="p-5 overflow-x-auto">
+              <table className="w-full min-w-[720px] border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200">
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">Item Name</th>
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">Qty</th>
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">Unit Price (Rs.)</th>
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">Discount (Rs.)</th>
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">Total (Rs.)</th>
+                    <th className="px-2 py-2"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lineItems.map((item) => {
+                    const row = calculateRow(item);
 
-                        return (
-                          <Table.Row key={item.id}>
-                            <Table.Cell>
-                              <select
-                                value={item.product}
-                                onChange={(e) => {
-                                  const selectedItem = inventoryItems.find(inv => inv._id === e.target.value);
-                                  const unitPrice = selectedItem?.unitPriceAmount || 0;
-                                  setLineItems((prev) =>
-                                    prev.map((lineItem) => {
-                                      if (lineItem.id !== item.id) return lineItem;
-                                      const updatedItem = { ...lineItem, product: e.target.value, unitPrice };
-                                      const computed = calculateRow(updatedItem);
-                                      return {
-                                        ...updatedItem,
-                                        total: computed.total,
-                                        rowSubtotal: computed.subtotal,
-                                      };
-                                    })
-                                  );
-                                }}
-                                className="w-40 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-700 outline-none focus:border-[#008951]"
-                              >
-                                <option value="">Select</option>
-                                {inventoryItems.map((inv) => (
-                                  <option key={inv._id} value={inv._id}>
-                                    {inv.label || `${inv.itemCode} - ${inv.itemName}`} (Stock: {inv.currentQuantity})
-                                  </option>
-                                ))}
-                              </select>
-                            </Table.Cell>
-                            <Table.Cell>
-                              <input
-                                type="number"
-                                value={item.quantity}
-                                onChange={(e) => updateLineItem(item.id, "quantity", e.target.value)}
-                                placeholder="0"
-                                className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
-                              />
-                            </Table.Cell>
-                            <Table.Cell>
-                              <input
-                                type="number"
-                                value={item.unitPrice}
-                                onChange={(e) => updateLineItem(item.id, "unitPrice", e.target.value)}
-                                placeholder="0"
-                                className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
-                              />
-                            </Table.Cell>
-                            <Table.Cell>
-                              <input
-                                type="number"
-                                value={item.discount}
-                                onChange={(e) => updateLineItem(item.id, "discount", e.target.value)}
-                                placeholder="0"
-                                className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
-                              />
-                            </Table.Cell>
-                            <Table.Cell>
-                              <input
-                                type="text"
-                                value={row.total ? row.total.toFixed(2) : "0.00"}
-                                disabled
-                                className="w-28 rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-sm text-slate-500 outline-none cursor-not-allowed"
-                              />
-                            </Table.Cell>
-                            <Table.Cell>
-                              {lineItems.length > 1 && (
-                                <button
-                                  type="button"
-                                  onClick={() => removeLineItem(item.id)}
-                                  className="text-rose-500 hover:text-rose-700 transition"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              )}
-                            </Table.Cell>
-                          </Table.Row>
-                        );
-                      }}
-                    </Table.Body>
-                  </Table.Content>
-                </Table.ScrollContainer>
-              </Table>
+                    return (
+                      <tr key={item.id} className="border-b border-slate-100 last:border-b-0">
+                        <td className="px-2 py-2">
+                          <select
+                            value={item.product}
+                            onChange={(e) => {
+                              const selectedItem = inventoryItems.find(
+                                (inv) => String(inv._id || inv.id) === e.target.value
+                              );
+                              const unitPrice = selectedItem?.unitPriceAmount || 0;
+                              setLineItems((prev) =>
+                                prev.map((lineItem) => {
+                                  if (lineItem.id !== item.id) return lineItem;
+                                  const updatedItem = { ...lineItem, product: e.target.value, unitPrice };
+                                  const computed = calculateRow(updatedItem);
+                                  return {
+                                    ...updatedItem,
+                                    total: computed.total,
+                                    rowSubtotal: computed.subtotal,
+                                  };
+                                })
+                              );
+                            }}
+                            className="w-56 max-w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-700 outline-none focus:border-[#008951]"
+                          >
+                            <option value="">
+                              {optionsLoading ? "Loading items..." : "Select"}
+                            </option>
+                            {inventoryItems.map((inv) => {
+                              const itemId = String(inv._id || inv.id);
+                              return (
+                                <option key={itemId} value={itemId}>
+                                  {inv.label || `${inv.itemCode} - ${inv.itemName}`} (Stock: {inv.currentQuantity})
+                                </option>
+                              );
+                            })}
+                          </select>
+                        </td>
+                        <td className="px-2 py-2">
+                          <input
+                            type="number"
+                            value={item.quantity}
+                            onChange={(e) => updateLineItem(item.id, "quantity", e.target.value)}
+                            placeholder="0"
+                            className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
+                          />
+                        </td>
+                        <td className="px-2 py-2">
+                          <input
+                            type="number"
+                            value={item.unitPrice}
+                            onChange={(e) => updateLineItem(item.id, "unitPrice", e.target.value)}
+                            placeholder="0"
+                            className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
+                          />
+                        </td>
+                        <td className="px-2 py-2">
+                          <input
+                            type="number"
+                            value={item.discount}
+                            onChange={(e) => updateLineItem(item.id, "discount", e.target.value)}
+                            placeholder="0"
+                            className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
+                          />
+                        </td>
+                        <td className="px-2 py-2">
+                          <input
+                            type="text"
+                            value={row.total ? row.total.toFixed(2) : "0.00"}
+                            disabled
+                            className="w-28 rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-sm text-slate-500 outline-none cursor-not-allowed"
+                          />
+                        </td>
+                        <td className="px-2 py-2">
+                          {lineItems.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeLineItem(item.id)}
+                              className="text-rose-500 hover:text-rose-700 transition"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
