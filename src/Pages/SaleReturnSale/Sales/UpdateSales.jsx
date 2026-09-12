@@ -2,9 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import { Table } from "@heroui/react";
-import { useInventoryItems } from "../../../queries/inventory/inventory.queries";
-import { useCustomers } from "../../../queries/customers/customers.queries";
-import { useSaleById, useUpdateSale } from "../../../queries/sales/sales.queries";
+import { useSaleById, useUpdateSale, useGetSaleFormOptions } from "../../../queries/sales/sales.queries";
 import { useToast } from "../../../utils/GlobalToast";
 import { useGetAccounts } from "../../../queries/accounts/accounts.queries";
 
@@ -13,7 +11,7 @@ function UpdateSales() {
   const { id } = useParams();
   const toast = useToast();
   const [lineItems, setLineItems] = useState([
-    { id: 1, product: "", cylinderType: "", quantity: "", unitPrice: "", discount: "", taxRate: 17, total: "" }
+    { id: 1, product: "", cylinderType: "", quantity: "", unitPrice: "", discount: "", total: "" }
   ]);
   const [amountPaid, setAmountPaid] = useState(0);
   const [customerId, setCustomerId] = useState("");
@@ -25,11 +23,10 @@ function UpdateSales() {
   // const [paymentMethod, setPaymentMethod] = useState("cash");
   const [referenceNumber, setReferenceNumber] = useState("");
 
-  const { data: inventoryData } = useInventoryItems({ search: "", page: 1, limit: 100 });
-  const inventoryItems = inventoryData?.data?.items || [];
-
-  const { data: customersData } = useCustomers({ search: "", page: 1, limit: 100 });
-  const customers = customersData?.data?.items || [];
+  const { data: formOptionsResponse } = useGetSaleFormOptions();
+  const formOptions = formOptionsResponse?.data || {};
+  const customers = formOptions.customers || [];
+  const inventoryItems = formOptions.inventoryItems || [];
 
   const { data: accountsData } = useGetAccounts({ search: "", page: 1, limit: 100 });
   const accounts = accountsData?.data?.items || [];
@@ -58,7 +55,6 @@ function UpdateSales() {
           quantity: item.quantity,
           unitPrice: item.unitPriceAmount,
           discount: item.discountAmount,
-          taxRate: sale.taxRate * 100 || 17,
           total: item.lineTotalAmount,
         }));
         setLineItems(mappedLineItems);
@@ -70,16 +66,13 @@ function UpdateSales() {
     const qty = Number(item.quantity) || 0;
     const unitPrice = Number(item.unitPrice) || 0;
     const discount = Number(item.discount) || 0;
-    const taxRate = Number(item.taxRate) || 0;
 
     const subtotal = qty * unitPrice;
-    const taxAmount = (subtotal - discount) * (taxRate / 100);
-    const total = subtotal - discount + taxAmount;
+    const total = subtotal - discount;
 
     return {
       subtotal,
       discount,
-      taxAmount,
       total,
     };
   };
@@ -96,7 +89,6 @@ function UpdateSales() {
           ...updatedItem,
           total: computed.total,
           rowSubtotal: computed.subtotal,
-          rowTax: computed.taxAmount,
         };
       })
     );
@@ -105,7 +97,7 @@ function UpdateSales() {
   const addLineItem = () => {
     setLineItems((prev) => [
       ...prev,
-      { id: prev.length + 1, product: "", cylinderType: "", quantity: "", unitPrice: "", discount: "", taxRate: 17, total: "" }
+      { id: prev.length + 1, product: "", cylinderType: "", quantity: "", unitPrice: "", discount: "", total: "" }
     ]);
   };
 
@@ -118,11 +110,10 @@ function UpdateSales() {
       const row = calculateRow(item);
       acc.subtotal += row.subtotal;
       acc.discount += row.discount;
-      acc.tax += row.taxAmount;
       acc.grandTotal += row.total;
       return acc;
     },
-    { subtotal: 0, discount: 0, tax: 0, grandTotal: 0 }
+    { subtotal: 0, discount: 0, grandTotal: 0 }
   );
 
   const outstanding = totals.grandTotal - amountPaid;
@@ -154,14 +145,13 @@ function UpdateSales() {
           quantity: Number(item.quantity),
           unitPriceAmount: Number(item.unitPrice),
           discountAmount: Number(item.discount) || 0,
-          taxAmount: 0,
         })),
-      payment: amountPaid > 0 ? {
+      payment:  {
         accountId: paymentAccountId,
         paymentAmount: amountPaid,
-        paymentMethod: saleType,
+        // paymentMethod: saleType,
         referenceNumber: referenceNumber || "",
-      } : undefined,
+      } ,
     };
 
     try {
@@ -277,14 +267,15 @@ function UpdateSales() {
                   <div className="relative">
                     <select
                       value={customerId}
-                      disabled
+                      // disabled
                       onChange={(e) => setCustomerId(e.target.value)}
                       className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     >
                       <option value="">Select customer</option>
                       {customers.map((customer) => (
                         <option key={customer._id} value={customer._id}>
-                          {customer.customerCode} - {customer.customerName}
+                          {customer.label ||
+                            `${customer.customerCode} - ${customer.customerName}`}
                         </option>
                       ))}
                     </select>
@@ -293,28 +284,42 @@ function UpdateSales() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Payment Method 
+
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 ">
+                <div className='flex flex-col gap-2'>
+                  <label className='block text-sm font-medium text-slate-700'>
+                    Payment Account
                   </label>
-                  <div className="relative">
-                    <select
-                      value={saleType}
-                      onChange={(e) => setSaleType(e.target.value)}
-                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                    >
-                      <option value="">Select Payment Method</option>
-                      {saleTypesOptions.map((type) => (
-                        <option key={type.value} value={type.value}>
-                          {type.label}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                  </div>
+                  <select
+                    value={paymentAccountId}
+                    onChange={e => setPaymentAccountId(e.target.value)}
+                    className='w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#008951]'
+                  >
+                    <option value=''>Select account</option>
+                    {accounts.map(account => (
+                      <option key={account._id} value={account._id}>
+                        {account.accountCode} - {account.accountName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className='flex flex-col gap-2'>
+                  <label className='block text-sm font-medium text-slate-700'>
+                    Reference Number
+                  </label>
+                  <input
+                    type='text'
+                    value={referenceNumber}
+                    onChange={e => setReferenceNumber(e.target.value)}
+                    placeholder='Enter reference number'
+                    className='w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951]'
+                  />
                 </div>
               </div>
+
+
             </div>
           </div>
 
@@ -340,7 +345,6 @@ function UpdateSales() {
                       <Table.Column className="text-xs font-semibold text-slate-600">Qty</Table.Column>
                       <Table.Column className="text-xs font-semibold text-slate-600">Unit Price (Rs.)</Table.Column>
                       <Table.Column className="text-xs font-semibold text-slate-600">Discount (Rs.)</Table.Column>
-                      <Table.Column className="text-xs font-semibold text-slate-600">Tax (%)</Table.Column>
                       <Table.Column className="text-xs font-semibold text-slate-600">Total (Rs.)</Table.Column>
                       <Table.Column className="text-xs font-semibold text-slate-600"></Table.Column>
                     </Table.Header>
@@ -365,7 +369,6 @@ function UpdateSales() {
                                         ...updatedItem,
                                         total: computed.total,
                                         rowSubtotal: computed.subtotal,
-                                        rowTax: computed.taxAmount,
                                       };
                                     })
                                   );
@@ -375,7 +378,7 @@ function UpdateSales() {
                                 <option value="">Select</option>
                                 {inventoryItems.map((inv) => (
                                   <option key={inv._id} value={inv._id}>
-                                    {inv.itemCode} - {inv.itemName}
+                                    {inv.label || `${inv.itemCode} - ${inv.itemName}`} (Stock: {inv.currentQuantity})
                                   </option>
                                 ))}
                               </select>
@@ -405,15 +408,6 @@ function UpdateSales() {
                                 onChange={(e) => updateLineItem(item.id, "discount", e.target.value)}
                                 placeholder="0"
                                 className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
-                              />
-                            </Table.Cell>
-                            <Table.Cell>
-                              <input
-                                type="number"
-                                value={item.taxRate}
-                                onChange={(e) => updateLineItem(item.id, "taxRate", e.target.value)}
-                                placeholder="0.00"
-                                className="w-28 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
                               />
                             </Table.Cell>
                             <Table.Cell>
@@ -468,12 +462,6 @@ function UpdateSales() {
                   Rs. {totals.discount.toFixed(2)}
                 </span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-600">Tax (17% GST)</span>
-                <span className="text-sm font-medium text-slate-900">
-                  Rs. {totals.tax.toFixed(2)}
-                </span>
-              </div>
               <div className="border-t border-slate-200 pt-4 flex justify-between items-center">
                 <span className="text-sm font-bold text-BLUE-dark">
                   Grand Total
@@ -497,36 +485,7 @@ function UpdateSales() {
                   className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951] text-right"
                 />
               </div>
-              {amountPaid > 0 && (
-                <>
-                  <div className="flex flex-col gap-2 pt-2 border-t border-slate-200">
-                    <label className="block text-sm font-medium text-slate-700">Payment Account</label>
-                    <select
-                      value={paymentAccountId}
-                      onChange={(e) => setPaymentAccountId(e.target.value)}
-                      className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#008951]"
-                    >
-                      <option value="">Select account</option>
-                      {accounts.map((account) => (
-                        <option key={account._id} value={account._id}>
-                          {account.accountCode} - {account.accountName}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                 
-                  <div className="flex flex-col gap-2">
-                    <label className="block text-sm font-medium text-slate-700">Reference Number</label>
-                    <input
-                      type="text"
-                      value={referenceNumber}
-                      onChange={(e) => setReferenceNumber(e.target.value)}
-                      placeholder="Enter reference number"
-                      className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951]"
-                    />
-                  </div>
-                </>
-              )}
+
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-600">Outstanding</span>
                 <span className="text-sm font-medium text-orange">
@@ -536,13 +495,12 @@ function UpdateSales() {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-600">Payment Status</span>
                 <span
-                  className={`text-sm font-medium px-3 py-1 rounded-full ${
-                    paymentStatus === "Paid"
+                  className={`text-sm font-medium px-3 py-1 rounded-full ${paymentStatus === "Paid"
                       ? "bg-green-100 text-green-700"
                       : paymentStatus === "Partially Paid"
-                      ? "bg-amber-100 text-amber-700"
-                      : "bg-rose-100 text-rose-700"
-                  }`}
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-rose-100 text-rose-700"
+                    }`}
                 >
                   {paymentStatus}
                 </span>

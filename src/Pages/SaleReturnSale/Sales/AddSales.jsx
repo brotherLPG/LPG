@@ -10,7 +10,7 @@ function AddSales() {
   const navigate = useNavigate();
   const toast = useToast();
   const [lineItems, setLineItems] = useState([
-    { id: 1, product: "", cylinderType: "", quantity: "", unitPrice: "", discount: "", taxRate: 0, total: "" }
+    { id: 1, product: "", cylinderType: "", quantity: "", unitPrice: "", discount: "", total: "" }
   ]);
   const [amountPaid, setAmountPaid] = useState(0);
   const [customerId, setCustomerId] = useState("");
@@ -50,7 +50,6 @@ function AddSales() {
   const inventoryItems = formOptions.inventoryItems || [];
   // const accounts = formOptions.accounts || [];
   const paymentTerms = formOptions.paymentTerms || [];
-  const defaultTaxRate = Number(formOptions.taxRatePercent ?? formOptions.taxRate ?? 0);
 
   const createSaleMutation = useCreateSale();
 
@@ -58,16 +57,13 @@ function AddSales() {
     const qty = Number(item.quantity) || 0;
     const unitPrice = Number(item.unitPrice) || 0;
     const discount = Number(item.discount) || 0;
-    const taxRate = Number(item.taxRate) || 0;
 
     const subtotal = qty * unitPrice;
-    const taxAmount = (subtotal - discount) * (taxRate / 100);
-    const total = subtotal - discount + taxAmount;
+    const total = subtotal - discount;
 
     return {
       subtotal,
       discount,
-      taxAmount,
       total,
     };
   };
@@ -84,7 +80,6 @@ function AddSales() {
           ...updatedItem,
           total: computed.total,
           rowSubtotal: computed.subtotal,
-          rowTax: computed.taxAmount,
         };
       })
     );
@@ -93,7 +88,7 @@ function AddSales() {
   const addLineItem = () => {
     setLineItems((prev) => [
       ...prev,
-      { id: prev.length + 1, product: "", cylinderType: "", quantity: "", unitPrice: "", discount: "", taxRate: defaultTaxRate, total: "" }
+      { id: prev.length + 1, product: "", cylinderType: "", quantity: "", unitPrice: "", discount: "", total: "" }
     ]);
   };
 
@@ -106,15 +101,11 @@ function AddSales() {
       const row = calculateRow(item);
       acc.subtotal += row.subtotal;
       acc.discount += row.discount;
-      acc.tax += row.taxAmount;
       acc.grandTotal += row.total;
       return acc;
     },
-    { subtotal: 0, discount: 0, tax: 0, grandTotal: 0 }
+    { subtotal: 0, discount: 0, grandTotal: 0 }
   );
-
-  const uniqueTaxRates = [...new Set(lineItems.map((item) => Number(item.taxRate) || 0))];
-  const taxRateLabel = uniqueTaxRates.map((rate) => `${rate}%`).join(", ");
 
   const outstanding = totals.grandTotal - amountPaid;
 
@@ -334,7 +325,6 @@ function AddSales() {
                       <Table.Column className="text-xs font-semibold text-slate-600">Qty</Table.Column>
                       <Table.Column className="text-xs font-semibold text-slate-600">Unit Price (Rs.)</Table.Column>
                       <Table.Column className="text-xs font-semibold text-slate-600">Discount (Rs.)</Table.Column>
-                      <Table.Column className="text-xs font-semibold text-slate-600">Tax ({taxRateLabel})</Table.Column>
                       <Table.Column className="text-xs font-semibold text-slate-600">Total (Rs.)</Table.Column>
                       <Table.Column className="text-xs font-semibold text-slate-600"></Table.Column>
                     </Table.Header>
@@ -359,7 +349,6 @@ function AddSales() {
                                         ...updatedItem,
                                         total: computed.total,
                                         rowSubtotal: computed.subtotal,
-                                        rowTax: computed.taxAmount,
                                       };
                                     })
                                   );
@@ -399,15 +388,6 @@ function AddSales() {
                                 onChange={(e) => updateLineItem(item.id, "discount", e.target.value)}
                                 placeholder="0"
                                 className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
-                              />
-                            </Table.Cell>
-                            <Table.Cell>
-                              <input
-                                type="number"
-                                value={item.taxRate}
-                                onChange={(e) => updateLineItem(item.id, "taxRate", e.target.value)}
-                                placeholder="0.00"
-                                className="w-28 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
                               />
                             </Table.Cell>
                             <Table.Cell>
@@ -460,12 +440,6 @@ function AddSales() {
                 <span className="text-sm text-slate-600">Trade Discount</span>
                 <span className="text-sm font-medium text-slate-900">
                   Rs. {totals.discount.toFixed(2)}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-600">Tax ({taxRateLabel} GST)</span>
-                <span className="text-sm font-medium text-slate-900">
-                  Rs. {totals.tax.toFixed(2)}
                 </span>
               </div>
               <div className="border-t border-slate-200 pt-4 flex justify-between items-center">
