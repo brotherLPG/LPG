@@ -7,6 +7,7 @@ import { queryKeys } from "../queryKeys";
 import {
   getSales,
   getSaleById,
+  getSaleFormOptions,
   createSale,
   updateSale,
   deleteSale,
@@ -24,6 +25,13 @@ export const useSaleById = (id) => {
     queryKey: queryKeys.sales.detail(id),
     queryFn: () => getSaleById(id),
     enabled: !!id,
+  });
+};
+
+export const useGetSaleFormOptions = () => {
+  return useQuery({
+    queryKey: queryKeys.sales.formOptions(),
+    queryFn: () => getSaleFormOptions(),
   });
 };
 

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Switch } from "@heroui/react";
 import { ChevronDown } from "lucide-react";
 import { useToast } from "../../utils/GlobalToast";
 import { useCreateSupplier } from "../../queries/suppliers/suppliers.queries";

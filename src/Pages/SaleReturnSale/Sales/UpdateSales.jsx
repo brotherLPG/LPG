@@ -22,7 +22,7 @@ function UpdateSales() {
   const [remarks, setRemarks] = useState("");
   const [saleType, setSaleType] = useState("");
   const [paymentAccountId, setPaymentAccountId] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("cash");
+  // const [paymentMethod, setPaymentMethod] = useState("cash");
   const [referenceNumber, setReferenceNumber] = useState("");
 
   const { data: inventoryData } = useInventoryItems({ search: "", page: 1, limit: 100 });

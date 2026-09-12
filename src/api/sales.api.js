@@ -10,6 +10,11 @@ export const getSaleById = async (id) => {
   return response.data
 }
 
+export const getSaleFormOptions = async () => {
+  const response = await api.get('/sales/form-options')
+  return response.data
+}
+
 export const createSale = async (data) => {
   const response = await api.post('/sales', data)
   return response.data
@@ -28,6 +33,7 @@ export const deleteSale = async (id) => {
 export default {
   getSales,
   getSaleById,
+  getSaleFormOptions,
   createSale,
   updateSale,
   deleteSale,

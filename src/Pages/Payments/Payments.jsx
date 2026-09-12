@@ -1,4 +1,4 @@
-import { PlusCircle, Eye, Edit3, Trash2, ChevronDown, Loader } from "lucide-react";
+import { PlusCircle, Eye, ChevronDown, Loader } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalTable from "../../utils/GlobalTable";
@@ -47,9 +47,6 @@ function Payments() {
     }));
   }, [paymentRecords]);
 
-  const handleDeleteClick = (item) => {
-    setDeleteModal({ isOpen: true, item });
-  };
 
   const handleDeleteConfirm = async () => {
     if (deleteModal.item) {
@@ -58,6 +55,7 @@ function Payments() {
         toast.success(`Payment voucher ${deleteModal.item.voucherNo} has been deleted successfully`);
         setDeleteModal({ isOpen: false, item: null });
       } catch (error) {
+        console.error('Error deleting payment voucher:', error);
         toast.error('Failed to delete payment voucher');
       }
     }

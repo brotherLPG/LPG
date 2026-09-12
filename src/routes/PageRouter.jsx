@@ -61,7 +61,7 @@ import FillingBatches from '../Pages/FillingBatches/FillingBatches';
 import CreateBatch from '../Pages/FillingBatches/CreateBatch';
 import UpdateBatch from '../Pages/FillingBatches/UpdateBatch';
 import FillingBatchDetails from '../Pages/FillingBatches/FillingBatchDetails';
-import MaintenanceAssets from '../Pages/MaintenanceAssets/MaintenanceAssets';
+import MaintenanceAssets from '../Pages/MaintenanceAssets/MaintenanceAssets';``
 import LogMaintenance from '../Pages/MaintenanceAssets/LogMaintenance';
 import MaintenanceRecords from '../Pages/MaintenanceAssets/MaintenanceRecords';
 import AddMaintenanceRecord from '../Pages/MaintenanceAssets/AddMaintenanceRecord';

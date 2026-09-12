@@ -1,30 +1,56 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import { Table } from "@heroui/react";
-import { useInventoryItems } from "../../../queries/inventory/inventory.queries";
-import { useCustomers } from "../../../queries/customers/customers.queries";
-import { useCreateSale } from "../../../queries/sales/sales.queries";
+import { useCreateSale, useGetSaleFormOptions } from "../../../queries/sales/sales.queries";
 import { useToast } from "../../../utils/GlobalToast";
+import { useGetAccounts } from "../../../queries/accounts/accounts.queries";
 
 function AddSales() {
   const navigate = useNavigate();
   const toast = useToast();
   const [lineItems, setLineItems] = useState([
-    { id: 1, product: "", cylinderType: "", quantity: "", unitPrice: "", discount: "", taxRate: 17, total: "" }
+    { id: 1, product: "", cylinderType: "", quantity: "", unitPrice: "", discount: "", taxRate: 0, total: "" }
   ]);
   const [amountPaid, setAmountPaid] = useState(0);
   const [customerId, setCustomerId] = useState("");
-  const [invoiceDate, setInvoiceDate] = useState("");
+  const [accountId, setAccountId] = useState("");
+  const [invoiceDate, setInvoiceDate] = useState(
+    new Date().toLocaleDateString("en-CA")
+  );
   const [paymentTermDays, setPaymentTermDays] = useState(0);
   const [remarks, setRemarks] = useState("");
-  const [saveAsDraft, setSaveAsDraft] = useState(false);
+  // const [saveAsDraft, setSaveAsDraft] = useState(false);
 
-  const { data: inventoryData } = useInventoryItems({ search: "", page: 1, limit: 100 });
-  const inventoryItems = inventoryData?.data?.items || [];
+  const { data: accountsData } = useGetAccounts({ search: "", page: 1, limit: 100 });
+  const accounts = accountsData?.data?.items || [];
 
-  const { data: customersData } = useCustomers({ search: "", page: 1, limit: 100 });
-  const customers = customersData?.data?.items || [];
+  useEffect(() => {
+    if (accountId || accounts.length === 0) return;
+
+    const cashAccount = accounts.find((account) => {
+      const code = String(account.accountCode || "").toUpperCase();
+      const name = String(account.accountName || "").toLowerCase();
+      const label = String(account.label || "").toLowerCase();
+      return (
+        code === "CASH" ||
+        name.includes("cash on hand") ||
+        label.includes("cash on hand")
+      );
+    });
+
+    if (cashAccount?._id) {
+      setAccountId(cashAccount._id);
+    }
+  }, [accounts, accountId]);
+
+  const { data: formOptionsResponse, isLoading: optionsLoading } = useGetSaleFormOptions();
+  const formOptions = formOptionsResponse?.data || {};
+  const customers = formOptions.customers || [];
+  const inventoryItems = formOptions.inventoryItems || [];
+  // const accounts = formOptions.accounts || [];
+  const paymentTerms = formOptions.paymentTerms || [];
+  const defaultTaxRate = Number(formOptions.taxRatePercent ?? formOptions.taxRate ?? 0);
 
   const createSaleMutation = useCreateSale();
 
@@ -67,7 +93,7 @@ function AddSales() {
   const addLineItem = () => {
     setLineItems((prev) => [
       ...prev,
-      { id: prev.length + 1, product: "", cylinderType: "", quantity: "", unitPrice: "", discount: "", taxRate: 17, total: "" }
+      { id: prev.length + 1, product: "", cylinderType: "", quantity: "", unitPrice: "", discount: "", taxRate: defaultTaxRate, total: "" }
     ]);
   };
 
@@ -86,6 +112,9 @@ function AddSales() {
     },
     { subtotal: 0, discount: 0, tax: 0, grandTotal: 0 }
   );
+
+  const uniqueTaxRates = [...new Set(lineItems.map((item) => Number(item.taxRate) || 0))];
+  const taxRateLabel = uniqueTaxRates.map((rate) => `${rate}%`).join(", ");
 
   const outstanding = totals.grandTotal - amountPaid;
 
@@ -118,6 +147,7 @@ function AddSales() {
         })),
       tradeDiscountAmount: 0,
       amountPaid: amountPaid,
+      accountId,
       remarks,
       saveAsDraft: isDraft,
     };
@@ -179,7 +209,11 @@ function AddSales() {
                   <input
                     type="text"
                     disabled
-                    value="INV-2026-0459 (Auto-generated)"
+                    value={
+                      formOptions.nextInvoiceNumber
+                        ? `${formOptions.nextInvoiceNumber} (Auto-generated)`
+                        : "Loading..."
+                    }
                     className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed"
                   />
                 </div>
@@ -197,37 +231,82 @@ function AddSales() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                <div>
+                  <label className='block text-sm font-medium text-slate-700 mb-1.5'>
+                    Customer <span className='text-rose-500'>*</span>
+                  </label>
+                  <div className='relative'>
+                    <select
+                      value={customerId}
+                      onChange={e => {
+                        const selectedId = e.target.value
+                        setCustomerId(selectedId)
+                        const selectedCustomer = customers.find(
+                          customer => customer._id === selectedId
+                        )
+                        if (selectedCustomer?.paymentTermDays != null) {
+                          setPaymentTermDays(Number(selectedCustomer.paymentTermDays))
+                        }
+                      }}
+                      disabled={optionsLoading}
+                      className='w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100'
+                    >
+                      <option value=''>Select customer</option>
+                      {customers.map(customer => (
+                        <option key={customer._id} value={customer._id}>
+                          {customer.label ||
+                            `${customer.customerCode} - ${customer.customerName}`}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className='absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none' />
+                  </div>
+                </div>
+
+
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Payment Terms (Days) <span className="text-rose-500">*</span>
                   </label>
-                  <input
-                    type="number"
-                    value={paymentTermDays}
-                    onChange={(e) => setPaymentTermDays(Number(e.target.value))}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                    placeholder="0"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Customer <span className="text-rose-500">*</span>
-                  </label>
                   <div className="relative">
                     <select
-                      value={customerId}
-                      onChange={(e) => setCustomerId(e.target.value)}
+                      value={paymentTermDays}
+                      onChange={(e) => setPaymentTermDays(Number(e.target.value))}
+                      disabled={optionsLoading}
                       className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     >
-                      <option value="">Select customer</option>
-                      {customers.map((customer) => (
-                        <option key={customer._id} value={customer._id}>
-                          {customer.customerCode} - {customer.customerName}
+                      <option value="">Select payment terms</option>
+                      {paymentTerms.map((term) => (
+                        <option key={term.value} value={term.value}>
+                          {term.label}
                         </option>
                       ))}
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                   </div>
+                </div>
+
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Payment Account <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={accountId}
+                    onChange={(e) => setAccountId(e.target.value)}
+                    disabled={optionsLoading}
+                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  >
+                    <option value="">Select Account</option>
+                    {accounts.map((account) => (
+                      <option key={account._id} value={account._id}>
+                        {account.label || `${account.accountCode} - ${account.accountName}`}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
               </div>
             </div>
@@ -255,7 +334,7 @@ function AddSales() {
                       <Table.Column className="text-xs font-semibold text-slate-600">Qty</Table.Column>
                       <Table.Column className="text-xs font-semibold text-slate-600">Unit Price (Rs.)</Table.Column>
                       <Table.Column className="text-xs font-semibold text-slate-600">Discount (Rs.)</Table.Column>
-                      <Table.Column className="text-xs font-semibold text-slate-600">Tax (17%)</Table.Column>
+                      <Table.Column className="text-xs font-semibold text-slate-600">Tax ({taxRateLabel})</Table.Column>
                       <Table.Column className="text-xs font-semibold text-slate-600">Total (Rs.)</Table.Column>
                       <Table.Column className="text-xs font-semibold text-slate-600"></Table.Column>
                     </Table.Header>
@@ -290,7 +369,7 @@ function AddSales() {
                                 <option value="">Select</option>
                                 {inventoryItems.map((inv) => (
                                   <option key={inv._id} value={inv._id}>
-                                    {inv.itemCode} - {inv.itemName}
+                                    {inv.label || `${inv.itemCode} - ${inv.itemName}`} (Stock: {inv.currentQuantity})
                                   </option>
                                 ))}
                               </select>
@@ -384,7 +463,7 @@ function AddSales() {
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-600">Tax (17% GST)</span>
+                <span className="text-sm text-slate-600">Tax ({taxRateLabel} GST)</span>
                 <span className="text-sm font-medium text-slate-900">
                   Rs. {totals.tax.toFixed(2)}
                 </span>
@@ -421,13 +500,12 @@ function AddSales() {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-600">Payment Status</span>
                 <span
-                  className={`text-sm font-medium px-3 py-1 rounded-full ${
-                    paymentStatus === "Paid"
+                  className={`text-sm font-medium px-3 py-1 rounded-full ${paymentStatus === "Paid"
                       ? "bg-green-100 text-green-700"
                       : paymentStatus === "Partially Paid"
-                      ? "bg-amber-100 text-amber-700"
-                      : "bg-rose-100 text-rose-700"
-                  }`}
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-rose-100 text-rose-700"
+                    }`}
                 >
                   {paymentStatus}
                 </span>
