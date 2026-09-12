@@ -136,6 +136,7 @@ function UpdateSales() {
     const saleData = {
       customerId,
       invoiceDate: invoiceDate || new Date().toISOString().split('T')[0],
+      // saleType,
       remarks,
       lineItems: lineItems
         .filter(item => item.product && item.quantity)
@@ -149,7 +150,7 @@ function UpdateSales() {
       payment:  {
         accountId: paymentAccountId,
         paymentAmount: amountPaid,
-        // paymentMethod: saleType,
+        paymentMethod: saleType,
         referenceNumber: referenceNumber || "",
       } ,
     };
@@ -276,6 +277,26 @@ function UpdateSales() {
                         <option key={customer._id} value={customer._id}>
                           {customer.label ||
                             `${customer.customerCode} - ${customer.customerName}`}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Sale Type
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={saleType}
+                      onChange={(e) => setSaleType(e.target.value)}
+                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    >
+                      <option value="">Select sale type</option>
+                      {saleTypesOptions.map((type) => (
+                        <option key={type.value} value={type.value}>
+                          {type.label}
                         </option>
                       ))}
                     </select>
