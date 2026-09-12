@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { DollarSign, CreditCard, Search, CirclePlus, TrendingUp, ArrowLeft, Eye, Edit3 } from "lucide-react";
+import {  Search, CirclePlus, ArrowLeft, Eye, Edit3 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import GlobalTable from "../../../utils/GlobalTable";
 import { useSales } from "../../../queries/sales/sales.queries";
@@ -23,7 +23,7 @@ function Sales() {
 
   const params = {
     page,
-    limit: 20,
+    limit: 10,
     ...(searchTerm && { search: searchTerm }),
     ...(saleStatus && { saleStatus }),
     ...(paymentStatus && { paymentStatus }),
@@ -35,7 +35,7 @@ function Sales() {
   const { data: salesData, isLoading } = useSales(params);
 
   const sales = salesData?.data?.items || [];
-  const pagination = salesData?.data?.pagination || { total: 0, totalPages: 0, page: 1, limit: 20 };
+  const pagination = salesData?.data?.pagination || { total: 0, totalPages: 0, page: 1, limit: 10 };
   const summary = salesData?.data?.summary || {
     todaySalesAmount: 0,
     todaySalesCount: 0,

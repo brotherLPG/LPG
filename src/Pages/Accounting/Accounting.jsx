@@ -14,14 +14,15 @@ function Accounting() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
 
-  // Fetch accounts from API (without filters to get meta data)
-  const { data: accountsResponse, isLoading, isError, error } = useGetAccounts({
-    search: query,
-    accountType: categoryFilter !== "All" ? categoryFilter : undefined,
-    status: statusFilter !== "All" ? statusFilter : undefined,
+  const accountListParams = {
     page: currentPage,
     limit,
-  });
+    ...(query && { search: query }),
+    ...(categoryFilter !== "All" && { accountType: categoryFilter }),
+    ...(statusFilter !== "All" && { status: statusFilter }),
+  };
+
+  const { data: accountsResponse, isLoading, isError, error } = useGetAccounts(accountListParams);
 
   const accountRecords = accountsResponse?.data?.items || [];
   const pagination = accountsResponse?.data?.pagination || {};

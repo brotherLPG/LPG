@@ -12,7 +12,12 @@ import {
   deleteAccount,
 } from "../../api/accounts.api";
 
-export const useGetAccounts = (params) => {
+export const DEFAULT_ACCOUNTS_LIST_PARAMS = {
+  page: 1,
+  limit: 10,
+};
+
+export const useGetAccounts = (params = DEFAULT_ACCOUNTS_LIST_PARAMS) => {
   return useQuery({
     queryKey: queryKeys.accounts.list(params),
     queryFn: () => getAccounts(params),

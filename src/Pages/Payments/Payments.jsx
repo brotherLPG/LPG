@@ -18,14 +18,15 @@ function Payments() {
   const [limit] = useState(10);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
 
-  // Fetch payments from API
-  const { data: paymentsResponse, isLoading, isError, error } = useGetPayments({
-    search: query,
-    paymentStatus: status !== "All" ? status : undefined,
-    direction: direction !== "All" ? direction : undefined,
+  const paymentListParams = {
     page: currentPage,
     limit,
-  });
+    ...(query && { search: query }),
+    ...(status !== "All" && { paymentStatus: status }),
+    ...(direction !== "All" && { direction }),
+  };
+
+  const { data: paymentsResponse, isLoading, isError, error } = useGetPayments(paymentListParams);
 
   const paymentRecords = paymentsResponse?.data?.items || [];
   const pagination = paymentsResponse?.data?.pagination || {};

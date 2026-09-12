@@ -5,6 +5,25 @@ import { ChevronDown } from "lucide-react";
 import { useToast } from "../../utils/GlobalToast";
 import { useCreateSupplier } from "../../queries/suppliers/suppliers.queries";
 
+const PK_IBAN_LENGTH = 24;
+
+const formatIban = (value) => {
+  const compact = value
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .toUpperCase()
+    .slice(0, PK_IBAN_LENGTH);
+
+  return compact.replace(/(.{4})/g, "$1 ").trim();
+};
+
+const compactIban = (value) => value.replace(/\s/g, "");
+
+const isValidPkIban = (value) => {
+  const compact = compactIban(value);
+  if (!compact) return true;
+  return /^PK\d{2}[A-Z]{4}\d{16}$/.test(compact);
+};
+
 function AddSupplier() {
   const navigate = useNavigate();
   const [isActive, setIsActive] = useState(true);
@@ -25,12 +44,39 @@ function AddSupplier() {
     const [bankAccountTitle, setBankAccountTitle] = useState("");
   const [bankAccountNumber, setBankAccountNumber] = useState("");
   const [iban, setIban] = useState("");
+  const [ibanError, setIbanError] = useState("");
 
   const createMutation = useCreateSupplier();
+
+  const handleIbanChange = (value) => {
+    const formatted = formatIban(value);
+    setIban(formatted);
+    if (ibanError && isValidPkIban(formatted)) {
+      setIbanError("");
+    }
+  };
+
+  const validateIban = () => {
+    if (!compactIban(iban)) {
+      setIbanError("");
+      return true;
+    }
+    if (!isValidPkIban(iban)) {
+      setIbanError("Enter a valid Pakistan IBAN, e.g. PK36 HABB 0000 1234 5678 9012");
+      return false;
+    }
+    setIbanError("");
+    return true;
+  };
 
 
     const handleSubmit = async (e) => {
       e.preventDefault();
+
+      if (!validateIban()) {
+        toast.error("Please enter a valid IBAN.");
+        return;
+      }
 
       try {
       
@@ -51,7 +97,7 @@ function AddSupplier() {
            bankName,
            bankAccountTitle,
            bankAccountNumber,
-           iban,
+           iban: compactIban(iban),
          };
 
         await createMutation.mutateAsync(payload);
@@ -368,11 +414,27 @@ function AddSupplier() {
               </label>
                   <input
                     type="text"
-                    placeholder="e.g. PK00 HABB 0000 0012 3456 78"
+                    inputMode="text"
+                    autoComplete="off"
+                    spellCheck={false}
+                    maxLength={29}
+                    placeholder="e.g. PK36 HABB 0000 1234 5678 9012"
                     value={iban}
-                    onChange={(e) => setIban(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    onChange={(e) => handleIbanChange(e.target.value)}
+                    onBlur={validateIban}
+                    className={`w-full rounded-md border bg-white px-3 py-2 text-sm font-mono tracking-wider text-slate-900 uppercase outline-none focus:ring-2 ${
+                      ibanError
+                        ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                        : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                    }`}
                   />
+                  {ibanError ? (
+                    <p className="mt-1.5 text-xs text-rose-500">{ibanError}</p>
+                  ) : (
+                    <p className="mt-1.5 text-xs text-slate-400">
+                      Pakistan IBAN: PK + 22 characters (24 total)
+                    </p>
+                  )}
             </div>
           </div>
         </div>

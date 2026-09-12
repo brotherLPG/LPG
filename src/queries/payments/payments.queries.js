@@ -13,10 +13,16 @@ import {
   getPaymentFormOptions,
 } from "../../api/payments.api";
 
-export const useGetPayments = (params) => {
+export const DEFAULT_PAYMENTS_LIST_PARAMS = {
+  page: 1,
+  limit: 10,
+};
+
+export const useGetPayments = (params = DEFAULT_PAYMENTS_LIST_PARAMS) => {
   return useQuery({
     queryKey: queryKeys.payments.list(params),
     queryFn: () => getPayments(params),
+    // staleTime: 5 * 60 * 1000,
   });
 };
 

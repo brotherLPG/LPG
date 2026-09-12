@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { PlusCircle, Search, Eye, Edit3, ChevronDown, Trash2 } from "lucide-react";
+import { PlusCircle, Search, Eye, Edit3, ChevronDown } from "lucide-react";
 import GlobalTable from "../../utils/GlobalTable";
 import { useInventoryItems, useDeleteInventoryItem } from "../../queries/inventory/inventory.queries";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
@@ -17,7 +17,7 @@ function Inventory() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
 
-  const { data: inventoryData, isLoading, error } = useInventoryItems({ search: query, page: 1, limit: 100 });
+  const { data: inventoryData } = useInventoryItems({ search: query, page: 1, limit: 10 });
   const deleteMutation = useDeleteInventoryItem();
 
   const filteredData = useMemo(() => {
@@ -30,10 +30,7 @@ function Inventory() {
     });
   }, [inventoryData, query, category, statusFilter]);
 
-  const handleDeleteClick = (item) => {
-    setDeleteModal({ isOpen: true, item });
-  };
-
+ 
   const handleDeleteConfirm = () => {
     if (deleteModal.item) {
       const id = deleteModal.item._id;

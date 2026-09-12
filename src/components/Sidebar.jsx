@@ -73,6 +73,11 @@ const menuItems = [
     icon: Package,
     label: "Cylinder Types",
     path: "/cylinder-types",
+    activePrefixes: [
+      "/cylinders/add-type",
+      "/cylinders/edit-type",
+      "/cylinders/view-type",
+    ],
     modules: ["cylinder-types"],
   },
   {
@@ -121,6 +126,7 @@ const menuItems = [
     icon: Building,
     label: "Fixed Assets",
     path: "/assets",
+    activePrefixes: ["/maintenance-records", "/maintenance-assets"],
     modules: ["assets"],
   },
   {
@@ -148,6 +154,18 @@ const canShowMenuItem = (item, allowedModules) => {
   if (!allowedModules?.size) return false;
 
   return item.modules.some((moduleName) => allowedModules.has(moduleName));
+};
+
+const normalizePath = (path) => path.replace(/\/+$/, "") || "/";
+
+const isMenuItemActive = (item, pathname) => {
+  const current = normalizePath(pathname).toLowerCase();
+  const prefixes = [item.path, ...(item.activePrefixes || [])];
+
+  return prefixes.some((prefix) => {
+    const base = normalizePath(prefix).toLowerCase();
+    return current === base || current.startsWith(`${base}/`);
+  });
 };
 
 const Sidebar = () => {
@@ -206,7 +224,7 @@ const Sidebar = () => {
           <ul className="space-y-1">
             {visibleMenuItems.map((item) => {
               const Icon = item.icon;
-              const isActive = location.pathname === item.path;
+              const isActive = isMenuItemActive(item, location.pathname);
               return (
                 <li key={item.path}>
                   <Link

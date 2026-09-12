@@ -13,11 +13,13 @@ import { getEmployees } from '../api/employees.api.js'
 import { getPermissions } from '../api/permissions.api.js'
 import { getCurrentUser } from '../api/auth.api.js'
 import { getAccounts } from '../api/accounts.api.js'
+import { DEFAULT_ACCOUNTS_LIST_PARAMS } from './accounts/accounts.queries.js'
 import { getInventoryItems } from '../api/inventory.api.js'
 import { getStorageTankDashboard } from '../api/storageTanks.api.js'
 import { getSales } from '../api/sales.api.js'
 import { getReturnSales } from '../api/returnsale.api.js'
 import { getPayments } from '../api/payments.api.js'
+import { DEFAULT_PAYMENTS_LIST_PARAMS } from './payments/payments.queries.js'
 import { getAssets } from '../api/assets.api.js'
 import { getMaintenanceRecords } from '../api/maintenanceRecords.api.js'
 import { getExpenses } from '../api/expenses.api.js'
@@ -198,10 +200,8 @@ export const prefetchDashboard = async queryClient => {
     // ========================================
 
     queryClient.prefetchQuery({
-      queryKey: queryKeys.accounts.list({ page: 1, limit: 10 }),
-
-      queryFn: () =>
-        getAccounts({ page: 1, limit: 10 })
+      queryKey: queryKeys.accounts.list(DEFAULT_ACCOUNTS_LIST_PARAMS),
+      queryFn: () => getAccounts(DEFAULT_ACCOUNTS_LIST_PARAMS),
     }),
 
     // ========================================
@@ -262,13 +262,9 @@ export const prefetchDashboard = async queryClient => {
     // ========================================
 
     queryClient.prefetchQuery({
-      queryKey: queryKeys.payments.list({ page: 1, limit: 10 }),
-
-      queryFn: () =>
-        getPayments({
-          page: 1,
-          limit: 10,
-        })
+      queryKey: queryKeys.payments.list(DEFAULT_PAYMENTS_LIST_PARAMS),
+      queryFn: () => getPayments(DEFAULT_PAYMENTS_LIST_PARAMS),
+      // staleTime: 5 * 60 * 1000,
     }),
 
     // ========================================
