@@ -38,6 +38,8 @@ export const queryKeys = {
 
     detail: id => ['customers', 'detail', id],
 
+    ledger: id => ['customers', 'ledger', id],
+
     salesHistory: (id, params) => ['customers', 'sales-history', id, params],
 
     paymentHistory: (id, params) => ['customers', 'payment-history', id, params]
@@ -66,7 +68,13 @@ export const queryKeys = {
 
     list: (params) => ['suppliers', 'list', params],
 
-    detail: id => ['suppliers', 'detail', id]
+    detail: id => ['suppliers', 'detail', id],
+
+    ledger: id => ['suppliers', 'ledger', id],
+
+    purchaseHistory: (id, params) => ['suppliers', 'purchase-history', id, params],
+
+    paymentHistory: (id, params) => ['suppliers', 'payment-history', id, params]
   },
 
   // =========================

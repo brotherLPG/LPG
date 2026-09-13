@@ -25,10 +25,28 @@ export const getSupplierById = async (id) => {
   return response.data
 }
 
+export const getSupplierLedger = async (id) => {
+  const response = await api.get(`/suppliers/${id}/ledger`)
+  return response.data
+}
+
+export const getSupplierPurchaseHistory = async (id, params) => {
+  const response = await api.get(`/suppliers/${id}/purchase-history`, { params })
+  return response.data
+}
+
+export const getSupplierPaymentHistory = async (id, params) => {
+  const response = await api.get(`/suppliers/${id}/payment-history`, { params })
+  return response.data
+}
+
 export default {
   getSuppliers,
   deleteSupplier,
   createSupplier,
   updateSupplier,
   getSupplierById,
+  getSupplierLedger,
+  getSupplierPurchaseHistory,
+  getSupplierPaymentHistory,
 }

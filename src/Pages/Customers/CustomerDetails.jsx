@@ -6,7 +6,7 @@ import { useToast } from "../../utils/GlobalToast";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import GlobalTable from "../../utils/GlobalTable";
 import {
-  useCustomerById,
+  useCustomerLedger,
   useCustomerSalesHistory,
   useCustomerPaymentHistory,
   useDeleteCustomer,
@@ -100,8 +100,9 @@ function CustomerDetails() {
   const [paymentsPage, setPaymentsPage] = useState(1);
   const paymentsLimit = 10;
 
-  const { data, isLoading, error } = useCustomerById(id);
-  const customer = data?.data;
+  const { data, isLoading, error } = useCustomerLedger(id);
+  const customer = data?.data?.customer;
+  const summary = data?.data?.summary;
   const deleteMutation = useDeleteCustomer();
 
   const salesHistoryParams = {
@@ -466,19 +467,18 @@ function CustomerDetails() {
         contact: customer.contactPersonName || "—",
         phone: customer.phoneNumber || "—",
         isActive: customer.isActive !== false,
-        totalPurchases:
-          customer.totalPurchasesAmount ?? customer.totalPurchases ?? 0,
-        outstandingBalance:
-          customer.outstandingBalanceAmount ??
-          customer.outstandingAmount ??
-          customer.openingBalanceAmount ??
-          0,
-        lastPaymentAmount:
-          customer.lastPaymentAmount ?? customer.lastPayment?.amount ?? 0,
-        lastPaymentDate: formatReceivedDate(
-          customer.lastPaymentDate || customer.lastPayment?.date
-        ),
-        creditLimit: customer.creditLimitAmount ?? 0,
+        accountStatus:
+          customer.accountStatus ||
+          (customer.isActive !== false ? "Active Account" : "Inactive Account"),
+        totalPurchases: summary?.totalPurchases ?? 0,
+        salesCount: summary?.salesCount ?? 0,
+        outstandingBalance: summary?.outstandingBalance ?? 0,
+        lastPaymentAmount: summary?.lastPaymentAmount ?? 0,
+        lastPaymentDate: formatReceivedDate(summary?.lastPaymentDate),
+        lastPaymentNumber: summary?.lastPaymentNumber,
+        lastPaymentMethodLabel: summary?.lastPaymentMethodLabel,
+        creditLimit:
+          summary?.creditLimitAmount ?? customer.creditLimitAmount ?? 0,
       }
     : null;
 
@@ -566,7 +566,7 @@ function CustomerDetails() {
                       : "bg-red-50 text-red-600"
                   }`}
                 >
-                  {customerFile.isActive ? "Active Account" : "Inactive Account"}
+                  {customerFile.accountStatus}
                 </span>
               </div>
               <p className="mt-1 text-sm text-slate-500">
@@ -608,6 +608,10 @@ function CustomerDetails() {
           <p className="mt-2 text-2xl font-bold text-slate-900">
             {formatRs(customerFile.totalPurchases)}
           </p>
+          <p className="mt-1 text-xs text-slate-400">
+            {customerFile.salesCount}{" "}
+            {customerFile.salesCount === 1 ? "sale" : "sales"}
+          </p>
         </article>
 
         <article className="rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
@@ -624,7 +628,13 @@ function CustomerDetails() {
           </p>
           <p className="mt-1 text-xs text-slate-400">
             {customerFile.lastPaymentDate
-              ? `Received on ${customerFile.lastPaymentDate}`
+              ? [
+                  `Received on ${customerFile.lastPaymentDate}`,
+                  customerFile.lastPaymentNumber,
+                  customerFile.lastPaymentMethodLabel,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")
               : "No payment received yet"}
           </p>
         </article>

@@ -10,6 +10,7 @@ import {
   createCustomer,
   updateCustomer,
   getCustomerById,
+  getCustomerLedger,
   getCustomerSalesHistory,
   getCustomerPaymentHistory,
 } from "../../api/customers.api";
@@ -25,6 +26,14 @@ export const useCustomerById = (id) => {
   return useQuery({
     queryKey: queryKeys.customers.detail(id),
     queryFn: () => getCustomerById(id),
+    enabled: !!id,
+  });
+};
+
+export const useCustomerLedger = (id) => {
+  return useQuery({
+    queryKey: queryKeys.customers.ledger(id),
+    queryFn: () => getCustomerLedger(id),
     enabled: !!id,
   });
 };
