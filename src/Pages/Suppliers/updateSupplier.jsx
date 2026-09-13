@@ -12,7 +12,13 @@ function UpdateSupplier() {
   const updateSupplierMutation = useUpdateSupplier();
 
   const { data: supplierData, isLoading } = useSupplierById(id);
-  const supplier = supplierData?.data;
+  const supplier =
+    supplierData?.data?._doc ||
+    supplierData?.data ||
+    supplierData?._doc ||
+    (supplierData?.supplierName || supplierData?.supplierCode
+      ? supplierData
+      : null);
 
   const [formData, setFormData] = useState({
     supplierName: "",

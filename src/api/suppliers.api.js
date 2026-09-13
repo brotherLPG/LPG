@@ -1,5 +1,43 @@
 import api from './axios'
 
+const SUPPLIER_META_KEYS = new Set([
+  '$__',
+  '$isNew',
+  '$locals',
+  '$op',
+  'errors',
+  'isNew',
+  '_doc',
+  'form',
+  'message',
+  'success',
+])
+
+const unwrapSupplierRecord = (payload) => {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    return payload
+  }
+
+  const nested = payload.data
+  if (nested && typeof nested === 'object' && !Array.isArray(nested)) {
+    if (nested._doc || nested.supplierName || nested.supplierCode || nested._id) {
+      return nested._doc ? { ...nested._doc } : { ...nested }
+    }
+  }
+
+  if (payload._doc) {
+    return { ...payload._doc }
+  }
+
+  if (payload.supplierName || payload.supplierCode || payload._id) {
+    return Object.fromEntries(
+      Object.entries(payload).filter(([key]) => !SUPPLIER_META_KEYS.has(key))
+    )
+  }
+
+  return payload
+}
+
 export const getSuppliers = async (params) => {
   const response = await api.get('/suppliers', { params })
   return response.data
@@ -22,7 +60,14 @@ export const updateSupplier = async (id, data) => {
 
 export const getSupplierById = async (id) => {
   const response = await api.get(`/suppliers/${id}`)
-  return response.data
+  const payload = response.data
+
+  return {
+    success: payload?.success ?? true,
+    message: payload?.message,
+    form: payload?.form,
+    data: unwrapSupplierRecord(payload),
+  }
 }
 
 export const getSupplierLedger = async (id) => {
