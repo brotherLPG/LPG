@@ -10,6 +10,8 @@ import {
   createCustomer,
   updateCustomer,
   getCustomerById,
+  getCustomerSalesHistory,
+  getCustomerPaymentHistory,
 } from "../../api/customers.api";
 
 export const useCustomers = (params) => {
@@ -23,6 +25,22 @@ export const useCustomerById = (id) => {
   return useQuery({
     queryKey: queryKeys.customers.detail(id),
     queryFn: () => getCustomerById(id),
+    enabled: !!id,
+  });
+};
+
+export const useCustomerSalesHistory = (id, params) => {
+  return useQuery({
+    queryKey: queryKeys.customers.salesHistory(id, params),
+    queryFn: () => getCustomerSalesHistory(id, params),
+    enabled: !!id,
+  });
+};
+
+export const useCustomerPaymentHistory = (id, params) => {
+  return useQuery({
+    queryKey: queryKeys.customers.paymentHistory(id, params),
+    queryFn: () => getCustomerPaymentHistory(id, params),
     enabled: !!id,
   });
 };

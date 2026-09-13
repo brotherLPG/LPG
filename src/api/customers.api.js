@@ -24,3 +24,13 @@ export const getCustomerById = async (id) => {
   const response = await api.get(`/customers/${id}`)
   return response.data
 }
+
+export const getCustomerSalesHistory = async (id, params) => {
+  const response = await api.get(`/customers/${id}/sales-history`, { params })
+  return response.data
+}
+
+export const getCustomerPaymentHistory = async (id, params) => {
+  const response = await api.get(`/customers/${id}/payment-history`, { params })
+  return response.data
+}

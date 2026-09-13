@@ -36,7 +36,11 @@ export const queryKeys = {
 
     list: (params) => ['customers', 'list', params],
 
-    detail: id => ['customers', 'detail', id]
+    detail: id => ['customers', 'detail', id],
+
+    salesHistory: (id, params) => ['customers', 'sales-history', id, params],
+
+    paymentHistory: (id, params) => ['customers', 'payment-history', id, params]
   },
 
   // =========================
