@@ -326,7 +326,7 @@ function AddPayment() {
 
                   <div>
                     <label className="block text-sm font-semibold text-BLUE-dark mb-1.5">
-                      Current Ledger Balance
+                      Remaining Amount
                     </label>
                     <input
                       type="text"
