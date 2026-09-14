@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { useToast } from "../../utils/GlobalToast";
-import { useCylinderTypeById, useUpdateCylinderType } from "../../queries/cylinderTypes/cylinderTypes.queries";
+import {
+  useCylinderTypeById,
+  useUpdateCylinderType,
+  useCylinderTypeFormOptions,
+} from "../../queries/cylinderTypes/cylinderTypes.queries";
 
 function UpdateCylinderType() {
   const { id } = useParams();
@@ -11,9 +15,20 @@ function UpdateCylinderType() {
 
   const { data, isLoading: isFetching } = useCylinderTypeById(id);
   const updateMutation = useUpdateCylinderType();
+  const { data: formOptionsResponse, isLoading: optionsLoading } =
+    useCylinderTypeFormOptions();
+  const formOptions = formOptionsResponse?.data || {};
+  const categories = formOptions.categories || [];
+  const colorCodes = formOptions.colorCodes || [];
+  const valveTypes = formOptions.valveTypes || [];
+  const materials = formOptions.materials || [];
+  const statuses = formOptions.statuses || [];
+  const activeLabel =
+    statuses.find((status) => status.value === true)?.label || "Active Type";
+  const inactiveLabel =
+    statuses.find((status) => status.value === false)?.label || "Inactive Type";
 
-  const cylinderData = data?.data?._doc;
-  const meta = data?.data?.form;
+  const cylinderData = data?.data?._doc || data?.data;
 
   const [typeName, setTypeName] = useState("");
   const [category, setCategory] = useState("");
@@ -131,9 +146,16 @@ function UpdateCylinderType() {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Category <span className="text-rose-500">*</span></label>
                 <div className="relative">
-                  <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100">
-                    <option value="" disabled>Select Category</option>
-                    {meta?.categories?.map((cat) => (
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    disabled={optionsLoading}
+                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                  >
+                    <option value="" disabled>
+                      {optionsLoading ? "Loading..." : "Select Category"}
+                    </option>
+                    {categories.map((cat) => (
                       <option key={cat.value} value={cat.value}>
                         {cat.label}
                       </option>
@@ -156,9 +178,16 @@ function UpdateCylinderType() {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Color Code</label>
                 <div className="relative">
-                  <select value={colorCode} onChange={(e) => setColorCode(e.target.value)} className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100">
-                    <option value="" disabled>Select Color Identification</option>
-                    {meta?.colorCodes?.map((color) => (
+                  <select
+                    value={colorCode}
+                    onChange={(e) => setColorCode(e.target.value)}
+                    disabled={optionsLoading}
+                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                  >
+                    <option value="" disabled>
+                      {optionsLoading ? "Loading..." : "Select Color Identification"}
+                    </option>
+                    {colorCodes.map((color) => (
                       <option key={color.value} value={color.value}>
                         {color.label}
                       </option>
@@ -175,7 +204,9 @@ function UpdateCylinderType() {
                   <button type="button" onClick={() => setIsActive(!isActive)} className={`relative inline-flex h-6 w-11 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isActive ? "bg-[#10b981]" : "bg-slate-200"}`} role="switch" aria-checked={isActive}>
                     <span aria-hidden="true" className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isActive ? "translate-x-5" : "translate-x-0"}`} />
                   </button>
-                  <span className={`text-sm font-semibold ${isActive ? "text-[#008951]" : "text-error"}`}>{isActive ? "Active Type" : "InActive Type"}</span>
+                  <span className={`text-sm font-semibold ${isActive ? "text-[#008951]" : "text-error"}`}>
+                    {isActive ? activeLabel : inactiveLabel}
+                  </span>
                 </div>
               </div>
             </div>
@@ -225,9 +256,16 @@ function UpdateCylinderType() {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Valve Type</label>
                 <div className="relative">
-                  <select value={valveType} onChange={(e) => setValveType(e.target.value)} className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100">
-                    <option value="" disabled>Select Valve Type</option>
-                    {meta?.valveTypes?.map((valve) => (
+                  <select
+                    value={valveType}
+                    onChange={(e) => setValveType(e.target.value)}
+                    disabled={optionsLoading}
+                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                  >
+                    <option value="" disabled>
+                      {optionsLoading ? "Loading..." : "Select Valve Type"}
+                    </option>
+                    {valveTypes.map((valve) => (
                       <option key={valve.value} value={valve.value}>
                         {valve.label}
                       </option>
@@ -239,9 +277,16 @@ function UpdateCylinderType() {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Material</label>
                 <div className="relative">
-                  <select value={material} onChange={(e) => setMaterial(e.target.value)} className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100">
-                    <option value="" disabled>Select Material</option>
-                    {meta?.materials?.map((mat) => (
+                  <select
+                    value={material}
+                    onChange={(e) => setMaterial(e.target.value)}
+                    disabled={optionsLoading}
+                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                  >
+                    <option value="" disabled>
+                      {optionsLoading ? "Loading..." : "Select Material"}
+                    </option>
+                    {materials.map((mat) => (
                       <option key={mat.value} value={mat.value}>
                         {mat.label}
                       </option>
@@ -261,8 +306,12 @@ function UpdateCylinderType() {
 
       <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <button onClick={() => navigate("/cylinder-types")} className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">Cancel</button>
-        <button onClick={handleSave} disabled={updateMutation.isLoading} className={`rounded-lg px-6 py-2 text-sm font-medium text-white transition ${updateMutation.isLoading ? "bg-emerald-300 pointer-events-none" : "bg-[#008951] hover:bg-[#007545]"}`}>
-         {updateMutation.isPending ? "Update Saving..." : " Update Cylinder Type"}
+        <button
+          onClick={handleSave}
+          disabled={updateMutation.isPending || optionsLoading}
+          className={`rounded-lg px-6 py-2 text-sm font-medium text-white transition ${updateMutation.isPending || optionsLoading ? "bg-emerald-300 pointer-events-none" : "bg-[#008951] hover:bg-[#007545]"}`}
+        >
+          {updateMutation.isPending ? "Updating..." : "Update Cylinder Type"}
         </button>
       </div>
     </main>

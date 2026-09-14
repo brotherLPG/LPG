@@ -133,7 +133,9 @@ export const queryKeys = {
 
     list: (params) => ['cylinder-types', 'list', params],
 
-    detail: id => ['cylinder-types', 'detail', id]
+    detail: id => ['cylinder-types', 'detail', id],
+
+    formOptions: () => ['cylinder-types', 'form-options']
   },
 
   // =========================

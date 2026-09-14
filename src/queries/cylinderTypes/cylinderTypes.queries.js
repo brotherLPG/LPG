@@ -6,6 +6,7 @@ import {
   createCylinderType,
   updateCylinderType,
   getCylinderTypeById,
+  getCylinderTypeFormOptions,
 } from "../../api/cylinderTypes.api";
 
 export const useCylinderTypes = (params) => {
@@ -20,6 +21,13 @@ export const useCylinderTypeById = (id) => {
     queryKey: queryKeys.cylinderTypes.detail(id),
     queryFn: () => getCylinderTypeById(id),
     enabled: !!id,
+  });
+};
+
+export const useCylinderTypeFormOptions = () => {
+  return useQuery({
+    queryKey: queryKeys.cylinderTypes.formOptions(),
+    queryFn: getCylinderTypeFormOptions,
   });
 };
 

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Switch } from "@heroui/react";
 import { ChevronDown } from "lucide-react";
 import { useToast } from "../../utils/GlobalToast";
-import { useCreateCylinderType, useCylinderTypes } from "../../queries/cylinderTypes/cylinderTypes.queries";
+import {
+  useCreateCylinderType,
+  useCylinderTypeFormOptions,
+} from "../../queries/cylinderTypes/cylinderTypes.queries";
 
 function AddCylinderType() {
   const navigate = useNavigate();
@@ -25,9 +27,19 @@ function AddCylinderType() {
   const [safetyCert, setSafetyCert] = useState("");
 
   const createMutation = useCreateCylinderType();
-  const { data: cylinderTypesData } = useCylinderTypes({ limit: 1 });
-
-  const meta = cylinderTypesData?.data?.meta;
+  const { data: formOptionsResponse, isLoading: optionsLoading } =
+    useCylinderTypeFormOptions();
+  const formOptions = formOptionsResponse?.data || {};
+  const nextTypeCode = formOptions.nextTypeCode || "";
+  const categories = formOptions.categories || [];
+  const colorCodes = formOptions.colorCodes || [];
+  const valveTypes = formOptions.valveTypes || [];
+  const materials = formOptions.materials || [];
+  const statuses = formOptions.statuses || [];
+  const activeLabel =
+    statuses.find((status) => status.value === true)?.label || "Active Type";
+  const inactiveLabel =
+    statuses.find((status) => status.value === false)?.label || "Inactive Type";
 
 
      const handleSubmit = async (e) => {
@@ -112,7 +124,13 @@ function AddCylinderType() {
                 <input
                   type="text"
                   disabled
-                  value="CYL-008"
+                  value={
+                    optionsLoading
+                      ? "Loading..."
+                      : nextTypeCode
+                        ? `${nextTypeCode} (Auto-generated)`
+                        : "Auto-generated on save"
+                  }
                   className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed"
                 />
               </div>
@@ -136,15 +154,15 @@ function AddCylinderType() {
                 </label>
                 <div className="relative">
                   <select
-                    defaultValue=""
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    disabled={optionsLoading}
+                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:cursor-not-allowed"
                   >
                     <option value="" disabled>
-                      Select Category
+                      {optionsLoading ? "Loading..." : "Select Category"}
                     </option>
-                    {meta?.categories?.map((cat) => (
+                    {categories.map((cat) => (
                       <option key={cat.value} value={cat.value}>
                         {cat.label}
                       </option>
@@ -186,15 +204,15 @@ function AddCylinderType() {
                 </label>
                 <div className="relative">
                   <select
-                    defaultValue=""
                     value={colorCode}
                     onChange={(e) => setColorCode(e.target.value)}
-                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    disabled={optionsLoading}
+                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:cursor-not-allowed"
                   >
                     <option value="" disabled>
-                      Select Color Identification
+                      {optionsLoading ? "Loading..." : "Select Color Identification"}
                     </option>
-                    {meta?.colorCodes?.map((color) => (
+                    {colorCodes.map((color) => (
                       <option key={color.value} value={color.value}>
                         {color.label}
                       </option>
@@ -235,7 +253,7 @@ function AddCylinderType() {
                   <span
                     className={`text-sm font-semibold ${isActive ? "text-[#008951]" : "text-error"}`}
                   >
-                    {isActive ? "Active Type" : "InActive Type"}
+                    {isActive ? activeLabel : inactiveLabel}
                   </span>
                 </div>
               </div>
@@ -336,15 +354,15 @@ function AddCylinderType() {
                 </label>
                 <div className="relative">
                   <select
-                    defaultValue=""
                     value={valveType}
                     onChange={(e) => setValveType(e.target.value)}
-                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    disabled={optionsLoading}
+                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:cursor-not-allowed"
                   >
                     <option value="" disabled>
-                      Select Valve Type
+                      {optionsLoading ? "Loading..." : "Select Valve Type"}
                     </option>
-                    {meta?.valveTypes?.map((valve) => (
+                    {valveTypes.map((valve) => (
                       <option key={valve.value} value={valve.value}>
                         {valve.label}
                       </option>
@@ -359,15 +377,15 @@ function AddCylinderType() {
                 </label>
                 <div className="relative">
                   <select
-                    defaultValue=""
                     value={material}
                     onChange={(e) => setMaterial(e.target.value)}
-                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    disabled={optionsLoading}
+                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:cursor-not-allowed"
                   >
                     <option value="" disabled>
-                      Select Material
+                      {optionsLoading ? "Loading..." : "Select Material"}
                     </option>
-                    {meta?.materials?.map((mat) => (
+                    {materials.map((mat) => (
                       <option key={mat.value} value={mat.value}>
                         {mat.label}
                       </option>
@@ -403,10 +421,9 @@ function AddCylinderType() {
         </button>
         <button
           onClick={handleSubmit}
-          disabled={createMutation.isLoading}
-          className={`rounded-lg px-6 py-2 text-sm font-medium text-white transition ${createMutation.isLoading ? "bg-emerald-300 pointer-events-none" : "bg-[#008951] hover:bg-[#007545]"}`}
+          disabled={createMutation.isPending || optionsLoading}
+          className={`rounded-lg px-6 py-2 text-sm font-medium text-white transition ${createMutation.isPending || optionsLoading ? "bg-emerald-300 pointer-events-none" : "bg-[#008951] hover:bg-[#007545]"}`}
         >
-        
           {createMutation.isPending ? "Saving..." : "Save Cylinder Type"}
         </button>
       </div>

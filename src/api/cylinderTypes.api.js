@@ -25,10 +25,16 @@ export const getCylinderTypeById = async (id) => {
   return response.data
 }
 
+export const getCylinderTypeFormOptions = async () => {
+  const response = await api.get('/cylinder-types/form-options')
+  return response.data
+}
+
 export default {
   getCylinderTypes,
   deleteCylinderType,
   createCylinderType,
   updateCylinderType,
   getCylinderTypeById,
+  getCylinderTypeFormOptions,
 }
