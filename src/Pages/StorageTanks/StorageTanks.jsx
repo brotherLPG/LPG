@@ -1,6 +1,5 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
-import { AlertTriangle, Edit, History } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import StorageTanksimage from "../../assets/Images/StorageTanks.jpg"
 import GlobalTable from "../../utils/GlobalTable"
 import { useStorageTankDashboard } from "../../queries/storageTanks/storageTanks.queries"
@@ -72,11 +71,11 @@ function StorageTanks() {
       key: "receipt",
       label: "Receipt ID",
       isRowHeader: true,
-      className: "px-0 py-1.5 text-left font-bold text-tertiary",
-      cellClassName: "px-0 py-2",
+      className: "px-0 py-1.5 text-left font-bold text-tertiary w-[32%]",
+      cellClassName: "px-0 py-2 w-[32%] align-top",
       renderCell: (item) => (
-        <div className="flex flex-col">
-          <span className="text-[12px] font-bold text-6th-color">{item.receipt}</span>
+        <div className="flex min-w-0 flex-col">
+          <span className="text-[12px] font-bold text-6th-color wrap-break-word">{item.receipt}</span>
           <span className="text-4th-color text-[10px] font-regular">{formatDate(item.date)}</span>
         </div>
       ),
@@ -84,14 +83,14 @@ function StorageTanks() {
     {
       key: "supplier",
       label: "Supplier",
-      className: "px-2 py-1.5 text-left font-bold text-tertiary",
-      cellClassName: "px-2 py-2 text-[12px] text-tertiary",
+      className: "px-2 py-1.5 text-left font-bold text-tertiary w-[43%]",
+      cellClassName: "px-2 py-2 text-[12px] text-tertiary w-[43%] align-top wrap-break-word",
     },
     {
       key: "quantity",
       label: "Quantity",
-      className: "px-2 py-1.5 text-left font-bold text-tertiary",
-      cellClassName: "px-2 py-2 text-[12px] font-bold text-BLUE-dark",
+      className: "px-2 py-1.5 text-left font-bold text-tertiary w-[25%]",
+      cellClassName: "px-2 py-2 text-[12px] font-bold text-BLUE-dark w-[25%] align-top wrap-break-word",
     },
   ];
 
@@ -110,12 +109,12 @@ function StorageTanks() {
         </div>
       ),
     },
-    {
-      key: "description",
-      label: "Description",
-      className: "px-2 py-1.5 text-left font-bold text-tertiary",
-      cellClassName: "px-2 py-2 text-[12px] text-tertiary",
-    },
+    // {
+    //   key: "description",
+    //   label: "Description",
+    //   className: "px-2 py-1.5 text-left font-bold text-tertiary",
+    //   cellClassName: "px-2 py-2 text-[12px] text-tertiary",
+    // },
     {
       key: "typeName",
       label: "Type Name",
@@ -319,7 +318,7 @@ function StorageTanks() {
         ========================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 mb-2">
           {/* Recent Bulk LPG Receipts */}
-          <section className="min-w-0 overflow-hidden rounded-md border border-slate-200 bg-white">
+          <section className="min-w-0 overflow-hidden rounded-md border border-slate-200 bg-white [&_.overflow-x-auto]:overflow-x-hidden! [&_.min-w-300]:min-w-0! [&_.min-w-300]:w-full! [&_table]:w-full! [&_table]:table-fixed">
             <header className="flex items-center justify-between border-b border-slate-100 px-3 py-2">
               <h3 className="border-b border-slate-100 py-2 text-[16px] font-bold text-BLUE-dark">
                 Recent Bulk LPG Receipts
@@ -334,8 +333,8 @@ function StorageTanks() {
           </section>
 
           {/* Recent Cylinder Filling Batches */}
-          <section className="min-w-0 overflow-hidden rounded-md border border-slate-200 bg-white">
-            <header className="flex items-center justify-between border-b border-slate-100 px-3 py-2">
+         <section className="min-w-0 overflow-hidden rounded-md border border-slate-200 bg-white [&_.overflow-x-auto]:overflow-x-hidden! [&_.min-w-300]:min-w-0! [&_.min-w-300]:w-full! [&_table]:w-full! [&_table]:table-fixed">
+             <header className="flex items-center justify-between border-b border-slate-100 px-3 py-2">
               <h3 className="border-b border-slate-100 py-2 text-[16px] font-bold text-BLUE-dark">
                 Recent Cylinder Filling Batches
               </h3>
@@ -345,7 +344,6 @@ function StorageTanks() {
               columns={batchColumns}
               data={fillingBatches}
               ariaLabel="Recent filling batches"
-              // pagination={true}
             />
           </section>
         </div>

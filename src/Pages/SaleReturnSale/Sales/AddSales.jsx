@@ -472,7 +472,7 @@ function AddSales() {
                 />
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-600">Outstanding</span>
+                <span className="text-sm text-slate-600">Remaining Amount</span>
                 <span className="text-sm font-medium text-orange">
                   Rs. {outstanding.toFixed(2)}
                 </span>

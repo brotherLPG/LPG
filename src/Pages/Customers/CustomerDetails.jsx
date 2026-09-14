@@ -615,7 +615,7 @@ function CustomerDetails() {
         </article>
 
         <article className="rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
-          <p className="text-sm font-medium text-amber-700">Outstanding Balance</p>
+          <p className="text-sm font-medium text-amber-700">Remaining Balance</p>
           <p className="mt-2 text-2xl font-bold text-amber-500">
             {formatRs(customerFile.outstandingBalance)}
           </p>

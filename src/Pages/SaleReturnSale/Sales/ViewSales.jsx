@@ -1,24 +1,10 @@
-import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ChevronDown } from "lucide-react";
 import { Table } from "@heroui/react";
 import { useSaleById } from "../../../queries/sales/sales.queries";
-import { useInventoryItems } from "../../../queries/inventory/inventory.queries";
-import { useCustomers } from "../../../queries/customers/customers.queries";
-import { useGetAccounts } from "../../../queries/accounts/accounts.queries";
 
 function ViewSales() {
   const navigate = useNavigate();
   const { id } = useParams();
-
-  const { data: inventoryData } = useInventoryItems({ search: "", page: 1, limit: 100 });
-  const inventoryItems = inventoryData?.data?.items || [];
-
-  const { data: customersData } = useCustomers({ search: "", page: 1, limit: 100 });
-  const customers = customersData?.data?.items || [];
-
-  const { data: accountsData } = useGetAccounts({ search: "", page: 1, limit: 100 });
-  const accounts = accountsData?.data?.items || [];
 
   const { data: saleData, isLoading: isLoadingSale } = useSaleById(id);
 
@@ -274,7 +260,7 @@ function ViewSales() {
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-600">Outstanding</span>
+                <span className="text-sm text-slate-600">Remaining Amount</span>
                 <span className="text-sm font-medium text-orange">
                   {formatCurrency(sale?.outstandingAmount)}
                 </span>

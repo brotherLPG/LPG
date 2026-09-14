@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import { useSaleById, useUpdateSale, useGetSaleFormOptions } from "../../../queries/sales/sales.queries";
 import { useToast } from "../../../utils/GlobalToast";
-import { useGetAccounts } from "../../../queries/accounts/accounts.queries";
 
 function UpdateSales() {
   const navigate = useNavigate();
@@ -513,7 +512,7 @@ function UpdateSales() {
               </div>
 
               <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-600">Outstanding</span>
+                <span className="text-sm text-slate-600">Remaining Amount</span>
                 <span className="text-sm font-medium text-orange">
                   Rs. {outstanding.toFixed(2)}
                 </span>

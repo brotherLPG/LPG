@@ -1,4 +1,4 @@
-import { ArrowLeft, Pencil } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetPaymentById } from "../../queries/payments/payments.queries";
 
@@ -117,7 +117,7 @@ function PaymentDetails() {
                   <tr className="border-b border-slate-200">
                     <th className="px-4 py-3 text-left font-semibold text-slate-700">Invoice Number</th>
                     <th className="px-4 py-3 text-left font-semibold text-slate-700">Amount Applied</th>
-                    <th className="px-4 py-3 text-left font-semibold text-slate-700">Outstanding Amount</th>
+                    <th className="px-4 py-3 text-left font-semibold text-slate-700">Remaining Amount</th>
                   </tr>
                 </thead>
                 <tbody>
