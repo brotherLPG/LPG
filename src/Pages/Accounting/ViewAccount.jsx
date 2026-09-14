@@ -140,7 +140,7 @@ function ViewAccount() {
           <h2 className="text-lg font-semibold text-slate-800">Account Information</h2>
         </div>
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
             <div>
               <label className="block text-sm font-medium text-slate-500 mb-1">Account Name</label>
               <p className="text-sm font-semibold text-slate-900">{account.accountName || "—"}</p>
@@ -210,34 +210,6 @@ function ViewAccount() {
         </div>
       </div>
 
-      <div className="mt-6 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <div className="border-b border-slate-200 px-6 py-4">
-          <h2 className="text-lg font-semibold text-slate-800">Timestamps</h2>
-        </div>
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-slate-400" />
-              <div>
-                <p className="text-sm font-medium text-slate-500">Created At</p>
-                <p className="text-sm font-semibold text-slate-900">
-                  {account.createdAt ? new Date(account.createdAt).toLocaleString() : "—"}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-slate-400" />
-              <div>
-                <p className="text-sm font-medium text-slate-500">Last Updated</p>
-                <p className="text-sm font-semibold text-slate-900">
-                  {account.updatedAt ? new Date(account.updatedAt).toLocaleString() : "—"}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </main>
   );
 }
