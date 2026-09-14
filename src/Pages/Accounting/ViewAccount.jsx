@@ -58,7 +58,6 @@ function ViewAccount() {
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               {account.accountName}
             </h1>
-            <p className="mt-1 text-sm text-slate-500">{account.accountCode}</p>
           </div>
           <div className="flex gap-2">
            
@@ -77,13 +76,21 @@ function ViewAccount() {
 
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4 xl:grid-cols-4">
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-3">
+          <div className="flex items-start gap-3">
             <div className="rounded-lg bg-slate-100 p-2">
               <Wallet className="h-5 w-5 text-slate-700" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-semibold text-slate-600">Account Code</p>
-              <p className="text-xl font-bold text-slate-900">{account.accountCode}</p>
+              <p className="text-xl font-bold tracking-tight text-slate-900">
+                {account.accountCode || "—"}
+              </p>
+              <div className="mt-1.5 flex items-center gap-1.5">
+                  <span className="text-[11px] font-medium text-slate-400">Account Type</span>
+                <span className="inline-flex max-w-full truncate rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                  {account.accountTypeLabel || account.accountType || "—"}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -144,11 +151,6 @@ function ViewAccount() {
             <div>
               <label className="block text-sm font-medium text-slate-500 mb-1">Account Name</label>
               <p className="text-sm font-semibold text-slate-900">{account.accountName || "—"}</p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-500 mb-1">Account Type</label>
-              <p className="text-sm font-semibold text-slate-900">{account.accountTypeLabel || account.accountType || "—"}</p>
             </div>
 
             <div>
