@@ -25,7 +25,7 @@ export const deletePayment = async (id) => {
   return response.data
 }
 
-export const getPaymentFormOptions = async () => {
-  const response = await api.get('/payments/form-options')
+export const getPaymentFormOptions = async (params) => {
+  const response = await api.get('/payments/form-options', { params })
   return response.data
 }

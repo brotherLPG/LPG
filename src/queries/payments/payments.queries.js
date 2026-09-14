@@ -34,10 +34,11 @@ export const useGetPaymentById = (id) => {
   });
 };
 
-export const useGetPaymentFormOptions = () => {
+export const useGetPaymentFormOptions = (params, options = {}) => {
   return useQuery({
-    queryKey: queryKeys.payments.formOptions(),
-    queryFn: () => getPaymentFormOptions(),
+    queryKey: queryKeys.payments.formOptions(params),
+    queryFn: () => getPaymentFormOptions(params),
+    enabled: options.enabled ?? true,
   });
 };
 

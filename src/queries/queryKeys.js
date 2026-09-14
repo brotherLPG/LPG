@@ -243,7 +243,7 @@ export const queryKeys = {
 
     detail: id => ['payments', 'detail', id],
 
-    formOptions: () => ['payments', 'form-options']
+    formOptions: (params) => ['payments', 'form-options', params]
   },
 
   // =========================

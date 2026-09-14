@@ -4,11 +4,26 @@ import { ChevronDown } from "lucide-react";
 import { useGetPaymentFormOptions, useCreatePayment } from "../../queries/payments/payments.queries";
 import { useToast } from "../../utils/GlobalToast";
 
+const formatInvoiceDate = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const parseAmount = (value) =>
+  Number(String(value || "").replace(/,/g, "").trim()) || 0;
+
 function AddPayment() {
   const navigate = useNavigate();
   const toast = useToast();
   const [paymentDirection, setPaymentDirection] = useState("receive");
   const [selectedInvoices, setSelectedInvoices] = useState([]);
+  const [allocationAmounts, setAllocationAmounts] = useState({});
   const [paymentAmount, setPaymentAmount] = useState("");
   const [formData, setFormData] = useState({
     paymentDate: "",
@@ -18,43 +33,145 @@ function AddPayment() {
     referenceNumber: "",
   });
   const { data: formOptions, isLoading: optionsLoading } = useGetPaymentFormOptions();
-  const createMutation = useCreatePayment();
 
-  const invoices = formOptions?.data?.outstandingInvoices || [];
+  const isCustomerReceipt = paymentDirection === "receive";
+  const partyParams = formData.customerId
+    ? isCustomerReceipt
+      ? { customerId: formData.customerId }
+      : { supplierId: formData.customerId }
+    : undefined;
+
+  const {
+    data: partyFormOptions,
+    isFetching: isPartyOptionsLoading,
+  } = useGetPaymentFormOptions(partyParams, {
+    enabled: Boolean(partyParams),
+  });
+
+  const createMutation = useCreatePayment();
+  const outstandingInvoices = Array.isArray(
+    partyFormOptions?.data?.outstandingInvoices
+  )
+    ? partyFormOptions.data.outstandingInvoices
+    : [];
+  const invoices = outstandingInvoices;
+  const ledgerBalanceLabel =
+    partyFormOptions?.data?.ledgerBalanceLabel ||
+    (formData.customerId ? "Loading..." : "Rs. 0");
 
   const handleInputChange = (field, value) => {
     setFormData((previous) => ({ ...previous, [field]: value }));
   };
 
-  const handleInvoiceToggle = (invoiceId) => {
-    setSelectedInvoices((prev) =>
-      prev.includes(invoiceId)
-        ? prev.filter((id) => id !== invoiceId)
-        : [...prev, invoiceId]
+  const handleDirectionChange = (value) => {
+    setPaymentDirection(value);
+    handleInputChange("customerId", "");
+    setSelectedInvoices([]);
+    setAllocationAmounts({});
+  };
+
+  const handlePartyChange = (value) => {
+    handleInputChange("customerId", value);
+    setSelectedInvoices([]);
+    setAllocationAmounts({});
+  };
+
+  const getInvoiceId = (invoice) => invoice._id;
+
+  const getInvoiceLabel = (invoice) =>
+    invoice.invoiceNumber || invoice.saleNumber || invoice._id;
+
+  const handleInvoiceToggle = (invoice) => {
+    const invoiceId = getInvoiceId(invoice);
+    const isSelected = selectedInvoices.includes(invoiceId);
+
+    if (isSelected) {
+      setSelectedInvoices((prev) => prev.filter((id) => id !== invoiceId));
+      setAllocationAmounts((prev) => {
+        const next = { ...prev };
+        delete next[invoiceId];
+        return next;
+      });
+      return;
+    }
+
+    setSelectedInvoices((prev) => [...prev, invoiceId]);
+    setAllocationAmounts((prev) => ({
+      ...prev,
+      [invoiceId]: String(invoice.outstandingAmount ?? 0),
+    }));
+  };
+
+  const handleSelectAll = () => {
+    if (selectedInvoices.length === invoices.length) {
+      setSelectedInvoices([]);
+      setAllocationAmounts({});
+      return;
+    }
+
+    setSelectedInvoices(invoices.map((invoice) => getInvoiceId(invoice)));
+    setAllocationAmounts(
+      Object.fromEntries(
+        invoices.map((invoice) => [
+          getInvoiceId(invoice),
+          String(invoice.outstandingAmount ?? 0),
+        ])
+      )
     );
   };
+
+  const handleAllocationAmountChange = (invoiceId, value) => {
+    setAllocationAmounts((prev) => ({
+      ...prev,
+      [invoiceId]: value,
+    }));
+  };
+
+  const buildAllocations = () =>
+    selectedInvoices
+      .map((invoiceId) => {
+        const invoice = outstandingInvoices.find((item) => item._id === invoiceId);
+        if (!invoice) return null;
+
+        const outstanding = parseAmount(invoice.outstandingAmount);
+        const typedAmount = parseAmount(allocationAmounts[invoiceId]);
+        const amountApplied = Math.min(typedAmount || outstanding, outstanding);
+
+        if (amountApplied <= 0) return null;
+
+        return {
+          saleId: invoice._id,
+          amountApplied,
+        };
+      })
+      .filter(Boolean);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const allocations = selectedInvoices.map((invoiceId) => {
-        const invoice = invoices.find((inv) => (inv._id || inv.saleId) === invoiceId);
-        return {
-          saleId: invoice?._id || invoiceId,
-          amountApplied: Number(paymentAmount) || 0,
-        };
-      });
+      const allocations = buildAllocations();
+      const allocatedTotal = allocations.reduce(
+        (sum, allocation) => sum + allocation.amountApplied,
+        0
+      );
 
-      await createMutation.mutateAsync({
+      const payload = {
         direction: paymentDirection,
         paymentDate: formData.paymentDate || null,
-        customerId: formData.customerId,
-        paymentAmount: Number(paymentAmount) || 0,
+        paymentAmount: parseAmount(paymentAmount) || allocatedTotal,
         paymentMethod: formData.paymentMethod,
         accountId: formData.accountId,
         referenceNumber: formData.referenceNumber,
         allocations,
-      });
+      };
+
+      if (isCustomerReceipt) {
+        payload.customerId = formData.customerId;
+      } else {
+        payload.supplierId = formData.customerId;
+      }
+
+      await createMutation.mutateAsync(payload);
       toast.success("Payment recorded successfully!");
       navigate("/payments");
     } catch (error) {
@@ -62,18 +179,21 @@ function AddPayment() {
     }
   };
 
-  const getAllocationRemarks = () => {
-    if (selectedInvoices.length === 0) return "";
-    const amount = parseInt(paymentAmount) || 0;
-    const selectedInvoice = invoices.find((inv) => (inv._id || inv.saleId) === selectedInvoices[0]);
-    if (selectedInvoice) {
-      const outstanding = selectedInvoice.outstandingAmount || selectedInvoice.outstanding;
-      const newBalance = outstanding - amount;
-      const invoiceNumber = selectedInvoice.saleNumber || selectedInvoice.saleId || selectedInvoice._id;
-      return `Rs. ${amount.toLocaleString()} applied to ${invoiceNumber} (New Bal: Rs. ${newBalance.toLocaleString()})`;
-    }
-    return "";
-  };
+  const appliedAmountsTotal = selectedInvoices.reduce(
+    (total, invoiceId) => total + parseAmount(allocationAmounts[invoiceId]),
+    0
+  );
+  const appliedAmountsLabel = appliedAmountsTotal
+    ? `Rs. ${appliedAmountsTotal.toLocaleString()}`
+    : "";
+
+  const invoiceEmptyMessage = !formData.customerId
+    ? isCustomerReceipt
+      ? "Select a customer to load outstanding invoices."
+      : "Select a supplier to load outstanding invoices."
+    : isPartyOptionsLoading
+      ? "Loading outstanding invoices..."
+      : "No outstanding invoices found.";
 
   return (
     <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
@@ -106,9 +226,8 @@ function AddPayment() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-          {/* Left Column (lg:col-span-2) */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-6">
+          <div className="gap-6">
             {/* Card 1: Voucher & Party Configuration */}
             <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
               <div className="border-b border-slate-200 p-4">
@@ -155,7 +274,7 @@ function AddPayment() {
                       <button
                         key={direction.value}
                         type="button"
-                        onClick={() => setPaymentDirection(direction.value)}
+                        onClick={() => handleDirectionChange(direction.value)}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                           paymentDirection === direction.value
                             ? "bg-white text-accent-blue border border-[#1E40AF] rounded"
@@ -170,7 +289,7 @@ function AddPayment() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                   <div>
                     <label className="block text-sm font-semibold text-BLUE-dark mb-1.5">
-                      {paymentDirection === "receive"
+                      {isCustomerReceipt
                         ? "Select Customer"
                         : "Select Supplier"}{" "}
                       <span className="text-rose-500">*</span>
@@ -179,17 +298,17 @@ function AddPayment() {
                       <select
                         value={formData.customerId}
                         onChange={(event) =>
-                          handleInputChange("customerId", event.target.value)
+                          handlePartyChange(event.target.value)
                         }
                         disabled={optionsLoading}
                         className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                       >
                         <option value="" disabled>
-                          {paymentDirection === "receive"
+                          {isCustomerReceipt
                             ? "Select customer"
                             : "Select supplier"}
                         </option>
-                        {paymentDirection === "receive"
+                        {isCustomerReceipt
                           ? formOptions?.data?.customers?.map((customer) => (
                               <option key={customer._id} value={customer._id}>
                                 {customer.label}
@@ -212,7 +331,7 @@ function AddPayment() {
                     <input
                       type="text"
                       disabled
-                      value={formOptions?.data?.ledgerBalanceLabel || "Rs. 0"}
+                      value={ledgerBalanceLabel}
                       className="w-full rounded-md border font-bold border-slate-200 bg-[#FEF2F2] px-3 py-2 text-sm text-error outline-none cursor-not-allowed"
                     />
                   </div>
@@ -220,7 +339,7 @@ function AddPayment() {
               </div>
             </div>
             {/* Card 3: Financial Execution Details */}
-            <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden mt-3">
               <div className="border-b border-slate-200 p-4">
                 <h2 className="border-b border-slate-100 text-[16px] font-bold text-BLUE-dark">
                   Financial Execution Details
@@ -314,92 +433,121 @@ function AddPayment() {
             </div>
           </div>
 
-          {/* Right Column (lg:col-span-1) */}
-          <div className=" w-full">
-            {/* Card 2: Invoice Auto-Allocation */}
-            <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-              <div className="border-b border-slate-200 p-4">
-                <h2 className="border-b border-slate-100 text-[16px] font-bold text-BLUE-dark">
-                  Invoice Auto-Allocation
-                </h2>
-              </div>
-              <div className="p-5 space-y-4">
-                <p className="text-sm text-tertiary">
-                  Select outstanding invoices to apply Rs.
-                  {parseInt(paymentAmount || 0).toLocaleString()} credit
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 p-4">
+              <h2 className="text-[16px] font-bold text-BLUE-dark">
+                Invoice Auto-Allocation
+              </h2>
+              <p className="mt-1 text-sm text-tertiary">
+                Select invoices and enter the amount to apply to each.
+              </p>
+            </div>
+            <div className="overflow-x-auto">
+              {invoices.length === 0 ? (
+                <p className="px-4 py-8 text-center text-sm text-slate-500">
+                  {invoiceEmptyMessage}
                 </p>
+              ) : (
+                <table className="w-full min-w-180 text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-200 bg-slate-50">
+                      <th className="px-4 py-3 text-left">
+                        <input
+                          type="checkbox"
+                          checked={
+                            invoices.length > 0 &&
+                            selectedInvoices.length === invoices.length
+                          }
+                          onChange={handleSelectAll}
+                          className="h-4 w-4 rounded border-slate-300 text-[#008951] focus:ring-[#008951]"
+                        />
+                      </th>
+                      <th className="px-4 py-3 text-left font-semibold text-slate-700">
+                        Invoice #
+                      </th>
+                      <th className="px-4 py-3 text-left font-semibold text-slate-700">
+                        Sale #
+                      </th>
+                      <th className="px-4 py-3 text-left font-semibold text-slate-700">
+                        Date
+                      </th>
+                      <th className="px-4 py-3 text-right font-semibold text-slate-700">
+                        Total (Rs.)
+                      </th>
+                      <th className="px-4 py-3 text-right font-semibold text-slate-700">
+                        Outstanding (Rs.)
+                      </th>
+                      <th className="px-4 py-3 text-right font-semibold text-slate-700">
+                        Amount to apply (Rs.)
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {invoices.map((invoice) => {
+                      const invoiceId = getInvoiceId(invoice);
+                      const isSelected = selectedInvoices.includes(invoiceId);
 
-                {invoices.map((invoice) => (
-                  <div
-                    key={invoice._id || invoice.saleId}
-                    className={`flex items-center gap-4 p-4 rounded-lg border transition-colors ${
-                      selectedInvoices.includes(invoice._id || invoice.saleId)
-                        ? "border-[#1E40AF] bg-emerald-50"
-                        : "border-slate-200 bg-slate-50 hover:bg-slate-100"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      id={invoice._id || invoice.saleId}
-                      checked={selectedInvoices.includes(
-                        invoice._id || invoice.saleId,
-                      )}
-                      onChange={() =>
-                        handleInvoiceToggle(invoice._id || invoice.saleId)
-                      }
-                      className="h-4 w-4 rounded border-slate-300 text-[#008951] focus:ring-[#008951]"
-                    />
-                    <div className="flex-1">
-                      <label
-                        htmlFor={invoice._id || invoice.saleId}
-                        className={`text-sm font-bold cursor-pointer ${
-                          selectedInvoices.includes(
-                            invoice._id || invoice.saleId,
-                          )
-                            ? "text-accent-blue"
-                            : "text-BLUE-dark"
-                        }`}
-                      >
-                        Invoice {invoice.saleNumber || invoice.saleId}
-                      </label>
-                      <div>
-                        <p className="gap-6 mt-1 text-[11px] text-tertiary">
-                          Invoice Total: Rs.{" "}
-                          {(
-                            invoice.totalAmount || invoice.total
-                          ).toLocaleString()}
-                        </p>
-                        <p
-                          className={`gap-6 mt-1 text-[12px] font-semibold ${
-                            selectedInvoices.includes(
-                              invoice._id || invoice.saleId,
-                            )
-                              ? "text-error"
-                              : "text-tertiary"
+                      return (
+                        <tr
+                          key={invoiceId}
+                          className={`border-b border-slate-100 last:border-0 ${
+                            isSelected ? "bg-emerald-50/70" : "hover:bg-slate-50"
                           }`}
                         >
-                          Outstanding: Rs.{" "}
-                          {(
-                            invoice.outstandingAmount || invoice.outstanding
-                          ).toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                <div>
-                  <label className="block text-sm font-normal text-tertiary mb-1.5">
-                    Allocation Remarks
-                  </label>
-                  <input
-                    type="text"
-                    disabled
-                    value={getAllocationRemarks()}
-                    className="w-full rounded-md border border-none bg-white px-3 py-2 text-sm text-text-BLUE-dark outline-none cursor-not-allowed"
-                  />
-                </div>
-              </div>
+                          <td className="px-4 py-3">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleInvoiceToggle(invoice)}
+                              className="h-4 w-4 rounded border-slate-300 text-[#008951] focus:ring-[#008951]"
+                            />
+                          </td>
+                          <td className="px-4 py-3 font-semibold text-[#1a56db]">
+                            {invoice.invoiceNumber || getInvoiceLabel(invoice)}
+                          </td>
+                          <td className="px-4 py-3 text-slate-600">
+                            {invoice.saleNumber || "—"}
+                          </td>
+                          <td className="px-4 py-3 text-slate-600">
+                            {formatInvoiceDate(invoice.invoiceDate) || "—"}
+                          </td>
+                          <td className="px-4 py-3 text-right text-slate-700">
+                            {Number(invoice.totalAmount || 0).toLocaleString()}
+                          </td>
+                          <td className="px-4 py-3 text-right font-semibold text-slate-800">
+                            {Number(invoice.outstandingAmount || 0).toLocaleString()}
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            {isSelected ? (
+                              <input
+                                type="text"
+                                value={allocationAmounts[invoiceId] ?? ""}
+                                onChange={(event) =>
+                                  handleAllocationAmountChange(
+                                    invoiceId,
+                                    event.target.value
+                                  )
+                                }
+                                className="w-32 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-right text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                              />
+                            ) : (
+                              <span className="text-slate-400">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+            <div className="border-t border-slate-100 p-4">
+              <label className="block text-sm font-normal text-tertiary mb-1.5">
+                Allocation Remarks
+              </label>
+              <p className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                {appliedAmountsLabel || "—"}
+              </p>
             </div>
           </div>
         </div>
