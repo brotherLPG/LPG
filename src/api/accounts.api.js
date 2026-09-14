@@ -24,3 +24,8 @@ export const deleteAccount = async (id) => {
   const response = await api.delete(`/accounts/${id}`)
   return response.data
 }
+
+export const getAccountFormOptions = async () => {
+  const response = await api.get('/accounts/form-options')
+  return response.data
+}

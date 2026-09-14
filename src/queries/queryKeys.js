@@ -174,7 +174,9 @@ export const queryKeys = {
 
     list: (params) => ['accounts', 'list', params],
 
-    detail: id => ['accounts', 'detail', id]
+    detail: id => ['accounts', 'detail', id],
+
+    formOptions: () => ['accounts', 'form-options']
   },
 
   // =========================

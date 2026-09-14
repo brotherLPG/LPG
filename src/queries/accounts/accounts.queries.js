@@ -10,6 +10,7 @@ import {
   createAccount,
   updateAccount,
   deleteAccount,
+  getAccountFormOptions,
 } from "../../api/accounts.api";
 
 export const DEFAULT_ACCOUNTS_LIST_PARAMS = {
@@ -29,6 +30,13 @@ export const useGetAccountById = (id) => {
     queryKey: queryKeys.accounts.detail(id),
     queryFn: () => getAccountById(id),
     enabled: !!id,
+  });
+};
+
+export const useAccountFormOptions = () => {
+  return useQuery({
+    queryKey: queryKeys.accounts.formOptions(),
+    queryFn: getAccountFormOptions,
   });
 };
 

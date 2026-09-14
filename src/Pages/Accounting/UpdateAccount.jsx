@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useUpdateAccount } from "../../queries/accounts/accounts.queries";
-import { useGetAccountById } from "../../queries/accounts/accounts.queries";
-import { useGetAccounts } from "../../queries/accounts/accounts.queries";
+import {
+  useUpdateAccount,
+  useGetAccountById,
+  useAccountFormOptions,
+} from "../../queries/accounts/accounts.queries";
 import { useToast } from "../../utils/GlobalToast";
 import { AlertCircle, Loader } from "lucide-react";
 
@@ -12,8 +14,15 @@ function UpdateAccount() {
   const updateMutation = useUpdateAccount();
   const toast = useToast();
 
-  // Fetch accounts to get form options from meta
-  const { data: accountsData } = useGetAccounts();
+  const { data: formOptionsResponse, isLoading: optionsLoading } =
+    useAccountFormOptions();
+  const formOptions = formOptionsResponse?.data || {};
+  const accountTypes = formOptions.accountTypes || [];
+  const accountCategories = formOptions.accountCategories || [];
+  const parentAccounts = (formOptions.parentAccounts || []).filter(
+    (account) => account._id !== id
+  );
+  const statuses = formOptions.statuses || [];
 
   // Fetch existing account data
   const { data: accountData, isLoading: isLoadingAccount } = useGetAccountById(id);
@@ -45,7 +54,7 @@ function UpdateAccount() {
         accountName: account.accountName || "",
         accountType: account.accountType || "",
         accountCategory: account.accountCategory || "",
-        parentAccountId: account.parentAccountId || null,
+        parentAccountId: account.parentAccountId?._id || account.parentAccountId || null,
         bankName: account.bankName || "",
         branchName: account.branchName || "",
         accountNumber: account.accountNumber || "",
@@ -209,12 +218,15 @@ function UpdateAccount() {
                 <select
                   value={formData.accountType}
                   onChange={(e) => handleChange("accountType", e.target.value)}
+                  disabled={optionsLoading}
                   className={`w-full rounded-md border ${
                     formErrors.accountType ? "border-red-500" : "border-slate-200"
-                  } bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100`}
+                  } bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:cursor-not-allowed`}
                 >
-                  <option value="">Select account type</option>
-                  {accountsData?.data?.meta?.accountTypes?.map((type) => (
+                  <option value="">
+                    {optionsLoading ? "Loading..." : "Select account type"}
+                  </option>
+                  {accountTypes.map((type) => (
                     <option key={type.value} value={type.value}>
                       {type.label}
                     </option>
@@ -236,12 +248,15 @@ function UpdateAccount() {
                   onChange={(e) =>
                     handleChange("accountCategory", e.target.value)
                   }
+                  disabled={optionsLoading}
                   className={`w-full rounded-md border ${
                     formErrors.accountCategory ? "border-red-500" : "border-slate-200"
-                  } bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100`}
+                  } bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:cursor-not-allowed`}
                 >
-                  <option value="">Select category</option>
-                  {accountsData?.data?.meta?.accountCategories?.map((category) => (
+                  <option value="">
+                    {optionsLoading ? "Loading..." : "Select category"}
+                  </option>
+                  {accountCategories.map((category) => (
                     <option key={category.value} value={category.value}>
                       {category.label}
                     </option>
@@ -263,12 +278,15 @@ function UpdateAccount() {
                   onChange={(e) =>
                     handleChange("parentAccountId", e.target.value ? e.target.value : null)
                   }
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  disabled={optionsLoading}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:cursor-not-allowed"
                 >
-                  <option value="">Select parent account</option>
-                  {accountsData?.data?.items?.map((account) => (
+                  <option value="">
+                    {optionsLoading ? "Loading..." : "Select parent account"}
+                  </option>
+                  {parentAccounts.map((account) => (
                     <option key={account._id} value={account._id}>
-                      {account.accountCode} - {account.accountName}
+                      {account.label}
                     </option>
                   ))}
                 </select>
@@ -402,9 +420,11 @@ function UpdateAccount() {
                 <select
                   value={formData.isActive}
                   onChange={(e) => handleChange("isActive", e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  disabled={optionsLoading}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:cursor-not-allowed"
                 >
-                  {accountsData?.data?.meta?.statuses?.map((status) => (
+                  {optionsLoading && <option value="">Loading...</option>}
+                  {statuses.map((status) => (
                     <option key={status.value} value={status.value}>
                       {status.label}
                     </option>
@@ -462,7 +482,7 @@ function UpdateAccount() {
           </button>
           <button
             type="submit"
-            disabled={updateMutation.isPending}
+            disabled={updateMutation.isPending || optionsLoading}
             className="inline-flex items-center gap-2 rounded-lg bg-[#008951] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#007545] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {updateMutation.isPending && <Loader className="h-4 w-4 animate-spin" />}
