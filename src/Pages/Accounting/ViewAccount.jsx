@@ -1,4 +1,4 @@
-import { ArrowLeft, Edit, Building2, Landmark, Wallet, Calendar, FileText, CheckCircle, XCircle } from "lucide-react";
+import { Edit, Building2, Landmark, Wallet, CheckCircle, XCircle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetAccountById } from "../../queries/accounts/accounts.queries";
 import { usePermissions } from "../../contexts/PermissionContext";
