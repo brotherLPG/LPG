@@ -11,8 +11,13 @@ import {
   CreditCard,
   Building,
   Loader,
+  Bell,
+  ChevronDown,
+  UserRound,
+  LogOut,
 } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from "../assets/Images/logo.jpeg";
 import { useCurrentUser } from "../queries/auth/auth.queries";
 import { useRoleById } from "../queries/roles/roles.queries";
@@ -51,12 +56,7 @@ const menuItems = [
     // Always visible — no module gate
     modules: null,
   },
-  {
-    icon: Users,
-    label: "Users & Roles",
-    path: "/users-roles",
-    modules: ["users", "roles"],
-  },
+
   {
     icon: Users,
     label: "Customers",
@@ -69,42 +69,14 @@ const menuItems = [
     path: "/suppliers",
     modules: ["suppliers"],
   },
-  {
-    icon: Package,
-    label: "Cylinder Types",
-    path: "/cylinder-types",
-    activePrefixes: [
-      "/cylinders/add-type",
-      "/cylinders/edit-type",
-      "/cylinders/view-type",
-    ],
-    modules: ["cylinder-types"],
-  },
+  
   {
     icon: Warehouse,
     label: "Storage Tanks",
     path: "/storage-tanks",
     modules: ["storage-tanks"],
   },
-  {
-    icon: Receipt,
-    label: "LPG Receipts",
-    path: "/lpg-receipts",
-    modules: ["lpg-receipts"],
-  },
-  {
-    icon: Layers,
-    label: "Filling Batches",
-    path: "/filling-batches",
-    modules: ["filling-batches"],
-  },
-  {
-    icon: Package,
-    label: "Inventory",
-    path: "/inventory",
-    modules: ["inventory-items"],
-  },
-  {
+   {
     icon: DollarSign,
     label: "Accounting",
     path: "/accounting",
@@ -122,6 +94,41 @@ const menuItems = [
     path: "/payments",
     modules: ["payments"],
   },
+   {
+    icon: Layers,
+    label: "Filling Batches",
+    path: "/filling-batches",
+    modules: ["filling-batches"],
+  },
+  {
+    icon: Package,
+    label: "Cylinder Types",
+    path: "/cylinder-types",
+    activePrefixes: [
+      "/cylinders/add-type",
+      "/cylinders/edit-type",
+      "/cylinders/view-type",
+    ],
+    modules: ["cylinder-types"],
+  },
+  {
+    icon: Package,
+    label: "Inventory",
+    path: "/inventory",
+    modules: ["inventory-items"],
+  },
+  {
+    icon: Receipt,
+    label: "LPG Receipts",
+    path: "/lpg-receipts",
+    modules: ["lpg-receipts"],
+  },
+    {
+    icon: Users,
+    label: "Employees",
+    path: "/employees",
+    modules: ["employees"],
+  },
   {
     icon: Building,
     label: "Fixed Assets",
@@ -129,17 +136,18 @@ const menuItems = [
     activePrefixes: ["/maintenance-records", "/maintenance-assets"],
     modules: ["assets"],
   },
-  {
-    icon: Users,
-    label: "Employees",
-    path: "/employees",
-    modules: ["employees"],
-  },
+
   {
     icon: CreditCard,
     label: "Expenses",
     path: "/expenses",
     modules: ["expenses"],
+  },
+   {
+    icon: Users,
+    label: "Users & Roles",
+    path: "/users-roles",
+    modules: ["users", "roles"],
   },
   {
     icon: ShieldCheck,
@@ -170,6 +178,9 @@ const isMenuItemActive = (item, pathname) => {
 
 const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef(null);
   const {
     data: currentUserResponse,
     isLoading: isUserLoading,
@@ -197,6 +208,39 @@ const Sidebar = () => {
   const visibleMenuItems = menuItems.filter((item) =>
     canShowMenuItem(item, allowedModules)
   );
+
+  const storedUser = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "null");
+    } catch {
+      return null;
+    }
+  })();
+  const profileUser = currentUser || storedUser;
+  const profileName = profileUser?.fullName || "User";
+  const profileRole =
+    profileUser?.role?.roleName || profileUser?.roleName || "User";
+  const profileInitial = profileName.charAt(0).toUpperCase();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleSignOut = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+    navigate("/");
+  };
 
   return (
     <div className="h-screen flex flex-col w-64 shadow-2xl overflow-hidden transition-all duration-300 ease-in-out bg-gradient-primary-vertical">
@@ -248,6 +292,73 @@ const Sidebar = () => {
           </ul>
         )}
       </nav>
+
+      <div className="relative shrink-0 border-t border-white/10 p-3" ref={profileMenuRef}>
+        {isProfileMenuOpen && (
+          <div className="absolute bottom-full left-3 right-3 mb-2 overflow-hidden rounded-xl bg-white shadow-xl z-50">
+            <div className="bg-gradient-primary p-4 border-b border-slate-200">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
+                  <span className="text-lg font-bold text-white">{profileInitial}</span>
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate font-semibold text-white">{profileName}</p>
+                  <p className="truncate text-xs text-white/70">{profileRole}</p>
+                </div>
+              </div>
+            </div>
+            <div className="py-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsProfileMenuOpen(false);
+                  navigate("/settings");
+                }}
+                className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+              >
+                <UserRound className="h-4 w-4 text-slate-400" /> Profile And
+                settings
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsProfileMenuOpen(false);
+                  navigate("/notifications");
+                }}
+                className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+              >
+                <Bell className="h-4 w-4 text-slate-400" /> Notifications
+              </button>
+              <div className="my-1 border-t border-slate-100" />
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+              >
+                <LogOut className="h-4 w-4" /> Sign Out
+              </button>
+            </div>
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={() => setIsProfileMenuOpen((open) => !open)}
+          aria-expanded={isProfileMenuOpen}
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors hover:bg-white/15"
+        >
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-white/30 bg-white/20">
+            <span className="text-sm font-bold text-white">{profileInitial}</span>
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-white">{profileName}</p>
+            <p className="truncate text-xs text-white/50">{profileRole}</p>
+          </div>
+          <ChevronDown
+            className={`h-4 w-4 shrink-0 text-white/70 transition-transform ${isProfileMenuOpen ? "rotate-180" : ""}`}
+          />
+        </button>
+      </div>
     </div>
   );
 };

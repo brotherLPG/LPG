@@ -19,7 +19,7 @@ function AddAsset() {
   const [serialNumber, setSerialNumber] = useState("");
   const [locationName, setLocationName] = useState("Yard");
   const [assetStatus, setAssetStatus] = useState("in-use");
-  const [purchaseDate, setPurchaseDate] = useState("");
+  const [purchaseDate, setPurchaseDate] = useState(new Date().toISOString().split('T')[0]);
   const [purchaseCostAmount, setPurchaseCostAmount] = useState("");
   const [depreciationMethod, setDepreciationMethod] = useState("straight-line");
   const [assignedEmployeeId, setAssignedEmployeeId] = useState("");

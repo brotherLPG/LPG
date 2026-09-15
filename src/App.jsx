@@ -18,7 +18,7 @@ function App() {
   const location = useLocation();
   const isPublicPage = PUBLIC_PATHS.includes(location.pathname);
   const isAuthenticated = hasAuthTokens();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen] = useState(true);
 
   if (!isAuthenticated && !isPublicPage) {
     return <Navigate to="/" replace />;
@@ -28,8 +28,8 @@ function App() {
     <ToastProvider>
       <div className="flex h-screen bg-gray-100 overflow-hidden">
         {!isPublicPage && isSidebarOpen && <Sidebar />}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {!isPublicPage && <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} isSidebarOpen={isSidebarOpen} />}
+        <div className="flex-1 flex flex-col overflow-hidden ">
+              {/* {!isPublicPage && <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} isSidebarOpen={isSidebarOpen} />} */}
           <PageRouter/>
         </div>
       </div>
