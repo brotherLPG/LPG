@@ -109,8 +109,8 @@ function ViewAccount() {
       {
         key: "inwardAmount",
         label: "Inward (Rs.)",
-        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-right",
-        cellClassName: "px-4 py-4 text-right whitespace-nowrap",
+        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap ",
+        cellClassName: "px-4 py-4 text-center whitespace-nowrap",
         renderCell: (item) => (
           <span className="text-[13px] font-medium text-emerald-600">
             {formatAmount(item.inwardAmount)}
@@ -120,8 +120,8 @@ function ViewAccount() {
       {
         key: "outwardAmount",
         label: "Outward (Rs.)",
-        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-right",
-        cellClassName: "px-4 py-4 text-right whitespace-nowrap",
+        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap ",
+        cellClassName: "px-4 py-4 text-center whitespace-nowrap",
         renderCell: (item) => (
           <span className="text-[13px] font-medium text-red-600">
             {formatAmount(item.outwardAmount)}
@@ -131,8 +131,8 @@ function ViewAccount() {
       {
         key: "balanceAfter",
         label: "Balance After",
-        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-right",
-        cellClassName: "px-4 py-4 text-right whitespace-nowrap",
+        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap ",
+        cellClassName: "px-4 py-4 text-center whitespace-nowrap",
         renderCell: (item) => (
           <span className="text-[13px] font-semibold text-slate-800">
             {Number(item.balanceAfter ?? item.afterBalance ?? 0).toLocaleString()}
