@@ -1,16 +1,158 @@
-import { Edit, Building2, Landmark, Wallet, CheckCircle, XCircle } from "lucide-react";
+import { useMemo, useState } from "react";
+import {
+  Edit,
+  Building2,
+  Landmark,
+  Wallet,
+  CheckCircle,
+  XCircle,
+  ArrowDownLeft,
+  ArrowUpRight,
+  TrendingUp,
+  Receipt,
+} from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useGetAccountById } from "../../queries/accounts/accounts.queries";
+import {
+  useAccountLedger,
+  useAccountTransactions,
+} from "../../queries/accounts/accounts.queries";
 import { usePermissions } from "../../contexts/PermissionContext";
+import GlobalTable from "../../utils/GlobalTable";
+
+const formatDate = (dateString) => {
+  if (!dateString) return "—";
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime()) || date.getFullYear() < 2000) return "—";
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const formatAmount = (value) => {
+  const amount = Number(value || 0);
+  if (!amount) return "—";
+  return amount.toLocaleString();
+};
+
+const formatRs = (value) => `Rs. ${Number(value || 0).toLocaleString()}`;
 
 function ViewAccount() {
   const navigate = useNavigate();
   const { can } = usePermissions();
   const { id } = useParams();
+  const [txnPage, setTxnPage] = useState(1);
+  const txnLimit = 20;
 
-  const { data: accountData, isLoading, isError } = useGetAccountById(id);
+  const { data: ledgerData, isLoading, isError } = useAccountLedger(id);
+  const {
+    data: transactionsResponse,
+    isLoading: isTransactionsLoading,
+    isError: isTransactionsError,
+  } = useAccountTransactions(id, { page: txnPage, limit: txnLimit });
 
-  const account = accountData?.data;
+  const account = ledgerData?.data?.account;
+  const summary = ledgerData?.data?.summary || {};
+  const transactions = (transactionsResponse?.data?.items || []).map((item) => ({
+    ...item,
+    id: item._id,
+  }));
+  const txnPagination = transactionsResponse?.data?.pagination || {};
+
+  const transactionColumns = useMemo(
+    () => [
+      {
+        key: "transactionDate",
+        label: "Date",
+        isRowHeader: true,
+        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+        cellClassName: "px-4 py-4 text-slate-600 text-[13px] whitespace-nowrap",
+        renderCell: (item) => formatDate(item.transactionDate),
+      },
+      {
+        key: "transactionNumber",
+        label: "Transaction #",
+        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+        cellClassName: "px-4 py-4 whitespace-nowrap",
+        renderCell: (item) => (
+          <span className="font-semibold text-slate-800 text-[13px]">
+            {item.transactionNumber || "—"}
+          </span>
+        ),
+      },
+      {
+        key: "partyName",
+        label: "Party",
+        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+        cellClassName: "px-4 py-4 text-slate-600 text-[13px]",
+        renderCell: (item) => (
+          <div className="flex flex-col">
+            <span className="font-semibold text-slate-800">{item.partyName || "—"}</span>
+            {item.partyCode && (
+              <span className="text-[11px] text-slate-400">{item.partyCode}</span>
+            )}
+          </div>
+        ),
+      },
+      {
+        key: "directionLabel",
+        label: "Type",
+        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+        cellClassName: "px-4 py-4 whitespace-nowrap",
+        renderCell: (item) => (
+          <span className="text-[13px] text-slate-600">
+            {item.directionLabel || item.paymentTypeLabel || "—"}
+          </span>
+        ),
+      },
+      {
+        key: "inwardAmount",
+        label: "Inward (Rs.)",
+        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-right",
+        cellClassName: "px-4 py-4 text-right whitespace-nowrap",
+        renderCell: (item) => (
+          <span className="text-[13px] font-medium text-emerald-600">
+            {formatAmount(item.inwardAmount)}
+          </span>
+        ),
+      },
+      {
+        key: "outwardAmount",
+        label: "Outward (Rs.)",
+        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-right",
+        cellClassName: "px-4 py-4 text-right whitespace-nowrap",
+        renderCell: (item) => (
+          <span className="text-[13px] font-medium text-red-600">
+            {formatAmount(item.outwardAmount)}
+          </span>
+        ),
+      },
+      {
+        key: "balanceAfter",
+        label: "Balance After",
+        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-right",
+        cellClassName: "px-4 py-4 text-right whitespace-nowrap",
+        renderCell: (item) => (
+          <span className="text-[13px] font-semibold text-slate-800">
+            {Number(item.balanceAfter ?? item.afterBalance ?? 0).toLocaleString()}
+          </span>
+        ),
+      },
+      {
+        key: "statusLabel",
+        label: "Status",
+        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+        cellClassName: "px-4 py-4 whitespace-nowrap",
+        renderCell: (item) => (
+          <span className="inline-flex rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-600">
+            {item.statusLabel || item.status || "—"}
+          </span>
+        ),
+      },
+    ],
+    []
+  );
 
   if (isLoading) {
     return (
@@ -103,7 +245,11 @@ function ViewAccount() {
             <div>
               <p className="text-sm font-semibold text-slate-600">Opening Balance</p>
               <p className="text-xl font-bold text-slate-900">
-                Rs. {account.openingBalanceAmount?.toLocaleString() || 0}
+                {formatRs(summary.openingBalanceAmount ?? account.openingBalanceAmount)}
+              </p>
+              <p className="mt-1 text-[11px] text-slate-400">
+                {summary.transactionCount || 0}{" "}
+                {summary.transactionCount === 1 ? "transaction" : "transactions"}
               </p>
             </div>
           </div>
@@ -117,7 +263,10 @@ function ViewAccount() {
             <div>
               <p className="text-sm font-semibold text-slate-600">Current Balance</p>
               <p className="text-xl font-bold text-emerald-600">
-                Rs. {account.currentBalanceAmount?.toLocaleString() || 0}
+                {formatRs(summary.currentBalanceAmount ?? account.currentBalanceAmount)}
+              </p>
+              <p className="mt-1 text-[11px] text-slate-400">
+                Net {formatRs(summary.netMovement)}
               </p>
             </div>
           </div>
@@ -135,7 +284,84 @@ function ViewAccount() {
             <div>
               <p className="text-sm font-semibold text-slate-600">Status</p>
               <p className="text-xl font-bold text-slate-900">
-                {account.statusLabel || account.status || (account.isActive ? 'Active' : 'Inactive')}
+                {account.accountStatus || account.statusLabel || account.status || (account.isActive ? 'Active' : 'Inactive')}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-emerald-100 p-2">
+              <ArrowDownLeft className="h-5 w-5 text-emerald-600" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-slate-600">Total Inward</p>
+              <p className="text-xl font-bold text-emerald-600">{formatRs(summary.totalInward)}</p>
+              <p className="mt-1 text-[11px] text-slate-400">
+                {summary.inwardCount || 0}{" "}
+                {summary.inwardCount === 1 ? "inward entry" : "inward entries"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-red-100 p-2">
+              <ArrowUpRight className="h-5 w-5 text-red-600" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-slate-600">Total Outward</p>
+              <p className="text-xl font-bold text-red-600">{formatRs(summary.totalOutward)}</p>
+              <p className="mt-1 text-[11px] text-slate-400">
+                {summary.outwardCount || 0}{" "}
+                {summary.outwardCount === 1 ? "outward entry" : "outward entries"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-blue-100 p-2">
+              <TrendingUp className="h-5 w-5 text-blue-600" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-slate-600">Net Movement</p>
+              <p className="text-xl font-bold text-slate-900">{formatRs(summary.netMovement)}</p>
+              <p className="mt-1 text-[11px] text-slate-400">
+                {summary.transactionCount || 0}{" "}
+                {summary.transactionCount === 1 ? "transaction" : "transactions"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-slate-100 p-2">
+              <Receipt className="h-5 w-5 text-slate-700" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-slate-600">Last Transaction</p>
+              <p className="text-xl font-bold text-slate-900">
+                {summary.lastTransactionNumber
+                  ? formatRs(summary.lastTransactionAmount)
+                  : "—"}
+              </p>
+              <p className="mt-1 text-[11px] text-slate-400">
+                {summary.lastTransactionNumber
+                  ? [
+                      summary.lastTransactionNumber,
+                      formatDate(summary.lastTransactionDate),
+                      summary.lastTransactionDirectionLabel,
+                    ]
+                      .filter((value) => value && value !== "—")
+                      .join(" · ")
+                  : "No transactions yet"}
               </p>
             </div>
           </div>
@@ -210,6 +436,29 @@ function ViewAccount() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="border-b border-slate-200 px-6 py-4">
+          <h2 className="text-lg font-semibold text-slate-800">Account Transactions</h2>
+        </div>
+        <GlobalTable
+          columns={transactionColumns}
+          data={transactions}
+          pagination
+          rowsPerPage={txnPagination.limit || txnLimit}
+          ariaLabel="Account transactions"
+          emptyContent={
+            isTransactionsLoading
+              ? "Loading transactions..."
+              : isTransactionsError
+                ? "Unable to load transactions."
+                : "No transactions found for this account."
+          }
+          totalCount={txnPagination.total}
+          page={txnPage}
+          onPageChange={setTxnPage}
+        />
       </div>
 
     </main>

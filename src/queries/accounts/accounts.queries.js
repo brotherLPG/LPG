@@ -11,6 +11,8 @@ import {
   updateAccount,
   deleteAccount,
   getAccountFormOptions,
+  getAccountTransactions,
+  getAccountLedger,
 } from "../../api/accounts.api";
 
 export const DEFAULT_ACCOUNTS_LIST_PARAMS = {
@@ -37,6 +39,22 @@ export const useAccountFormOptions = () => {
   return useQuery({
     queryKey: queryKeys.accounts.formOptions(),
     queryFn: getAccountFormOptions,
+  });
+};
+
+export const useAccountTransactions = (id, params) => {
+  return useQuery({
+    queryKey: queryKeys.accounts.transactions(id, params),
+    queryFn: () => getAccountTransactions(id, params),
+    enabled: !!id,
+  });
+};
+
+export const useAccountLedger = (id) => {
+  return useQuery({
+    queryKey: queryKeys.accounts.ledger(id),
+    queryFn: () => getAccountLedger(id),
+    enabled: !!id,
   });
 };
 

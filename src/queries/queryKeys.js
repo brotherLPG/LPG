@@ -178,7 +178,11 @@ export const queryKeys = {
 
     detail: id => ['accounts', 'detail', id],
 
-    formOptions: () => ['accounts', 'form-options']
+    formOptions: () => ['accounts', 'form-options'],
+
+    transactions: (id, params) => ['accounts', 'transactions', id, params],
+
+    ledger: id => ['accounts', 'ledger', id]
   },
 
   // =========================

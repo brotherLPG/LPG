@@ -29,3 +29,13 @@ export const getAccountFormOptions = async () => {
   const response = await api.get('/accounts/form-options')
   return response.data
 }
+
+export const getAccountTransactions = async (id, params) => {
+  const response = await api.get(`/accounts/${id}/transactions`, { params })
+  return response.data
+}
+
+export const getAccountLedger = async (id) => {
+  const response = await api.get(`/accounts/${id}/ledger`)
+  return response.data
+}
