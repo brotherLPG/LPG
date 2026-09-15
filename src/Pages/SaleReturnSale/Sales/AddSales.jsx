@@ -19,6 +19,9 @@ function AddSales() {
   );
   const [paymentTermDays, setPaymentTermDays] = useState(0);
   const [remarks, setRemarks] = useState("");
+  const [referenceNumber, setReferenceNumber] = useState('')
+  const [saleType, setSaleType] = useState('')
+
   // const [saveAsDraft, setSaveAsDraft] = useState(false);
 
   // const { data: accountsData } = useGetAccounts({ search: "", page: 1, limit: 100 });
@@ -30,28 +33,29 @@ function AddSales() {
   const inventoryItems = formOptions.inventoryItems || [];
   const accounts = formOptions.accounts || [];
   const paymentTerms = formOptions.paymentTerms || [];
+  const saleTypesOptions = formOptions.saleTypes || []
 
   const createSaleMutation = useCreateSale();
 
 
   useEffect(() => {
-  if (accountId || accounts.length === 0) return
+    if (accountId || accounts.length === 0) return
 
-  const cashAccount = accounts.find(account => {
-    const code = String(account.accountCode || '').toUpperCase()
-    const name = String(account.accountName || '').toLowerCase()
-    const label = String(account.label || '').toLowerCase()
-    return (
-      code === 'CASH' ||
-      name.includes('cash on hand') ||
-      label.includes('cash on hand')
-    )
-  })
+    const cashAccount = accounts.find(account => {
+      const code = String(account.accountCode || '').toUpperCase()
+      const name = String(account.accountName || '').toLowerCase()
+      const label = String(account.label || '').toLowerCase()
+      return (
+        code === 'CASH' ||
+        name.includes('cash on hand') ||
+        label.includes('cash on hand')
+      )
+    })
 
-  if (cashAccount?._id) {
-    setAccountId(cashAccount._id)
-  }
-}, [accounts, accountId])
+    if (cashAccount?._id) {
+      setAccountId(cashAccount._id)
+    }
+  }, [accounts, accountId])
 
 
   const calculateRow = (item) => {
@@ -140,6 +144,8 @@ function AddSales() {
       tradeDiscountAmount: 0,
       amountPaid: amountPaid,
       accountId,
+      paymentMethod: saleType || 'Cash',
+      referenceNumber: referenceNumber || "",
       remarks,
       saveAsDraft: isDraft,
     };
@@ -280,27 +286,68 @@ function AddSales() {
                 </div>
 
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Payment Account <span className="text-rose-500">*</span>
+                <label className='block text-sm font-medium text-slate-700 mb-1.5'>
+                  Sale Type
                 </label>
-                <div className="relative">
+                <div className='relative'>
                   <select
-                    value={accountId}
-                    onChange={(e) => setAccountId(e.target.value)}
-                    disabled={optionsLoading}
-                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    value={saleType}
+                    onChange={e => setSaleType(e.target.value)}
+                    className='w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100'
                   >
-                    <option value="">Select Account</option>
-                    {accounts.map((account) => (
-                      <option key={account._id} value={account._id}>
-                        {account.label || `${account.accountCode} - ${account.accountName}`}
+                    <option value=''>Select sale type</option>
+                    {saleTypesOptions.map(type => (
+                      <option key={type.value} value={type.value}>
+                        {type.label}
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  <ChevronDown className='absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none' />
                 </div>
               </div>
+
+
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 ">
+                <div className='flex flex-col gap-2'>
+                  <label className="block text-sm font-medium text-slate-700 ">
+                    Payment Account <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={accountId}
+                      onChange={(e) => setAccountId(e.target.value)}
+                      disabled={optionsLoading}
+                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    >
+                      <option value="">Select Account</option>
+                      {accounts.map((account) => (
+                        <option key={account._id} value={account._id}>
+                          {account.label || `${account.accountCode} - ${account.accountName}`}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  </div>
+
+                </div>
+                <div className='flex flex-col gap-2'>
+                  <label className='block text-sm font-medium text-slate-700'>
+                    Reference Number
+                  </label>
+                  <input
+                    type='text'
+                    value={referenceNumber}
+                    onChange={e => setReferenceNumber(e.target.value)}
+                    placeholder='Enter reference number'
+                    className='w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951]'
+                  />
+                </div>
+
+              </div>
+
             </div>
           </div>
 
@@ -481,10 +528,10 @@ function AddSales() {
                 <span className="text-sm text-slate-600">Payment Status</span>
                 <span
                   className={`text-sm font-medium px-3 py-1 rounded-full ${paymentStatus === "Paid"
-                      ? "bg-green-100 text-green-700"
-                      : paymentStatus === "Partially Paid"
-                        ? "bg-amber-100 text-amber-700"
-                        : "bg-rose-100 text-rose-700"
+                    ? "bg-green-100 text-green-700"
+                    : paymentStatus === "Partially Paid"
+                      ? "bg-amber-100 text-amber-700"
+                      : "bg-rose-100 text-rose-700"
                     }`}
                 >
                   {paymentStatus}

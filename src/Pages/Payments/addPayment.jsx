@@ -26,7 +26,7 @@ function AddPayment() {
   const [allocationAmounts, setAllocationAmounts] = useState({});
   const [paymentAmount, setPaymentAmount] = useState("");
   const [formData, setFormData] = useState({
-    paymentDate: "",
+    paymentDate:  new Date().toLocaleDateString("en-CA"),
     customerId: "",
     paymentMethod: "",
     accountId: "",
