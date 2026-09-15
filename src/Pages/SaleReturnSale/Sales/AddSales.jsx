@@ -365,7 +365,7 @@ function AddSales() {
                               const itemId = String(inv._id || inv.id);
                               return (
                                 <option key={itemId} value={itemId}>
-                                  {inv.label || `${inv.itemCode} - ${inv.itemName}`} (Stock: {inv.currentQuantity})
+                                  {`${inv.itemName}`} (Stock: {inv.currentQuantity})
                                 </option>
                               );
                             })}

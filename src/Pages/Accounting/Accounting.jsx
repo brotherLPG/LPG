@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Eye, ChevronDown, Plus, Loader, Pencil } from "lucide-react";
 import GlobalTable from "../../utils/GlobalTable";
-import { useGetAccounts } from "../../queries/accounts/accounts.queries";
+import { useGetAccounts, useAccountFormOptions } from "../../queries/accounts/accounts.queries";
 import { usePermissions } from "../../contexts/PermissionContext";
 
 function Accounting() {
@@ -23,6 +23,10 @@ function Accounting() {
   };
 
   const { data: accountsResponse, isLoading, isError, error } = useGetAccounts(accountListParams);
+  const { data: formOptionsResponse, isLoading: optionsLoading } = useAccountFormOptions();
+  const formOptions = formOptionsResponse?.data || {};
+  const statuses = formOptions.statuses || [];
+  const accountTypes = formOptions.accountTypes || [];
 
   const accountRecords = accountsResponse?.data?.items || [];
   const pagination = accountsResponse?.data?.pagination || {};
@@ -272,12 +276,13 @@ function Accounting() {
                 setStatusFilter(event.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48"
+              disabled={optionsLoading}
+              className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48 disabled:bg-slate-50 disabled:cursor-not-allowed"
             >
-              <option value="All">Status: All</option>
-              {accountsResponse?.data?.meta?.statuses?.map((status) => (
-                <option key={status.value} value={status.value}>
-                  Status: {status.label}
+              <option value="All">{optionsLoading ? "Loading..." : "Status: All"}</option>
+              {statuses.map((status) => (
+                <option key={String(status.value)} value={status.value}>
+                  {status.label}
                 </option>
               ))}
             </select>
@@ -291,12 +296,13 @@ function Accounting() {
                 setCategoryFilter(event.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48"
+              disabled={optionsLoading}
+              className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48 disabled:bg-slate-50 disabled:cursor-not-allowed"
             >
-              <option value="All">Type: All</option>
-              {accountsResponse?.data?.meta?.accountTypes?.map((type) => (
+              <option value="All">{optionsLoading ? "Loading..." : "Type: All"}</option>
+              {accountTypes.map((type) => (
                 <option key={type.value} value={type.value}>
-                  Type: {type.label}
+                  {type.label}
                 </option>
               ))}
             </select>
