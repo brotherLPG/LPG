@@ -128,17 +128,17 @@ function ViewAccount() {
           </span>
         ),
       },
-      {
-        key: "balanceAfter",
-        label: "Balance After",
-        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap ",
-        cellClassName: "px-4 py-4 text-center whitespace-nowrap",
-        renderCell: (item) => (
-          <span className="text-[13px] font-semibold text-slate-800">
-            {Number(item.balanceAfter ?? item.afterBalance ?? 0).toLocaleString()}
-          </span>
-        ),
-      },
+      // {
+      //   key: "balanceAfter",
+      //   label: "Balance After",
+      //   className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap ",
+      //   cellClassName: "px-4 py-4 text-center whitespace-nowrap",
+      //   renderCell: (item) => (
+      //     <span className="text-[13px] font-semibold text-slate-800">
+      //       {Number(item.balanceAfter ?? item.afterBalance ?? 0).toLocaleString()}
+      //     </span>
+      //   ),
+      // },
       {
         key: "statusLabel",
         label: "Status",
