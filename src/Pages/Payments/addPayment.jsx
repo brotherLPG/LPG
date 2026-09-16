@@ -139,8 +139,15 @@ function AddPayment() {
 
         if (amountApplied <= 0) return null;
 
+        if (isCustomerReceipt) {
+          return {
+            saleId: invoice.saleId || invoice._id,
+            amountApplied,
+          };
+        }
+
         return {
-          saleId: invoice._id,
+          lpgReceiptId: invoice.lpgReceiptId || invoice._id,
           amountApplied,
         };
       })

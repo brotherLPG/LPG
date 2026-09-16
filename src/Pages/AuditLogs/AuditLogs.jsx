@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { CalendarDays, ChevronDown, Search } from 'lucide-react'
+import { ChevronDown, Search } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import GlobalTable from '../../utils/GlobalTable'
 import { useAuditLogs } from '../../queries/auditLogs/auditLogs.queries'
@@ -274,15 +274,7 @@ function AuditLogs () {
               </select>
               <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             </div>
-            <button
-              type="button"
-              className="flex h-9 w-64 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 text-sm text-slate-600 hover:bg-slate-50"
-            >
-              <CalendarDays className="h-4 w-4 text-slate-500" />
-              <span>All dates</span>
-              <ChevronDown className="ml-auto h-4 w-4 text-slate-400" />
-            </button>
-          </div>
+           </div>
         </div>
 
         <div className="mt-5 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
