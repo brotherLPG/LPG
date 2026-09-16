@@ -1,24 +1,161 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Table } from "@heroui/react";
-import { useReturnSaleFormOptions } from "../../../queries/returnsales/returnsales.queries";
+import {
+  useCreateReturnSale,
+  useReturnSaleFormOptions,
+} from "../../../queries/returnsales/returnsales.queries";
+import { useSaleById, useSales } from "../../../queries/sales/sales.queries";
+import { useToast } from "../../../utils/GlobalToast";
 
 function CreateReturn() {
   const navigate = useNavigate();
-  const { data: formOptions, isLoading } = useReturnSaleFormOptions();
-  const [returnedItems, setReturnedItems] = useState([
-    { id: 1, itemName: "", originalQty: "", returnQty: "", unitPrice: "", returnAmount: "" }
-  ]);
+  const toast = useToast();
+  const { data: formOptions } = useReturnSaleFormOptions();
+  const createReturnMutation = useCreateReturnSale();
+
+  const [returnQuantities, setReturnQuantities] = useState({});
   const [selectedCustomer, setSelectedCustomer] = useState("");
+  const [selectedSaleId, setSelectedSaleId] = useState("");
   const [selectedReason, setSelectedReason] = useState("");
-  const [returnDate, setReturnDate] = useState("");
-  const [originalInvoiceNumber, setOriginalInvoiceNumber] = useState("");
+  const [returnDate, setReturnDate] = useState(
+    new Date().toLocaleDateString("en-CA")
+  );
   const [inspectionNotes, setInspectionNotes] = useState("");
 
   const customers = formOptions?.data?.customers || [];
   const returnReasons = formOptions?.data?.returnReasons || [];
   const actionType = formOptions?.data?.actionType;
   const nextReturnNumber = formOptions?.data?.nextReturnNumber;
+
+  const { data: salesData, isLoading: isLoadingSales } = useSales(
+    {
+      page: 1,
+      limit: 100,
+      customerId: selectedCustomer,
+    },
+    { enabled: Boolean(selectedCustomer) }
+  );
+
+  const customerSales = salesData?.data?.items || [];
+
+  const { data: saleResponse, isLoading: isLoadingSale } =
+    useSaleById(selectedSaleId);
+  const originalSale = saleResponse?.data;
+
+  const returnedItems = (originalSale?.lineItems || []).map((item, index) => {
+    const inventoryItemId = item.inventoryItemId;
+    return {
+      id: item._id || inventoryItemId || index + 1,
+      inventoryItemId,
+      itemName: item.itemName || item.itemCode || "Item",
+      originalQty: Number(item.quantity) || 0,
+      returnQty: returnQuantities[inventoryItemId] ?? "",
+      unitPrice: Number(item.unitPriceAmount) || 0,
+    };
+  });
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "—";
+    return new Date(dateString).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const formatCurrency = (amount) => {
+    return `Rs. ${Number(amount || 0).toLocaleString()}`;
+  };
+
+  const getReasonValue = (reason) =>
+    typeof reason === "string" ? reason : reason?.value ?? "";
+
+  const getReasonLabel = (reason) =>
+    typeof reason === "string" ? reason : reason?.label ?? reason?.value ?? "";
+
+  const updateReturnQty = (inventoryItemId, value) => {
+    const item = returnedItems.find(
+      (row) => row.inventoryItemId === inventoryItemId
+    );
+    const numericValue = value === "" ? "" : Number(value);
+    const cappedQty =
+      numericValue === ""
+        ? ""
+        : Math.min(Math.max(numericValue, 0), item?.originalQty || 0);
+
+    setReturnQuantities((prev) => ({
+      ...prev,
+      [inventoryItemId]: cappedQty,
+    }));
+  };
+
+  const returnValue = returnedItems.reduce((total, item) => {
+    const qty = Number(item.returnQty) || 0;
+    return total + qty * (Number(item.unitPrice) || 0);
+  }, 0);
+
+  const suppliedItemsSummary =
+    originalSale?.lineItems
+      ?.map((item) => `${item.itemName || item.itemCode} (${item.quantity})`)
+      .join(", ") || "—";
+
+  const handleCustomerChange = (customerId) => {
+    setSelectedCustomer(customerId);
+    setSelectedSaleId("");
+    setReturnQuantities({});
+  };
+
+  const handleSaleChange = (saleId) => {
+    setSelectedSaleId(saleId);
+    setReturnQuantities({});
+  };
+
+  const handleSubmit = async () => {
+    const returnItems = returnedItems
+      .filter((item) => item.inventoryItemId && Number(item.returnQty) > 0)
+      .map((item) => ({
+        inventoryItemId: item.inventoryItemId,
+        quantity: Number(item.returnQty),
+      }));
+
+    if (!selectedSaleId) {
+      toast.error("Please select the original sale.");
+      return;
+    }
+
+    if (!returnDate) {
+      toast.error("Please select a return date.");
+      return;
+    }
+
+    if (!selectedReason) {
+      toast.error("Please select a reason for return.");
+      return;
+    }
+
+    if (returnItems.length === 0) {
+      toast.error("Please enter a return quantity for at least one item.");
+      return;
+    }
+
+    const payload = {
+      originalSaleId: selectedSaleId,
+      returnDate,
+      returnReason: selectedReason,
+      returnItems,
+    };
+
+    try {
+      await createReturnMutation.mutateAsync(payload);
+      toast.success("Sales return processed successfully!");
+      navigate("/sales?tab=returns");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to process return. Please try again."
+      );
+    }
+  };
 
   return (
     <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
@@ -91,13 +228,14 @@ function CreateReturn() {
                 </label>
                 <select
                   value={selectedCustomer}
-                  onChange={(e) => setSelectedCustomer(e.target.value)}
+                  onChange={(e) => handleCustomerChange(e.target.value)}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 >
                   <option value="">Select Customer</option>
                   {customers.map((customer) => (
                     <option key={customer._id} value={customer._id}>
-                      {customer.label}
+                      {customer.label ||
+                        `${customer.customerCode} - ${customer.customerName}`}
                     </option>
                   ))}
                 </select>
@@ -118,13 +256,25 @@ function CreateReturn() {
                   Original Invoice Number{" "}
                   <span className="text-rose-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={originalInvoiceNumber}
-                  onChange={(e) => setOriginalInvoiceNumber(e.target.value)}
-                  placeholder="e.g. INV-2026-0456"
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                />
+                <select
+                  value={selectedSaleId}
+                  onChange={(e) => handleSaleChange(e.target.value)}
+                  disabled={!selectedCustomer}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed"
+                >
+                  <option value="">
+                    {!selectedCustomer
+                      ? "Select a customer first"
+                      : isLoadingSales
+                        ? "Loading invoices..."
+                        : "Select original invoice"}
+                  </option>
+                  {customerSales.map((sale) => (
+                    <option key={sale._id} value={sale._id}>
+                      {sale.invoiceNumber || sale.saleNumber}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="grid grid-cols-3 md:grid-cols-4 gap-5">
@@ -133,7 +283,7 @@ function CreateReturn() {
                     Original customer
                   </label>
                   <p className="text-BLUE-dark text-[13px] font-semibold">
-                    Karachi LPG Distributors
+                    {originalSale?.customerName || "—"}
                   </p>
                 </div>
                 <div>
@@ -141,7 +291,7 @@ function CreateReturn() {
                     Original Date
                   </label>
                   <p className="text-BLUE-dark text-[13px] font-semibold">
-                    02 Aug 2026
+                    {originalSale ? formatDate(originalSale.invoiceDate) : "—"}
                   </p>
                 </div>
                 <div>
@@ -149,7 +299,9 @@ function CreateReturn() {
                     Original Invoice Total
                   </label>
                   <p className="text-accent-blue text-[13px] font-semibold">
-                    Rs. 210,000
+                    {originalSale
+                      ? formatCurrency(originalSale.totalAmount)
+                      : "—"}
                   </p>
                 </div>
                 <div>
@@ -157,7 +309,7 @@ function CreateReturn() {
                     Supplied Items Summary
                   </label>
                   <p className="text-BLUE-dark text-[13px] font-semibold">
-                    02 Aug 2026
+                    {isLoadingSale ? "Loading..." : suppliedItemsSummary}
                   </p>
                 </div>
               </div>
@@ -171,41 +323,86 @@ function CreateReturn() {
                 Returned Items Details
               </h2>
             </div>
-            <div className="p-5">
-              <Table aria-label="Returned items table">
-                <Table.ScrollContainer>
-                  <Table.Content>
-                    <Table.Header className="w-full">
-                      <Table.Column className="text-xs font-semibold text-slate-600">
-                        Item Name
-                      </Table.Column>
-                      <Table.Column className="text-xs font-semibold text-slate-600">
-                        Original Invoice Qty
-                      </Table.Column>
-                      <Table.Column className="text-xs font-semibold text-slate-600">
-                        Return Qty
-                      </Table.Column>
-                      <Table.Column className="text-xs font-semibold text-slate-600">
-                        Unit Price (Rs.)
-                      </Table.Column>
-                      <Table.Column className="text-xs font-semibold text-slate-600">
-                        Return Amount (Rs.)
-                      </Table.Column>
-                    </Table.Header>
-                    <Table.Body items={returnedItems}>
-                      {(item) => (
-                        <Table.Row key={item.id}>
-                          <Table.Cell>Filled Cylinder 11KG</Table.Cell>
-                          <Table.Cell>50</Table.Cell>
-                          <Table.Cell>10</Table.Cell>
-                          <Table.Cell>2,500</Table.Cell>
-                          <Table.Cell>25,000</Table.Cell>
-                        </Table.Row>
-                      )}
-                    </Table.Body>
-                  </Table.Content>
-                </Table.ScrollContainer>
-              </Table>
+            <div className="p-5 overflow-x-auto">
+              <table className="w-full min-w-180 border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200">
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">
+                      Item Name
+                    </th>
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">
+                      Original Invoice Qty
+                    </th>
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">
+                      Return Qty
+                    </th>
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">
+                      Unit Price (Rs.)
+                    </th>
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">
+                      Return Amount (Rs.)
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {returnedItems.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="px-2 py-6 text-center text-sm text-slate-500"
+                      >
+                        {selectedSaleId
+                          ? isLoadingSale
+                            ? "Loading sale items..."
+                            : "No items found on this sale."
+                          : "Select an original invoice to load items."}
+                      </td>
+                    </tr>
+                  ) : (
+                    returnedItems.map((item) => {
+                      const returnAmount =
+                        (Number(item.returnQty) || 0) *
+                        (Number(item.unitPrice) || 0);
+
+                      return (
+                        <tr
+                          key={item.id}
+                          className="border-b border-slate-100 last:border-b-0"
+                        >
+                          <td className="px-2 py-2 text-sm text-slate-900">
+                            {item.itemName}
+                          </td>
+                          <td className="px-2 py-2 text-sm text-slate-900">
+                            {item.originalQty}
+                          </td>
+                          <td className="px-2 py-2">
+                            <input
+                              type="number"
+                              min="0"
+                              max={item.originalQty}
+                              value={item.returnQty}
+                              onChange={(e) =>
+                                updateReturnQty(
+                                  item.inventoryItemId,
+                                  e.target.value
+                                )
+                              }
+                              placeholder="0"
+                              className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
+                            />
+                          </td>
+                          <td className="px-2 py-2 text-sm text-slate-900">
+                            {Number(item.unitPrice).toLocaleString()}
+                          </td>
+                          <td className="px-2 py-2 text-sm font-medium text-slate-900">
+                            {returnAmount.toLocaleString()}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -230,11 +427,14 @@ function CreateReturn() {
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 >
                   <option value="">Select Reason</option>
-                  {returnReasons.map((reason) => (
-                    <option key={reason.value} value={reason.value}>
-                      {reason.label}
-                    </option>
-                  ))}
+                  {returnReasons.map((reason) => {
+                    const value = getReasonValue(reason);
+                    return (
+                      <option key={value} value={value}>
+                        {getReasonLabel(reason)}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
               <div>
@@ -249,7 +449,9 @@ function CreateReturn() {
                 <label className="block text-[14px] font-bold text-BLUE-dark">
                   Return Value
                 </label>
-                <p className="text-2xl text-error font-extrabold">Rs. 49,000</p>
+                <p className="text-2xl text-error font-extrabold">
+                  {formatCurrency(returnValue)}
+                </p>
               </div>
             </div>
           </div>
@@ -282,16 +484,21 @@ function CreateReturn() {
       {/* Bottom Action Bar */}
       <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <button
+          type="button"
           onClick={() => navigate("/sales?tab=returns")}
           className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
         >
           Cancel
         </button>
         <button
-          onClick={() => navigate("/sales?tab=returns")}
-          className="rounded-lg bg-gradient-bg-blue  px-6 py-2 text-sm font-medium text-white transition hover:bg-[#007545]"
+          type="button"
+          onClick={handleSubmit}
+          disabled={createReturnMutation.isPending}
+          className="rounded-lg bg-gradient-bg-blue px-6 py-2 text-sm font-medium text-white transition hover:bg-[#007545] disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          Process Return (Issue Credit)
+          {createReturnMutation.isPending
+            ? "Processing..."
+            : "Process Return (Issue Credit)"}
         </button>
       </div>
     </main>

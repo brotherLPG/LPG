@@ -10,18 +10,6 @@ function ViewSales() {
 
   const sale = saleData?.data;
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
   const formatCurrency = (amount) => {
     return `PKR ${Number(amount || 0).toLocaleString()}`;
   };
@@ -274,32 +262,6 @@ function ViewSales() {
             </div>
           </div>
 
-          {/* Card 4: Timestamps */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4">
-              <h2 className="text-[16px] font-bold text-BLUE-dark">
-                Timestamps
-              </h2>
-            </div>
-            <div className="p-5 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Created At
-                </label>
-                <div className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900">
-                  {formatDate(sale?.createdAt)}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Updated At
-                </label>
-                <div className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900">
-                  {formatDate(sale?.updatedAt)}
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Card 5: Remarks */}
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">

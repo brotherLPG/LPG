@@ -20,7 +20,7 @@ function AddSales() {
   const [paymentTermDays, setPaymentTermDays] = useState(0);
   const [remarks, setRemarks] = useState("");
   const [referenceNumber, setReferenceNumber] = useState('')
-  const [saleType, setSaleType] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState('')
 
   // const [saveAsDraft, setSaveAsDraft] = useState(false);
 
@@ -33,7 +33,7 @@ function AddSales() {
   const inventoryItems = formOptions.inventoryItems || [];
   const accounts = formOptions.accounts || [];
   const paymentTerms = formOptions.paymentTerms || [];
-  const saleTypesOptions = formOptions.saleTypes || []
+  const saleTypesOptions = formOptions.paymentMethods || []
 
   const createSaleMutation = useCreateSale();
 
@@ -144,7 +144,7 @@ function AddSales() {
       tradeDiscountAmount: 0,
       amountPaid: amountPaid,
       accountId,
-      paymentMethod: saleType || 'Cash',
+      paymentMethod: paymentMethod || 'Cash',
       referenceNumber: referenceNumber || "",
       remarks,
       saveAsDraft: isDraft,
@@ -289,12 +289,12 @@ function AddSales() {
 
               <div>
                 <label className='block text-sm font-medium text-slate-700 mb-1.5'>
-                  Sale Type
+                  Payment Method
                 </label>
                 <div className='relative'>
                   <select
-                    value={saleType}
-                    onChange={e => setSaleType(e.target.value)}
+                    value={paymentMethod}
+                    onChange={e => setPaymentMethod(e.target.value)}
                     className='w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100'
                   >
                     <option value=''>Select sale type</option>

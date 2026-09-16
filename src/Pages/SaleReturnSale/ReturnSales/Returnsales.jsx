@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { Search, Eye, Edit3 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import  { useState } from "react";
+import { Search } from "lucide-react";
+// import { useNavigate } from "react-router-dom";
 import GlobalTable from "../../../utils/GlobalTable";
 import { useReturnSales } from "../../../queries/returnsales/returnsales.queries";
-import { usePermissions } from "../../../contexts/PermissionContext";
+// import { usePermissions } from "../../../contexts/PermissionContext";
 
 function Returnsales() {
-  const navigate = useNavigate();
-  const { can } = usePermissions();
+  // const navigate = useNavigate();
+  // const { can } = usePermissions();
   const [searchTerm, setSearchTerm] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -104,37 +104,7 @@ function Returnsales() {
       cellClassName:
         "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap text-nowrap",
     },
-    {
-      key: "actions",
-      label: "Actions",
-      className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 text-right pr-6",
-      cellClassName: "px-4 py-4 pr-6",
-      renderCell: (item) => (
-        <div className="flex items-center justify-end gap-3">
-          {can("sales-returns", "read") && (
-          <button
-            type="button"
-            onClick={() => navigate(`/sales/return/view/${item._id}`)}
-            aria-label={`View ${item.returnNumber}`}
-            className="text-[#1a56db] hover:text-blue-800 transition-colors"
-          >
-            <Eye className="h-4 w-4" strokeWidth={2.5} />
-          </button>
-          )}
-          {can("sales-returns", "update") && (
-          <button
-            type="button"
-            onClick={() => navigate(`/sales/return/edit/${item._id}`)}
-            aria-label={`Edit ${item.returnNumber}`}
-            className="text-[#008951] hover:text-emerald-800 transition-colors"
-          >
-            <Edit3 className="h-4 w-4" strokeWidth={2.5} />
-          </button>
-          )}
-        </div>
-      ),
-    },
+  
   ];
 
   return (

@@ -36,7 +36,7 @@ function UpdateSales() {
 
   const paymentTermsOptions = saleData?.data?.form?.paymentTerms || [];
   
-  const saleTypesOptions = saleData?.data?.form?.saleTypes || [];
+  const saleTypesOptions = saleData?.data?.form?.paymentMethods || [];
 
   useEffect(() => {
     if (saleData?.data) {
@@ -286,7 +286,7 @@ function UpdateSales() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Sale Type
+                    Payment Method
                   </label>
                   <div className="relative">
                     <select

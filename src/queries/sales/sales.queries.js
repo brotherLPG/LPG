@@ -13,10 +13,11 @@ import {
   deleteSale,
 } from "../../api/sales.api";
 
-export const useSales = (params) => {
+export const useSales = (params, options = {}) => {
   return useQuery({
     queryKey: queryKeys.sales.list(params),
     queryFn: () => getSales(params),
+    enabled: options.enabled ?? true,
   });
 };
 

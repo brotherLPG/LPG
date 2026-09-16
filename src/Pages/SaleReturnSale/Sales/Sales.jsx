@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from "react";
-import {  Search, CirclePlus, ArrowLeft, Eye, Edit3 } from "lucide-react";
+import { useState } from "react";
+import { Search, CirclePlus, ArrowLeft, Eye, Edit3 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import GlobalTable from "../../../utils/GlobalTable";
-import { useSales } from "../../../queries/sales/sales.queries";
+import { useGetSaleFormOptions, useSales } from "../../../queries/sales/sales.queries";
 import Returnsales from "../ReturnSales/Returnsales";
 import { usePermissions } from "../../../contexts/PermissionContext";
 
@@ -13,18 +13,24 @@ function Sales() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "sales";
   const [searchTerm, setSearchTerm] = useState("");
-  const [type, setType] = useState("All");
-  const [saleStatus, setSaleStatus] = useState("");
+  const [saleType, setSaleType] = useState("");
+  const [saleStatus] = useState("");
   const [paymentStatus, setPaymentStatus] = useState("");
   const [customerId, setCustomerId] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
 
+  const { data: formOptionsResponse } = useGetSaleFormOptions();
+  const formOptions = formOptionsResponse?.data || {};
+  const customers = formOptions.customers || [];
+  const saleTypes = formOptions.saleTypes || [];
+
   const params = {
     page,
     limit: 10,
     ...(searchTerm && { search: searchTerm }),
+    ...(saleType && { saleType }),
     ...(saleStatus && { saleStatus }),
     ...(paymentStatus && { paymentStatus }),
     ...(customerId && { customerId }),
@@ -223,24 +229,24 @@ function Sales() {
       renderCell: (item) => (
         <div className="flex items-center justify-end gap-3">
           {can("sales", "read") && (
-          <button
-            type="button"
-            onClick={() => navigate(`/sales/view/${item._id}`)}
-            aria-label={`View ${item.saleNumber}`}
-            className="text-[#1a56db] hover:text-blue-800 transition-colors"
-          >
-            <Eye className="h-4 w-4" strokeWidth={2.5} />
-          </button>
+            <button
+              type="button"
+              onClick={() => navigate(`/sales/view/${item._id}`)}
+              aria-label={`View ${item.saleNumber}`}
+              className="text-[#1a56db] hover:text-blue-800 transition-colors"
+            >
+              <Eye className="h-4 w-4" strokeWidth={2.5} />
+            </button>
           )}
           {can("sales", "update") && (
-          <button
-            type="button"
-            onClick={() => navigate(`/sales/edit/${item._id}`)}
-            aria-label={`Edit ${item.saleNumber}`}
-            className="text-[#008951] hover:text-emerald-800 transition-colors"
-          >
-            <Edit3 className="h-4 w-4" strokeWidth={2.5} />
-          </button>
+            <button
+              type="button"
+              onClick={() => navigate(`/sales/edit/${item._id}`)}
+              aria-label={`Edit ${item.saleNumber}`}
+              className="text-[#008951] hover:text-emerald-800 transition-colors"
+            >
+              <Edit3 className="h-4 w-4" strokeWidth={2.5} />
+            </button>
           )}
         </div>
       ),
@@ -281,13 +287,13 @@ function Sales() {
               </button>
             )}
             {can("sales-returns", "create") && (
-            <button
-              type="button"
-              onClick={() => navigate("/sales/return")}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-bg-blue px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-orange-600"
-            >
-              <ArrowLeft className="h-4 w-4 rotate-180" /> Create Return
-            </button>
+              <button
+                type="button"
+                onClick={() => navigate("/sales/return")}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-bg-blue px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-orange-600"
+              >
+                <ArrowLeft className="h-4 w-4 rotate-180" /> Create Return
+              </button>
             )}
           </div>
         </div>
@@ -314,165 +320,183 @@ function Sales() {
 
         {activeTab === "sales" && (
           <>
-        {/* Summary Cards */}
-        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-tertiary">
-                  Today's Sales
-                </p>
-                <p className="mt-2 text-2xl font-extrabold text-accent-blue">
-                  PKR {summaryStats.total.toLocaleString()}
-                </p>
-                <p className="mt-1 text-xs text-tertiary">
-                  {summaryStats.totalCount} sales
-                </p>
+            {/* Summary Cards */}
+            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-tertiary">
+                      Today's Sales
+                    </p>
+                    <p className="mt-2 text-2xl font-extrabold text-accent-blue">
+                      PKR {summaryStats.total.toLocaleString()}
+                    </p>
+                    <p className="mt-1 text-xs text-tertiary">
+                      {summaryStats.totalCount} sales
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-tertiary">
+                      Cash Sales
+                    </p>
+                    <p className="mt-2 text-2xl font-extrabold text-emerald-600">
+                      PKR {summaryStats.cash.toLocaleString()}
+                    </p>
+                    <p className="mt-1 text-xs text-tertiary">
+                      {summaryStats.cashCount} sales
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-tertiary">
+                      Credit Sales
+                    </p>
+                    <p className="mt-2 text-2xl font-extrabold text-blue-600">
+                      PKR {summaryStats.credit.toLocaleString()}
+                    </p>
+                    <p className="mt-1 text-xs text-tertiary">
+                      {summaryStats.creditCount} sales
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-tertiary">
+                      Pending Credit
+                    </p>
+                    <p className="mt-2 text-2xl font-extrabold text-purple-600">
+                      PKR {summaryStats.pendingCredit.toLocaleString()}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-400">Outstanding</p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-tertiary">
-                  Cash Sales
-                </p>
-                <p className="mt-2 text-2xl font-extrabold text-emerald-600">
-                  PKR {summaryStats.cash.toLocaleString()}
-                </p>
-                <p className="mt-1 text-xs text-tertiary">
-                  {summaryStats.cashCount} sales
-                </p>
+            {/* Filters */}
+            <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:items-center">
+                <label className="relative flex-1 col-span-2">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
+                  <input
+                    value={searchTerm}
+                    onChange={(event) => {
+                      setSearchTerm(event.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full rounded-md border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-500 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
+                    placeholder="Search by customer or invoice ID..."
+                  />
+                </label>
+                <div className="relative">
+                  <select
+                    value={customerId}
+                    onChange={(event) => {
+                      setCustomerId(event.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951]"
+                  >
+                    <option value="">Customer: All</option>
+                    {customers.map((customer) => (
+                      <option key={customer._id} value={customer._id}>
+                        {customer.label || `${customer.customerCode} – ${customer.customerName}`}
+                      </option>
+                    ))}
+                  </select>
+                  <ArrowLeft className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 rotate-180 pointer-events-none" />
+                </div>
+                <div className="relative">
+                  <select
+                    value={saleType}
+                    onChange={(event) => {
+                      setSaleType(event.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951]"
+                  >
+                    <option value="">Type: All</option>
+                    {saleTypes.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <ArrowLeft className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 rotate-180 pointer-events-none" />
+                </div>
+                <div className="relative">
+                  <select
+                    value={paymentStatus}
+                    onChange={(event) => {
+                      setPaymentStatus(event.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951]"
+                  >
+                    <option value="">Payment Status: All</option>
+                    {meta.paymentStatuses.map((status) => (
+                      <option key={status.value} value={status.value}>
+                        {status.label}
+                      </option>
+                    ))}
+                  </select>
+                  <ArrowLeft className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 rotate-180 pointer-events-none" />
+                </div>
+                <div>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(event) => {
+                      setStartDate(event.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951]"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(event) => {
+                      setEndDate(event.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951]"
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-tertiary">
-                  Credit Sales
-                </p>
-                <p className="mt-2 text-2xl font-extrabold text-blue-600">
-                  PKR {summaryStats.credit.toLocaleString()}
-                </p>
-                <p className="mt-1 text-xs text-tertiary">
-                  {summaryStats.creditCount} sales
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-tertiary">
-                  Pending Credit
-                </p>
-                <p className="mt-2 text-2xl font-extrabold text-purple-600">
-                  PKR {summaryStats.pendingCredit.toLocaleString()}
-                </p>
-                <p className="mt-1 text-xs text-slate-400">Outstanding</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:items-center">
-            <label className="relative flex-1 col-span-2">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
-              <input
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                className="w-full rounded-md border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-500 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
-                placeholder="Search by customer or invoice ID..."
+            {/* Table */}
+            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+              <GlobalTable
+                columns={salesColumns}
+                data={sales}
+                ariaLabel="Sales Table"
+                className=""
+                rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors whitespace-nowrap text-nowrap"
+                emptyContent={
+                  isLoading ? "Loading sales..." : "No sales match your search."
+                }
+                pagination={true}
+                rowsPerPage={pagination.limit || 10}
+                currentPage={pagination.page}
+                totalPages={pagination.totalPages}
+                onPageChange={(newPage) => setPage(newPage)}
               />
-            </label>
-            <div className="relative">
-              <select
-                value={type}
-                onChange={(event) => setType(event.target.value)}
-                className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
-              >
-                <option value="All">Type: All</option>
-                {meta.saleTypes.map((type) => (
-                  <option key={type.value} value={type.value}>
-                    {type.label}
-                  </option>
-                ))}
-              </select>
-              <ArrowLeft className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 rotate-180 pointer-events-none" />
             </div>
-            {/* <div className="relative">
-              <select
-                value={saleStatus}
-                onChange={(event) => setSaleStatus(event.target.value)}
-                className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
-              >
-                <option value="">Sale Status: All</option>
-                {meta.saleStatuses.map((status) => (
-                  <option key={status.value} value={status.value}>
-                    {status.label}
-                  </option>
-                ))}
-              </select>
-              <ArrowLeft className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 rotate-180 pointer-events-none" />
-            </div> */}
-            <div className="relative">
-              <select
-                value={paymentStatus}
-                onChange={(event) => setPaymentStatus(event.target.value)}
-                className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
-              >
-                <option value="">Payment Status: All</option>
-                {meta.paymentStatuses.map((status) => (
-                  <option key={status.value} value={status.value}>
-                    {status.label}
-                  </option>
-                ))}
-              </select>
-              <ArrowLeft className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 rotate-180 pointer-events-none" />
-            </div>
-            <div>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(event) => setStartDate(event.target.value)}
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
-              />
-            </div>
-            <div>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(event) => setEndDate(event.target.value)}
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Table */}
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <GlobalTable
-            columns={salesColumns}
-            data={sales}
-            ariaLabel="Sales Table"
-            className=""
-            rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors whitespace-nowrap text-nowrap"
-            emptyContent={
-              isLoading ? "Loading sales..." : "No sales match your search."
-            }
-            pagination={true}
-            rowsPerPage={pagination.limit || 10}
-            currentPage={pagination.page}
-            totalPages={pagination.totalPages}
-            onPageChange={(newPage) => setPage(newPage)}
-          />
-        </div>
           </>
         )}
 

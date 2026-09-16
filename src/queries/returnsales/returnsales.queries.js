@@ -35,6 +35,7 @@ export const useCreateReturnSale = () => {
     mutationFn: createReturnSale,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.returnSales.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sales.all });
     },
   });
 };
