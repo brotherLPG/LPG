@@ -15,7 +15,7 @@ function Returnsales() {
 
   const params = {
     page,
-    limit: 20,
+    limit: 10,
     ...(searchTerm && { search: searchTerm }),
     ...(startDate && { startDate }),
     ...(endDate && { endDate }),
