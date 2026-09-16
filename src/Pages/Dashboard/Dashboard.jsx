@@ -1,14 +1,22 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  CirclePlus,
   AlertTriangle,
+  Receipt,
+  ShoppingCart,
+  TrendingUp,
+  Wallet,
 } from "lucide-react";
 import Recentsales from "../../components/Dashbord/RecentSales/RecentSales";
 import RecentPayments from "../../components/Dashbord/RecentPayments/RecentPayments";
 import RecentNotifications from "../../components/Dashbord/RecentNotifications/RecentNotifications";
+import SalesPaymentTrend from "../../components/Dashbord/SalesPaymentTrend/SalesPaymentTrend";
 import { useQueryClient } from "@tanstack/react-query";
 import { prefetchDashboard } from "../../queries/prefetchDashboard";
+
+const formatRupees = (value) =>
+  `Rs. ${Number(value || 0).toLocaleString("en-US")}`;
+
 function Dashboard() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -17,254 +25,222 @@ function Dashboard() {
     prefetchDashboard(queryClient);
   }, [queryClient]);
 
-  // -----------------------------
-  // Dashboard Data
-  // -----------------------------
+  const todayLabel = new Date().toLocaleDateString("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 
-  const salesData = [
-    { day: "Mon", value: 400 },
-    { day: "Tue", value: 260 },
-    { day: "Wed", value: 320 },
-    { day: "Thu", value: 220 },
-    { day: "Fri", value: 410 },
-    { day: "Sat", value: 380 },
-    { day: "Sun", value: 520 },
+  const kpiCards = [
+    // {
+    //   label: "Filled Cylinders",
+    //   value: "342 units",
+    //   hint: "Low domestic inventory",
+    //   icon: Flame,
+    //   cardClass: "bg-[#FFF7ED]",
+    //   iconClass: "bg-[#F59E0B] text-white",
+    //   valueClass: "text-[#B45309]",
+    // },
+    {
+      label: "Total Sales",
+      value: formatRupees(1250000),
+      hint: "vs. previous 7 days",
+      change: "+12%",
+      icon: ShoppingCart,
+      cardClass: "bg-[#EEF4FF]",
+      iconClass: "bg-[#2563EB] text-white",
+      valueClass: "text-[#1E3A8A]",
+    },
+    {
+      label: "Total Received Payment",
+      value: formatRupees(1080000),
+      hint: "vs. previous 7 days",
+      change: "+10%",
+      icon: Wallet,
+      cardClass: "bg-[#ECFDF5]",
+      iconClass: "bg-[#22C55E] text-white",
+      valueClass: "text-[#166534]",
+    },
+    {
+      label: "Outstanding Receivable",
+      value: formatRupees(170000),
+      hint: "Sales minus received",
+      icon: Receipt,
+      cardClass: "bg-[#FEF2F2]",
+      iconClass: "bg-[#EF4444] text-white",
+      valueClass: "text-[#991B1B]",
+    },
   ];
 
   const lowStockAlerts = [
     {
       id: 1,
-      title: "FILLED-CYLINDER-15KG",
-      message: "15 remaining (Minimum: 50)",
+      title: "15 KG Filled Cylinder",
+      remaining: 15,
+      minimum: 50,
       type: "warning",
     },
     {
       id: 2,
-      title: "FILLED-CYLINDER-45KG",
-      message: "5 remaining (Minimum: 15)",
+      title: "45 KG Filled Cylinder",
+      remaining: 5,
+      minimum: 15,
       type: "danger",
     },
     {
       id: 3,
-      title: "VALVE-REPLACEMENT-KIT",
-      message: "10 left (Minimum: 30)",
+      title: "Valve Replacement Kit",
+      remaining: 10,
+      minimum: 30,
       type: "warning",
     },
   ];
 
-  // -----------------------------
-  // Helpers
-  // -----------------------------
-
-
-  const getAlertClass = (type) => {
-    if (type === "danger") {
-      return "border-red-300 bg-red-50 text-red-500";
-    }
-
-    return "border-amber-300 bg-amber-50 text-amber-500";
-  };
-
   return (
     <div className="min-h-screen w-full bg-slate-50">
-      <div className="w-full px-4 md:px-6 lg:px-8 py-3">
-        {/* =========================================
-            BREADCRUMB
-        ========================================= */}
-        <div className="text-slate-400 mb-1">
+      <div className="w-full px-4 md:px-6 lg:px-8 py-6">
+        <div className="mb-1 text-sm text-slate-400">
           <span
             onClick={() => navigate("/dashboard")}
-            className="cursor-pointer hover:text-primary-dark transition-colors"
+            className="cursor-pointer transition-colors hover:text-primary-dark"
           >
             Brother LPG
           </span>
-
           <span className="mx-1">/</span>
-
-          <span>Dashboard</span>
+          <span className="font-medium text-slate-600">Dashboard</span>
         </div>
 
-        {/* =========================================
-            HEADER
-        ========================================= */}
-        <div className="flex items-center justify-between  pb-2 my-1">
+        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="font-bold text-slate-800 text-[28px]">
-              Operations Control Board
-            </h1>
 
-            <p className="text-tertiary text-[14px]">
-              Operational KPIs, filling statistics, and warning indicators for
-              Rawalpindi plant
+            <h1 className="text-[28px] font-bold tracking-tight text-slate-800">
+              Operations Overview
+            </h1>
+            <p className="mt-1 text-sm text-tertiary">
+              Monitor live sales, collections, filling activity, and inventory
+              alerts for the plant in one place.
             </p>
           </div>
 
-          <button
-            onClick={() => navigate("/filling-batches/create")}
-            className="
-              flex
-              items-center
-              gap-1
-              px-3
-              py-1.5
-              rounded
-              bg-gradient-bg-blue
-              text-white
-              transition
-              text-[14px]
-            "
-          >
-            <CirclePlus className="w-5 h-5" />
-            New Filling Batch
-          </button>
-        </div>
-
-        {/* =========================================
-            FILLED CYLINDERS
-        ========================================= */}
-        <div className="bg-white border border-slate-200 rounded-md px-4 py-2 mb-2">
-          <p className="text-tertiary font-semibold font-family-inter text-sm my-2">
-            Filled Cylinders
-          </p>
-
-          <h2 className="text-xl font-extrabold text-orange leading-6 my-2">
-            342 units
-          </h2>
-
-          <div className="flex items-center gap-1 mt-2">
-            <span className="w-1 h-1 rounded-full bg-orange-500" />
-
-            <span className="text-[12px] text-slate-400">
-              Low domestic inventory
-            </span>
+          <div className='mb-2 flex flex-wrap items-center gap-2 mt-2'>
+            <span className='text-xs text-slate-400'>{todayLabel}</span>
           </div>
+
         </div>
 
-        {/* =========================================
-            SALES + LOW STOCK
-        ========================================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 mb-2">
-          {/* Weekly Sales */}
-          {/* Weekly Sales */}
-          <div className="lg:col-span-2 bg-white border border-slate-200 rounded-md">
-            <div className="px-3 py-2 border-b border-slate-100">
-              <h3 className="font-bold text-[16px] text-BLUE-dark">
-                Weekly Sales Trend (Rs. in thousands)
-              </h3>
-            </div>
 
-            <div className="px-4 py-3">
-              <div className="flex">
-                {/* Y Axis */}
-                <div className="w-14 h-44 flex flex-col justify-between text-right pr-2">
-                  <span className="text-[11px] text-tertiary font-regular">Rs. 600k</span>
-
-                  <span className="text-[11px] text-tertiary font-regular">Rs. 480k</span>
-
-                  <span className="text-[11px] text-tertiary font-regular">Rs. 360k</span>
-
-                  <span className="text-[11px] text-tertiary font-regular">Rs. 240k</span>
-
-                  <span className="text-[11px] text-tertiary font-regular">Rs. 120k</span>
-
-                  <span className="text-[11px] text-tertiary font-regular">Rs. 0k</span>
+        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {kpiCards.map((card) => {
+            const Icon = card.icon;
+            return (
+              <div
+                key={card.label}
+                className={`flex items-center gap-4 rounded-2xl px-5 py-2 ${card.cardClass}`}
+              >
+                <div
+                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${card.iconClass}`}
+                >
+                  <Icon className="h-5 w-5" />
                 </div>
-
-                {/* Chart */}
-                <div className="flex-1">
-                  {/* Bars */}
-                  <div className="h-48 flex items-end justify-between gap-4 ">
-                    {salesData.map((item) => {
-                      const height = Math.max((item.value / 600) * 100, 3);
-
-                      return (
-                        <div
-                          key={item.day}
-                          className="flex-1 h-full flex flex-col items-center justify-end"
-                        >
-                          {/* Bar */}
-                          <div className="w-full h-full flex items-end justify-center">
-                            <div
-                              className="
-                      w-5
-                      md:w-7
-                      bg-gradient-bg-blue
-                      rounded-t-sm
-                      transition-all
-                      duration-300
-                      hover:opacity-80
-                    "
-                              style={{
-                                height: `${height}%`,
-                              }}
-                              title={`Rs. ${item.value}k`}
-                            />
-                          </div>
-
-                          {/* Day */}
-                          <span className="text-[11px] text-tertiary font-regular mt-1">
-                            {item.day}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-slate-500">{card.label}</p>
+                  <p className={`truncate text-xl font-bold tracking-tight ${card.valueClass}`}>
+                    {card.value}
+                  </p>
+                  <p className="mt-1 flex items-center gap-1 text-xs text-slate-400">
+                    {card.change ? (
+                      <>
+                        <TrendingUp className="h-3.5 w-3.5 text-[#16A34A]" />
+                        <span className="font-semibold text-[#16A34A]">{card.change}</span>
+                      </>
+                    ) : null}
+                    {card.hint}
+                  </p>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Low Stock */}
-          <div className="bg-white border border-slate-200 rounded-md">
-            <div className="px-3 py-2 border-b border-slate-100">
-              <h3 className="font-bold text-[16px] text-BLUE-dark">
-                Low-Stock Alerts (Minimum Threshold)
-              </h3>
-            </div>
-
-            <div className="p-3 space-y-1.5">
-              {lowStockAlerts.map((alert) => (
-                <div
-                  key={alert.id}
-                  className={`
-                    flex
-                    items-center
-                    gap-2
-                    border
-                    rounded-lg
-                    px-2
-                    py-3
-                    ${getAlertClass(alert.type)}
-                  `}
-                >
-                  <AlertTriangle className="w-5 h-5 shrink-0" />
-
-                  <div>
-                    <p className="text-[12px] font-bold">{alert.title}</p>
-
-                    <p className="text-[11px] font-regular">{alert.message}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+            );
+          })}
         </div>
 
-        {/* =========================================
-            RECENT SALES + PAYMENTS
-        ========================================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 mb-2">
-          {/* Recent Sales */}
-          <Recentsales/>
+        <div className="mb-4 grid grid-cols-1 gap-4 xl:grid-cols-3">
+          <div className="xl:col-span-2">
+            <SalesPaymentTrend />
+          </div>
 
-          {/* Recent Payments */}
+          <section className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-[16px] font-bold text-BLUE-dark">
+                  Low-Stock Alerts
+                </h3>
+                <p className="mt-1 text-xs text-slate-400">
+                  Items below minimum threshold
+                </p>
+              </div>
+              <span className="rounded-full bg-[#FEF2F2] px-2.5 py-1 text-xs font-semibold text-[#DC2626]">
+                {lowStockAlerts.length} alerts
+              </span>
+            </div>
+
+            <div className="flex-1 space-y-3">
+              {lowStockAlerts.map((alert) => {
+                const percent = Math.min(
+                  100,
+                  Math.round((alert.remaining / alert.minimum) * 100)
+                );
+                const isDanger = alert.type === "danger";
+
+                return (
+                  <div
+                    key={alert.id}
+                    className={`rounded-xl border px-3 py-3 ${isDanger
+                        ? "border-red-100 bg-red-50/70"
+                        : "border-amber-100 bg-amber-50/70"
+                      }`}
+                  >
+                    <div className="mb-2 flex items-start gap-2">
+                      <AlertTriangle
+                        className={`mt-0.5 h-4 w-4 shrink-0 ${isDanger ? "text-red-500" : "text-amber-500"
+                          }`}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-BLUE-dark">
+                          {alert.title}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          {alert.remaining} remaining · Min {alert.minimum}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="h-1.5 overflow-hidden rounded-full bg-white/80">
+                      <div
+                        className={`h-full rounded-full ${isDanger ? "bg-red-500" : "bg-amber-500"
+                          }`}
+                        style={{ width: `${percent}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => navigate("/inventory")}
+              className="mt-4 text-left text-sm font-semibold text-accent-blue hover:underline"
+            >
+              View inventory
+            </button>
+          </section>
+        </div>
+
+        <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <Recentsales />
           <RecentPayments />
         </div>
 
-        {/* =========================================
-            RECENT NOTIFICATIONS
-        ========================================= */}
-       <RecentNotifications/>
+        <RecentNotifications />
       </div>
     </div>
   );

@@ -12,60 +12,58 @@ function RecentPayments() {
     { receipt: "PAY-1117", payer: "Sui Northern Gas Co.", amount: "320,000", method: "Bank Wire" },
   ];
 
-  // Column definitions for recent payments table
   const paymentColumns = [
     {
       key: "receipt",
       label: "Receipt #",
       isRowHeader: true,
-      className: "px-0 py-1.5 text-left font-bold text-tertiary",
-      cellClassName: "px-0 py-2 text-[10px] font-semibold text-BLUE-dark",
+      className: "px-1 py-2 text-left text-xs font-semibold text-slate-500",
+      cellClassName: "px-1 py-2.5 text-[12px] font-semibold text-BLUE-dark",
     },
     {
       key: "payer",
       label: "Payee / Account",
-      className: "px-2 py-1.5 text-left font-bold text-tertiary",
-      cellClassName: "px-2 py-2 text-[10px] text-slate-600",
+      className: "px-2 py-2 text-left text-xs font-semibold text-slate-500",
+      cellClassName: "px-2 py-2.5 text-[12px] text-slate-600",
     },
     {
       key: "amount",
       label: "Amount (Rs.)",
-      className: "px-2 py-1.5 text-left font-bold text-tertiary",
-      cellClassName: "px-2 py-2 text-[10px] font-semibold text-slate-700",
+      className: "px-2 py-2 text-left text-xs font-semibold text-slate-500",
+      cellClassName: "px-2 py-2.5 text-[12px] font-semibold text-slate-700",
     },
     {
       key: "method",
       label: "Method",
-      className: "px-2 py-1.5 text-left font-bold text-tertiary",
-      cellClassName: "px-0 py-2 text-[10px] text-slate-600",
+      className: "px-2 py-2 text-left text-xs font-semibold text-slate-500",
+      cellClassName: "px-1 py-2.5 text-[12px] text-slate-600",
     },
   ];
-  
-  return (
-    <>
-      <section className="min-w-0 overflow-hidden rounded-md border border-slate-200 bg-white">
-        <header className="flex items-center justify-between border-b border-slate-100 px-3 py-2">
-          <h3 className="text-[16px] font-bold text-BLUE-dark">
-            Recent Payments
-          </h3>
-          <button
-            type="button"
-            onClick={() => navigate("/payments")}
-            className="text-[12px] font-semibold text-accent-blue hover:underline"
-          >
-            View All Payments
-          </button>
-        </header>
 
-        <GlobalTable
-          columns={paymentColumns}
-          data={recentPayments}
-          ariaLabel="Recent payments"
-          className=""
-          rowClassName="border-b border-slate-100 last:border-b-0 hover:bg-slate-50"
-        />
-      </section>
-    </>
+  return (
+    <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <header className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div>
+          <h3 className="text-[16px] font-bold text-BLUE-dark">Recent Payments</h3>
+          <p className="mt-0.5 text-xs text-slate-400">Latest collections and supplier payments</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate("/payments")}
+          className="text-[12px] font-semibold text-accent-blue hover:underline"
+        >
+          View all
+        </button>
+      </header>
+
+      <GlobalTable
+        columns={paymentColumns}
+        data={recentPayments}
+        ariaLabel="Recent payments"
+        className=""
+        rowClassName="border-b border-slate-100 last:border-b-0 hover:bg-slate-50"
+      />
+    </section>
   );
 }
 

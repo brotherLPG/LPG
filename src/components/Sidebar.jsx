@@ -243,7 +243,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col w-64 shadow-2xl overflow-hidden transition-all duration-300 ease-in-out bg-gradient-primary-vertical">
+    <div className="h-screen flex flex-col w-60 shadow-2xl overflow-hidden transition-all duration-300 ease-in-out bg-gradient-primary-vertical">
       {/* Logo Section */}
       <div className="p-3 border-b border-white/10 shrink-0">
         <div className="flex items-center gap-1">
@@ -258,7 +258,7 @@ const Sidebar = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 overflow-y-auto">
+      <nav className="sidebar-scroll flex-1 px-3 py-4 pr-1.5">
         {isSidebarLoading ? (
           <div className="flex h-full min-h-40 flex-col items-center justify-center gap-3">
             <Loader className="h-7 w-7 animate-spin text-white/80" />
