@@ -1,4 +1,4 @@
-import { Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
+import { Eye, Edit3, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalTable from "../../utils/GlobalTable";
@@ -245,14 +245,7 @@ function MaintenanceRecords() {
             <Edit3 className="h-3.5 w-3.5" strokeWidth={2.5} /> Edit
           </button>
           )}
-          {/* <button
-            type="button"
-            aria-label={`Delete ${item.maintenanceNumber}`}
-            onClick={() => setDeleteModal({ isOpen: true, item })}
-            className="flex items-center gap-1 rounded-md bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors"
-          >
-            <Trash2 className="h-3.5 w-3.5" strokeWidth={2.5} /> Delete
-          </button> */}
+         
         </div>
       ),
     },

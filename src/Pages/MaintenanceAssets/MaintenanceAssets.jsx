@@ -1,81 +1,16 @@
-import { PlusCircle, Eye, Edit3, Trash2, ChevronDown, Wrench, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import {  Eye, Edit3, Trash2, ChevronDown} from "lucide-react";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import GlobalTable from "../../utils/GlobalTable";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
 
-const initialAssets = [
-  { 
-    id: 1,
-    assetCode: "AST-2026-001", 
-    assetName: "Compressor Unit A1", 
-    category: "Equipment", 
-    manufacturer: "Atlas Copco", 
-    location: "Main Plant - Zone A", 
-    operationalStatus: "Operational", 
-    nextMaintenance: "15 Sep 2026" 
-  },
-  { 
-    id: 2,
-    assetCode: "AST-2026-002", 
-    assetName: "Storage Tank T-101", 
-    category: "Storage", 
-    manufacturer: "McDermott", 
-    location: "Storage Yard - Zone B", 
-    operationalStatus: "Maintenance Required", 
-    nextMaintenance: "28 Aug 2026" 
-  },
-  { 
-    id: 3,
-    assetCode: "AST-2026-003", 
-    assetName: "Pump Station P-05", 
-    category: "Equipment", 
-    manufacturer: "Grundfos", 
-    location: "Pumping Station - Zone C", 
-    operationalStatus: "Operational", 
-    nextMaintenance: "10 Oct 2026" 
-  },
-  { 
-    id: 4,
-    assetCode: "AST-2026-004", 
-    assetName: "Safety Valve SV-201", 
-    category: "Safety", 
-    manufacturer: "Emerson", 
-    location: "Main Plant - Zone A", 
-    operationalStatus: "Under Maintenance", 
-    nextMaintenance: "05 Sep 2026" 
-  },
-  { 
-    id: 5,
-    assetCode: "AST-2026-005", 
-    assetName: "Control Panel CP-03", 
-    category: "Electrical", 
-    manufacturer: "Siemens", 
-    location: "Control Room - Zone D", 
-    operationalStatus: "Operational", 
-    nextMaintenance: "20 Nov 2026" 
-  },
-  { 
-    id: 6,
-    assetCode: "AST-2026-006", 
-    assetName: "Filling Machine FM-02", 
-    category: "Equipment", 
-    manufacturer: "Cryostar", 
-    location: "Filling Station - Zone E", 
-    operationalStatus: "Operational", 
-    nextMaintenance: "12 Dec 2026" 
-  },
-];
-
 function MaintenanceAssets() {
-  const navigate = useNavigate();
   const toast = useToast();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
   const [status, setStatus] = useState("All");
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
-  const [assets, setAssets] = useState(initialAssets);
+  const [assets, setAssets] = useState([]);
 
   const filteredAssets = useMemo(() => assets.filter((asset) => {
     const matchesQuery = `${asset.assetCode} ${asset.assetName} ${asset.manufacturer} ${asset.location}`.toLowerCase().includes(query.toLowerCase());
@@ -177,7 +112,7 @@ function MaintenanceAssets() {
             aria-label={`View ${item.assetCode}`}
             className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
           >
-            <Eye className="h-3.5 w-3.5" /> View
+            <Eye className="h-3.5 w-3.5" />
           </button>
           <button
             type="button"
