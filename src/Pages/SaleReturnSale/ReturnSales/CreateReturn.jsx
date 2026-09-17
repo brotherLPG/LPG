@@ -17,6 +17,8 @@ function CreateReturn() {
   const [selectedCustomer, setSelectedCustomer] = useState("");
   const [selectedSaleId, setSelectedSaleId] = useState("");
   const [selectedReason, setSelectedReason] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [accountId, setAccountId] = useState("");
   const [returnDate, setReturnDate] = useState(
     new Date().toLocaleDateString("en-CA")
   );
@@ -24,8 +26,30 @@ function CreateReturn() {
 
   const customers = formOptions?.data?.customers || [];
   const returnReasons = formOptions?.data?.returnReasons || [];
+  const paymentMethods = formOptions?.data?.paymentMethods || [];
+  const accounts = formOptions?.data?.accounts || [];
   const actionType = formOptions?.data?.actionType;
   const nextReturnNumber = formOptions?.data?.nextReturnNumber;
+
+  const defaultAccountId =
+    accounts.find((account) => {
+      const code = String(account.accountCode || "").toUpperCase();
+      const name = String(account.accountName || "").toLowerCase();
+      const label = String(account.label || "").toLowerCase();
+      return (
+        code === "CASH" ||
+        name.includes("cash on hand") ||
+        label.includes("cash on hand")
+      );
+    })?._id || "";
+
+  const defaultPaymentMethod =
+    paymentMethods.find(
+      (method) => String(method.value || "").toLowerCase() === "cash"
+    )?.value || "";
+
+  const selectedAccountId = accountId || defaultAccountId;
+  const selectedPaymentMethod = paymentMethod || defaultPaymentMethod;
 
   const { data: salesData, isLoading: isLoadingSales } = useSales(
     {
@@ -138,11 +162,23 @@ function CreateReturn() {
       return;
     }
 
+    if (!selectedPaymentMethod) {
+      toast.error("Please select a payment method.");
+      return;
+    }
+
+    if (!selectedAccountId) {
+      toast.error("Please select an account.");
+      return;
+    }
+
     const payload = {
       originalSaleId: selectedSaleId,
       returnDate,
       returnReason: selectedReason,
       returnItems,
+      paymentMethod: selectedPaymentMethod,
+      accountId: selectedAccountId,
     };
 
     try {
@@ -444,6 +480,41 @@ function CreateReturn() {
                 <p className="text-sm BLUE-dark font-medium">
                   {actionType?.label || "Credit to Customer Ledger Account"}
                 </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Payment Method <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  value={selectedPaymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                >
+                  <option value="">Select Payment Method</option>
+                  {paymentMethods.map((method) => (
+                    <option key={method.value} value={method.value}>
+                      {method.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Account <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  value={selectedAccountId}
+                  onChange={(e) => setAccountId(e.target.value)}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                >
+                  <option value="">Select Account</option>
+                  {accounts.map((account) => (
+                    <option key={account._id} value={account._id}>
+                      {account.label ||
+                        `${account.accountCode} – ${account.accountName}`}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="flex flex-row justify-between my-auto items-center">
                 <label className="block text-[14px] font-bold text-BLUE-dark">
