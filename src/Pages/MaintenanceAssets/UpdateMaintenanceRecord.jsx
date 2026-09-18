@@ -194,7 +194,7 @@ function UpdateMaintenanceRecord() {
 
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
           <form onSubmit={handleSubmit} className="p-6">
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Maintenance Number
@@ -220,7 +220,20 @@ function UpdateMaintenanceRecord() {
                 />
               </div>
 
-              <div className="lg:col-span-2">
+              <div>
+                <label className='block text-sm font-medium text-slate-700 mb-1.5'>
+                  Next Maintenance Date
+                </label>
+                <input
+                  type='date'
+                  value={form.nextMaintenanceDate}
+                  onChange={updateField('nextMaintenanceDate')}
+                  className='w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100'
+                />
+              </div>
+
+
+              <div className="lg:col-span-3">
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Select Asset <span className="text-rose-500">*</span>
                 </label>
@@ -320,18 +333,6 @@ function UpdateMaintenanceRecord() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Next Maintenance Date
-                </label>
-                <input
-                  type="date"
-                  value={form.nextMaintenanceDate}
-                  onChange={updateField("nextMaintenanceDate")}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Payment Method <span className="text-rose-500">*</span>
                 </label>
                 <select
@@ -374,7 +375,7 @@ function UpdateMaintenanceRecord() {
                 </select>
               </div>
 
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-3">
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Problem Description
                 </label>
@@ -387,7 +388,7 @@ function UpdateMaintenanceRecord() {
                 />
               </div>
 
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-3">
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Work Performed <span className="text-rose-500">*</span>
                 </label>

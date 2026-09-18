@@ -159,7 +159,7 @@ function AddMaintenanceRecord() {
         {/* Form Card */}
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
           <form onSubmit={handleSubmit} className="p-6">
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               {/* Maintenance Number */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
@@ -193,8 +193,24 @@ function AddMaintenanceRecord() {
                 />
               </div>
 
+              {
+                /* Next Maintenance Date */
+              }
+              <div>
+                <label className='block text-sm font-medium text-slate-700 mb-1.5'>
+                  Next Maintenance Date
+                </label>
+                <input
+                  type='date'
+                  value={nextMaintenanceDate}
+                  onChange={e => setNextMaintenanceDate(e.target.value)}
+                  className='w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100'
+                />
+              </div>
+
+
               {/* Asset Selection */}
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-3">
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Select Asset <span className="text-rose-500">*</span>
                 </label>
@@ -295,19 +311,6 @@ function AddMaintenanceRecord() {
                 />
               </div>
 
-              {/* Next Maintenance Date */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Next Maintenance Date
-                </label>
-                <input
-                  type="date"
-                  value={nextMaintenanceDate}
-                  onChange={(e) => setNextMaintenanceDate(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                />
-              </div>
-
               {/* Payment Method */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
@@ -357,7 +360,7 @@ function AddMaintenanceRecord() {
               {
                 /* Problem Description */
               }
-              <div className='lg:col-span-2'>
+              <div className='lg:col-span-3'>
                 <label className='block text-sm font-medium text-slate-700 mb-1.5'>
                   Problem Description
                 </label>
@@ -373,7 +376,7 @@ function AddMaintenanceRecord() {
               {
                 /* Work Performed */
               }
-              <div className='lg:col-span-2'>
+              <div className='lg:col-span-3'>
                 <label className='block text-sm font-medium text-slate-700 mb-1.5'>
                   Work Performed <span className='text-rose-500'>*</span>
                 </label>
