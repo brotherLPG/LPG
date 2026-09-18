@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCreateAsset } from "../../queries/assets/assets.queries";
-import { useEmployees } from "../../queries/employees/employees.queries";
+import { useCreateAsset, useAssetFormOptions } from "../../queries/assets/assets.queries";
 import { useToast } from "../../utils/GlobalToast";
 
 function AddAsset() {
@@ -9,45 +8,31 @@ function AddAsset() {
   const toast = useToast();
 
   const createAssetMutation = useCreateAsset();
-  const { data: employeesData } = useEmployees({ limit: 100 });
-  const employeeList = employeesData?.data?.items || [];
+  const { data: formOptionsResponse, isLoading: optionsLoading } = useAssetFormOptions();
+  const formOptions = formOptionsResponse?.data || {};
+
+  const nextAssetCode = formOptions.nextAssetCode || "";
+  const categoryOptions = formOptions.assetCategories || [];
+  const statusOptions = formOptions.assetStatuses || [];
+  const depreciationOptions = formOptions.depreciationMethods || [];
+  const paymentMethods = formOptions.paymentMethods || [];
+  const accounts = formOptions.accounts || [];
+  const employeeList = formOptions.employees || [];
 
   const [assetName, setAssetName] = useState("");
-  const [assetCategory, setAssetCategory] = useState("vehicle");
+  const [assetCategory, setAssetCategory] = useState("");
   const [manufacturerName, setManufacturerName] = useState("");
   const [modelNumber, setModelNumber] = useState("");
   const [serialNumber, setSerialNumber] = useState("");
-  const [locationName, setLocationName] = useState("Yard");
-  const [assetStatus, setAssetStatus] = useState("in-use");
+  const [locationName, setLocationName] = useState("");
+  const [assetStatus, setAssetStatus] = useState("");
   const [purchaseDate, setPurchaseDate] = useState(new Date().toISOString().split('T')[0]);
   const [purchaseCostAmount, setPurchaseCostAmount] = useState("");
-  const [depreciationMethod, setDepreciationMethod] = useState("straight-line");
+  const [depreciationMethod, setDepreciationMethod] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [accountId, setAccountId] = useState("");
   const [assignedEmployeeId, setAssignedEmployeeId] = useState("");
   const [currentBookValueAmount, setCurrentBookValueAmount] = useState("");
-
-  const categoryOptions = [
-    { label: "Plant", value: "plant" },
-    { label: "Vehicle", value: "vehicle" },
-    { label: "Filling Machine", value: "filling-machine" },
-    { label: "Compressor", value: "compressor" },
-    { label: "Tank", value: "tank" },
-    { label: "Building", value: "building" },
-    { label: "Furniture", value: "furniture" },
-    { label: "Other", value: "other" },
-  ];
-
-  const statusOptions = [
-    { label: "In Use", value: "in-use" },
-    { label: "Idle", value: "idle" },
-    { label: "Under Maintenance", value: "under-maintenance" },
-    { label: "Disposed", value: "disposed" },
-  ];
-
-  const depreciationOptions = [
-    { label: "Straight Line", value: "straight-line" },
-    { label: "Reducing Balance", value: "reducing-balance" },
-    { label: "None", value: "none" },
-  ];
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -57,8 +42,33 @@ function AddAsset() {
       return;
     }
 
+    if (!assetCategory) {
+      toast.error("Please select asset category");
+      return;
+    }
+
+    if (!assetStatus) {
+      toast.error("Please select asset status");
+      return;
+    }
+
+    if (!depreciationMethod) {
+      toast.error("Please select depreciation method");
+      return;
+    }
+
     if (!purchaseCostAmount) {
       toast.error("Please enter purchase cost");
+      return;
+    }
+
+    if (!paymentMethod) {
+      toast.error("Please select payment method");
+      return;
+    }
+
+    if (!accountId) {
+      toast.error("Please select an account");
       return;
     }
 
@@ -73,6 +83,8 @@ function AddAsset() {
       locationName: locationName.trim(),
       assignedEmployeeId: assignedEmployeeId || null,
       depreciationMethod,
+      paymentMethod,
+      accountId,
       currentBookValueAmount: numericBookValue,
       assetStatus,
       manufacturerName: manufacturerName.trim() || undefined,
@@ -119,9 +131,9 @@ function AddAsset() {
       </div>
 
       <form onSubmit={handleSave}>
-        <div className="space-y-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="space-y-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Card 1: Asset Information */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden col-span-2">
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden col-span-1">
             <div className="border-b border-slate-200 p-4">
               <h2 className="text-[16px] font-bold text-BLUE-dark">
                 Asset Information
@@ -129,6 +141,24 @@ function AddAsset() {
             </div>
             <div className="p-5 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Asset Code
+                  </label>
+                  <input
+                    type="text"
+                    disabled
+                    value={
+                      optionsLoading
+                        ? "Loading..."
+                        : nextAssetCode
+                          ? `${nextAssetCode} (Auto-generated)`
+                          : "Auto-generated on save"
+                    }
+                    className="w-full rounded-md border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed"
+                  />
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Asset Name <span className="text-rose-500">*</span>
@@ -148,10 +178,15 @@ function AddAsset() {
                     Asset Category <span className="text-rose-500">*</span>
                   </label>
                   <select
+                    required
                     value={assetCategory}
                     onChange={(e) => setAssetCategory(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    disabled={optionsLoading}
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
                   >
+                    <option value="">
+                      {optionsLoading ? "Loading..." : "Select category"}
+                    </option>
                     {categoryOptions.map((opt) => (
                       <option key={opt.value} value={opt.value}>
                         {opt.label}
@@ -159,9 +194,30 @@ function AddAsset() {
                     ))}
                   </select>
                 </div>
+
+                <div>
+                  <label className='block text-sm font-medium text-slate-700 mb-1.5'>
+                    Asset Status <span className='text-rose-500'>*</span>
+                  </label>
+                  <select
+                    required
+                    value={assetStatus}
+                    onChange={e => setAssetStatus(e.target.value)}
+                    disabled={optionsLoading}
+                    className='w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50'
+                  >
+                    <option value=''>{optionsLoading ? 'Loading...' : 'Select status'}</option>
+                    {statusOptions.map(opt => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Manufacturer Name
@@ -200,40 +256,22 @@ function AddAsset() {
                     className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Location Name <span className="text-rose-500">*</span>
+                  <label className='block text-sm font-medium text-slate-700 mb-1.5'>
+                    Location Name <span className='text-rose-500'>*</span>
                   </label>
                   <input
-                    type="text"
+                    type='text'
                     required
                     value={locationName}
-                    onChange={(e) => setLocationName(e.target.value)}
-                    placeholder="e.g. Yard"
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    onChange={e => setLocationName(e.target.value)}
+                    placeholder='e.g. Yard'
+                    className='w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100'
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Asset Status <span className="text-rose-500">*</span>
-                  </label>
-                  <select
-                    value={assetStatus}
-                    onChange={(e) => setAssetStatus(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                  >
-                    {statusOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
               </div>
+
             </div>
           </div>
 
@@ -245,81 +283,137 @@ function AddAsset() {
               </h2>
             </div>
             <div className="p-5 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Purchase Date
-                </label>
-                <input
-                  type="date"
-                  value={purchaseDate}
-                  onChange={(e) => setPurchaseDate(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                />
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Purchase Cost (Rs.) <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  required
-                  value={purchaseCostAmount}
-                  onChange={(e) => setPurchaseCostAmount(e.target.value)}
-                  placeholder="e.g. 2500000"
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Purchase Date
+                  </label>
+                  <input
+                    type="date"
+                    value={purchaseDate}
+                    onChange={(e) => setPurchaseDate(e.target.value)}
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Current Book Value (Rs.)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={currentBookValueAmount}
-                  onChange={(e) => setCurrentBookValueAmount(e.target.value)}
-                  placeholder={purchaseCostAmount ? `Default: ${purchaseCostAmount}` : "e.g. 2100000"}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Purchase Cost (Rs.) <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    required
+                    value={purchaseCostAmount}
+                    onChange={(e) => setPurchaseCostAmount(e.target.value)}
+                    placeholder="e.g. 2500000"
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Depreciation Method <span className="text-rose-500">*</span>
-                </label>
-                <select
-                  value={depreciationMethod}
-                  onChange={(e) => setDepreciationMethod(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                >
-                  {depreciationOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Payment Method <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    required
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    disabled={optionsLoading}
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                  >
+                    <option value="">
+                      {optionsLoading ? "Loading..." : "Select payment method"}
                     </option>
-                  ))}
-                </select>
+                    {paymentMethods.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Account <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    required
+                    value={accountId}
+                    onChange={(e) => setAccountId(e.target.value)}
+                    disabled={optionsLoading}
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                  >
+                    <option value="">
+                      {optionsLoading ? "Loading..." : "Select account"}
+                    </option>
+                    {accounts.map((acc) => (
+                      <option key={acc._id} value={acc._id}>
+                        {acc.label || `${acc.accountCode} – ${acc.accountName}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Current Book Value (Rs.)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={currentBookValueAmount}
+                    onChange={(e) => setCurrentBookValueAmount(e.target.value)}
+                    placeholder={purchaseCostAmount ? `Default: ${purchaseCostAmount}` : "e.g. 2100000"}
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Depreciation Method <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    required
+                    value={depreciationMethod}
+                    onChange={(e) => setDepreciationMethod(e.target.value)}
+                    disabled={optionsLoading}
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                  >
+                    <option value="">
+                      {optionsLoading ? "Loading..." : "Select method"}
+                    </option>
+                    {depreciationOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Assigned Employee
+                  </label>
+                  <select
+                    value={assignedEmployeeId}
+                    onChange={(e) => setAssignedEmployeeId(e.target.value)}
+                    disabled={optionsLoading}
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                  >
+                    <option value="">
+                      {optionsLoading ? "Loading..." : "None / Unassigned"}
+                    </option>
+                    {employeeList.map((emp) => (
+                      <option key={emp._id} value={emp._id}>
+                        {emp.label || `${emp.employeeCode} – ${emp.fullName}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Assigned Employee
-                </label>
-                <select
-                  value={assignedEmployeeId}
-                  onChange={(e) => setAssignedEmployeeId(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                >
-                  <option value="">None / Unassigned</option>
-                  {employeeList.map((emp) => (
-                    <option key={emp._id} value={emp._id}>
-                      {emp.employeeCode ? `${emp.employeeCode} - ` : ""}{emp.fullName}
-                    </option>
-                  ))}
-                </select>
-              </div>
             </div>
           </div>
         </div>
@@ -335,7 +429,7 @@ function AddAsset() {
           </button>
           <button
             type="submit"
-            disabled={createAssetMutation.isPending}
+            disabled={createAssetMutation.isPending || optionsLoading}
             className="rounded-lg bg-gradient-bg-blue px-6 py-2 text-sm font-medium text-white transition hover:bg-[#007545] disabled:opacity-50"
           >
             {createAssetMutation.isPending ? "Saving..." : "Save Asset"}

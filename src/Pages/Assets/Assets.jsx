@@ -1,9 +1,9 @@
-import { CirclePlus, Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
+import { Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalTable from "../../utils/GlobalTable";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
-import { useAssets, useDeleteAsset } from "../../queries/assets/assets.queries";
+import { useAssets, useDeleteAsset, useAssetFormOptions } from "../../queries/assets/assets.queries";
 import { useToast } from "../../utils/GlobalToast";
 import { usePermissions } from "../../contexts/PermissionContext";
 
@@ -22,15 +22,18 @@ function Assets() {
 
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
-  const [location, setLocation] = useState("All");
+  // const [location, setLocation] = useState("All");
   const [status, setStatus] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
 
+  const { data: formOptionsResponse, isLoading: optionsLoading } = useAssetFormOptions();
+  const formOptions = formOptionsResponse?.data || {};
+
   const { data: assetsResponse, isLoading, error } = useAssets({
     search: query || undefined,
     assetCategory: category === "All" ? undefined : category,
-    locationName: location === "All" ? undefined : location,
+    // locationName: location === "All" ? undefined : location,
     assetStatus: status === "All" ? undefined : status,
     page: currentPage,
     limit: 10,
@@ -40,42 +43,16 @@ function Assets() {
 
   const assets = assetsResponse?.data?.items || [];
   const pagination = assetsResponse?.data?.pagination || { total: 0, page: 1, totalPages: 1 };
-  const meta = assetsResponse?.data?.meta || {};
 
   const categoryOptions = [
     { label: "All Categories", value: "All" },
-    ...(meta.assetCategories || [
-      "plant",
-      "vehicle",
-      "filling-machine",
-      "compressor",
-      "tank",
-      "building",
-      "furniture",
-      "other",
-    ]).map((cat) => ({
-      label: formatLabel(cat),
-      value: cat,
-    })),
+    ...(formOptions.assetCategories || []),
   ];
 
   const statusOptions = [
     { label: "All Statuses", value: "All" },
-    ...(meta.assetStatuses || [
-      "in-use",
-      "idle",
-      "under-maintenance",
-      "disposed",
-    ]).map((st) => ({
-      label: formatLabel(st),
-      value: st,
-    })),
+    ...(formOptions.assetStatuses || []),
   ];
-
-  const locations = useMemo(() => {
-    const locSet = new Set(assets.map((a) => a.locationName).filter(Boolean));
-    return Array.from(locSet);
-  }, [assets]);
 
   const mappedAssets = useMemo(() => {
     return assets.map((asset) => {
@@ -85,12 +62,17 @@ function Assets() {
           ? asset.assignedEmployeeId.fullName
           : "-";
 
+      const accountName =
+        asset.accountId && typeof asset.accountId === "object"
+          ? asset.accountId.accountName || asset.accountId.label || "-"
+          : "-";
+
       return {
         _id: asset._id,
         assetCode: asset.assetCode || "-",
         assetName: asset.assetName || "-",
         category: formatLabel(asset.assetCategory),
-        rawCategory: asset.assetCategory,
+        accountName,
         date: pDate
           ? `${pDate.getDate().toString().padStart(2, "0")}/${(pDate.getMonth() + 1)
               .toString()
@@ -135,8 +117,8 @@ function Assets() {
       key: "assetCode",
       label: "Asset Code",
       isRowHeader: true,
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-4",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+      cellClassName: "px-4 py-4 whitespace-nowrap",
       renderCell: (item) => (
         <div>
           <span className="font-bold text-slate-800 text-[13px]">{item.assetCode}</span>
@@ -149,43 +131,50 @@ function Assets() {
     {
       key: "category",
       label: "Category",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap",
       renderCell: (item) => item.category,
     },
     {
       key: "location",
       label: "Location",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap",
       renderCell: (item) => item.location,
+    },
+    {
+      key: "accountName",
+      label: "Account",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap",
+      renderCell: (item) => item.accountName,
     },
     {
       key: "assignedEmployee",
       label: "Assigned To",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap",
       renderCell: (item) => item.assignedEmployee,
     },
     {
       key: "date",
       label: "Purchase Date",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap",
       renderCell: (item) => item.date,
     },
     {
       key: "purchaseCost",
       label: "Purchase Cost (Rs.)",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap",
       renderCell: (item) => item.purchaseCost.toLocaleString(),
     },
     {
       key: "bookValue",
       label: "Book Value (Rs.)",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-4",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+      cellClassName: "px-4 py-4 whitespace-nowrap",
       renderCell: (item) => (
         <span className="text-slate-900 font-bold text-[13px]">
           Rs. {item.bookValue.toLocaleString()}
@@ -195,8 +184,8 @@ function Assets() {
     {
       key: "status",
       label: "Status",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-4",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+      cellClassName: "px-4 py-4 whitespace-nowrap",
       renderCell: (item) => {
         const statusStyles = {
           "in-use": "bg-emerald-50 text-emerald-600 border border-emerald-100",
@@ -331,7 +320,8 @@ function Assets() {
                     setCategory(event.target.value);
                     setCurrentPage(1);
                   }}
-                  className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-44 lg:w-48"
+                  disabled={optionsLoading}
+                  className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-44 lg:w-48 disabled:opacity-50"
                 >
                   {categoryOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -341,24 +331,7 @@ function Assets() {
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
               </div>
-              <div className="relative">
-                <select
-                  value={location}
-                  onChange={(event) => {
-                    setLocation(event.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-40 lg:w-44"
-                >
-                  <option value="All">All Locations</option>
-                  {locations.map((loc) => (
-                    <option key={loc} value={loc}>
-                      {loc}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
-              </div>
+             
               <div className="relative">
                 <select
                   value={status}
@@ -366,7 +339,8 @@ function Assets() {
                     setStatus(event.target.value);
                     setCurrentPage(1);
                   }}
-                  className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-40 lg:w-44"
+                  disabled={optionsLoading}
+                  className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-40 lg:w-44 disabled:opacity-50"
                 >
                   {statusOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>

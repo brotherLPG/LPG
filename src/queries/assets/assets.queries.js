@@ -10,6 +10,7 @@ import {
   createAsset,
   updateAsset,
   deleteAsset,
+  getAssetFormOptions,
 } from "../../api/assets.api";
 
 export const useAssets = (params) => {
@@ -24,6 +25,13 @@ export const useAssetById = (id) => {
     queryKey: queryKeys.assets.detail(id),
     queryFn: () => getAssetById(id),
     enabled: !!id,
+  });
+};
+
+export const useAssetFormOptions = () => {
+  return useQuery({
+    queryKey: queryKeys.assets.formOptions(),
+    queryFn: getAssetFormOptions,
   });
 };
 

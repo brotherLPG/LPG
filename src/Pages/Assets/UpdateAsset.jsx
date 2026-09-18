@@ -1,8 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAssetById, useUpdateAsset } from "../../queries/assets/assets.queries";
-import { useEmployees } from "../../queries/employees/employees.queries";
 import { useToast } from "../../utils/GlobalToast";
+
+const getId = (value) => {
+  if (!value) return "";
+  return typeof value === "object" ? value._id || "" : value;
+};
+
+const toOptionList = (items = []) =>
+  items.map((item) => {
+    if (typeof item === "string") return { label: item, value: item };
+    const value = item.value || item.locationName || item.location || item.name || item.label || item._id || "";
+    const label = item.label || item.locationName || item.location || item.name || item.accountName || item.fullName || value;
+    return { label, value };
+  }).filter((item) => item.value);
 
 function UpdateAsset() {
   const { id } = useParams();
@@ -11,22 +23,33 @@ function UpdateAsset() {
 
   const { data: assetResponse, isLoading, error } = useAssetById(id);
   const updateAssetMutation = useUpdateAsset();
-  const { data: employeesData } = useEmployees({ limit: 100 });
-  const employeeList = employeesData?.data?.items || [];
 
   const asset = assetResponse?.data;
+  const formOptions = asset?.form || {};
+  const categoryOptions = formOptions.assetCategories || [];
+  const statusOptions = formOptions.assetStatuses || [];
+  const depreciationOptions = formOptions.depreciationMethods || [];
+  const paymentMethods = formOptions.paymentMethods || [];
+  const accounts = formOptions.accounts || [];
+  const employeeList = formOptions.employees || [];
+  const locationOptions = toOptionList(
+    formOptions.locations || formOptions.locationNames || formOptions.assetLocations || []
+  );
+  const optionsLoading = isLoading;
 
   const [assetCode, setAssetCode] = useState("");
   const [assetName, setAssetName] = useState("");
-  const [assetCategory, setAssetCategory] = useState("vehicle");
+  const [assetCategory, setAssetCategory] = useState("");
   const [manufacturerName, setManufacturerName] = useState("");
   const [modelNumber, setModelNumber] = useState("");
   const [serialNumber, setSerialNumber] = useState("");
-  const [locationName, setLocationName] = useState("Yard");
-  const [assetStatus, setAssetStatus] = useState("in-use");
+  const [locationName, setLocationName] = useState("");
+  const [assetStatus, setAssetStatus] = useState("");
   const [purchaseDate, setPurchaseDate] = useState("");
   const [purchaseCostAmount, setPurchaseCostAmount] = useState("");
-  const [depreciationMethod, setDepreciationMethod] = useState("straight-line");
+  const [depreciationMethod, setDepreciationMethod] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [accountId, setAccountId] = useState("");
   const [assignedEmployeeId, setAssignedEmployeeId] = useState("");
   const [currentBookValueAmount, setCurrentBookValueAmount] = useState("");
 
@@ -34,12 +57,12 @@ function UpdateAsset() {
     if (asset) {
       setAssetCode(asset.assetCode || "");
       setAssetName(asset.assetName || "");
-      setAssetCategory(asset.assetCategory || "vehicle");
+      setAssetCategory(asset.assetCategory || "");
       setManufacturerName(asset.manufacturerName || "");
       setModelNumber(asset.modelNumber || "");
       setSerialNumber(asset.serialNumber || "");
       setLocationName(asset.locationName || "");
-      setAssetStatus(asset.assetStatus || "in-use");
+      setAssetStatus(asset.assetStatus || "");
 
       if (asset.purchaseDate) {
         const d = new Date(asset.purchaseDate);
@@ -50,40 +73,12 @@ function UpdateAsset() {
 
       setPurchaseCostAmount(asset.purchaseCostAmount !== undefined && asset.purchaseCostAmount !== null ? String(asset.purchaseCostAmount) : "");
       setCurrentBookValueAmount(asset.currentBookValueAmount !== undefined && asset.currentBookValueAmount !== null ? String(asset.currentBookValueAmount) : "");
-      setDepreciationMethod(asset.depreciationMethod || "straight-line");
-
-      const empId = asset.assignedEmployeeId
-        ? typeof asset.assignedEmployeeId === "object"
-          ? asset.assignedEmployeeId._id
-          : asset.assignedEmployeeId
-        : "";
-      setAssignedEmployeeId(empId || "");
+      setDepreciationMethod(asset.depreciationMethod || "");
+      setPaymentMethod(asset.paymentMethod || "");
+      setAccountId(getId(asset.accountId || asset.paidFromAccountId));
+      setAssignedEmployeeId(getId(asset.assignedEmployeeId));
     }
   }, [asset]);
-
-  const categoryOptions = [
-    { label: "Plant", value: "plant" },
-    { label: "Vehicle", value: "vehicle" },
-    { label: "Filling Machine", value: "filling-machine" },
-    { label: "Compressor", value: "compressor" },
-    { label: "Tank", value: "tank" },
-    { label: "Building", value: "building" },
-    { label: "Furniture", value: "furniture" },
-    { label: "Other", value: "other" },
-  ];
-
-  const statusOptions = [
-    { label: "In Use", value: "in-use" },
-    { label: "Idle", value: "idle" },
-    { label: "Under Maintenance", value: "under-maintenance" },
-    { label: "Disposed", value: "disposed" },
-  ];
-
-  const depreciationOptions = [
-    { label: "Straight Line", value: "straight-line" },
-    { label: "Reducing Balance", value: "reducing-balance" },
-    { label: "None", value: "none" },
-  ];
 
   const handleUpdate = async (e) => {
     e.preventDefault();
@@ -98,6 +93,16 @@ function UpdateAsset() {
       return;
     }
 
+    if (!paymentMethod) {
+      toast.error("Please select payment method");
+      return;
+    }
+
+    if (!accountId) {
+      toast.error("Please select an account");
+      return;
+    }
+
     const numericCost = Number(purchaseCostAmount) || 0;
     const numericBookValue = currentBookValueAmount !== "" ? Number(currentBookValueAmount) : numericCost;
 
@@ -109,6 +114,8 @@ function UpdateAsset() {
       locationName: locationName.trim(),
       assignedEmployeeId: assignedEmployeeId || null,
       depreciationMethod,
+      paymentMethod,
+      accountId,
       currentBookValueAmount: numericBookValue,
       assetStatus,
       manufacturerName: manufacturerName.trim() || undefined,
@@ -220,10 +227,15 @@ function UpdateAsset() {
                     Asset Category <span className="text-rose-500">*</span>
                   </label>
                   <select
+                    required
                     value={assetCategory}
                     onChange={(e) => setAssetCategory(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    disabled={optionsLoading}
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
                   >
+                    <option value="">
+                      {optionsLoading ? "Loading..." : "Select category"}
+                    </option>
                     {categoryOptions.map((opt) => (
                       <option key={opt.value} value={opt.value}>
                         {opt.label}
@@ -279,14 +291,33 @@ function UpdateAsset() {
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Location Name <span className="text-rose-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    required
-                    value={locationName}
-                    onChange={(e) => setLocationName(e.target.value)}
-                    placeholder="e.g. Yard"
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                  />
+                  {locationOptions.length ? (
+                    <select
+                      required
+                      value={locationName}
+                      onChange={(e) => setLocationName(e.target.value)}
+                      disabled={optionsLoading}
+                      className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                    >
+                      <option value="">
+                        {optionsLoading ? "Loading..." : "Select location"}
+                      </option>
+                      {locationOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      required
+                      value={locationName}
+                      onChange={(e) => setLocationName(e.target.value)}
+                      placeholder="e.g. Yard"
+                      className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    />
+                  )}
                 </div>
 
                 <div>
@@ -294,10 +325,15 @@ function UpdateAsset() {
                     Asset Status <span className="text-rose-500">*</span>
                   </label>
                   <select
+                    required
                     value={assetStatus}
                     onChange={(e) => setAssetStatus(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    disabled={optionsLoading}
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
                   >
+                    <option value="">
+                      {optionsLoading ? "Loading..." : "Select status"}
+                    </option>
                     {statusOptions.map((opt) => (
                       <option key={opt.value} value={opt.value}>
                         {opt.label}
@@ -346,6 +382,50 @@ function UpdateAsset() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Payment Method <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  required
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  disabled={optionsLoading}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                >
+                  <option value="">
+                    {optionsLoading ? "Loading..." : "Select payment method"}
+                  </option>
+                  {paymentMethods.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Account <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  required
+                  value={accountId}
+                  onChange={(e) => setAccountId(e.target.value)}
+                  disabled={optionsLoading}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                >
+                  <option value="">
+                    {optionsLoading ? "Loading..." : "Select account"}
+                  </option>
+                  {accounts.map((acc) => (
+                    <option key={acc._id} value={acc._id}>
+                      {acc.label || `${acc.accountCode} – ${acc.accountName}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Current Book Value (Rs.)
                 </label>
                 <input
@@ -363,10 +443,15 @@ function UpdateAsset() {
                   Depreciation Method <span className="text-rose-500">*</span>
                 </label>
                 <select
+                  required
                   value={depreciationMethod}
                   onChange={(e) => setDepreciationMethod(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  disabled={optionsLoading}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
                 >
+                  <option value="">
+                    {optionsLoading ? "Loading..." : "Select method"}
+                  </option>
                   {depreciationOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>
                       {opt.label}
@@ -382,12 +467,15 @@ function UpdateAsset() {
                 <select
                   value={assignedEmployeeId}
                   onChange={(e) => setAssignedEmployeeId(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  disabled={optionsLoading}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
                 >
-                  <option value="">None / Unassigned</option>
+                  <option value="">
+                    {optionsLoading ? "Loading..." : "None / Unassigned"}
+                  </option>
                   {employeeList.map((emp) => (
                     <option key={emp._id} value={emp._id}>
-                      {emp.employeeCode ? `${emp.employeeCode} - ` : ""}{emp.fullName}
+                      {emp.label || `${emp.employeeCode} – ${emp.fullName}`}
                     </option>
                   ))}
                 </select>
@@ -407,7 +495,7 @@ function UpdateAsset() {
           </button>
           <button
             type="submit"
-            disabled={updateAssetMutation.isPending}
+            disabled={updateAssetMutation.isPending || optionsLoading}
             className="rounded-lg bg-gradient-bg-blue px-6 py-2 text-sm font-medium text-white transition hover:bg-[#007545] disabled:opacity-50"
           >
             {updateAssetMutation.isPending ? "Updating..." : "Update Asset"}

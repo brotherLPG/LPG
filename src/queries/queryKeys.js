@@ -264,7 +264,9 @@ export const queryKeys = {
 
     list: (params) => ['assets', 'list', params],
 
-    detail: id => ['assets', 'detail', id]
+    detail: id => ['assets', 'detail', id],
+
+    formOptions: () => ['assets', 'form-options'],
   },
 
   // =========================
