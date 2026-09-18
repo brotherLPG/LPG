@@ -96,7 +96,7 @@ function UpdateRole() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="max-w-4xl space-y-5">
+      <form onSubmit={handleSubmit} className=" space-y-5">
         <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="mb-4 text-base font-bold text-slate-800">
             Role Details

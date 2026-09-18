@@ -1,4 +1,4 @@
-import { ArrowLeft, Edit, Package, DollarSign, CheckCircle, XCircle, Calendar } from "lucide-react";
+import {  Edit, Package, DollarSign, CheckCircle, XCircle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCylinderTypeById } from "../../queries/cylinderTypes/cylinderTypes.queries";
 import { usePermissions } from "../../contexts/PermissionContext";
@@ -139,7 +139,7 @@ function ViewCylinderType() {
           <h2 className="text-lg font-semibold text-slate-800">Cylinder Information</h2>
         </div>
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div>
               <label className="block text-sm font-medium text-slate-500 mb-1">Type Code</label>
               <p className="text-sm font-semibold text-slate-900">{cylinderData.typeCode || "—"}</p>
@@ -155,10 +155,7 @@ function ViewCylinderType() {
               <p className="text-sm font-semibold text-slate-900 capitalize">{cylinderData.cylinderCategory || "—"}</p>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-500 mb-1">Capacity (KG)</label>
-              <p className="text-sm font-semibold text-slate-900">{cylinderData.capacityKg || "—"}</p>
-            </div>
+         
 
             <div>
               <label className="block text-sm font-medium text-slate-500 mb-1">Tare Weight (KG)</label>
@@ -225,35 +222,6 @@ function ViewCylinderType() {
               <p className="text-sm font-semibold text-slate-900">
                 Rs. {cylinderData.securityDepositAmount?.toLocaleString() || 0}
               </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-6 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <div className="border-b border-slate-200 px-6 py-4">
-          <h2 className="text-lg font-semibold text-slate-800">Timestamps</h2>
-        </div>
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-slate-400" />
-              <div>
-                <p className="text-sm font-medium text-slate-500">Created At</p>
-                <p className="text-sm font-semibold text-slate-900">
-                  {cylinderData.createdAt ? new Date(cylinderData.createdAt).toLocaleString() : "—"}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-slate-400" />
-              <div>
-                <p className="text-sm font-medium text-slate-500">Last Updated</p>
-                <p className="text-sm font-semibold text-slate-900">
-                  {cylinderData.updatedAt ? new Date(cylinderData.updatedAt).toLocaleString() : "—"}
-                </p>
-              </div>
             </div>
           </div>
         </div>
