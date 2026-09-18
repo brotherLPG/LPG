@@ -10,6 +10,7 @@ import {
   createMaintenanceRecord,
   updateMaintenanceRecord,
   deleteMaintenanceRecord,
+  getMaintenanceRecordFormOptions,
 } from "../../api/maintenanceRecords.api";
 
 export const useMaintenanceRecords = (params) => {
@@ -24,6 +25,13 @@ export const useMaintenanceRecordById = (id) => {
     queryKey: queryKeys.maintenanceRecords.detail(id),
     queryFn: () => getMaintenanceRecordById(id),
     enabled: !!id,
+  });
+};
+
+export const useMaintenanceRecordFormOptions = () => {
+  return useQuery({
+    queryKey: queryKeys.maintenanceRecords.formOptions(),
+    queryFn: getMaintenanceRecordFormOptions,
   });
 };
 

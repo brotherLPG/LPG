@@ -1,41 +1,51 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAssets } from "../../queries/assets/assets.queries";
-import { useEmployees } from "../../queries/employees/employees.queries";
-import { useCreateMaintenanceRecord } from "../../queries/maintenanceRecords/maintenanceRecords.queries";
+import {
+  useCreateMaintenanceRecord,
+  useMaintenanceRecordFormOptions,
+} from "../../queries/maintenanceRecords/maintenanceRecords.queries";
 import { useToast } from "../../utils/GlobalToast";
 
 function AddMaintenanceRecord() {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const { data: assetsData, isLoading: isLoadingAssets } = useAssets({ limit: 100 });
-  const { data: employeesData, isLoading: isLoadingEmployees } = useEmployees({ limit: 100 });
+  const { data: formOptionsResponse, isLoading: isLoadingOptions } =
+    useMaintenanceRecordFormOptions();
   const createMutation = useCreateMaintenanceRecord();
 
-  const assetList = assetsData?.data?.items || [];
-  const employeeList = employeesData?.data?.items || [];
+  const formOptions = formOptionsResponse?.data || {};
+  const nextMaintenanceNumber = formOptions.nextMaintenanceNumber || "";
+  const maintenanceTypes = formOptions.maintenanceTypes || [];
+  const paymentMethods = formOptions.paymentMethods || [];
+  const assetList = formOptions.assets || [];
+  const employeeList = formOptions.employees || [];
+  const accounts = formOptions.accounts || [];
 
   const [assetId, setassetId] = useState("");
-  const [maintenanceType, setMaintenanceType] = useState("preventive");
+  const [maintenanceType, setMaintenanceType] = useState("");
   const [maintenanceDate, setMaintenanceDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [problemDescription, setProblemDescription] = useState("");
   const [workPerformed, setWorkPerformed] = useState("");
   const [maintenanceCostAmount, setMaintenanceCostAmount] = useState("");
   const [nextMaintenanceDate, setNextMaintenanceDate] = useState("");
   const [performedByEmployeeId, setPerformedByEmployeeId] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [accountId, setAccountId] = useState("");
 
   const selectedAsset = assetList.find((a) => a._id === assetId);
 
   const resetForm = () => {
     setassetId("");
-    setMaintenanceType("preventive");
+    setMaintenanceType("");
     setMaintenanceDate(new Date().toISOString().split("T")[0]);
     setProblemDescription("");
     setWorkPerformed("");
     setMaintenanceCostAmount("");
     setNextMaintenanceDate("");
     setPerformedByEmployeeId("");
+    setPaymentMethod("");
+    setAccountId("");
   };
 
   const buildPayload = () => {
@@ -49,6 +59,8 @@ function AddMaintenanceRecord() {
       maintenanceCostAmount: Number(maintenanceCostAmount) || 0,
       nextMaintenanceDate: nextMaintenanceDate || null,
       performedByEmployeeId,
+      paymentMethod,
+      accountId,
     };
   };
 
@@ -71,6 +83,14 @@ function AddMaintenanceRecord() {
     }
     if (!maintenanceCostAmount) {
       toast.error("Please enter maintenance cost");
+      return false;
+    }
+    if (!paymentMethod) {
+      toast.error("Please select payment method");
+      return false;
+    }
+    if (!accountId) {
+      toast.error("Please select an account");
       return false;
     }
     if (!performedByEmployeeId) {
@@ -140,6 +160,39 @@ function AddMaintenanceRecord() {
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
           <form onSubmit={handleSubmit} className="p-6">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              {/* Maintenance Number */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Maintenance Number
+                </label>
+                <input
+                  type="text"
+                  disabled
+                  value={
+                    isLoadingOptions
+                      ? "Loading..."
+                      : nextMaintenanceNumber
+                        ? `${nextMaintenanceNumber} (Auto-generated)`
+                        : "Auto-generated on save"
+                  }
+                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-500 outline-none cursor-not-allowed"
+                />
+              </div>
+
+              {/* Maintenance Date */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Maintenance Date <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  value={maintenanceDate}
+                  onChange={(e) => setMaintenanceDate(e.target.value)}
+                  required
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                />
+              </div>
+
               {/* Asset Selection */}
               <div className="lg:col-span-2">
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
@@ -149,15 +202,15 @@ function AddMaintenanceRecord() {
                   value={assetId}
                   onChange={(e) => setassetId(e.target.value)}
                   required
-                  disabled={isLoadingAssets}
+                  disabled={isLoadingOptions}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
                 >
                   <option value="">
-                    {isLoadingAssets ? "Loading assets..." : "Select an asset..."}
+                    {isLoadingOptions ? "Loading assets..." : "Select an asset..."}
                   </option>
                   {assetList.map((asset) => (
                     <option key={asset._id} value={asset._id}>
-                      {asset.assetCode} — {asset.assetName} ({asset.locationName || asset.assetCategory || "Asset"})
+                      {asset.label || `${asset.assetCode} – ${asset.assetName}`}
                     </option>
                   ))}
                 </select>
@@ -189,56 +242,41 @@ function AddMaintenanceRecord() {
                   value={maintenanceType}
                   onChange={(e) => setMaintenanceType(e.target.value)}
                   required
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  disabled={isLoadingOptions}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
                 >
-                  <option value="preventive">Preventive</option>
-                  <option value="corrective">Corrective</option>
-                  <option value="inspection">Inspection</option>
-                  <option value="emergency">Emergency</option>
+                  <option value="">
+                    {isLoadingOptions ? "Loading types..." : "Select maintenance type..."}
+                  </option>
+                  {maintenanceTypes.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 
-              {/* Maintenance Date */}
+              {/* Performed By Employee */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Maintenance Date <span className="text-rose-500">*</span>
+                  Performed By Employee <span className="text-rose-500">*</span>
                 </label>
-                <input
-                  type="date"
-                  value={maintenanceDate}
-                  onChange={(e) => setMaintenanceDate(e.target.value)}
+                <select
+                  value={performedByEmployeeId}
+                  onChange={(e) => setPerformedByEmployeeId(e.target.value)}
                   required
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                />
-              </div>
-
-              {/* Problem Description */}
-              <div className="lg:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Problem Description
-                </label>
-                <textarea
-                  value={problemDescription}
-                  onChange={(e) => setProblemDescription(e.target.value)}
-                  rows={3}
-                  placeholder="Describe the problem or reason for maintenance..."
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
-                />
-              </div>
-
-              {/* Work Performed */}
-              <div className="lg:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Work Performed <span className="text-rose-500">*</span>
-                </label>
-                <textarea
-                  value={workPerformed}
-                  onChange={(e) => setWorkPerformed(e.target.value)}
-                  rows={3}
-                  placeholder="Describe the service or repair work performed..."
-                  required
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
-                />
+                  disabled={isLoadingOptions}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
+                >
+                  <option value="">
+                    {isLoadingOptions ? "Loading employees..." : "Select employee / technician..."}
+                  </option>
+                  {employeeList.map((emp) => (
+                    <option key={emp._id} value={emp._id}>
+                      {emp.label || `${emp.employeeCode} – ${emp.fullName}`}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Maintenance Cost Amount */}
@@ -270,28 +308,86 @@ function AddMaintenanceRecord() {
                 />
               </div>
 
-              {/* Performed By Employee */}
-              <div className="lg:col-span-2">
+              {/* Payment Method */}
+              <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Performed By Employee <span className="text-rose-500">*</span>
+                  Payment Method <span className="text-rose-500">*</span>
                 </label>
                 <select
-                  value={performedByEmployeeId}
-                  onChange={(e) => setPerformedByEmployeeId(e.target.value)}
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
                   required
-                  disabled={isLoadingEmployees}
+                  disabled={isLoadingOptions}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
                 >
                   <option value="">
-                    {isLoadingEmployees ? "Loading employees..." : "Select employee / technician..."}
+                    {isLoadingOptions ? "Loading..." : "Select payment method"}
                   </option>
-                  {employeeList.map((emp) => (
-                    <option key={emp._id} value={emp._id}>
-                      {emp.employeeCode ? `${emp.employeeCode} — ` : ""}{emp.fullName} ({emp.jobTitle || "Staff"})
+                  {paymentMethods.map((method) => (
+                    <option key={method.value} value={method.value}>
+                      {method.label}
                     </option>
                   ))}
                 </select>
               </div>
+
+              {/* Account */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Account <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  value={accountId}
+                  onChange={(e) => setAccountId(e.target.value)}
+                  required
+                  disabled={isLoadingOptions}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
+                >
+                  <option value="">
+                    {isLoadingOptions ? "Loading..." : "Select account"}
+                  </option>
+                  {accounts.map((acc) => (
+                    <option key={acc._id} value={acc._id}>
+                      {acc.label || `${acc.accountCode} – ${acc.accountName}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {
+                /* Problem Description */
+              }
+              <div className='lg:col-span-2'>
+                <label className='block text-sm font-medium text-slate-700 mb-1.5'>
+                  Problem Description
+                </label>
+                <textarea
+                  value={problemDescription}
+                  onChange={e => setProblemDescription(e.target.value)}
+                  rows={3}
+                  placeholder='Describe the problem or reason for maintenance...'
+                  className='w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none'
+                />
+              </div>
+
+              {
+                /* Work Performed */
+              }
+              <div className='lg:col-span-2'>
+                <label className='block text-sm font-medium text-slate-700 mb-1.5'>
+                  Work Performed <span className='text-rose-500'>*</span>
+                </label>
+                <textarea
+                  value={workPerformed}
+                  onChange={e => setWorkPerformed(e.target.value)}
+                  rows={3}
+                  placeholder='Describe the service or repair work performed...'
+                  required
+                  className='w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none'
+                />
+              </div>
+
+
             </div>
 
             {/* Actions */}
@@ -305,7 +401,7 @@ function AddMaintenanceRecord() {
               </button>
               <button
                 type="button"
-                disabled={createMutation.isPending}
+                disabled={createMutation.isPending || isLoadingOptions}
                 onClick={handleSaveAndAddAnother}
                 className="rounded-lg border border-[#1a56db] bg-white px-4 py-2.5 text-sm font-medium text-[#1a56db] shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
               >
@@ -313,7 +409,7 @@ function AddMaintenanceRecord() {
               </button>
               <button
                 type="submit"
-                disabled={createMutation.isPending}
+                disabled={createMutation.isPending || isLoadingOptions}
                 className="rounded-lg bg-gradient-bg-blue px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0f326e] disabled:opacity-50"
               >
                 {createMutation.isPending ? "Saving..." : "Save Record"}

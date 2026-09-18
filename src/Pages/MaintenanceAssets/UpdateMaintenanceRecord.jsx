@@ -1,12 +1,54 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAssets } from "../../queries/assets/assets.queries";
-import { useEmployees } from "../../queries/employees/employees.queries";
 import {
   useMaintenanceRecordById,
+  useMaintenanceRecordFormOptions,
   useUpdateMaintenanceRecord,
 } from "../../queries/maintenanceRecords/maintenanceRecords.queries";
 import { useToast } from "../../utils/GlobalToast";
+
+const getId = (value) => {
+  if (!value) return "";
+  return typeof value === "object" ? value._id || "" : value;
+};
+
+const toDateInput = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString().split("T")[0];
+};
+
+const emptyForm = {
+  maintenanceNumber: "",
+  maintenanceAssetId: "",
+  maintenanceType: "",
+  maintenanceDate: "",
+  problemDescription: "",
+  workPerformed: "",
+  maintenanceCostAmount: "",
+  nextMaintenanceDate: "",
+  performedByEmployeeId: "",
+  paymentMethod: "",
+  accountId: "",
+};
+
+const mapRecordToForm = (record) => ({
+  maintenanceNumber: record.maintenanceNumber || "",
+  maintenanceAssetId: getId(record.assetId || record.maintenanceAssetId),
+  maintenanceType: record.maintenanceType || "",
+  maintenanceDate: toDateInput(record.maintenanceDate),
+  problemDescription: record.problemDescription || "",
+  workPerformed: record.workPerformed || "",
+  maintenanceCostAmount:
+    record.maintenanceCostAmount !== undefined && record.maintenanceCostAmount !== null
+      ? String(record.maintenanceCostAmount)
+      : "",
+  nextMaintenanceDate: toDateInput(record.nextMaintenanceDate),
+  performedByEmployeeId: getId(record.performedByEmployeeId),
+  paymentMethod: record.paymentMethod || "",
+  accountId: getId(record.accountId),
+});
 
 function UpdateMaintenanceRecord() {
   const { id } = useParams();
@@ -14,109 +56,80 @@ function UpdateMaintenanceRecord() {
   const toast = useToast();
 
   const { data: recordResponse, isLoading, error } = useMaintenanceRecordById(id);
+  const { data: formOptionsResponse, isLoading: isLoadingOptions } =
+    useMaintenanceRecordFormOptions();
   const updateMutation = useUpdateMaintenanceRecord();
-  const { data: assetsData, isLoading: isLoadingAssets } = useAssets({ limit: 100 });
-  const { data: employeesData, isLoading: isLoadingEmployees } = useEmployees({ limit: 100 });
 
   const record = recordResponse?.data;
-  const assetList = assetsData?.data?.items || [];
-  const employeeList = employeesData?.data?.items || [];
+  const formOptions = formOptionsResponse?.data || {};
+  const maintenanceTypes = formOptions.maintenanceTypes || [];
+  const paymentMethods = formOptions.paymentMethods || [];
+  const assetList = formOptions.assets || [];
+  const employeeList = formOptions.employees || [];
+  const accounts = formOptions.accounts || [];
 
-  const [maintenanceNumber, setMaintenanceNumber] = useState("");
-  const [maintenanceAssetId, setMaintenanceAssetId] = useState("");
-  const [maintenanceType, setMaintenanceType] = useState("preventive");
-  const [maintenanceDate, setMaintenanceDate] = useState("");
-  const [problemDescription, setProblemDescription] = useState("");
-  const [workPerformed, setWorkPerformed] = useState("");
-  const [maintenanceCostAmount, setMaintenanceCostAmount] = useState("");
-  const [nextMaintenanceDate, setNextMaintenanceDate] = useState("");
-  const [performedByEmployeeId, setPerformedByEmployeeId] = useState("");
+  const [form, setForm] = useState(emptyForm);
+  const [hydratedId, setHydratedId] = useState(null);
 
-  useEffect(() => {
-    if (record) {
-      setMaintenanceNumber(record.maintenanceNumber || "");
+  if (record?._id && hydratedId !== record._id) {
+    setHydratedId(record._id);
+    setForm(mapRecordToForm(record));
+  }
 
-      const rawAsset = record.assetId || record.maintenanceAssetId;
-      const assetIdVal =
-        rawAsset && typeof rawAsset === "object"
-          ? rawAsset._id
-          : rawAsset;
-      setMaintenanceAssetId(assetIdVal || "");
+  const updateField = (field) => (e) => {
+    setForm((prev) => ({ ...prev, [field]: e.target.value }));
+  };
 
-      setMaintenanceType(record.maintenanceType || "preventive");
-
-      if (record.maintenanceDate) {
-        const d = new Date(record.maintenanceDate);
-        if (!isNaN(d.getTime())) {
-          setMaintenanceDate(d.toISOString().split("T")[0]);
-        }
-      }
-
-      setProblemDescription(record.problemDescription || "");
-      setWorkPerformed(record.workPerformed || "");
-      setMaintenanceCostAmount(
-        record.maintenanceCostAmount !== undefined && record.maintenanceCostAmount !== null
-          ? String(record.maintenanceCostAmount)
-          : ""
-      );
-
-      if (record.nextMaintenanceDate) {
-        const nd = new Date(record.nextMaintenanceDate);
-        if (!isNaN(nd.getTime())) {
-          setNextMaintenanceDate(nd.toISOString().split("T")[0]);
-        }
-      } else {
-        setNextMaintenanceDate("");
-      }
-
-      const empId =
-        record.performedByEmployeeId && typeof record.performedByEmployeeId === "object"
-          ? record.performedByEmployeeId._id
-          : record.performedByEmployeeId;
-      setPerformedByEmployeeId(empId || "");
-    }
-  }, [record]);
-
-  const selectedAsset = assetList.find((a) => a._id === maintenanceAssetId);
+  const selectedAsset = assetList.find((a) => a._id === form.maintenanceAssetId);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!maintenanceAssetId) {
+    if (!form.maintenanceAssetId) {
       toast.error("Please select an asset");
       return;
     }
-    if (!maintenanceType) {
+    if (!form.maintenanceType) {
       toast.error("Please select maintenance type");
       return;
     }
-    if (!maintenanceDate) {
+    if (!form.maintenanceDate) {
       toast.error("Please select maintenance date");
       return;
     }
-    if (!workPerformed.trim()) {
+    if (!form.workPerformed.trim()) {
       toast.error("Please describe work performed");
       return;
     }
-    if (!maintenanceCostAmount) {
+    if (!form.maintenanceCostAmount) {
       toast.error("Please enter maintenance cost");
       return;
     }
-    if (!performedByEmployeeId) {
+    if (!form.paymentMethod) {
+      toast.error("Please select payment method");
+      return;
+    }
+    if (!form.accountId) {
+      toast.error("Please select an account");
+      return;
+    }
+    if (!form.performedByEmployeeId) {
       toast.error("Please select performed by employee");
       return;
     }
 
     const payload = {
-      assetId: maintenanceAssetId,
-      maintenanceAssetId,
-      maintenanceType,
-      maintenanceDate: maintenanceDate || undefined,
-      problemDescription: problemDescription.trim() || undefined,
-      workPerformed: workPerformed.trim(),
-      maintenanceCostAmount: Number(maintenanceCostAmount) || 0,
-      nextMaintenanceDate: nextMaintenanceDate || null,
-      performedByEmployeeId,
+      assetId: form.maintenanceAssetId,
+      maintenanceAssetId: form.maintenanceAssetId,
+      maintenanceType: form.maintenanceType,
+      maintenanceDate: form.maintenanceDate || undefined,
+      problemDescription: form.problemDescription.trim() || undefined,
+      workPerformed: form.workPerformed.trim(),
+      maintenanceCostAmount: Number(form.maintenanceCostAmount) || 0,
+      nextMaintenanceDate: form.nextMaintenanceDate || null,
+      performedByEmployeeId: form.performedByEmployeeId,
+      paymentMethod: form.paymentMethod,
+      accountId: form.accountId,
     };
 
     try {
@@ -153,7 +166,6 @@ function UpdateMaintenanceRecord() {
   return (
     <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
       <section className="max-w-5xl mx-auto">
-        {/* Header & Breadcrumbs */}
         <div className="mb-6">
           <p className="text-xs mb-2">
             <span
@@ -173,35 +185,58 @@ function UpdateMaintenanceRecord() {
             <span className="font-semibold text-slate-700">Edit Record</span>
           </p>
           <h1 className="text-2xl font-bold tracking-tight text-BLUE-dark">
-            Edit Maintenance Record ({maintenanceNumber})
+            Edit Maintenance Record ({form.maintenanceNumber})
           </h1>
           <p className="text-sm text-tertiary">
             Update maintenance details, costs, and service logs
           </p>
         </div>
 
-        {/* Form Card */}
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
           <form onSubmit={handleSubmit} className="p-6">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              {/* Asset Selection */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Maintenance Number
+                </label>
+                <input
+                  type="text"
+                  disabled
+                  value={form.maintenanceNumber || "—"}
+                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-500 outline-none cursor-not-allowed"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Maintenance Date <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  value={form.maintenanceDate}
+                  onChange={updateField("maintenanceDate")}
+                  required
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                />
+              </div>
+
               <div className="lg:col-span-2">
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Select Asset <span className="text-rose-500">*</span>
                 </label>
                 <select
-                  value={maintenanceAssetId}
-                  onChange={(e) => setMaintenanceAssetId(e.target.value)}
+                  value={form.maintenanceAssetId}
+                  onChange={updateField("maintenanceAssetId")}
                   required
-                  disabled={isLoadingAssets}
+                  disabled={isLoadingOptions}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
                 >
                   <option value="">
-                    {isLoadingAssets ? "Loading assets..." : "Select an asset..."}
+                    {isLoadingOptions ? "Loading assets..." : "Select an asset..."}
                   </option>
                   {assetList.map((asset) => (
                     <option key={asset._id} value={asset._id}>
-                      {asset.assetCode} — {asset.assetName} ({asset.locationName || asset.assetCategory || "Asset"})
+                      {asset.label || `${asset.assetCode} – ${asset.assetName}`}
                     </option>
                   ))}
                 </select>
@@ -217,72 +252,57 @@ function UpdateMaintenanceRecord() {
                     <span>
                       <strong className="font-semibold">Location:</strong> {selectedAsset.locationName || "-"}
                     </span>
+                    <span>
+                      <strong className="font-semibold">Status:</strong> {selectedAsset.assetStatus || "-"}
+                    </span>
                   </div>
                 )}
               </div>
 
-              {/* Maintenance Type */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Maintenance Type <span className="text-rose-500">*</span>
                 </label>
                 <select
-                  value={maintenanceType}
-                  onChange={(e) => setMaintenanceType(e.target.value)}
+                  value={form.maintenanceType}
+                  onChange={updateField("maintenanceType")}
                   required
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  disabled={isLoadingOptions}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
                 >
-                  <option value="preventive">Preventive</option>
-                  <option value="corrective">Corrective</option>
-                  <option value="inspection">Inspection</option>
-                  <option value="emergency">Emergency</option>
+                  <option value="">
+                    {isLoadingOptions ? "Loading types..." : "Select maintenance type..."}
+                  </option>
+                  {maintenanceTypes.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 
-              {/* Maintenance Date */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Maintenance Date <span className="text-rose-500">*</span>
+                  Performed By Employee <span className="text-rose-500">*</span>
                 </label>
-                <input
-                  type="date"
-                  value={maintenanceDate}
-                  onChange={(e) => setMaintenanceDate(e.target.value)}
+                <select
+                  value={form.performedByEmployeeId}
+                  onChange={updateField("performedByEmployeeId")}
                   required
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                />
+                  disabled={isLoadingOptions}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
+                >
+                  <option value="">
+                    {isLoadingOptions ? "Loading employees..." : "Select employee / technician..."}
+                  </option>
+                  {employeeList.map((emp) => (
+                    <option key={emp._id} value={emp._id}>
+                      {emp.label || `${emp.employeeCode} – ${emp.fullName}`}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              {/* Problem Description */}
-              <div className="lg:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Problem Description
-                </label>
-                <textarea
-                  value={problemDescription}
-                  onChange={(e) => setProblemDescription(e.target.value)}
-                  rows={3}
-                  placeholder="Describe the problem or reason for maintenance..."
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
-                />
-              </div>
-
-              {/* Work Performed */}
-              <div className="lg:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Work Performed <span className="text-rose-500">*</span>
-                </label>
-                <textarea
-                  value={workPerformed}
-                  onChange={(e) => setWorkPerformed(e.target.value)}
-                  rows={3}
-                  placeholder="Describe the service or repair work performed..."
-                  required
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
-                />
-              </div>
-
-              {/* Maintenance Cost Amount */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Maintenance Cost (Rs.) <span className="text-rose-500">*</span>
@@ -290,52 +310,98 @@ function UpdateMaintenanceRecord() {
                 <input
                   type="number"
                   min="0"
-                  value={maintenanceCostAmount}
-                  onChange={(e) => setMaintenanceCostAmount(e.target.value)}
+                  value={form.maintenanceCostAmount}
+                  onChange={updateField("maintenanceCostAmount")}
                   placeholder="e.g. 18000"
                   required
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
 
-              {/* Next Maintenance Date */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Next Maintenance Date
                 </label>
                 <input
                   type="date"
-                  value={nextMaintenanceDate}
-                  onChange={(e) => setNextMaintenanceDate(e.target.value)}
+                  value={form.nextMaintenanceDate}
+                  onChange={updateField("nextMaintenanceDate")}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
 
-              {/* Performed By Employee */}
-              <div className="lg:col-span-2">
+              <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Performed By Employee <span className="text-rose-500">*</span>
+                  Payment Method <span className="text-rose-500">*</span>
                 </label>
                 <select
-                  value={performedByEmployeeId}
-                  onChange={(e) => setPerformedByEmployeeId(e.target.value)}
+                  value={form.paymentMethod}
+                  onChange={updateField("paymentMethod")}
                   required
-                  disabled={isLoadingEmployees}
+                  disabled={isLoadingOptions}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
                 >
                   <option value="">
-                    {isLoadingEmployees ? "Loading employees..." : "Select employee / technician..."}
+                    {isLoadingOptions ? "Loading..." : "Select payment method"}
                   </option>
-                  {employeeList.map((emp) => (
-                    <option key={emp._id} value={emp._id}>
-                      {emp.employeeCode ? `${emp.employeeCode} — ` : ""}{emp.fullName} ({emp.jobTitle || "Staff"})
+                  {paymentMethods.map((method) => (
+                    <option key={method.value} value={method.value}>
+                      {method.label}
                     </option>
                   ))}
                 </select>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Account <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  value={form.accountId}
+                  onChange={updateField("accountId")}
+                  required
+                  disabled={isLoadingOptions}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
+                >
+                  <option value="">
+                    {isLoadingOptions ? "Loading..." : "Select account"}
+                  </option>
+                  {accounts.map((acc) => (
+                    <option key={acc._id} value={acc._id}>
+                      {acc.label || `${acc.accountCode} – ${acc.accountName}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="lg:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Problem Description
+                </label>
+                <textarea
+                  value={form.problemDescription}
+                  onChange={updateField("problemDescription")}
+                  rows={3}
+                  placeholder="Describe the problem or reason for maintenance..."
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
+                />
+              </div>
+
+              <div className="lg:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Work Performed <span className="text-rose-500">*</span>
+                </label>
+                <textarea
+                  value={form.workPerformed}
+                  onChange={updateField("workPerformed")}
+                  rows={3}
+                  placeholder="Describe the service or repair work performed..."
+                  required
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
+                />
+              </div>
             </div>
 
-            {/* Actions */}
             <div className="mt-8 flex justify-end gap-3">
               <button
                 type="button"
@@ -346,7 +412,7 @@ function UpdateMaintenanceRecord() {
               </button>
               <button
                 type="submit"
-                disabled={updateMutation.isPending}
+                disabled={updateMutation.isPending || isLoadingOptions}
                 className="rounded-lg bg-gradient-bg-blue px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0f326e] disabled:opacity-50"
               >
                 {updateMutation.isPending ? "Updating..." : "Update Record"}

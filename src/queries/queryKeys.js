@@ -279,7 +279,9 @@ export const queryKeys = {
 
     list: (params) => ['maintenance-records', 'list', params],
 
-    detail: id => ['maintenance-records', 'detail', id]
+    detail: id => ['maintenance-records', 'detail', id],
+
+    formOptions: () => ['maintenance-records', 'form-options'],
   },
 
   // =========================
