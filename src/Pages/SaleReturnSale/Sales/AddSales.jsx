@@ -35,6 +35,16 @@ function AddSales() {
   const paymentTerms = formOptions.paymentTerms || [];
   const saleTypesOptions = formOptions.paymentMethods || []
 
+  const selectedCustomer = customers.find(
+    (customer) => customer._id === customerId
+  ) || null;
+
+  const formatCurrency = (value) =>
+    `Rs. ${Number(value || 0).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+
   const createSaleMutation = useCreateSale();
 
 
@@ -113,6 +123,15 @@ function AddSales() {
   );
 
   const outstanding = totals.grandTotal - amountPaid;
+
+  // Negative customer outstanding = available credit to apply against this sale
+  const customerOutstandingBalance = Number(selectedCustomer?.outstanding) || 0;
+  const customerCreditAvailable =
+    customerOutstandingBalance < 0 ? Math.abs(customerOutstandingBalance) : 0;
+  const expectedReceivedAmount = Math.max(
+    0,
+    totals.grandTotal - customerCreditAvailable
+  );
 
   const getPaymentStatus = () => {
     if (totals.grandTotal === outstanding) {
@@ -240,11 +259,11 @@ function AddSales() {
                       onChange={e => {
                         const selectedId = e.target.value
                         setCustomerId(selectedId)
-                        const selectedCustomer = customers.find(
-                          customer => customer._id === selectedId
+                        const customer = customers.find(
+                          (item) => item._id === selectedId
                         )
-                        if (selectedCustomer?.paymentTermDays != null) {
-                          setPaymentTermDays(Number(selectedCustomer.paymentTermDays))
+                        if (customer?.paymentTermDays != null) {
+                          setPaymentTermDays(Number(customer.paymentTermDays))
                         }
                       }}
                       disabled={optionsLoading}
@@ -260,6 +279,30 @@ function AddSales() {
                     </select>
                     <ChevronDown className='absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none' />
                   </div>
+                  {selectedCustomer && (
+                    <div className="mt-2 grid grid-cols-2 gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+                      <div>
+                        <p className="text-xs text-slate-500">Credit Limit</p>
+                        <p className="text-sm font-semibold text-slate-900">
+                          {formatCurrency(selectedCustomer.creditLimitAmount)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500">Outstanding</p>
+                        <p
+                          className={`text-sm font-semibold ${
+                            Number(selectedCustomer.outstanding) < 0
+                              ? "text-emerald-600"
+                              : Number(selectedCustomer.outstanding) > 0
+                                ? "text-amber-600"
+                                : "text-slate-900"
+                          }`}
+                        >
+                          {formatCurrency(selectedCustomer.outstanding)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
 
@@ -518,6 +561,20 @@ function AddSales() {
                   className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951] text-right"
                 />
               </div>
+              {selectedCustomer && totals.grandTotal > 0 && (
+                <div className="rounded-md border border-blue-100 bg-blue-50 px-3 py-2">
+                  <p className="text-xs text-slate-500">Expected Received Amount</p>
+                  <p className="text-sm font-semibold text-accent-blue">
+                    {formatCurrency(expectedReceivedAmount)}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Tip: you want to receive from customer{" "}
+                    <span className="font-medium text-slate-700">
+                      {Number(expectedReceivedAmount).toLocaleString()}
+                    </span>
+                  </p>
+                </div>
+              )}
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-600">Remaining Amount</span>
                 <span className="text-sm font-medium text-orange">
