@@ -21,6 +21,13 @@ function formatDate(dateString) {
   });
 }
 
+function paymentTypeLabel(payment) {
+  if (payment.paymentType === "refund") return "Customer Refund (Outward)";
+  if (payment.paymentType === "pay") return "Supplier Payment (Outward)";
+  if (payment.paymentType === "receive") return "Customer Receipt (Inward)";
+  return payment.directionLabel || "-";
+}
+
 function PaymentDetails() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -81,7 +88,7 @@ function PaymentDetails() {
           <dl className="grid gap-5 p-5 sm:grid-cols-2">
             <DetailItem label="Payment Number" value={payment.paymentNumber} />
             <DetailItem label="Payment Date" value={formatDate(payment.paymentDate)} />
-            <DetailItem label="Direction" value={payment.directionLabel} />
+            <DetailItem label="Direction" value={paymentTypeLabel(payment)} />
             <DetailItem label="Status" value={payment.paymentStatusLabel} />
             <DetailItem label="Payment Amount" value={`Rs. ${payment.paymentAmount?.toLocaleString()}`} />
             <DetailItem label="Payment Method" value={payment.paymentMethodLabel} />

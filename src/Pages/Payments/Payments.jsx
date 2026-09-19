@@ -23,7 +23,11 @@ function Payments() {
     limit,
     ...(query && { search: query }),
     ...(status !== "All" && { paymentStatus: status }),
-    ...(direction !== "All" && { direction }),
+    ...(direction !== "All" && {
+      ...(direction === "refund"
+        ? { paymentType: "refund" }
+        : { direction }),
+    }),
   };
 
   const { data: paymentsResponse, isLoading, isError, error } = useGetPayments(paymentListParams);
@@ -32,19 +36,48 @@ function Payments() {
   const pagination = paymentsResponse?.data?.pagination || {};
   const meta = paymentsResponse?.data?.meta || {};
 
+  const directionFilterOptions = useMemo(() => {
+    const fromApi = meta.directions || [];
+    const extras = [
+      { value: "receive", label: "Customer Receipt" },
+      { value: "refund", label: "Customer Refund" },
+      { value: "pay", label: "Supplier Payment" },
+    ];
+    const byValue = new Map(
+      [...extras, ...fromApi].map((item) => [item.value, item])
+    );
+    return extras.map((item) => byValue.get(item.value) || item);
+  }, [meta.directions]);
+
   const deletePaymentMutation = useDeletePayment();
 
+  const getPaymentTypeMeta = (payment) => {
+    const type = payment.paymentType || payment.direction;
+    if (type === "refund") {
+      return { direction: "Outward", label: "Customer Refund", tone: "purple" };
+    }
+    if (type === "pay") {
+      return { direction: "Outward", label: "Supplier Payment", tone: "amber" };
+    }
+    return { direction: "Inward", label: "Customer Receipt", tone: "emerald" };
+  };
+
   const filteredPayments = useMemo(() => {
-    return paymentRecords.map((payment) => ({
-      id: payment._id,
-      voucherNo: payment.paymentNumber,
-      date: new Date(payment.paymentDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-      party: payment.partyName,
-      amount: `Rs. ${payment.paymentAmount.toLocaleString()}`,
-      method: payment.paymentMethodLabel || payment.paymentMethod,
-      direction: payment.direction === 'receive' ? 'Inward' : 'Outward',
-      status: payment.paymentStatusLabel || payment.paymentStatus,
-    }));
+    return paymentRecords.map((payment) => {
+      const typeMeta = getPaymentTypeMeta(payment);
+      return {
+        id: payment._id,
+        voucherNo: payment.paymentNumber,
+        date: new Date(payment.paymentDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+        party: payment.partyName,
+        amount: `Rs. ${payment.paymentAmount.toLocaleString()}`,
+        method: payment.paymentMethodLabel || payment.paymentMethod,
+        direction: typeMeta.direction,
+        directionLabel: typeMeta.label,
+        directionTone: typeMeta.tone,
+        status: payment.paymentStatusLabel || payment.paymentStatus,
+      };
+    });
   }, [paymentRecords]);
 
 
@@ -116,12 +149,14 @@ function Payments() {
       renderCell: (item) => (
         <span
           className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-            item.direction === "Inward"
+            item.directionTone === "emerald"
               ? "bg-emerald-50 text-emerald-600"
-              : "bg-amber-50 text-amber-600"
+              : item.directionTone === "purple"
+                ? "bg-purple-50 text-purple-600"
+                : "bg-amber-50 text-amber-600"
           }`}
         >
-          {item.direction === "Inward" ? "Customer Receipt" : "Supplier Payment"}
+          {item.directionLabel}
         </span>
       ),
     },
@@ -257,7 +292,7 @@ function Payments() {
                   className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
                 >
                   <option value="All">Direction: All</option>
-                  {meta.directions?.map((dir) => (
+                  {directionFilterOptions.map((dir) => (
                     <option key={dir.value} value={dir.value}>
                       Direction: {dir.label}
                     </option>

@@ -1,8 +1,14 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { useGetPaymentFormOptions, useCreatePayment } from "../../queries/payments/payments.queries";
 import { useToast } from "../../utils/GlobalToast";
+
+const DEFAULT_DIRECTION_OPTIONS = [
+  { value: "receive", label: "Customer Receipt (Inward)" },
+  { value: "refund", label: "Customer Refund (Outward)" },
+  { value: "pay", label: "Supplier Payment (Outward)" },
+];
 
 const formatInvoiceDate = (value) => {
   if (!value) return "";
@@ -17,6 +23,19 @@ const formatInvoiceDate = (value) => {
 
 const parseAmount = (value) =>
   Number(String(value || "").replace(/,/g, "").trim()) || 0;
+
+const getRefundDueAmount = (invoice) => {
+  if (invoice?.refundDueAmount != null) {
+    return parseAmount(invoice.refundDueAmount);
+  }
+  const outstanding = parseAmount(invoice?.outstandingAmount);
+  return outstanding < 0 ? Math.abs(outstanding) : 0;
+};
+
+const getAllocatableAmount = (invoice, isRefund) =>
+  isRefund
+    ? getRefundDueAmount(invoice)
+    : parseAmount(invoice?.outstandingAmount);
 
 function AddPayment() {
   const navigate = useNavigate();
@@ -34,10 +53,15 @@ function AddPayment() {
   });
   const { data: formOptions, isLoading: optionsLoading } = useGetPaymentFormOptions();
 
+  const isRefund = paymentDirection === "refund";
   const isCustomerReceipt = paymentDirection === "receive";
+  const isCustomerParty = isCustomerReceipt || isRefund;
   const partyParams = formData.customerId
-    ? isCustomerReceipt
-      ? { customerId: formData.customerId }
+    ? isCustomerParty
+      ? {
+          customerId: formData.customerId,
+          ...(isRefund ? { paymentType: "refund" } : {}),
+        }
       : { supplierId: formData.customerId }
     : undefined;
 
@@ -54,10 +78,27 @@ function AddPayment() {
   )
     ? partyFormOptions.data.outstandingInvoices
     : [];
-  const invoices = outstandingInvoices;
+  const refundDueInvoices = Array.isArray(
+    partyFormOptions?.data?.refundDueInvoices
+  )
+    ? partyFormOptions.data.refundDueInvoices
+    : [];
+  const invoices = isRefund
+    ? (outstandingInvoices.length ? outstandingInvoices : refundDueInvoices)
+    : outstandingInvoices;
   const ledgerBalanceLabel =
     partyFormOptions?.data?.ledgerBalanceLabel ||
     (formData.customerId ? "Loading..." : "Rs. 0");
+
+  const directionOptions = useMemo(() => {
+    const fromApi = formOptions?.data?.directions || [];
+    const byValue = new Map(
+      [...DEFAULT_DIRECTION_OPTIONS, ...fromApi].map((item) => [item.value, item])
+    );
+    return DEFAULT_DIRECTION_OPTIONS.map(
+      (item) => byValue.get(item.value) || item
+    );
+  }, [formOptions?.data?.directions]);
 
   const handleInputChange = (field, value) => {
     setFormData((previous) => ({ ...previous, [field]: value }));
@@ -68,6 +109,7 @@ function AddPayment() {
     handleInputChange("customerId", "");
     setSelectedInvoices([]);
     setAllocationAmounts({});
+    setPaymentAmount("");
   };
 
   const handlePartyChange = (value) => {
@@ -98,7 +140,7 @@ function AddPayment() {
     setSelectedInvoices((prev) => [...prev, invoiceId]);
     setAllocationAmounts((prev) => ({
       ...prev,
-      [invoiceId]: String(invoice.outstandingAmount ?? 0),
+      [invoiceId]: String(getAllocatableAmount(invoice, isRefund)),
     }));
   };
 
@@ -114,7 +156,7 @@ function AddPayment() {
       Object.fromEntries(
         invoices.map((invoice) => [
           getInvoiceId(invoice),
-          String(invoice.outstandingAmount ?? 0),
+          String(getAllocatableAmount(invoice, isRefund)),
         ])
       )
     );
@@ -130,16 +172,16 @@ function AddPayment() {
   const buildAllocations = () =>
     selectedInvoices
       .map((invoiceId) => {
-        const invoice = outstandingInvoices.find((item) => item._id === invoiceId);
+        const invoice = invoices.find((item) => item._id === invoiceId);
         if (!invoice) return null;
 
-        const outstanding = parseAmount(invoice.outstandingAmount);
+        const maxAmount = getAllocatableAmount(invoice, isRefund);
         const typedAmount = parseAmount(allocationAmounts[invoiceId]);
-        const amountApplied = Math.min(typedAmount || outstanding, outstanding);
+        const amountApplied = Math.min(typedAmount || maxAmount, maxAmount);
 
         if (amountApplied <= 0) return null;
 
-        if (isCustomerReceipt) {
+        if (isCustomerParty) {
           return {
             saleId: invoice.saleId || invoice._id,
             amountApplied,
@@ -162,8 +204,13 @@ function AddPayment() {
         0
       );
 
+      if (isRefund && !allocations.length) {
+        toast.error("Select at least one sale with refund due.");
+        return;
+      }
+
       const payload = {
-        direction: paymentDirection,
+        paymentType: paymentDirection,
         paymentDate: formData.paymentDate || null,
         paymentAmount: parseAmount(paymentAmount) || allocatedTotal,
         paymentMethod: formData.paymentMethod,
@@ -172,14 +219,18 @@ function AddPayment() {
         allocations,
       };
 
-      if (isCustomerReceipt) {
+      if (isCustomerParty) {
         payload.customerId = formData.customerId;
       } else {
         payload.supplierId = formData.customerId;
       }
 
       await createMutation.mutateAsync(payload);
-      toast.success("Payment recorded successfully!");
+      toast.success(
+        isRefund
+          ? "Refund recorded successfully!"
+          : "Payment recorded successfully!"
+      );
       navigate("/payments");
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to record payment. Please try again.");
@@ -195,12 +246,18 @@ function AddPayment() {
     : "";
 
   const invoiceEmptyMessage = !formData.customerId
-    ? isCustomerReceipt
-      ? "Select a customer to load outstanding invoices."
+    ? isCustomerParty
+      ? isRefund
+        ? "Select a customer to load sales with refund due."
+        : "Select a customer to load outstanding invoices."
       : "Select a supplier to load outstanding invoices."
     : isPartyOptionsLoading
-      ? "Loading outstanding invoices..."
-      : "No outstanding invoices found.";
+      ? isRefund
+        ? "Loading refund-due sales..."
+        : "Loading outstanding invoices..."
+      : isRefund
+        ? "No sales with refund due found."
+        : "No outstanding invoices found.";
 
   return (
     <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
@@ -228,8 +285,8 @@ function AddPayment() {
             Record Payment Voucher
           </h1>
           <p className="text-sm text-tertiary">
-            Book financial collections from distributors or clear bulk supplier
-            ledger invoices
+            Book customer receipts, pay refunds on credit sales, or clear
+            supplier ledger invoices
           </p>
         </div>
 
@@ -276,8 +333,8 @@ function AddPayment() {
                   <label className="block text-sm font-semibold text-BLUE-dark mb-1.5">
                     Payment Direction
                   </label>
-                  <div className="grid grid-cols-2 gap-3 w-full bg-[#F9FAFB] rounded-md py-3">
-                    {formOptions?.data?.directions?.map((direction) => (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full bg-[#F9FAFB] rounded-md py-3 px-3">
+                    {directionOptions.map((direction) => (
                       <button
                         key={direction.value}
                         type="button"
@@ -296,7 +353,7 @@ function AddPayment() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                   <div>
                     <label className="block text-sm font-semibold text-BLUE-dark mb-1.5">
-                      {isCustomerReceipt
+                      {isCustomerParty
                         ? "Select Customer"
                         : "Select Supplier"}{" "}
                       <span className="text-rose-500">*</span>
@@ -311,11 +368,11 @@ function AddPayment() {
                         className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                       >
                         <option value="" disabled>
-                          {isCustomerReceipt
+                          {isCustomerParty
                             ? "Select customer"
                             : "Select supplier"}
                         </option>
-                        {isCustomerReceipt
+                        {isCustomerParty
                           ? formOptions?.data?.customers?.map((customer) => (
                               <option key={customer._id} value={customer._id}>
                                 {customer.label}
@@ -356,7 +413,11 @@ function AddPayment() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-4">
                   <div>
                     <label className="block text-sm font-semibold text-BLUE-dark mb-1.5">
-                      Payment Amount Received (Rs.){" "}
+                      {isRefund
+                        ? "Refund Amount Paid (Rs.)"
+                        : isCustomerReceipt
+                          ? "Payment Amount Received (Rs.)"
+                          : "Payment Amount Paid (Rs.)"}{" "}
                       <span className="text-rose-500">*</span>
                     </label>
                     <input
@@ -396,7 +457,9 @@ function AddPayment() {
 
                   <div>
                     <label className="block text-sm font-semibold text-BLUE-dark mb-1.5">
-                      Target Plant Account{" "}
+                      {isRefund
+                        ? "Pay From Cash / Bank Account"
+                        : "Target Plant Account"}{" "}
                       <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
@@ -443,10 +506,12 @@ function AddPayment() {
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
             <div className="border-b border-slate-200 p-4">
               <h2 className="text-[16px] font-bold text-BLUE-dark">
-                Invoice Auto-Allocation
+                {isRefund ? "Refund Due Allocation" : "Invoice Auto-Allocation"}
               </h2>
               <p className="mt-1 text-sm text-tertiary">
-                Select invoices and enter the amount to apply to each.
+                {isRefund
+                  ? "Select sales marked Refund Due and enter the amount to refund on each."
+                  : "Select invoices and enter the amount to apply to each."}
               </p>
             </div>
             <div className="overflow-x-auto">
@@ -482,10 +547,10 @@ function AddPayment() {
                         Total (Rs.)
                       </th>
                       <th className="px-4 py-3 text-right font-semibold text-slate-700">
-                        Outstanding (Rs.)
+                        {isRefund ? "Refund Due (Rs.)" : "Outstanding (Rs.)"}
                       </th>
                       <th className="px-4 py-3 text-right font-semibold text-slate-700">
-                        Amount to apply (Rs.)
+                        {isRefund ? "Amount to refund (Rs.)" : "Amount to apply (Rs.)"}
                       </th>
                     </tr>
                   </thead>
@@ -522,7 +587,7 @@ function AddPayment() {
                             {Number(invoice.totalAmount || 0).toLocaleString()}
                           </td>
                           <td className="px-4 py-3 text-right font-semibold text-slate-800">
-                            {Number(invoice.outstandingAmount || 0).toLocaleString()}
+                            {getAllocatableAmount(invoice, isRefund).toLocaleString()}
                           </td>
                           <td className="px-4 py-3 text-right">
                             {isSelected ? (
@@ -575,7 +640,9 @@ function AddPayment() {
           >
             {createMutation.isPending
               ? "Recording..."
-              : "Record Voucher Payment"}
+              : isRefund
+                ? "Record Refund Payment"
+                : "Record Voucher Payment"}
           </button>
         </div>
       </form>
