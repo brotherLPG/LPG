@@ -95,7 +95,8 @@ function FillingBatchDetails() {
                         <DetailItem label="Cylinder Type" value={batch.cylinderTypeName || cylinderType?.typeName} />
                         <DetailItem label="Cylinder Quantity" value={batch.cylinderCount ? `${Number(batch.cylinderCount).toLocaleString()} Cylinders` : undefined} />
                         <DetailItem label="Target Fill Weight" value={batch.targetFillWeightKg ? `${Number(batch.targetFillWeightKg).toLocaleString()} KG` : undefined} />
-                        <DetailItem label="Actual LPG Used" value={batch.actualLpgUsedKg ? `${Number(batch.actualLpgUsedKg).toLocaleString()} KG` : undefined} />
+                        <DetailItem label="Residual Recovered" value={`${Number(batch.residualRecoveredKg || 0).toLocaleString()} KG`} />
+                        <DetailItem label="Actual LPG Used" value={batch.actualLpgUsedKg != null ? `${Number(batch.actualLpgUsedKg).toLocaleString()} KG` : undefined} />
                     </dl>
                 </section>
 
