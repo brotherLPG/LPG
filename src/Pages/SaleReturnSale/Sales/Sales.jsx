@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Search, CirclePlus, ArrowLeft, Eye, Edit3 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { Button, Tooltip } from "@heroui/react";
 import GlobalTable from "../../../utils/GlobalTable";
 import { useGetSaleFormOptions, useSales } from "../../../queries/sales/sales.queries";
 import Returnsales from "../ReturnSales/Returnsales";
@@ -229,24 +230,32 @@ function Sales() {
       renderCell: (item) => (
         <div className="flex items-center justify-end gap-3">
           {can("sales", "read") && (
-            <button
-              type="button"
-              onClick={() => navigate(`/sales/view/${item._id}`)}
-              aria-label={`View ${item.saleNumber}`}
-              className="text-[#1a56db] hover:text-blue-800 transition-colors"
-            >
-              <Eye className="h-4 w-4" strokeWidth={2.5} />
-            </button>
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => navigate(`/sales/view/${item._id}`)}
+                aria-label={`View ${item.saleNumber}`}
+                className="text-[#1a56db] hover:text-blue-800 transition-colors bg-transparent min-w-0 px-1"
+              >
+                <Eye className="h-4 w-4" strokeWidth={2.5} />
+              </Button>
+              <Tooltip.Content>
+                <p>View Sale</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
           {can("sales", "update") && (
-            <button
-              type="button"
-              onClick={() => navigate(`/sales/edit/${item._id}`)}
-              aria-label={`Edit ${item.saleNumber}`}
-              className="text-[#008951] hover:text-emerald-800 transition-colors"
-            >
-              <Edit3 className="h-4 w-4" strokeWidth={2.5} />
-            </button>
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => navigate(`/sales/edit/${item._id}`)}
+                aria-label={`Edit ${item.saleNumber}`}
+                className="text-[#008951] hover:text-emerald-800 transition-colors bg-transparent min-w-0 px-1"
+              >
+                <Edit3 className="h-4 w-4" strokeWidth={2.5} />
+              </Button>
+              <Tooltip.Content>
+                <p>Update Sale</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
         </div>
       ),

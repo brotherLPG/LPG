@@ -1,6 +1,7 @@
 import { PlusCircle, Eye, ChevronDown, Loader } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button, Tooltip } from "@heroui/react";
 import GlobalTable from "../../utils/GlobalTable";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
@@ -185,14 +186,18 @@ function Payments() {
       renderCell: (item) => (
         <div className="flex items-center gap-2">
           {can("payments", "read") && (
-          <button
-            type="button"
-            aria-label={`View ${item.voucherNo}`}
-            onClick={() => navigate(`/payments/view/${item.id}`)}
-            className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
-          >
-            <Eye className="h-3.5 w-3.5" /> View
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                aria-label={`View ${item.voucherNo}`}
+                onClick={() => navigate(`/payments/view/${item.id}`)}
+                className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+              >
+                <Eye className="h-3.5 w-3.5" />
+              </Button>
+              <Tooltip.Content>
+                <p>View Payment</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
           {/* <button
             type="button"

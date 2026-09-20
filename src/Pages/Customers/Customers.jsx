@@ -1,6 +1,7 @@
 import { Search, PlusCircle, Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button, Tooltip } from "@heroui/react";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
 import GlobalTable from "../../utils/GlobalTable";
@@ -143,38 +144,50 @@ function Customers() {
     {
       key: "actions",
       label: "Actions",
-       className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 text-center",
+       className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       renderCell: (customer) => (
         <div className="flex items-center gap-2">
           {can("customers", "read") && (
-          <button
-            type="button"
-            onClick={() => navigate(`/customers/view/${customer._id}`)}
-            aria-label={`View ${customer.name}`}
-            className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
-          >
-            <Eye className="h-3.5 w-3.5" /> View
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => navigate(`/customers/view/${customer._id}`)}
+                aria-label={`View ${customer.name}`}
+                className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+              >
+                <Eye className="h-3.5 w-3.5" />
+              </Button>
+              <Tooltip.Content>
+                <p>View Customer</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
           {can("customers", "update") && (
-          <button
-            type="button"
-            onClick={() => navigate(`/customers/edit/${customer._id}`)}
-            aria-label={`Edit ${customer.name}`}
-            className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
-          >
-            <Edit3 className="h-3.5 w-3.5" /> Edit
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => navigate(`/customers/edit/${customer._id}`)}
+                aria-label={`Edit ${customer.name}`}
+                className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
+              >
+                <Edit3 className="h-3.5 w-3.5" />
+              </Button>
+              <Tooltip.Content>
+                <p>Update Customer</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
           {can("customers", "delete") && (
-          <button
-            type="button"
-            onClick={() => handleDeleteClick(customer)}
-            aria-label={`Delete ${customer.name}`}
-            className="flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors"
-          >
-            <Trash2 className="h-3.5 w-3.5" /> Delete
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => handleDeleteClick(customer)}
+                aria-label={`Delete ${customer.name}`}
+                className="flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+              <Tooltip.Content>
+                <p>Delete Customer</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
         </div>
       ),

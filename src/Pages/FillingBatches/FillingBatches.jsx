@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CirclePlus, Eye, Edit3, ChevronDown } from "lucide-react";
+import { Button, Tooltip } from "@heroui/react";
 import GlobalTable from "../../utils/GlobalTable";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
@@ -167,24 +168,32 @@ function FillingBatches() {
       renderCell: (item) => (
         <div className="flex items-center justify-end gap-3">
           {can("filling-batches", "read") && (
-          <button
-            type="button"
-            aria-label={`View ${item.batchNo}`}
-            onClick={() => navigate(`/filling-batches/view/${item._id}`)}
-            className="text-[#1a56db] hover:text-blue-800 transition-colors"
-          >
-            <Eye className="h-4 w-4" strokeWidth={2.5} />
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                aria-label={`View ${item.batchNo}`}
+                onClick={() => navigate(`/filling-batches/view/${item._id}`)}
+                className="text-[#1a56db] hover:text-blue-800 transition-colors bg-transparent min-w-0 px-1"
+              >
+                <Eye className="h-4 w-4" strokeWidth={2.5} />
+              </Button>
+              <Tooltip.Content>
+                <p>View Batch</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
           {can("filling-batches", "update") && (
-          <button
-            type="button"
-            aria-label={`Edit ${item.batchNo}`}
-            onClick={() => navigate(`/filling-batches/edit/${item._id}`)}
-            className="text-[#008951] hover:text-emerald-800 transition-colors"
-          >
-            <Edit3 className="h-4 w-4" strokeWidth={2.5} />
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                aria-label={`Edit ${item.batchNo}`}
+                onClick={() => navigate(`/filling-batches/edit/${item._id}`)}
+                className="text-[#008951] hover:text-emerald-800 transition-colors bg-transparent min-w-0 px-1"
+              >
+                <Edit3 className="h-4 w-4" strokeWidth={2.5} />
+              </Button>
+              <Tooltip.Content>
+                <p>Update Batch</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
           {/* <button
             type="button"

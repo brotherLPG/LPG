@@ -6,6 +6,7 @@ import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
 import { useSuppliers, useDeleteSupplier } from "../../queries/suppliers/suppliers.queries";
 import { usePermissions } from "../../contexts/PermissionContext";
+import { Button, Tooltip } from "@heroui/react";
 
 // Data comes from API via react-query
 
@@ -134,11 +135,10 @@ function Suppliers() {
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
         <span
-          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-            item.status === "Active"
+          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${item.status === "Active"
               ? "bg-emerald-50 text-emerald-600"
               : "bg-rose-50 text-rose-600"
-          }`}
+            }`}
         >
           {item.status}
         </span>
@@ -152,34 +152,48 @@ function Suppliers() {
       renderCell: (item) => (
         <div className="flex items-center justify-center gap-2">
           {can("suppliers", "read") && (
-          <button
-            type="button"
-            onClick={() => navigate(`/suppliers/view/${item._id}`)}
-            aria-label={`View ${item.name}`}
-            className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
-          >
-            <Eye className="h-3.5 w-3.5" />
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => navigate(`/suppliers/view/${item._id}`)}
+                aria-label={`View ${item.name}`}
+                className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+              >
+                <Eye className="h-3.5 w-3.5" />
+              </Button>
+
+              <Tooltip.Content>
+                <p>View Supplier</p>
+              </Tooltip.Content>
+
+            </Tooltip>
           )}
           {can("suppliers", "update") && (
-          <button
-            type="button"
-            onClick={() => navigate(`/suppliers/edit/${item._id}`)}
-            aria-label={`Edit ${item.name}`}
-            className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
-          >
-            <Edit3 className="h-3.5 w-3.5" />
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => navigate(`/suppliers/edit/${item._id}`)}
+                aria-label={`Edit ${item.name}`}
+                className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
+              >
+                <Edit3 className="h-3.5 w-3.5" />
+              </Button>
+              <Tooltip.Content>
+                <p>Update Supplier</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
           {can("suppliers", "delete") && (
-          <button
-            type="button"
-            onClick={() => handleDeleteClick(item)}
-            aria-label={`Delete ${item.name}`}
-            className="flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition-colors"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => handleDeleteClick(item)}
+                aria-label={`Delete ${item.name}`}
+                className="flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition-colors"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+              <Tooltip.Content>
+                <p>Delete Supplier</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
         </div>
       ),
@@ -210,13 +224,13 @@ function Suppliers() {
             </p>
           </div>
           {can("suppliers", "create") && (
-          <button
-            type="button"
-            onClick={() => navigate("/suppliers/add")}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#008951] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#007545]"
-          >
-            <PlusCircle className="h-4 w-4" /> Add Supplier
-          </button>
+            <button
+              type="button"
+              onClick={() => navigate("/suppliers/add")}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#008951] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#007545]"
+            >
+              <PlusCircle className="h-4 w-4" /> Add Supplier
+            </button>
           )}
         </div>
 

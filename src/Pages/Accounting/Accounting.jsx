@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Eye, ChevronDown, Plus, Loader, Pencil } from "lucide-react";
+import { Button, Tooltip } from "@heroui/react";
 import GlobalTable from "../../utils/GlobalTable";
 import { useGetAccounts, useAccountFormOptions } from "../../queries/accounts/accounts.queries";
 import { usePermissions } from "../../contexts/PermissionContext";
@@ -128,22 +129,32 @@ function Accounting() {
       renderCell: (item) => (
         <div className="flex items-center gap-2">
           {can("accounts", "update") && (
-          <button
-            type="button"
-            onClick={() => navigate(`/accounting/edit/${item.accountId}`)}
-            className="flex items-center gap-1.5 rounded-full bg-emerald-50/70 border border-emerald-200/60 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
-          >
-            <Pencil className="h-3.5 w-3.5" /> Edit
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => navigate(`/accounting/edit/${item.accountId}`)}
+                aria-label={`Edit ${item.name}`}
+                className="flex items-center gap-1.5 rounded-full bg-emerald-50/70 border border-emerald-200/60 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+              <Tooltip.Content>
+                <p>Update Account</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
           {can("accounts", "read") && (
-          <button
-            type="button"
-            onClick={() => navigate(`/accounting/view/${item.accountId}`)}
-            className="flex items-center gap-1.5 rounded-full bg-blue-50/70 border border-blue-200/60 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
-          >
-            <Eye className="h-3.5 w-3.5" /> View
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => navigate(`/accounting/view/${item.accountId}`)}
+                aria-label={`View ${item.name}`}
+                className="flex items-center gap-1.5 rounded-full bg-blue-50/70 border border-blue-200/60 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+              >
+                <Eye className="h-3.5 w-3.5" />
+              </Button>
+              <Tooltip.Content>
+                <p>View Account</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
         </div>
       ),
