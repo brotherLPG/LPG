@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Pagination, Table } from "@heroui/react";
 
 const GlobalTable = ({
@@ -87,7 +87,7 @@ const GlobalTable = ({
                 className={`
                   px-2
                   py-1.5
-                  text-left
+                  ${/\btext-(left|center|right|start|end)\b/.test(column.className || "") ? "" : "text-left"}
                   font-bold
                   text-tertiary
                   ${column.className || ""}

@@ -72,13 +72,15 @@ function RecentSales({ sales }) {
           No recent sales found.
         </div>
       ) : (
-        <GlobalTable
-          columns={salesColumns}
-          data={items}
-          ariaLabel="Recent sales"
-          className=""
-          rowClassName="border-b border-slate-100 last:border-b-0 hover:bg-slate-50"
-        />
+        <section className='min-w-0 overflow-hidden rounded-md border border-slate-200 bg-white [&_.overflow-x-auto]:overflow-x-hidden! [&_.min-w-300]:min-w-0! [&_.min-w-300]:w-full! [&_table]:w-full! [&_table]:table-fixed'>
+          <GlobalTable
+            columns={salesColumns}
+            data={items}
+            ariaLabel="Recent sales"
+            className=""
+            rowClassName="border-b border-slate-100 last:border-b-0 hover:bg-slate-50"
+          />
+        </section>
       )}
     </section>
   );

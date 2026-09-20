@@ -15,10 +15,8 @@ function Suppliers() {
   const { can } = usePermissions();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
-  const [paymentTerm, setPaymentTerm] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
-  const [suppliersState, setSuppliersState] = useState([]);
 
   const { data: suppliersData, isLoading, error } = useSuppliers({
     search: query,
@@ -149,10 +147,10 @@ function Suppliers() {
     {
       key: "actions",
       label: "Actions",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 text-center!",
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2">
           {can("suppliers", "read") && (
           <button
             type="button"
@@ -160,7 +158,7 @@ function Suppliers() {
             aria-label={`View ${item.name}`}
             className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
           >
-            <Eye className="h-3.5 w-3.5" /> View
+            <Eye className="h-3.5 w-3.5" />
           </button>
           )}
           {can("suppliers", "update") && (
@@ -170,7 +168,7 @@ function Suppliers() {
             aria-label={`Edit ${item.name}`}
             className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
           >
-            <Edit3 className="h-3.5 w-3.5" /> Edit
+            <Edit3 className="h-3.5 w-3.5" />
           </button>
           )}
           {can("suppliers", "delete") && (
@@ -180,7 +178,7 @@ function Suppliers() {
             aria-label={`Delete ${item.name}`}
             className="flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition-colors"
           >
-            <Trash2 className="h-3.5 w-3.5" /> Delete
+            <Trash2 className="h-3.5 w-3.5" />
           </button>
           )}
         </div>
