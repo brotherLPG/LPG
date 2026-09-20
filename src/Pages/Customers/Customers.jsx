@@ -130,9 +130,7 @@ function Customers() {
     {
       key: "status",
       label: "Status",
-      className: "text-center",
-      className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      className:"bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
       renderCell: (customer) => (
         <span
           className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${getStatusStyle(customer)}`}

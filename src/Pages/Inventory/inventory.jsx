@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { PlusCircle, Search, Eye, Edit3, ChevronDown } from "lucide-react";
+import { Button, Tooltip } from "@heroui/react";
 import GlobalTable from "../../utils/GlobalTable";
 import { useInventoryItems, useDeleteInventoryItem } from "../../queries/inventory/inventory.queries";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
@@ -159,24 +160,32 @@ function Inventory() {
       renderCell: (item) => (
         <div className="flex items-center gap-2">
           {can("inventory-items", "read") && (
-          <button
-            type="button"
-            onClick={() => navigate(`/inventory/view/${item._id}`)}
-            aria-label={`View ${item.itemName}`}
-            className="flex items-center gap-1.5 rounded-full bg-blue-50/70 border border-blue-200/60 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
-          >
-            <Eye className="h-3.5 w-3.5" /> View
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => navigate(`/inventory/view/${item._id}`)}
+                aria-label={`View ${item.itemName}`}
+                className="flex items-center gap-1.5 rounded-full bg-blue-50/70 border border-blue-200/60 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+              >
+                <Eye className="h-3.5 w-3.5" />
+              </Button>
+              <Tooltip.Content>
+                <p>View Inventory Item</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
           {can("inventory-items", "update") && (
-          <button
-            type="button"
-            onClick={() => navigate(`/inventory/edit/${item._id}`)}
-            aria-label={`Edit ${item.itemName}`}
-            className="flex items-center gap-1.5 rounded-full bg-emerald-50/70 border border-emerald-200/60 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
-          >
-            <Edit3 className="h-3.5 w-3.5" /> Edit
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => navigate(`/inventory/edit/${item._id}`)}
+                aria-label={`Edit ${item.itemName}`}
+                className="flex items-center gap-1.5 rounded-full bg-emerald-50/70 border border-emerald-200/60 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
+              >
+                <Edit3 className="h-3.5 w-3.5" />
+              </Button>
+              <Tooltip.Content>
+                <p>Update Inventory Item</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
           {/* <button
             type="button"

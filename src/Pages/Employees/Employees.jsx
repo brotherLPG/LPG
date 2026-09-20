@@ -1,6 +1,7 @@
 import { Plus, Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button, Tooltip } from "@heroui/react";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import GlobalTable from "../../utils/GlobalTable";
 import { useEmployees, useDeleteEmployee } from "../../queries/employees/employees.queries";
@@ -143,34 +144,46 @@ function Employees() {
       renderCell: (item) => (
         <div className="flex items-center justify-end gap-3">
           {can("employees", "read") && (
-          <button
-            type="button"
-            aria-label={`View ${item.name}`}
-            onClick={() => navigate(`/employees/view/${item._id}`)}
-            className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
-          >
-            <Eye className="h-4 w-4" strokeWidth={2.5} /> View
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                aria-label={`View ${item.name}`}
+                onClick={() => navigate(`/employees/view/${item._id}`)}
+                className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+              >
+                <Eye className="h-4 w-4" strokeWidth={2.5} />
+              </Button>
+              <Tooltip.Content>
+                <p>View Employee</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
           {can("employees", "update") && (
-          <button
-            type="button"
-            onClick={() => navigate(`/employees/edit/${item._id}`)}
-            aria-label={`Edit ${item.name}`}
-            className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
-          >
-            <Edit3 className="h-4 w-4" strokeWidth={2.5} /> Edit
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => navigate(`/employees/edit/${item._id}`)}
+                aria-label={`Edit ${item.name}`}
+                className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
+              >
+                <Edit3 className="h-4 w-4" strokeWidth={2.5} />
+              </Button>
+              <Tooltip.Content>
+                <p>Update Employee</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
           {can("employees", "delete") && (
-          <button
-            type="button"
-            onClick={() => setDeleteModal({ isOpen: true, item })}
-            aria-label={`Delete ${item.name}`}
-            className="flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors"
-          >
-            <Trash2 className="h-4 w-4" strokeWidth={2.5} /> Delete
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => setDeleteModal({ isOpen: true, item })}
+                aria-label={`Delete ${item.name}`}
+                className="flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors"
+              >
+                <Trash2 className="h-4 w-4" strokeWidth={2.5} />
+              </Button>
+              <Tooltip.Content>
+                <p>Delete Employee</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
         </div>
       ),

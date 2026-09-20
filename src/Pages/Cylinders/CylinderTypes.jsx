@@ -1,6 +1,7 @@
 import { PlusCircle, Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button, Tooltip } from "@heroui/react";
 import GlobalTable from "../../utils/GlobalTable";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
@@ -156,34 +157,44 @@ function CylinderTypes() {
       renderCell: (item) => (
         <div className="flex items-center gap-2">
           {can("cylinder-types", "read") && (
-          <button
-            type="button"
-            aria-label={`View ${item.name}`}
-            onClick={() => navigate(`/cylinders/view-type/${item._id}`)}
-            className="flex items-center gap-1.5 rounded-full bg-blue-50/70 border border-blue-200/60 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
-          >
-            <Eye className="h-3.5 w-3.5" /> View
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => navigate(`/cylinders/view-type/${item._id}`)}
+                className="flex items-center gap-1.5 rounded-full bg-blue-50/70 border border-blue-200/60 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+              >
+                <Eye className="h-3.5 w-3.5" />
+              </Button>
+              <Tooltip.Content>
+                <p>View Cylinder Type</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
           {can("cylinder-types", "update") && (
-          <button
-            type="button"
-            aria-label={`Edit ${item.name}`}
-            onClick={() => navigate(`/cylinders/edit-type/${item._id}`)}
-            className="flex items-center gap-1.5 rounded-full bg-emerald-50/70 border border-emerald-200/60 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
-          >
-            <Edit3 className="h-3.5 w-3.5" /> Edit
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => navigate(`/cylinders/edit-type/${item._id}`)}
+                className="flex items-center gap-1.5 rounded-full bg-emerald-50/70 border border-emerald-200/60 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
+              >
+                <Edit3 className="h-3.5 w-3.5" />
+              </Button>
+              <Tooltip.Content>
+                <p>Update Cylinder Type</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
           {can("cylinder-types", "delete") && (
-          <button
-            type="button"
-            onClick={() => handleDeleteClick(item)}
-            aria-label={`Delete ${item.name}`}
-            className="flex items-center gap-1.5 rounded-full bg-rose-50/70 border border-rose-200/60 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition-colors"
-          >
-            <Trash2 className="h-3.5 w-3.5" /> Delete
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => handleDeleteClick(item)}
+                aria-label={`Delete ${item.name}`}
+                className="flex items-center gap-1.5 rounded-full bg-rose-50/70 border border-rose-200/60 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition-colors"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+              <Tooltip.Content>
+                <p>Delete Cylinder Type</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
         </div>
       ),

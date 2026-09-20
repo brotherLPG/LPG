@@ -1,6 +1,7 @@
 import { Eye, Pencil, CirclePlus, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button, Tooltip } from "@heroui/react";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import GlobalTable from "../../utils/GlobalTable";
 import { useToast } from "../../utils/GlobalToast";
@@ -147,24 +148,32 @@ function UsersRoles() {
       renderCell: (item) => (
         <div className="flex items-center gap-2">
           {can("users", "read") && (
-          <button
-            type="button"
-            aria-label={`View ${item.fullName}`}
-            onClick={() => navigate(`/users-roles/view/${item._id}`)}
-            className="text-blue-500 hover:text-blue-700"
-          >
-            <Eye className="h-4 w-4" />
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                aria-label={`View ${item.fullName}`}
+                onClick={() => navigate(`/users-roles/view/${item._id}`)}
+                className="text-blue-500 hover:text-blue-700 bg-transparent min-w-0 px-1"
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+              <Tooltip.Content>
+                <p>View User</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
           {can("users", "update") && (
-          <button
-            type="button"
-            aria-label={`Edit ${item.fullName}`}
-            onClick={() => navigate(`/users-roles/edit/${item._id}`)}
-            className="text-emerald-500 hover:text-emerald-700"
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                aria-label={`Edit ${item.fullName}`}
+                onClick={() => navigate(`/users-roles/edit/${item._id}`)}
+                className="text-emerald-500 hover:text-emerald-700 bg-transparent min-w-0 px-1"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Tooltip.Content>
+                <p>Update User</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
           {/* <button
             type="button"

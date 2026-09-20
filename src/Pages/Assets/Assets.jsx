@@ -1,6 +1,7 @@
 import { Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button, Tooltip } from "@heroui/react";
 import GlobalTable from "../../utils/GlobalTable";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useAssets, useDeleteAsset, useAssetFormOptions } from "../../queries/assets/assets.queries";
@@ -212,34 +213,46 @@ function Assets() {
       renderCell: (item) => (
         <div className="flex items-center justify-end gap-2">
           {can("assets", "read") && (
-          <button
-            type="button"
-            aria-label={`View ${item.assetCode}`}
-            onClick={() => navigate(`/assets/view/${item._id}`)}
-            className="flex items-center gap-1 rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
-          >
-            <Eye className="h-3.5 w-3.5" strokeWidth={2.5} /> View
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                aria-label={`View ${item.assetCode}`}
+                onClick={() => navigate(`/assets/view/${item._id}`)}
+                className="flex items-center gap-1 rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+              >
+                <Eye className="h-3.5 w-3.5" strokeWidth={2.5} />
+              </Button>
+              <Tooltip.Content>
+                <p>View Asset</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
           {can("assets", "update") && (
-          <button
-            type="button"
-            aria-label={`Edit ${item.assetCode}`}
-            onClick={() => navigate(`/assets/edit/${item._id}`)}
-            className="flex items-center gap-1 rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
-          >
-            <Edit3 className="h-3.5 w-3.5" strokeWidth={2.5} /> Edit
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                aria-label={`Edit ${item.assetCode}`}
+                onClick={() => navigate(`/assets/edit/${item._id}`)}
+                className="flex items-center gap-1 rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
+              >
+                <Edit3 className="h-3.5 w-3.5" strokeWidth={2.5} />
+              </Button>
+              <Tooltip.Content>
+                <p>Update Asset</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
           {can("assets", "delete") && (
-          <button
-            type="button"
-            aria-label={`Delete ${item.assetCode}`}
-            onClick={() => setDeleteModal({ isOpen: true, item })}
-            className="flex items-center gap-1 rounded-md bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors"
-          >
-            <Trash2 className="h-3.5 w-3.5" strokeWidth={2.5} /> Delete
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                aria-label={`Delete ${item.assetCode}`}
+                onClick={() => setDeleteModal({ isOpen: true, item })}
+                className="flex items-center gap-1 rounded-md bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors"
+              >
+                <Trash2 className="h-3.5 w-3.5" strokeWidth={2.5} />
+              </Button>
+              <Tooltip.Content>
+                <p>Delete Asset</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
         </div>
       ),

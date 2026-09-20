@@ -1,6 +1,7 @@
 import { Search, Trash2, Pencil, Eye } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button, Tooltip } from "@heroui/react";
 import GlobalTable from "../../utils/GlobalTable";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useDeleteRole, useRoles } from "../../queries/roles/roles.queries";
@@ -106,34 +107,46 @@ function Roles() {
       renderCell: (role) => (
         <div className="flex items-center gap-3">
           {can("roles", "read") && (
-          <button
-            type="button"
-            onClick={() => navigate(`/users-roles/view-role/${role._id}`)}
-            aria-label={`View ${role.roleName || role.name || "role"}`}
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-800"
-          >
-            <Eye className="h-4 w-4" /> View
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => navigate(`/users-roles/view-role/${role._id}`)}
+                aria-label={`View ${role.roleName || role.name || "role"}`}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-800 bg-transparent min-w-0 px-1"
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+              <Tooltip.Content>
+                <p>View Role</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
           {can("roles", "update") && (
-          <button
-            type="button"
-            onClick={() => navigate(`/users-roles/edit-role/${role._id}`)}
-            aria-label={`Edit ${role.roleName || role.name || "role"}`}
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-600 hover:text-emerald-800"
-          >
-            <Pencil className="h-4 w-4" /> Edit
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => navigate(`/users-roles/edit-role/${role._id}`)}
+                aria-label={`Edit ${role.roleName || role.name || "role"}`}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-600 hover:text-emerald-800 bg-transparent min-w-0 px-1"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Tooltip.Content>
+                <p>Update Role</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
           {can("roles", "delete") && (
-          <button
-            type="button"
-            onClick={() => setDeleteModal({ isOpen: true, role })}
-            aria-label={`Delete ${role.roleName || role.name || "role"}`}
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-600 hover:text-red-800"
-          >
-            <Trash2 className="h-4 w-4" /> Delete
-          </button>
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => setDeleteModal({ isOpen: true, role })}
+                aria-label={`Delete ${role.roleName || role.name || "role"}`}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-600 hover:text-red-800 bg-transparent min-w-0 px-1"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+              <Tooltip.Content>
+                <p>Delete Role</p>
+              </Tooltip.Content>
+            </Tooltip>
           )}
         </div>
       ),
