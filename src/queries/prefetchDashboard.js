@@ -23,9 +23,35 @@ import { DEFAULT_PAYMENTS_LIST_PARAMS } from './payments/payments.queries.js'
 import { getAssets } from '../api/assets.api.js'
 import { getMaintenanceRecords } from '../api/maintenanceRecords.api.js'
 import { getExpenses } from '../api/expenses.api.js'
+import {
+  getInventoryAlerts,
+  getOperationsOverview,
+} from '../api/dashboard.api.js'
+import {
+  DEFAULT_INVENTORY_ALERTS_PARAMS,
+  DEFAULT_OPERATIONS_PARAMS,
+} from './dashboard/dashboard.queries.js'
 
 export const prefetchDashboard = async queryClient => {
   await Promise.all([
+    // ========================================
+    // Operations Overview
+    // ========================================
+
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.dashboard.operations(DEFAULT_OPERATIONS_PARAMS),
+      queryFn: () => getOperationsOverview(DEFAULT_OPERATIONS_PARAMS),
+    }),
+
+    // ========================================
+    // Inventory Alerts
+    // ========================================
+
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.dashboard.inventoryAlerts(DEFAULT_INVENTORY_ALERTS_PARAMS),
+      queryFn: () => getInventoryAlerts(DEFAULT_INVENTORY_ALERTS_PARAMS),
+    }),
+
     // ========================================
     // Current User
     // ========================================

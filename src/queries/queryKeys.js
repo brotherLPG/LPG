@@ -210,6 +210,17 @@ export const queryKeys = {
   },
 
   // =========================
+  // Dashboard
+  // =========================
+  dashboard: {
+    all: ['dashboard'],
+
+    operations: (params) => ['dashboard', 'operations', params],
+
+    inventoryAlerts: (params) => ['dashboard', 'inventory-alerts', params],
+  },
+
+  // =========================
   // Sales
   // =========================
   sales: {
