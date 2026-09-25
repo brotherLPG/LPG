@@ -24,6 +24,14 @@ const formatInvoiceDate = (value) => {
 const parseAmount = (value) =>
   Number(String(value || "").replace(/,/g, "").trim()) || 0;
 
+const formatAccountOptionLabel = (account) => {
+  const base =
+    account.label ||
+    [account.accountCode, account.accountName].filter(Boolean).join(" – ");
+  const balance = Number(account.currentBalanceAmount || 0);
+  return `${base} (Rs. ${balance.toLocaleString()})`;
+};
+
 const getRefundDueAmount = (invoice) => {
   if (invoice?.refundDueAmount != null) {
     return parseAmount(invoice.refundDueAmount);
@@ -476,7 +484,7 @@ function AddPayment() {
                         </option>
                         {formOptions?.data?.accounts?.map((account) => (
                           <option key={account._id} value={account._id}>
-                            {account.label}
+                            {formatAccountOptionLabel(account)}
                           </option>
                         ))}
                       </select>
