@@ -128,17 +128,26 @@ function ViewAccount() {
           </span>
         ),
       },
-      // {
-      //   key: "balanceAfter",
-      //   label: "Balance After",
-      //   className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap ",
-      //   cellClassName: "px-4 py-4 text-center whitespace-nowrap",
-      //   renderCell: (item) => (
-      //     <span className="text-[13px] font-semibold text-slate-800">
-      //       {Number(item.balanceAfter ?? item.afterBalance ?? 0).toLocaleString()}
-      //     </span>
-      //   ),
-      // },
+      {
+        key: "remainingBalance",
+        label: "Remaining Balance (Rs.)",
+        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+        cellClassName: "px-4 py-4 text-center whitespace-nowrap",
+        renderCell: (item) => {
+          const remaining = Number(
+            item.remainingBalance ?? item.balanceAfter ?? item.afterBalance ?? 0
+          );
+          return (
+            <span
+              className={`text-[13px] font-semibold ${
+                remaining < 0 ? "text-red-600" : "text-slate-800"
+              }`}
+            >
+              {remaining.toLocaleString()}
+            </span>
+          );
+        },
+      },
       {
         key: "statusLabel",
         label: "Status",
