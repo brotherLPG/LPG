@@ -368,7 +368,7 @@ function AddSales() {
                       <option value="">Select Account</option>
                       {accounts.map((account) => (
                         <option key={account._id} value={account._id}>
-                          {account.label || `${account.accountCode} - ${account.accountName}`}
+                          {`${account.label || `${account.accountCode} - ${account.accountName}`} (Rs. ${Number(account.currentBalanceAmount || 0).toLocaleString()})`}
                         </option>
                       ))}
                     </select>
