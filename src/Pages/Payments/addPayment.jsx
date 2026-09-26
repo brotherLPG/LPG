@@ -45,10 +45,41 @@ const getAllocatableAmount = (invoice, isRefund) =>
     ? getRefundDueAmount(invoice)
     : parseAmount(invoice?.outstandingAmount);
 
+const roundMoney = (value) =>
+  Math.round((Number(value) + Number.EPSILON) * 100) / 100;
+
+const formatApplyAmount = (value) => {
+  const rounded = roundMoney(value);
+  if (!Number.isFinite(rounded) || rounded <= 0) return "";
+  return String(rounded);
+};
+
+const buildAutomaticAllocation = (invoiceList, amountValue, refund) => {
+  let remaining = roundMoney(parseAmount(amountValue));
+  const selected = [];
+  const amounts = {};
+
+  if (remaining <= 0) return { selected, amounts };
+
+  for (const invoice of invoiceList) {
+    if (remaining <= 0) break;
+    const maxAmount = roundMoney(getAllocatableAmount(invoice, refund));
+    if (maxAmount <= 0) continue;
+
+    const apply = Math.min(remaining, maxAmount);
+    selected.push(invoice._id);
+    amounts[invoice._id] = formatApplyAmount(apply);
+    remaining = roundMoney(remaining - apply);
+  }
+
+  return { selected, amounts };
+};
+
 function AddPayment() {
   const navigate = useNavigate();
   const toast = useToast();
   const [paymentDirection, setPaymentDirection] = useState("receive");
+  const [allocationMode, setAllocationMode] = useState("automatic");
   const [selectedInvoices, setSelectedInvoices] = useState([]);
   const [allocationAmounts, setAllocationAmounts] = useState({});
   const [paymentAmount, setPaymentAmount] = useState("");
@@ -94,6 +125,18 @@ function AddPayment() {
   const invoices = isRefund
     ? (outstandingInvoices.length ? outstandingInvoices : refundDueInvoices)
     : outstandingInvoices;
+
+  const automaticAllocation = useMemo(
+    () => buildAutomaticAllocation(invoices, paymentAmount, isRefund),
+    [invoices, paymentAmount, isRefund]
+  );
+  const isAutomatic = allocationMode === "automatic";
+  const activeSelectedInvoices = isAutomatic
+    ? automaticAllocation.selected
+    : selectedInvoices;
+  const activeAllocationAmounts = isAutomatic
+    ? automaticAllocation.amounts
+    : allocationAmounts;
   const ledgerBalanceLabel =
     partyFormOptions?.data?.ledgerBalanceLabel ||
     (formData.customerId ? "Loading..." : "Rs. 0");
@@ -115,9 +158,19 @@ function AddPayment() {
   const handleDirectionChange = (value) => {
     setPaymentDirection(value);
     handleInputChange("customerId", "");
+    setAllocationMode("automatic");
     setSelectedInvoices([]);
     setAllocationAmounts({});
     setPaymentAmount("");
+  };
+
+  const handleAllocationModeChange = (mode) => {
+    if (mode === allocationMode) return;
+    if (mode === "manual") {
+      setSelectedInvoices(automaticAllocation.selected);
+      setAllocationAmounts(automaticAllocation.amounts);
+    }
+    setAllocationMode(mode);
   };
 
   const handlePartyChange = (value) => {
@@ -178,13 +231,13 @@ function AddPayment() {
   };
 
   const buildAllocations = () =>
-    selectedInvoices
+    activeSelectedInvoices
       .map((invoiceId) => {
         const invoice = invoices.find((item) => item._id === invoiceId);
         if (!invoice) return null;
 
         const maxAmount = getAllocatableAmount(invoice, isRefund);
-        const typedAmount = parseAmount(allocationAmounts[invoiceId]);
+        const typedAmount = parseAmount(activeAllocationAmounts[invoiceId]);
         const amountApplied = Math.min(typedAmount || maxAmount, maxAmount);
 
         if (amountApplied <= 0) return null;
@@ -245,12 +298,27 @@ function AddPayment() {
     }
   };
 
-  const appliedAmountsTotal = selectedInvoices.reduce(
-    (total, invoiceId) => total + parseAmount(allocationAmounts[invoiceId]),
+  const appliedAmountsTotal = activeSelectedInvoices.reduce(
+    (total, invoiceId) => total + parseAmount(activeAllocationAmounts[invoiceId]),
     0
   );
-  const appliedAmountsLabel = appliedAmountsTotal
-    ? `Rs. ${appliedAmountsTotal.toLocaleString()}`
+  const unallocatedAmount = roundMoney(
+    Math.max(0, parseAmount(paymentAmount) - appliedAmountsTotal)
+  );
+  const allocationRemark = activeSelectedInvoices
+    .map((invoiceId) => {
+      const invoice = invoices.find((item) => item._id === invoiceId);
+      const amount = parseAmount(activeAllocationAmounts[invoiceId]);
+      if (!invoice || amount <= 0) return null;
+      const label = invoice.invoiceNumber || invoice.saleNumber || invoiceId;
+      return `${label}: Rs. ${amount.toLocaleString()}`;
+    })
+    .filter(Boolean)
+    .join(" · ");
+  const appliedAmountsLabel = allocationRemark
+    ? unallocatedAmount > 0
+      ? `${allocationRemark} · Unallocated Rs. ${unallocatedAmount.toLocaleString()}`
+      : allocationRemark
     : "";
 
   const invoiceEmptyMessage = !formData.customerId
@@ -513,14 +581,41 @@ function AddPayment() {
 
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
             <div className="border-b border-slate-200 p-4">
-              <h2 className="text-[16px] font-bold text-BLUE-dark">
-                {isRefund ? "Refund Due Allocation" : "Invoice Auto-Allocation"}
-              </h2>
-              <p className="mt-1 text-sm text-tertiary">
-                {isRefund
-                  ? "Select sales marked Refund Due and enter the amount to refund on each."
-                  : "Select invoices and enter the amount to apply to each."}
-              </p>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <h2 className="text-[16px] font-bold text-BLUE-dark">
+                    {isRefund ? "Refund Due Allocation" : "Invoice Auto-Allocation"}
+                  </h2>
+                  <p className="mt-1 text-sm text-tertiary">
+                    {isAutomatic
+                      ? isRefund
+                        ? "The refund amount is applied to sales in order, starting with the first."
+                        : "The payment amount is applied to invoices in order, starting with the first."
+                      : isRefund
+                        ? "Select sales and enter the amount to refund on each."
+                        : "Select invoices and enter the amount to apply to each."}
+                  </p>
+                </div>
+                <div className="inline-flex shrink-0 rounded-lg bg-[#F9FAFB] p-1">
+                  {[
+                    { value: "automatic", label: "Automatic" },
+                    { value: "manual", label: "Manual" },
+                  ].map((mode) => (
+                    <button
+                      key={mode.value}
+                      type="button"
+                      onClick={() => handleAllocationModeChange(mode.value)}
+                      className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+                        allocationMode === mode.value
+                          ? "bg-white text-accent-blue border border-[#1E40AF]"
+                          : "border border-transparent text-slate-600 hover:text-slate-800"
+                      }`}
+                    >
+                      {mode.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
             <div className="overflow-x-auto">
               {invoices.length === 0 ? (
@@ -536,10 +631,11 @@ function AddPayment() {
                           type="checkbox"
                           checked={
                             invoices.length > 0 &&
-                            selectedInvoices.length === invoices.length
+                            activeSelectedInvoices.length === invoices.length
                           }
                           onChange={handleSelectAll}
-                          className="h-4 w-4 rounded border-slate-300 text-[#008951] focus:ring-[#008951]"
+                          disabled={isAutomatic}
+                          className="h-4 w-4 rounded border-slate-300 text-[#008951] focus:ring-[#008951] disabled:cursor-default"
                         />
                       </th>
                       <th className="px-4 py-3 text-left font-semibold text-slate-700">
@@ -565,7 +661,7 @@ function AddPayment() {
                   <tbody>
                     {invoices.map((invoice) => {
                       const invoiceId = getInvoiceId(invoice);
-                      const isSelected = selectedInvoices.includes(invoiceId);
+                      const isSelected = activeSelectedInvoices.includes(invoiceId);
 
                       return (
                         <tr
@@ -579,7 +675,8 @@ function AddPayment() {
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => handleInvoiceToggle(invoice)}
-                              className="h-4 w-4 rounded border-slate-300 text-[#008951] focus:ring-[#008951]"
+                              disabled={isAutomatic}
+                              className="h-4 w-4 rounded border-slate-300 text-[#008951] focus:ring-[#008951] disabled:cursor-default"
                             />
                           </td>
                           <td className="px-4 py-3 font-semibold text-[#1a56db]">
@@ -601,14 +698,19 @@ function AddPayment() {
                             {isSelected ? (
                               <input
                                 type="text"
-                                value={allocationAmounts[invoiceId] ?? ""}
+                                readOnly={isAutomatic}
+                                value={activeAllocationAmounts[invoiceId] ?? ""}
                                 onChange={(event) =>
                                   handleAllocationAmountChange(
                                     invoiceId,
                                     event.target.value
                                   )
                                 }
-                                className="w-32 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-right text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                                className={`w-32 rounded-md border px-3 py-1.5 text-right text-sm text-slate-900 outline-none ${
+                                  isAutomatic
+                                    ? "cursor-default border-emerald-200 bg-emerald-50"
+                                    : "border-slate-200 bg-white focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                                }`}
                               />
                             ) : (
                               <span className="text-slate-400">—</span>
