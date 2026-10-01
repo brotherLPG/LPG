@@ -476,6 +476,7 @@ function CustomerDetails() {
         lastPaymentAmount: summary?.lastPaymentAmount ?? 0,
         lastPaymentDate: formatReceivedDate(summary?.lastPaymentDate),
         lastPaymentNumber: summary?.lastPaymentNumber,
+        lastPaymentType: summary?.lastPaymentType,
         lastPaymentMethodLabel: summary?.lastPaymentMethodLabel,
         creditLimit:
           summary?.creditLimitAmount ?? customer.creditLimitAmount ?? 0,
@@ -623,13 +624,13 @@ function CustomerDetails() {
 
         <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <p className="text-sm font-medium text-slate-500">Last Payment</p>
-          <p className="mt-2 text-2xl font-bold text-emerald-600">
+          <p className={`mt-2 text-2xl font-bold ${customerFile.lastPaymentType === "refund" ? "text-orange-600" : "text-emerald-600"}`}>
             {formatRs(customerFile.lastPaymentAmount)}
           </p>
           <p className="mt-1 text-xs text-slate-400">
             {customerFile.lastPaymentDate
               ? [
-                  `Received on ${customerFile.lastPaymentDate}`,
+                  `${customerFile.lastPaymentType === "refund" ? "Refunded" : "Received"} on ${customerFile.lastPaymentDate}`,
                   customerFile.lastPaymentNumber,
                   customerFile.lastPaymentMethodLabel,
                 ]
