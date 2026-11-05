@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { useUpdateSupplier, useSupplierById } from "../../queries/suppliers/suppliers.queries";
@@ -10,6 +10,18 @@ function UpdateSupplier() {
   const { id } = useParams();
   const [isActive, setIsActive] = useState(true);
   const updateSupplierMutation = useUpdateSupplier();
+
+  // Refs for required fields
+  const supplierNameRef = useRef(null);
+  const contactPersonNameRef = useRef(null);
+  const phoneNumberRef = useRef(null);
+  const paymentTermDaysRef = useRef(null);
+  const businessAddressRef = useRef(null);
+
+  // Error states for required fields
+  const [supplierNameError, setSupplierNameError] = useState("");
+  const [contactPersonNameError, setContactPersonNameError] = useState("");
+  const [phoneNumberError, setPhoneNumberError] = useState("");
 
   const { data: supplierData, isLoading } = useSupplierById(id);
   const supplier =
@@ -61,8 +73,55 @@ function UpdateSupplier() {
     }
   }, [supplier]);
 
+  const validateRequiredFields = () => {
+    let hasError = false;
+
+    if (!formData.supplierName.trim()) {
+      setSupplierNameError("Supplier Name is required");
+      supplierNameRef.current?.focus();
+      hasError = true;
+    } else {
+      setSupplierNameError("");
+    }
+
+    if (!formData.contactPersonName.trim()) {
+      setContactPersonNameError("Contact Person is required");
+      if (!hasError) contactPersonNameRef.current?.focus();
+      hasError = true;
+    } else {
+      setContactPersonNameError("");
+    }
+
+    if (!formData.phoneNumber.trim()) {
+      setPhoneNumberError("Phone Number is required");
+      if (!hasError) phoneNumberRef.current?.focus();
+      hasError = true;
+    } else {
+      setPhoneNumberError("");
+    }
+
+    return !hasError;
+  };
+
+  const handleKeyDown = (e, nextRef) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (nextRef && nextRef.current) {
+        nextRef.current.focus();
+      }
+    }
+  };
+
+  const clearError = (setErrorFn) => {
+    setErrorFn("");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateRequiredFields()) {
+      return;
+    }
 
     try {
       const payload = {
@@ -88,7 +147,11 @@ function UpdateSupplier() {
       toast.success("Supplier updated successfully!");
       navigate("/suppliers");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to update supplier. Please try again.");
+      const firstError = error?.response?.data?.errors?.[0];
+      const errorMessage = firstError
+        ? `${firstError.path}: ${firstError.message}`
+        : "Failed to update supplier. Please try again.";
+      toast.error(errorMessage);
     }
   };
 
@@ -163,15 +226,25 @@ function UpdateSupplier() {
                     Supplier Name <span className="text-rose-500">*</span>
                   </label>
                   <input
+                    ref={supplierNameRef}
                     type="text"
                     value={formData.supplierName}
-                    onChange={(e) =>
-                      handleInputChange("supplierName", e.target.value)
-                    }
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    onChange={(e) => {
+                      handleInputChange("supplierName", e.target.value);
+                      clearError(setSupplierNameError);
+                    }}
+                    onKeyDown={(e) => handleKeyDown(e, contactPersonNameRef)}
+                    className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                      supplierNameError
+                        ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                        : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                    }`}
                     placeholder="Enter supplier name"
                     required
                   />
+                  {supplierNameError && (
+                    <p className="mt-1.5 text-xs text-rose-500">{supplierNameError}</p>
+                  )}
                 </div>
 
                 <div className="md:col-span-2">
@@ -179,15 +252,25 @@ function UpdateSupplier() {
                     Contact Person <span className="text-rose-500">*</span>
                   </label>
                   <input
+                    ref={contactPersonNameRef}
                     type="text"
                     value={formData.contactPersonName}
-                    onChange={(e) =>
-                      handleInputChange("contactPersonName", e.target.value)
-                    }
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    onChange={(e) => {
+                      handleInputChange("contactPersonName", e.target.value);
+                      clearError(setContactPersonNameError);
+                    }}
+                    onKeyDown={(e) => handleKeyDown(e, phoneNumberRef)}
+                    className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                      contactPersonNameError
+                        ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                        : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                    }`}
                     placeholder="Enter contact person name"
                     required
                   />
+                  {contactPersonNameError && (
+                    <p className="mt-1.5 text-xs text-rose-500">{contactPersonNameError}</p>
+                  )}
                 </div>
 
                 <div>
@@ -195,15 +278,25 @@ function UpdateSupplier() {
                     Phone Number <span className="text-rose-500">*</span>
                   </label>
                   <input
+                    ref={phoneNumberRef}
                     type="text"
                     value={formData.phoneNumber}
-                    onChange={(e) =>
-                      handleInputChange("phoneNumber", e.target.value)
-                    }
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    onChange={(e) => {
+                      handleInputChange("phoneNumber", e.target.value);
+                      clearError(setPhoneNumberError);
+                    }}
+                    onKeyDown={(e) => handleKeyDown(e, formData.emailAddress ? null : paymentTermDaysRef)}
+                    className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                      phoneNumberError
+                        ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                        : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                    }`}
                     placeholder="Enter phone number"
                     required
                   />
+                  {phoneNumberError && (
+                    <p className="mt-1.5 text-xs text-rose-500">{phoneNumberError}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
@@ -215,6 +308,7 @@ function UpdateSupplier() {
                     onChange={(e) =>
                       handleInputChange("emailAddress", e.target.value)
                     }
+                    onKeyDown={(e) => handleKeyDown(e, paymentTermDaysRef)}
                     className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-500 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     placeholder="Enter email address"
                   />
@@ -265,10 +359,12 @@ function UpdateSupplier() {
                   </label>
                   <div className="relative">
                     <select
+                      ref={paymentTermDaysRef}
                       value={formData.paymentTermDays}
                       onChange={(e) =>
                         handleInputChange("paymentTermDays", e.target.value)
                       }
+                      onKeyDown={(e) => handleKeyDown(e, businessAddressRef)}
                       className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     >
                       <option value="15">Net 15 Days</option>
@@ -327,11 +423,18 @@ function UpdateSupplier() {
                   Business Address
                 </label>
                 <textarea
+                  ref={businessAddressRef}
                   rows="3"
                   value={formData.businessAddress}
                   onChange={(e) =>
                     handleInputChange("businessAddress", e.target.value)
                   }
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmit(e);
+                    }
+                  }}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-500 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
                   placeholder="Enter business address"
                 />

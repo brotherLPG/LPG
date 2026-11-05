@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { useToast } from "../../utils/GlobalToast";
@@ -28,6 +28,13 @@ function AddSupplier() {
   const [isActive, setIsActive] = useState(true);
   const toast = useToast();
 
+  // Refs for required fields
+  const supplierNameRef = useRef(null);
+  const contactPersonNameRef = useRef(null);
+  const phoneNumberRef = useRef(null);
+  const paymentTermDaysRef = useRef(null);
+  const businessAddressRef = useRef(null);
+
   const [supplierName, setSupplierName] = useState("");
   const [contactPersonName, setContactPersonName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -44,6 +51,12 @@ function AddSupplier() {
   const [bankAccountNumber, setBankAccountNumber] = useState("");
   const [iban, setIban] = useState("");
   const [ibanError, setIbanError] = useState("");
+
+  // Error states for required fields
+  const [supplierNameError, setSupplierNameError] = useState("");
+  const [contactPersonNameError, setContactPersonNameError] = useState("");
+  const [phoneNumberError, setPhoneNumberError] = useState("");
+  const [paymentTermDaysError, setPaymentTermDaysError] = useState("");
 
   const createMutation = useCreateSupplier();
 
@@ -68,9 +81,56 @@ function AddSupplier() {
     return true;
   };
 
+  const validateRequiredFields = () => {
+    let hasError = false;
+
+    if (!supplierName.trim()) {
+      setSupplierNameError("Supplier Name is required");
+      supplierNameRef.current?.focus();
+      hasError = true;
+    } else {
+      setSupplierNameError("");
+    }
+
+    if (!contactPersonName.trim()) {
+      setContactPersonNameError("Contact Person is required");
+      if (!hasError) contactPersonNameRef.current?.focus();
+      hasError = true;
+    } else {
+      setContactPersonNameError("");
+    }
+
+    if (!phoneNumber.trim()) {
+      setPhoneNumberError("Phone Number is required");
+      if (!hasError) phoneNumberRef.current?.focus();
+      hasError = true;
+    } else {
+      setPhoneNumberError("");
+    }
+
+    return !hasError;
+  };
+
+  const handleKeyDown = (e, nextRef) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (nextRef && nextRef.current) {
+        nextRef.current.focus();
+      }
+    }
+  };
+
+  const clearError = (setErrorFn) => {
+    setErrorFn("");
+  };
+
 
     const handleSubmit = async (e) => {
       e.preventDefault();
+
+      if (!validateRequiredFields()) {
+        return;
+      }
 
       if (!validateIban()) {
         toast.error("Please enter a valid IBAN.");
@@ -104,8 +164,9 @@ function AddSupplier() {
         navigate("/suppliers");
       } catch (error) {
         toast.error(
-          error.response?.data?.message ||
-            "Failed to create supplier. Please try again.",
+          error?.response?.data?.errors?.[0]
+            ? `${error?.response?.data?.errors?.[0].path}: ${error?.response?.data?.errors?.[0].message}`
+            : "Failed to create supplier. Please try again.",
         );
       }
     };
@@ -168,12 +229,25 @@ function AddSupplier() {
                   <span className="text-rose-500">*</span>
                 </label>
                 <input
+                  ref={supplierNameRef}
                   type="text"
                   placeholder="e.g. Attock Gas Ltd."
                   value={supplierName}
-                  onChange={(e) => setSupplierName(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-emerald-100 focus:border-[#008951]"
+                  onChange={(e) => {
+                    setSupplierName(e.target.value);
+                    clearError(setSupplierNameError);
+                  }}
+                  onKeyDown={(e) => handleKeyDown(e, contactPersonNameRef)}
+                  className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                    supplierNameError
+                      ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                      : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                  }`}
+                  required
                 />
+                {supplierNameError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{supplierNameError}</p>
+                )}
               </div>
 
               <div className="md:col-span-2">
@@ -181,12 +255,24 @@ function AddSupplier() {
                   Contact Person <span className="text-rose-500">*</span>
                 </label>
                 <input
+                  ref={contactPersonNameRef}
                   type="text"
                   placeholder="Full name of contact representative"
                   value={contactPersonName}
-                  onChange={(e) => setContactPersonName(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  onChange={(e) => {
+                    setContactPersonName(e.target.value);
+                    clearError(setContactPersonNameError);
+                  }}
+                  onKeyDown={(e) => handleKeyDown(e, phoneNumberRef)}
+                  className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                    contactPersonNameError
+                      ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                      : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                  }`}
                 />
+                {contactPersonNameError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{contactPersonNameError}</p>
+                )}
               </div>
 
               <div>
@@ -194,12 +280,24 @@ function AddSupplier() {
                   Phone Number <span className="text-rose-500">*</span>
                 </label>
                 <input
+                  ref={phoneNumberRef}
                   type="text"
                   placeholder="e.g. +92 300 1234567"
                   value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  onChange={(e) => {
+                    setPhoneNumber(e.target.value);
+                    clearError(setPhoneNumberError);
+                  }}
+                  onKeyDown={(e) => handleKeyDown(e, emailAddress ? null : paymentTermDaysRef)}
+                  className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                    phoneNumberError
+                      ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                      : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                  }`}
                 />
+                {phoneNumberError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{phoneNumberError}</p>
+                )}
               </div>
 
               <div>
@@ -211,6 +309,7 @@ function AddSupplier() {
                   placeholder="e.g. supplier@domain.com"
                   value={emailAddress}
                   onChange={(e) => setEmailAddress(e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(e, paymentTermDaysRef)}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
@@ -260,8 +359,10 @@ function AddSupplier() {
                 </label>
                 <div className="relative">
                   <select
+                    ref={paymentTermDaysRef}
                     value={paymentTermDays}
                     onChange={(e) => setPaymentTermDays(e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, businessAddressRef)}
                     className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   >
                     <option value="15">Net 15 Days</option>
@@ -278,13 +379,13 @@ function AddSupplier() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Credit Limit (Rs.)
                 </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 1,500,000"
-                    value={creditLimitAmount}
-                    onChange={(e) => setCreditLimitAmount(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                  />
+                <input
+                  type="text"
+                  placeholder="e.g. 1,500,000"
+                  value={creditLimitAmount}
+                  onChange={(e) => setCreditLimitAmount(e.target.value)}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                />
               </div>
 
               <div>
@@ -312,13 +413,20 @@ function AddSupplier() {
           <div className="p-5 space-y-5">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                Business Address <span className="text-rose-500">*</span>
+                Business Address
               </label>
               <textarea
+                ref={businessAddressRef}
                 rows="2"
                 placeholder="Plot, Street, Area, Sector, Industrial Area..."
                 value={businessAddress}
                 onChange={(e) => setBusinessAddress(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit(e);
+                  }
+                }}
                 className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
               />
             </div>
@@ -327,25 +435,25 @@ function AddSupplier() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   City
                 </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Islamabad"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                  />
+                <input
+                  type="text"
+                  placeholder="e.g. Islamabad"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   State/Province
                 </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Punjab"
-                    value={stateProvince}
-                    onChange={(e) => setStateProvince(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                  />
+                <input
+                  type="text"
+                  placeholder="e.g. Punjab"
+                  value={stateProvince}
+                  onChange={(e) => setStateProvince(e.target.value)}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
@@ -375,65 +483,65 @@ function AddSupplier() {
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Bank Name
               </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Habib Bank Limited"
-                    value={bankName}
-                    onChange={(e) => setBankName(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                  />
+              <input
+                type="text"
+                placeholder="e.g. Habib Bank Limited"
+                value={bankName}
+                onChange={(e) => setBankName(e.target.value)}
+                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Account Title
               </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Attock Gas Accounts"
-                    value={bankAccountTitle}
-                    onChange={(e) => setBankAccountTitle(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                  />
+              <input
+                type="text"
+                placeholder="e.g. Attock Gas Accounts"
+                value={bankAccountTitle}
+                onChange={(e) => setBankAccountTitle(e.target.value)}
+                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Account Number
               </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 12345678901234"
-                    value={bankAccountNumber}
-                    onChange={(e) => setBankAccountNumber(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                  />
+              <input
+                type="text"
+                placeholder="e.g. 12345678901234"
+                value={bankAccountNumber}
+                onChange={(e) => setBankAccountNumber(e.target.value)}
+                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 IBAN
               </label>
-                  <input
-                    type="text"
-                    inputMode="text"
-                    autoComplete="off"
-                    spellCheck={false}
-                    maxLength={29}
-                    placeholder="e.g. PK36 HABB 0000 1234 5678 9012"
-                    value={iban}
-                    onChange={(e) => handleIbanChange(e.target.value)}
-                    onBlur={validateIban}
-                    className={`w-full rounded-md border bg-white px-3 py-2 text-sm font-mono tracking-wider text-slate-900 uppercase outline-none focus:ring-2 ${
-                      ibanError
-                        ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
-                        : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
-                    }`}
-                  />
-                  {ibanError ? (
-                    <p className="mt-1.5 text-xs text-rose-500">{ibanError}</p>
-                  ) : (
-                    <p className="mt-1.5 text-xs text-slate-400">
-                      Pakistan IBAN: PK + 22 characters (24 total)
-                    </p>
-                  )}
+              <input
+                type="text"
+                inputMode="text"
+                autoComplete="off"
+                spellCheck={false}
+                maxLength={29}
+                placeholder="e.g. PK36 HABB 0000 1234 5678 9012"
+                value={iban}
+                onChange={(e) => handleIbanChange(e.target.value)}
+                onBlur={validateIban}
+                className={`w-full rounded-md border bg-white px-3 py-2 text-sm font-mono tracking-wider text-slate-900 uppercase outline-none focus:ring-2 ${
+                  ibanError
+                    ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                    : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                }`}
+              />
+              {ibanError ? (
+                <p className="mt-1.5 text-xs text-rose-500">{ibanError}</p>
+              ) : (
+                <p className="mt-1.5 text-xs text-slate-400">
+                  Pakistan IBAN: PK + 22 characters (24 total)
+                </p>
+              )}
             </div>
           </div>
         </div>
