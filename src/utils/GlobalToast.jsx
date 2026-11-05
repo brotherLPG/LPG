@@ -14,17 +14,11 @@ export const useToast = () => {
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
-  const addToast = useCallback((message, type = "info", duration = 3000) => {
+  const addToast = useCallback((message, type = "info", duration = 0) => {
     const id = Date.now();
     const toast = { id, message, type, duration };
     
     setToasts((prev) => [...prev, toast]);
-
-    if (duration > 0) {
-      setTimeout(() => {
-        removeToast(id);
-      }, duration);
-    }
 
     return id;
   }, []);
@@ -60,7 +54,7 @@ const ToastContainer = ({ toasts, onRemove }) => {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2">
       {toasts.map((toast) => (
         <Toast key={toast.id} toast={toast} onRemove={onRemove} />
       ))}
@@ -87,7 +81,7 @@ const Toast = ({ toast, onRemove }) => {
 
   return (
     <div
-      className={`flex items-start gap-3 p-4 rounded-lg border shadow-lg animate-in slide-in-from-right-full duration-300 ${bgColors[type]}`}
+      className={`flex items-start gap-3 p-4 rounded-lg border shadow-lg animate-in fade-in duration-300 ${bgColors[type]}`}
     >
       {icons[type]}
       <p className="flex-1 text-sm font-medium text-slate-800">{message}</p>

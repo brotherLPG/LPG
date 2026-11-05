@@ -47,7 +47,6 @@ function UpdateLpgReceipt() {
       setReceivedByEmployeeId(
         s.receivedByEmployeeId?._id || s.receivedByEmployeeId || s.receivedBy?._id || "",
       );
-      console.log(s);
       
       setRemarks(s.remarks || "");
     }
@@ -115,7 +114,11 @@ function UpdateLpgReceipt() {
       toast.success('LPG receipt updated successfully.');
       navigate('/lpg-receipts');
     } catch (err) {
-      toast.error('Failed to update LPG receipt. Please try again.');
+       const firstError = err?.response?.data?.errors?.[0];
+   const errorMessage = firstError
+     ? `${firstError.path}: ${firstError.message}`
+     : "Failed to update LPG receipt. Please try again.";
+   toast.error(errorMessage);
     }
   };
 
@@ -257,7 +260,6 @@ function UpdateLpgReceipt() {
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Purchase Rate per KG (Rs.){" "}
-                    <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -270,7 +272,7 @@ function UpdateLpgReceipt() {
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Received By (Employee){" "}
-                    <span className="text-rose-500">*</span>
+                    
                   </label>
                   <div className="relative">
                     <select

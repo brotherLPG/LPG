@@ -16,7 +16,7 @@ function ReceiveLpg() {
   const [truckReg, setTruckReg] = useState("");
   const [supplierInvoice, setSupplierInvoice] = useState("");
   const [receivedAt, setReceivedAt] = useState("");
-  const [remarks, setRemarks] = useState("Tanker inspected for seals and pressure values. Found normal. Decanting approved.");
+  const [remarks, setRemarks] = useState("");
 
   const toast = useToast();
   const createMutation = useCreateLpgReceipt();
@@ -61,7 +61,11 @@ function ReceiveLpg() {
    toast.success("LPG receipt created successfully.");
    navigate("/lpg-receipts");
  } catch (err) {
-   toast.error("Failed to create LPG receipt. Please try again.");
+   const firstError = err?.response?.data?.errors?.[0];
+   const errorMessage = firstError
+     ? `${firstError.path}: ${firstError.message}`
+     : "Failed to create LPG receipt. Please try again.";
+   toast.error(errorMessage);
  }
    };
 
@@ -208,7 +212,7 @@ function ReceiveLpg() {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Purchase Rate per KG (Rs.) <span className="text-rose-500">*</span>
+                    Purchase Rate per KG (Rs.)
                   </label>
                   <input
                     type="number"
@@ -220,7 +224,7 @@ function ReceiveLpg() {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Received By (Employee) <span className="text-rose-500">*</span>
+                    Received By (Employee)
                   </label>
                   <div className="relative">
                     <select
