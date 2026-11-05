@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import { useCreateSale, useGetSaleFormOptions } from "../../../queries/sales/sales.queries";
@@ -8,6 +8,12 @@ import { useToast } from "../../../utils/GlobalToast";
 function AddSales() {
   const navigate = useNavigate();
   const toast = useToast();
+  
+  // Error states
+  const [customerIdError, setCustomerIdError] = useState("");
+  const [lineItemsError, setLineItemsError] = useState("");
+  const [accountIdError, setAccountIdError] = useState("");
+  
   const [lineItems, setLineItems] = useState([
     { id: 1, product: "", cylinderType: "", quantity: "", unitPrice: "", discount: "", total: "" }
   ]);
@@ -147,7 +153,39 @@ function AddSales() {
 
   const paymentStatus = getPaymentStatus();
 
+  const validateForm = () => {
+    let hasError = false;
+
+    if (!customerId) {
+      setCustomerIdError("Customer is required");
+      hasError = true;
+    } else {
+      setCustomerIdError("");
+    }
+
+    const validLineItems = lineItems.filter(item => item.product && item.quantity);
+    if (validLineItems.length === 0) {
+      setLineItemsError("At least one line item with product and quantity is required");
+      hasError = true;
+    } else {
+      setLineItemsError("");
+    }
+
+    if (!accountId) {
+      setAccountIdError("Payment Account is required");
+      hasError = true;
+    } else {
+      setAccountIdError("");
+    }
+
+    return !hasError;
+  };
+
   const handleSubmit = async (isDraft = false) => {
+    if (!validateForm()) {
+      return;
+    }
+
     const saleData = {
       customerId,
       invoiceDate: invoiceDate || new Date().toISOString().split('T')[0],
@@ -163,7 +201,7 @@ function AddSales() {
       tradeDiscountAmount: 0,
       amountPaid: amountPaid,
       accountId,
-      paymentMethod: paymentMethod || 'Cash',
+      paymentMethod: paymentMethod?.toLowerCase() || 'cash',
       referenceNumber: referenceNumber || "",
       remarks,
       saveAsDraft: isDraft,
@@ -174,7 +212,12 @@ function AddSales() {
       toast.success(isDraft ? "Sale saved as draft successfully!" : "Sale created successfully!");
       navigate("/sales");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to create sale. Please try again.");
+      const firstError = error?.response?.data?.errors?.[0];
+      const mainMessage = error?.response?.data?.message;
+      const errorMessage = firstError
+        ? `${firstError.path}: ${firstError.message}`
+        : mainMessage || "Failed to create sale. Please try again.";
+      toast.error(errorMessage);
     }
   };
 
@@ -259,6 +302,7 @@ function AddSales() {
                       onChange={e => {
                         const selectedId = e.target.value
                         setCustomerId(selectedId)
+                        setCustomerIdError("");
                         const customer = customers.find(
                           (item) => item._id === selectedId
                         )
@@ -267,7 +311,11 @@ function AddSales() {
                         }
                       }}
                       disabled={optionsLoading}
-                      className='w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100'
+                      className={`w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:ring-2 ${
+                        customerIdError
+                          ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                          : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                      }`}
                     >
                       <option value=''>Select customer</option>
                       {customers.map(customer => (
@@ -279,6 +327,9 @@ function AddSales() {
                     </select>
                     <ChevronDown className='absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none' />
                   </div>
+                  {customerIdError && (
+                    <p className="mt-1.5 text-xs text-rose-500">{customerIdError}</p>
+                  )}
                   {selectedCustomer && (
                     <div className="mt-2 grid grid-cols-2 gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
                       <div>
@@ -361,9 +412,16 @@ function AddSales() {
                   <div className="relative">
                     <select
                       value={accountId}
-                      onChange={(e) => setAccountId(e.target.value)}
+                      onChange={(e) => {
+                        setAccountId(e.target.value);
+                        setAccountIdError("");
+                      }}
                       disabled={optionsLoading}
-                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                      className={`w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:ring-2 ${
+                        accountIdError
+                          ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                          : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                      }`}
                     >
                       <option value="">Select Account</option>
                       {accounts.map((account) => (
@@ -374,6 +432,9 @@ function AddSales() {
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                   </div>
+                  {accountIdError && (
+                    <p className="mt-1.5 text-xs text-rose-500">{accountIdError}</p>
+                  )}
 
                 </div>
                 <div className='flex flex-col gap-2'>
@@ -400,6 +461,9 @@ function AddSales() {
               <h2 className="text-[16px] font-bold text-BLUE-dark">
                 Line Items & Inventory Allocation
               </h2>
+              {lineItemsError && (
+                <p className="text-xs text-rose-500">{lineItemsError}</p>
+              )}
               <button
                 onClick={addLineItem}
                 className="flex items-center gap-2 px-3 py-1.5 border border-[#1E40AF] text-accent-blue rounded-lg text-sm font-medium transition"

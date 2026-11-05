@@ -63,9 +63,7 @@ function AddAccount() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!validateForm()) {
-      toast.error("Please fill in all required fields correctly");
       return;
     }
 
