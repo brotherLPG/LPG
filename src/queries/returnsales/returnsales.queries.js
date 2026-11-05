@@ -36,6 +36,8 @@ export const useCreateReturnSale = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.returnSales.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.sales.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.payments.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
     },
   });
 };

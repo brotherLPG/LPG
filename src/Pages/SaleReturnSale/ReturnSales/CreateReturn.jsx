@@ -14,6 +14,7 @@ function CreateReturn() {
   const createReturnMutation = useCreateReturnSale();
 
   const [returnQuantities, setReturnQuantities] = useState({});
+  const [returnPrices, setReturnPrices] = useState({});
   const [selectedCustomer, setSelectedCustomer] = useState("");
   const [selectedSaleId, setSelectedSaleId] = useState("");
   const [selectedReason, setSelectedReason] = useState("");
@@ -74,7 +75,9 @@ function CreateReturn() {
       itemName: item.itemName || item.itemCode || "Item",
       originalQty: Number(item.quantity) || 0,
       returnQty: returnQuantities[inventoryItemId] ?? "",
-      unitPrice: Number(item.unitPriceAmount) || 0,
+      originalUnitPrice: Number(item.unitPriceAmount) || 0,
+      unitPrice:
+        returnPrices[inventoryItemId] ?? (Number(item.unitPriceAmount) || 0),
     };
   });
 
@@ -113,6 +116,24 @@ function CreateReturn() {
     }));
   };
 
+  const updateReturnPrice = (inventoryItemId, value) => {
+    if (value === "") {
+      setReturnPrices((prev) => ({
+        ...prev,
+        [inventoryItemId]: "",
+      }));
+      return;
+    }
+
+    const numericValue = Number(value);
+    if (Number.isNaN(numericValue)) return;
+
+    setReturnPrices((prev) => ({
+      ...prev,
+      [inventoryItemId]: Math.max(numericValue, 0),
+    }));
+  };
+
   const returnValue = returnedItems.reduce((total, item) => {
     const qty = Number(item.returnQty) || 0;
     return total + qty * (Number(item.unitPrice) || 0);
@@ -127,11 +148,13 @@ function CreateReturn() {
     setSelectedCustomer(customerId);
     setSelectedSaleId("");
     setReturnQuantities({});
+    setReturnPrices({});
   };
 
   const handleSaleChange = (saleId) => {
     setSelectedSaleId(saleId);
     setReturnQuantities({});
+    setReturnPrices({});
   };
 
   const handleSubmit = async () => {
@@ -140,6 +163,7 @@ function CreateReturn() {
       .map((item) => ({
         inventoryItemId: item.inventoryItemId,
         quantity: Number(item.returnQty),
+        unitPriceAmount: Number(item.unitPrice) || 0,
       }));
 
     if (!selectedSaleId) {
@@ -162,6 +186,11 @@ function CreateReturn() {
       return;
     }
 
+    if (returnItems.some((item) => item.unitPriceAmount < 0)) {
+      toast.error("Return price cannot be negative.");
+      return;
+    }
+
     if (!selectedPaymentMethod) {
       toast.error("Please select a payment method.");
       return;
@@ -172,6 +201,16 @@ function CreateReturn() {
       return;
     }
 
+    const roundMoney = (value) => Math.round((Number(value) || 0) * 100) / 100;
+    const paidAmount = roundMoney(originalSale?.paidAmount);
+    const invoiceTotal = roundMoney(originalSale?.totalAmount);
+    const alreadyReturned = roundMoney(originalSale?.returnedAmount);
+    const outstandingAfter = roundMoney(
+      invoiceTotal - alreadyReturned - returnValue - paidAmount
+    );
+    const refundDue = outstandingAfter < 0 ? roundMoney(-outstandingAfter) : 0;
+    const refundAmount = roundMoney(Math.min(returnValue, refundDue, paidAmount));
+
     const payload = {
       originalSaleId: selectedSaleId,
       returnDate,
@@ -179,6 +218,7 @@ function CreateReturn() {
       returnItems,
       paymentMethod: selectedPaymentMethod,
       accountId: selectedAccountId,
+      ...(refundAmount > 0 ? { refundNow: true, refundAmount } : {}),
     };
 
     try {
@@ -427,8 +467,21 @@ function CreateReturn() {
                               className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
                             />
                           </td>
-                          <td className="px-2 py-2 text-sm text-slate-900">
-                            {Number(item.unitPrice).toLocaleString()}
+                          <td className="px-2 py-2">
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={item.unitPrice}
+                              onChange={(e) =>
+                                updateReturnPrice(
+                                  item.inventoryItemId,
+                                  e.target.value
+                                )
+                              }
+                              placeholder={String(item.originalUnitPrice)}
+                              className="w-28 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
+                            />
                           </td>
                           <td className="px-2 py-2 text-sm font-medium text-slate-900">
                             {returnAmount.toLocaleString()}

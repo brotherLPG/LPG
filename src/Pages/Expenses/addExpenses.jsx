@@ -350,7 +350,7 @@ function AddExpenses() {
                       <option value="">{isLoadingOptions ? "Loading..." : "Select source account"}</option>
                       {accounts.map((acc) => (
                         <option key={acc._id} value={acc._id}>
-                          {acc.label}
+                          {`${acc.label || `${acc.accountCode} – ${acc.accountName}`} (Rs. ${Number(acc.currentBalanceAmount || 0).toLocaleString()})`}
                         </option>
                       ))}
                     </select>

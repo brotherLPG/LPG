@@ -351,7 +351,7 @@ function AddMaintenanceRecord() {
                   </option>
                   {accounts.map((acc) => (
                     <option key={acc._id} value={acc._id}>
-                      {acc.label || `${acc.accountCode} – ${acc.accountName}`}
+                      {`${acc.label || `${acc.accountCode} – ${acc.accountName}`} (Rs. ${Number(acc.currentBalanceAmount || 0).toLocaleString()})`}
                     </option>
                   ))}
                 </select>
