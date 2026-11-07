@@ -1,4 +1,4 @@
-import { CirclePlus, Eye, Edit3, ChevronDown } from "lucide-react";
+import { CirclePlus, Eye, Edit3, ChevronDown, Printer } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Tooltip } from "@heroui/react";
@@ -8,6 +8,7 @@ import { useToast } from "../../utils/GlobalToast";
 import { useLpgReceipts, useDeleteLpgReceipt } from "../../queries/lpgReceipts/lpgReceipts.queries";
 import { useSuppliers } from "../../queries/suppliers/suppliers.queries";
 import { usePermissions } from "../../contexts/PermissionContext";
+import { usePrint } from "../../utils/usePrint";
 
 
 const initialReceipts = [];
@@ -15,6 +16,7 @@ const initialReceipts = [];
 function LpgReceipts() {
   const navigate = useNavigate();
   const { can } = usePermissions();
+  const { printContent, printTable, getQRCodeImg } = usePrint();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [supplier, setSupplier] = useState("All");
@@ -79,6 +81,130 @@ function LpgReceipts() {
     const matchesDate = !selectedDate || receipt.receivedDate === selectedDate;
     return matchesQuery && matchesStatus && matchesSupplier && matchesDate;
   }), [query, status, supplier, selectedDate, mappedReceipts]);
+
+  
+
+const handlePrintReceipt = (receipt) => {
+  const qrData = receipt._id
+    ? `${window.location.origin}/lpg-receipts/view/${receipt._id}`
+    : `LPG Receipt ${receipt.receiptNo}`;
+
+  const content = `
+    <!-- Top Row: Receipt meta + QR -->
+    <div class="receipt-top">
+      <div>
+        <p style="font-size: 13px; color: #64748b; margin: 0;">
+          Receipt <strong style="color: #1e293b;">${receipt.receiptNo}</strong>
+          &nbsp;•&nbsp; ${receipt.date}
+        </p>
+        <p style="font-size: 13px; color: #64748b; margin: 4px 0 0;">
+          Status: <strong style="color: #1e293b;">${receipt.status}</strong>
+        </p>
+      </div>
+      ${getQRCodeImg(qrData)}
+    </div>
+
+    <!-- Info Cards -->
+    <div class="info-grid">
+
+      <!-- Receipt Information -->
+      <div class="info-card">
+        <h3>Receipt Information</h3>
+        <table class="info-table">
+          <tr>
+            <td>Receipt #</td>
+            <td>${receipt.receiptNo}</td>
+          </tr>
+          <tr>
+            <td>Date</td>
+            <td>${receipt.date}</td>
+          </tr>
+          <tr>
+            <td>Status</td>
+            <td>${receipt.status}</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Supplier Information -->
+      <div class="info-card">
+        <h3>Supplier Information</h3>
+        <table class="info-table">
+          <tr>
+            <td>Supplier</td>
+            <td>${receipt.supplier}</td>
+          </tr>
+          <tr>
+            <td>Truck Reg</td>
+            <td>${receipt.truckReg}</td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- Delivery Details -->
+    <div class="delivery-section">
+      <h3 style="font-size: 14px; color: #1e293b; margin-bottom: 4px;">Delivery Details</h3>
+
+      <table class="delivery-table">
+        <thead>
+          <tr>
+            <th>Quantity (KG)</th>
+            <th>Rate/KG (Rs.)</th>
+            <th>Total Cost (Rs.)</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>${receipt.quantity.toLocaleString()}</td>
+            <td>${receipt.rate.toLocaleString()}</td>
+            <td class="total-cost">${receipt.totalCost.toLocaleString()}</td>
+          </tr>
+          <tr class="total-row">
+            <td colspan="2" style="text-align: right;">Grand Total</td>
+            <td>Rs. ${receipt.totalCost.toLocaleString()}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  printContent({
+    title: `LPG Receipt - ${receipt.receiptNo}`,
+    content,
+  });
+};
+
+
+
+  const handlePrintAllReceipts = () => {
+    const columns = [
+      { key: 'receiptNo', label: 'Receipt #' },
+      { key: 'supplier', label: 'Supplier Name' },
+      { key: 'date', label: 'Date Received' },
+      { key: 'truckReg', label: 'Truck Reg #' },
+      { key: 'quantity', label: 'Quantity (KG)' },
+      { key: 'rate', label: 'Rate/KG (Rs.)' },
+      { key: 'totalCost', label: 'Total Cost (Rs.)' },
+      { key: 'status', label: 'Status' },
+    ];
+
+    const data = filteredReceipts.map(receipt => ({
+      ...receipt,
+      quantity: receipt.quantity.toLocaleString(),
+      rate: receipt.rate.toLocaleString(),
+      totalCost: `Rs. ${receipt.totalCost.toLocaleString()}`,
+    }));
+
+    printTable({
+      columns,
+      data,
+      title: 'LPG Receipts',
+      subtitle: `Total: ${filteredReceipts.length} receipts`,
+    });
+  };
 
   // Calculate summary statistics
   const summaryStats = useMemo(() => {
@@ -216,6 +342,18 @@ function LpgReceipts() {
               </Tooltip.Content>
             </Tooltip>
           )}
+          <Tooltip delay={0}>
+            <Button
+              aria-label={`Print ${item.receiptNo}`}
+              onClick={() => handlePrintReceipt(item)}
+              className="text-slate-600 hover:text-slate-800 transition-colors bg-transparent min-w-0 px-1"
+            >
+              <Printer className="h-4 w-4" strokeWidth={2.5} />
+            </Button>
+            <Tooltip.Content>
+              <p>Print Receipt</p>
+            </Tooltip.Content>
+          </Tooltip>
           {/* <button
             type="button"
             aria-label={`Delete ${item.receiptNo}`}
@@ -252,15 +390,24 @@ function LpgReceipts() {
               Track incoming LPG tanker deliveries and receipt records
             </p>
           </div>
-          {can("lpg-receipts", "create") && (
-          <button
-            type="button"
-            onClick={() => navigate("/lpg-receipts/receive")}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-bg-blue px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#007545]"
-          >
-            <CirclePlus className="h-4 w-4" strokeWidth={3} /> Receive LPG
-          </button>
-          )}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handlePrintAllReceipts}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+            >
+              <Printer className="h-4 w-4" strokeWidth={2.5} /> Print All
+            </button>
+            {can("lpg-receipts", "create") && (
+            <button
+              type="button"
+              onClick={() => navigate("/lpg-receipts/receive")}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-bg-blue px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#007545]"
+            >
+              <CirclePlus className="h-4 w-4" strokeWidth={3} /> Receive LPG
+            </button>
+            )}
+          </div>
         </div>
 
         {/* Summary Cards */}
