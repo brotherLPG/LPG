@@ -1,5 +1,5 @@
 import { Eye, EyeOff } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useRoles } from "../../queries/roles/roles.queries";
 import { useEmployees } from "../../queries/employees/employees.queries";
@@ -44,6 +44,17 @@ function UpdateUser() {
     const { id } = useParams();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    // Refs for editable fields
+    const fullNameRef = useRef(null);
+    const emailRef = useRef(null);
+    const passwordRef = useRef(null);
+
+    // Error states
+    const [fullNameError, setFullNameError] = useState("");
+    const [emailError, setEmailError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+
     const [form, setForm] = useState({
         fullName: "",
         email: "",
@@ -102,10 +113,46 @@ function UpdateUser() {
 
     const inputClass = "w-full rounded border border-[#E5E7EB] bg-white px-2.5 py-2 text-[13px] text-BLUE-dark outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
     const selectClass = "w-full rounded border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-2 text-[13px] text-BLUE-dark outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
-    const updateField = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
+    const updateField = (key) => (event) => {
+        setForm((current) => ({ ...current, [key]: event.target.value }));
+
+        // Clear errors on change
+        if (key === 'fullName') setFullNameError("");
+        if (key === 'email') setEmailError("");
+        if (key === 'password') setPasswordError("");
+    };
+
+    const validateForm = () => {
+        let hasError = false;
+
+        if (!form.fullName.trim() || form.fullName.trim().length < 2) {
+            setFullNameError("Full name must contain at least 2 characters");
+            fullNameRef.current?.focus();
+            hasError = true;
+        }
+
+        if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+            setEmailError("Invalid email address");
+            if (!hasError) emailRef.current?.focus();
+            hasError = true;
+        }
+
+        // Password is optional in update, but if provided must be at least 8 characters
+        if (form.password && form.password.length < 8) {
+            setPasswordError("Password must be at least 8 characters");
+            if (!hasError) passwordRef.current?.focus();
+            hasError = true;
+        }
+
+        return !hasError;
+    };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+
+        if (!validateForm()) {
+            return;
+        }
 
         if (!form.role || !roles.some((currentRole) => currentRole._id === form.role)) {
             toast.error("Please select a valid role.");
@@ -139,7 +186,12 @@ function UpdateUser() {
             toast.success("User updated successfully!");
             navigate("/users-roles");
         } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to update user. Please try again.");
+            const firstError = error?.response?.data?.errors?.[0];
+            const mainMessage = error?.response?.data?.message;
+            const errorMessage = firstError
+                ? `${firstError.path}: ${firstError.message}`
+                : mainMessage || "Failed to update user. Please try again.";
+            toast.error(errorMessage);
         }
     };
 
@@ -190,18 +242,26 @@ function UpdateUser() {
                 <div className="grid gap-x-2.5 gap-y-2.5 p-3 sm:grid-cols-2">
                   <Field label="Full Name" required>
                     <input
+                      ref={fullNameRef}
                       value={form.fullName}
                       onChange={updateField("fullName")}
-                      className={inputClass}
+                      className={`${inputClass} ${fullNameError ? "border-red-400 focus:border-red-500 focus:ring-red-100" : ""}`}
                     />
+                    {fullNameError && (
+                      <span className="mt-1 block text-[11px] text-red-500">{fullNameError}</span>
+                    )}
                   </Field>
                   <Field label="Email Address" required>
                     <input
+                      ref={emailRef}
                       type="email"
                       value={form.email}
                       onChange={updateField("email")}
-                      className={inputClass}
+                      className={`${inputClass} ${emailError ? "border-red-400 focus:border-red-500 focus:ring-red-100" : ""}`}
                     />
+                    {emailError && (
+                      <span className="mt-1 block text-[11px] text-red-500">{emailError}</span>
+                    )}
                   </Field>
                   <Field label="Phone Number">
                     <input
@@ -241,10 +301,11 @@ function UpdateUser() {
                   >
                     <span className="relative block">
                       <input
+                        ref={passwordRef}
                         type={showPassword ? "text" : "password"}
                         value={form.password}
                         onChange={updateField("password")}
-                        className={`${inputClass} pr-8`}
+                        className={`${inputClass} pr-8 ${passwordError ? "border-red-400 focus:border-red-500 focus:ring-red-100" : ""}`}
                         placeholder="New password"
                       />
                       <button
@@ -259,6 +320,9 @@ function UpdateUser() {
                         )}
                       </button>
                     </span>
+                    {passwordError && (
+                      <span className="mt-1 block text-[11px] text-red-500">{passwordError}</span>
+                    )}
                   </Field>
                   <Field label="Confirm Password">
                     <span className="relative block">

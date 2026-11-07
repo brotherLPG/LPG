@@ -1,5 +1,5 @@
 import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRoles } from "../../queries/roles/roles.queries";
 import { useEmployees } from "../../queries/employees/employees.queries";
@@ -54,6 +54,23 @@ function AddUser() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const createMutation = useCreateUser();
+
+  // Refs for required fields
+  const fullNameRef = useRef(null);
+  const emailRef = useRef(null);
+  const phoneRef = useRef(null);
+  const cnicRef = useRef(null);
+  const usernameRef = useRef(null);
+  const passwordRef = useRef(null);
+
+  // Error states
+  const [fullNameError, setFullNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  const [cnicError, setCnicError] = useState("");
+  const [usernameError, setUsernameError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
   const [form, setForm] = useState({
     fullName: "", email: "", phone: "",
     cnic: "", username: "", password: "", confirmPassword: "",
@@ -87,9 +104,70 @@ function AddUser() {
     "w-full rounded border border-[#E5E7EB] bg-white px-2.5 py-2 text-[13px] text-BLUE-dark outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
   const selectClass =
     "w-full rounded border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-2 text-[13px] text-BLUE-dark outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
-  const update = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
+  const update = (key) => (event) => {
+    setForm((current) => ({ ...current, [key]: event.target.value }));
+
+    // Clear errors on change
+    if (key === 'fullName') setFullNameError("");
+    if (key === 'email') setEmailError("");
+    if (key === 'phone') setPhoneError("");
+    if (key === 'cnic') setCnicError("");
+    if (key === 'username') setUsernameError("");
+    if (key === 'password') setPasswordError("");
+  };
+
+  const validateForm = () => {
+    let hasError = false;
+
+    if (!form.fullName.trim() || form.fullName.trim().length < 2) {
+      setFullNameError("Full name must contain at least 2 characters");
+      fullNameRef.current?.focus();
+      hasError = true;
+    }
+
+    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      setEmailError("Invalid email address");
+      if (!hasError) emailRef.current?.focus();
+      hasError = true;
+    }
+
+    if (!form.phone.trim()) {
+      setPhoneError("Phone number is required");
+      if (!hasError) phoneRef.current?.focus();
+      hasError = true;
+    }
+
+    if (!form.cnic.trim()) {
+      setCnicError("CNIC number is required");
+      if (!hasError) cnicRef.current?.focus();
+      hasError = true;
+    }
+
+    if (!form.username.trim() || form.username.trim().length < 3) {
+      setUsernameError("Username must be at least 3 characters");
+      if (!hasError) usernameRef.current?.focus();
+      hasError = true;
+    } else if (!/^[a-zA-Z][a-zA-Z0-9._]*$/.test(form.username)) {
+      setUsernameError("Username must start with a letter and contain only letters, numbers, dots or underscores");
+      if (!hasError) usernameRef.current?.focus();
+      hasError = true;
+    }
+
+    if (!form.password.trim() || form.password.length < 8) {
+      setPasswordError("Password must be at least 8 characters");
+      if (!hasError) passwordRef.current?.focus();
+      hasError = true;
+    }
+
+    return !hasError;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
 
     if (form.password !== form.confirmPassword) {
       toast.error("Password and Confirm Password do not match.");
@@ -121,7 +199,12 @@ function AddUser() {
       toast.success("User created successfully!");
       navigate("/users-roles");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to create user. Please try again.");
+      const firstError = error?.response?.data?.errors?.[0];
+      const mainMessage = error?.response?.data?.message;
+      const errorMessage = firstError
+        ? `${firstError.path}: ${firstError.message}`
+        : mainMessage || "Failed to create user. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -166,28 +249,40 @@ function AddUser() {
               <div className="grid gap-x-2.5 gap-y-2.5 p-3 sm:grid-cols-2">
                 <Field label="Full Name" required>
                   <input
+                    ref={fullNameRef}
                     value={form.fullName}
                     onChange={update("fullName")}
-                    className={inputClass}
+                    className={`${inputClass} ${fullNameError ? "border-red-400 focus:border-red-500 focus:ring-red-100" : ""}`}
                     placeholder="Bilal Hassan"
                   />
+                  {fullNameError && (
+                    <span className="mt-1 block text-[11px] text-red-500">{fullNameError}</span>
+                  )}
                 </Field>
                 <Field label="Email Address" required>
                   <input
+                    ref={emailRef}
                     type="email"
                     value={form.email}
                     onChange={update("email")}
-                    className={inputClass}
+                    className={`${inputClass} ${emailError ? "border-red-400 focus:border-red-500 focus:ring-red-100" : ""}`}
                     placeholder="bilal.hassan@almanida-lpg.pk"
                   />
+                  {emailError && (
+                    <span className="mt-1 block text-[11px] text-red-500">{emailError}</span>
+                  )}
                 </Field>
                 <Field label="Phone Number" required>
                   <input
+                    ref={phoneRef}
                     value={form.phone}
                     onChange={update("phone")}
-                    className={inputClass}
+                    className={`${inputClass} ${phoneError ? "border-red-400 focus:border-red-500 focus:ring-red-100" : ""}`}
                     placeholder="0321-5678901"
                   />
+                  {phoneError && (
+                    <span className="mt-1 block text-[11px] text-red-500">{phoneError}</span>
+                  )}
                 </Field>
                 <Field
                   label="CNIC Number"
@@ -195,6 +290,7 @@ function AddUser() {
                   hint="13-digit Pakistan National ID Card number."
                 >
                   <input
+                    ref={cnicRef}
                     value={form.cnic}
                     onChange={(event) =>
                       setForm((current) => ({
@@ -202,9 +298,12 @@ function AddUser() {
                         cnic: formatCnic(event.target.value),
                       }))
                     }
-                    className={inputClass}
+                    className={`${inputClass} ${cnicError ? "border-red-400 focus:border-red-500 focus:ring-red-100" : ""}`}
                     placeholder="35201-1234567-9"
                   />
+                  {cnicError && (
+                    <span className="mt-1 block text-[11px] text-red-500">{cnicError}</span>
+                  )}
                 </Field>
               </div>
             </section>
@@ -216,19 +315,24 @@ function AddUser() {
               <div className="grid gap-x-2.5 gap-y-2.5 p-3 sm:grid-cols-2">
                 <Field label="Username" required>
                   <input
+                    ref={usernameRef}
                     value={form.username}
                     onChange={update("username")}
-                    className={`${inputClass} sm:col-span-2`}
+                    className={`${inputClass} sm:col-span-2 ${usernameError ? "border-red-400 focus:border-red-500 focus:ring-red-100" : ""}`}
                     placeholder="bilal.hassan"
                   />
+                  {usernameError && (
+                    <span className="mt-1 block text-[11px] text-red-500">{usernameError}</span>
+                  )}
                 </Field>
                 <Field label="Password" required>
                   <span className="relative block">
                     <input
+                      ref={passwordRef}
                       type={showPassword ? "text" : "password"}
                       value={form.password}
                       onChange={update("password")}
-                      className={`${inputClass} pr-8`}
+                      className={`${inputClass} pr-8 ${passwordError ? "border-red-400 focus:border-red-500 focus:ring-red-100" : ""}`}
                       placeholder="********"
                     />
                     <button
@@ -239,6 +343,9 @@ function AddUser() {
                       {showPassword ? <EyeOff size={13} /> : <Eye size={13} />}
                     </button>
                   </span>
+                  {passwordError && (
+                    <span className="mt-1 block text-[11px] text-red-500">{passwordError}</span>
+                  )}
                 </Field>
                 <Field label="Confirm Password" required>
                   <span className="relative block">
