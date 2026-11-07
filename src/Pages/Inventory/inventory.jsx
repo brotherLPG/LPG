@@ -1,18 +1,20 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { PlusCircle, Search, Eye, Edit3, ChevronDown } from "lucide-react";
+import { PlusCircle, Search, Eye, Edit3, ChevronDown, Printer } from "lucide-react";
 import { Button, Tooltip } from "@heroui/react";
 import GlobalTable from "../../utils/GlobalTable";
 import { useInventoryItems, useDeleteInventoryItem } from "../../queries/inventory/inventory.queries";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
 import { usePermissions } from "../../contexts/PermissionContext";
+import { usePrint } from "../../utils/usePrint";
 
 
 function Inventory() {
   const navigate = useNavigate();
   const toast = useToast();
   const { can } = usePermissions();
+  const { printContent, getQRCodeImg } = usePrint();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -32,6 +34,60 @@ function Inventory() {
   }, [inventoryData, query, category, statusFilter]);
 
  
+  const handlePrintInventoryItem = (item) => {
+    const qrData = [
+      `Item: ${item.itemName} (${item.itemCode})`,
+      `Category: ${item.categoryLabel}`,
+      `Volume: ${item.cylinderVolume}`,
+      `Current: ${item.currentQuantity}`,
+      `Min: ${item.minimumStockLevel}`,
+      `Max: ${item.maximumStockLevel}`,
+      `Status: ${item.stockStatusLabel}`,
+    ].join('\n');
+
+    const statusClass =
+      item.stockStatusLabel === 'In Stock' ? 'active' : 'inactive';
+
+    const content = `
+      <!-- Top Row -->
+      <div class="receipt-top">
+        <div>
+          <p style="font-size: 15px; font-weight: 700; color: #1e293b; margin: 0;">
+            ${item.itemName}
+          </p>
+          <p style="font-size: 13px; color: #64748b; margin: 4px 0 0;">
+            Item Code: <strong style="color: #1e293b;">${item.itemCode}</strong>
+            &nbsp;•&nbsp; ${item.categoryLabel}
+          </p>
+          <p style="margin: 8px 0 0;">
+            <span class="status-badge ${statusClass}">${item.stockStatusLabel}</span>
+          </p>
+        </div>
+        ${getQRCodeImg(qrData)}
+      </div>
+
+      <!-- Stock Details -->
+      <div class="delivery-section">
+        <h3 style="font-size: 14px; color: #1e293b; margin-bottom: 4px;">Stock Details</h3>
+        <table class="spec-table">
+          <tr><th>Item Code</th><td>${item.itemCode}</td></tr>
+          <tr><th>Item Name</th><td>${item.itemName}</td></tr>
+          <tr><th>Category</th><td>${item.categoryLabel}</td></tr>
+          <tr><th>Cylinder Volume</th><td>${item.cylinderVolume}</td></tr>
+          <tr><th>Current Quantity</th><td><strong>${item.currentQuantity}</strong></td></tr>
+          <tr><th>Minimum Stock</th><td>${item.minimumStockLevel}</td></tr>
+          <tr><th>Maximum Stock</th><td>${item.maximumStockLevel}</td></tr>
+          <tr><th>Status</th><td>${item.stockStatusLabel}</td></tr>
+        </table>
+      </div>
+    `;
+
+    printContent({
+      title: `Inventory Item - ${item.itemName}`,
+      content,
+    });
+  };
+
   const handleDeleteConfirm = () => {
     if (deleteModal.item) {
       const id = deleteModal.item._id;
@@ -187,6 +243,18 @@ function Inventory() {
               </Tooltip.Content>
             </Tooltip>
           )}
+          <Tooltip delay={0}>
+            <Button
+              aria-label={`Print ${item.itemName}`}
+              onClick={() => handlePrintInventoryItem(item)}
+              className="flex items-center gap-1.5 rounded-full bg-slate-50/70 border border-slate-200/60 px-3 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+            >
+              <Printer className="h-3.5 w-3.5" />
+            </Button>
+            <Tooltip.Content>
+              <p>Print Inventory Item</p>
+            </Tooltip.Content>
+          </Tooltip>
           {/* <button
             type="button"
             onClick={() => handleDeleteClick(item)}

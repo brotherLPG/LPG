@@ -1,4 +1,4 @@
-import { PlusCircle, Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
+import { PlusCircle, Eye, Edit3, Trash2, ChevronDown, Printer } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Tooltip } from "@heroui/react";
@@ -7,12 +7,14 @@ import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
 import { useCylinderTypes, useDeleteCylinderType } from "../../queries/cylinderTypes/cylinderTypes.queries";
 import { usePermissions } from "../../contexts/PermissionContext";
+import { usePrint } from "../../utils/usePrint";
 
 
 function CylinderTypes() {
   const navigate = useNavigate();
   const toast = useToast();
   const { can } = usePermissions();
+  const { printTable, printContent, getQRCodeImg } = usePrint();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [capacity, setCapacity] = useState("All");
@@ -49,6 +51,65 @@ function CylinderTypes() {
     const matchesCapacity = capacity === "All" || cyl.capacity === capacity;
     return matchesQuery && matchesStatus && matchesCapacity;
   }), [query, status, capacity, cylinderTypes]);
+
+
+  const handlePrintCylinderType = (item) => {
+    const qrData = [
+      `Type: ${item.name} (${item.code})`,
+      `Capacity: ${item.capacity}`,
+      `Tare: ${item.tare}`,
+      `Selling: ${item.price}`,
+      `Purchase: ${item.purchasePrice}`,
+      `Refill: ${item.refillPrice}`,
+      `Status: ${item.status}`,
+    ].join('\n');
+
+    const statusClass = item.status === 'Active' ? 'active' : 'inactive';
+
+    const content = `
+      <!-- Top Row -->
+      <div class="receipt-top">
+        <div>
+          <p style="font-size: 15px; font-weight: 700; color: #1e293b; margin: 0;">
+            ${item.name}
+          </p>
+          <p style="font-size: 13px; color: #64748b; margin: 4px 0 0;">
+            Type Code: <strong style="color: #1e293b;">${item.code}</strong>
+          </p>
+          <p style="margin: 8px 0 0;">
+            <span class="status-badge ${statusClass}">${item.status}</span>
+          </p>
+        </div>
+        ${getQRCodeImg(qrData)}
+      </div>
+
+      <!-- Specifications -->
+      <div class="delivery-section">
+        <h3 style="font-size: 14px; color: #1e293b; margin-bottom: 4px;">Specifications</h3>
+        <table class="spec-table">
+          <tr><th>Type Code</th><td>${item.code}</td></tr>
+          <tr><th>Type Name</th><td>${item.name}</td></tr>
+          <tr><th>Capacity</th><td>${item.capacity}</td></tr>
+          <tr><th>Tare Weight</th><td>${item.tare}</td></tr>
+        </table>
+      </div>
+
+      <!-- Pricing -->
+      <div class="delivery-section">
+        <h3 style="font-size: 14px; color: #1e293b; margin-bottom: 4px;">Pricing</h3>
+        <table class="spec-table">
+          <tr><th>Selling Price</th><td><span class="price-highlight">${item.price}</span></td></tr>
+          <tr><th>Purchase Price</th><td>${item.purchasePrice}</td></tr>
+          <tr><th>Refill Price</th><td>${item.refillPrice}</td></tr>
+        </table>
+      </div>
+    `;
+
+    printContent({
+      title: `Cylinder Type - ${item.name}`,
+      content,
+    });
+  };
 
   const handleDeleteClick = (item) => {
     setDeleteModal({ isOpen: true, item });
@@ -182,6 +243,18 @@ function CylinderTypes() {
               </Tooltip.Content>
             </Tooltip>
           )}
+          <Tooltip delay={0}>
+            <Button
+              aria-label={`Print ${item.name}`}
+              onClick={() => handlePrintCylinderType(item)}
+              className="flex items-center gap-1.5 rounded-full bg-slate-50/70 border border-slate-200/60 px-3 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+            >
+              <Printer className="h-3.5 w-3.5" />
+            </Button>
+            <Tooltip.Content>
+              <p>Print Cylinder Type</p>
+            </Tooltip.Content>
+          </Tooltip>
           {can("cylinder-types", "delete") && (
             <Tooltip delay={0}>
               <Button
@@ -226,15 +299,18 @@ function CylinderTypes() {
               Manage cylinder specifications and pricing
             </p>
           </div>
-          {can("cylinder-types", "create") && (
-          <button
-            type="button"
-            onClick={() => navigate("/cylinders/add-type")}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#008951] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#007545]"
-          >
-            <PlusCircle className="h-4 w-4" /> Add Cylinder Type
-          </button>
-          )}
+          <div className="flex items-center gap-2">
+           
+            {can("cylinder-types", "create") && (
+            <button
+              type="button"
+              onClick={() => navigate("/cylinders/add-type")}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#008951] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#007545]"
+            >
+              <PlusCircle className="h-4 w-4" /> Add Cylinder Type
+            </button>
+            )}
+          </div>
         </div>
 
         {/* Filters */}

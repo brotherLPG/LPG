@@ -191,6 +191,77 @@ export const usePrint = () => {
           font-weight: bold;
         }
 
+        /* Spec Table */
+        .spec-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 10px;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          overflow: hidden;
+        }
+
+        .spec-table th,
+        .spec-table td {
+          border-top: 1px solid #e2e8f0;
+          padding: 10px 14px;
+          font-size: 13px;
+          text-align: left;
+        }
+
+        .spec-table th {
+          width: 40%;
+          font-weight: 600;
+          color: #64748b;
+          background: #f8fafc;
+        }
+
+        .spec-table td {
+          color: #1e293b;
+          font-weight: 500;
+        }
+
+        .spec-table tr:first-child th,
+        .spec-table tr:first-child td {
+          border-top: none;
+        }
+
+        /* Price Highlight */
+        .price-highlight {
+          display: inline-block;
+          background: #ecfdf5;
+          border: 1px solid #a7f3d0;
+          color: #065f46;
+          font-weight: 700;
+          font-size: 15px;
+          padding: 6px 14px;
+          border-radius: 6px;
+          margin-top: 8px;
+        }
+
+        /* Status Badge */
+        .status-badge {
+          display: inline-block;
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          padding: 4px 12px;
+          border-radius: 999px;
+        }
+
+        .status-badge.active {
+          background: #ecfdf5;
+          color: #047857;
+          border: 1px solid #a7f3d0;
+        }
+
+        .status-badge.inactive {
+          background: #f1f5f9;
+          color: #64748b;
+          border: 1px solid #e2e8f0;
+        }
+
         /* QR Code */
         .qr-code {
           text-align: center;
