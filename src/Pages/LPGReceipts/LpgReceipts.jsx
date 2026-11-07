@@ -85,9 +85,16 @@ function LpgReceipts() {
   
 
 const handlePrintReceipt = (receipt) => {
-  const qrData = receipt._id
-    ? `${window.location.origin}/lpg-receipts/view/${receipt._id}`
-    : `LPG Receipt ${receipt.receiptNo}`;
+  const qrData = [
+    `Receipt: ${receipt.receiptNo}`,
+    `Date: ${receipt.date}`,
+    `Supplier: ${receipt.supplier}`,
+    `Truck: ${receipt.truckReg}`,
+    `Qty: ${receipt.quantity} KG`,
+    `Rate: ${receipt.rate}`,
+    `Total: ${receipt.totalCost}`,
+    `Status: ${receipt.status}`,
+  ].join('\n');
 
   const content = `
     <!-- Top Row: Receipt meta + QR -->
