@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { useToast } from "../../utils/GlobalToast";
@@ -12,6 +12,20 @@ function UpdateCylinderType() {
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
+
+  // Refs for required fields
+  const typeNameRef = useRef(null);
+  const categoryRef = useRef(null);
+  const capacityKgRef = useRef(null);
+  const tareWeightKgRef = useRef(null);
+  const sellingPriceRef = useRef(null);
+
+  // Error states
+  const [typeNameError, setTypeNameError] = useState("");
+  const [categoryError, setCategoryError] = useState("");
+  const [capacityKgError, setCapacityKgError] = useState("");
+  const [tareWeightKgError, setTareWeightKgError] = useState("");
+  const [sellingPriceError, setSellingPriceError] = useState("");
 
   const { data, isLoading: isFetching } = useCylinderTypeById(id);
   const updateMutation = useUpdateCylinderType();
@@ -64,7 +78,60 @@ function UpdateCylinderType() {
     }
   }, [cylinderData]);
 
+  const validateForm = () => {
+    let hasError = false;
+
+    if (!typeName.trim() || typeName.trim().length < 2) {
+      setTypeNameError("Type name must contain at least 2 characters");
+      typeNameRef.current?.focus();
+      hasError = true;
+    } else {
+      setTypeNameError("");
+    }
+
+    if (!category) {
+      setCategoryError("Category is required");
+      if (!hasError) categoryRef.current?.focus();
+      hasError = true;
+    } else {
+      setCategoryError("");
+    }
+
+    if (!capacityKg || parseFloat(capacityKg) <= 0) {
+      setCapacityKgError("Capacity must be greater than 0");
+      if (!hasError) capacityKgRef.current?.focus();
+      hasError = true;
+    } else {
+      setCapacityKgError("");
+    }
+
+    if (!tareWeightKg || parseFloat(tareWeightKg) <= 0) {
+      setTareWeightKgError("Tare weight must be greater than 0");
+      if (!hasError) tareWeightKgRef.current?.focus();
+      hasError = true;
+    } else {
+      setTareWeightKgError("");
+    }
+
+    if (!sellingPrice || parseFloat(sellingPrice) <= 0) {
+      setSellingPriceError("Selling price must be greater than 0");
+      if (!hasError) sellingPriceRef.current?.focus();
+      hasError = true;
+    } else {
+      setSellingPriceError("");
+    }
+
+    return !hasError;
+  };
+
+  const clearError = (setErrorFn) => {
+    setErrorFn("");
+  };
+
   const handleSave = async () => {
+    if (!validateForm()) {
+      return;
+    }
     const payload = {
       typeName,
       cylinderCategory: category,
@@ -87,7 +154,12 @@ function UpdateCylinderType() {
       toast.success("Cylinder type updated successfully.");
       navigate("/cylinder-types");
     } catch (err) {
-      toast.error("Failed to update cylinder type. Please try again.");
+      const firstError = err?.response?.data?.errors?.[0];
+      const mainMessage = err?.response?.data?.message;
+      const errorMessage = firstError
+        ? `${firstError.path}: ${firstError.message}`
+        : mainMessage || "Failed to update cylinder type. Please try again.";
+      toast.error(errorMessage);
     }
   };
 
@@ -140,17 +212,42 @@ function UpdateCylinderType() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Type Name <span className="text-rose-500">*</span></label>
-                <input type="text" placeholder="e.g. Commercial LPG 11KG" value={typeName} onChange={(e) => setTypeName(e.target.value)} className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
+                <input
+                  ref={typeNameRef}
+                  type="text"
+                  placeholder="e.g. Commercial LPG 11KG"
+                  value={typeName}
+                  onChange={(e) => {
+                    setTypeName(e.target.value);
+                    clearError(setTypeNameError);
+                  }}
+                  className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                    typeNameError
+                      ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                      : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                  }`}
+                />
+                {typeNameError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{typeNameError}</p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Category <span className="text-rose-500">*</span></label>
                 <div className="relative">
                   <select
+                    ref={categoryRef}
                     value={category}
-                    onChange={(e) => setCategory(e.target.value)}
+                    onChange={(e) => {
+                      setCategory(e.target.value);
+                      clearError(setCategoryError);
+                    }}
                     disabled={optionsLoading}
-                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                    className={`w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:ring-2 ${
+                      categoryError
+                        ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                        : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                    } disabled:bg-slate-100 disabled:cursor-not-allowed`}
                   >
                     <option value="" disabled>
                       {optionsLoading ? "Loading..." : "Select Category"}
@@ -163,16 +260,53 @@ function UpdateCylinderType() {
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
+                {categoryError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{categoryError}</p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Capacity (KG) <span className="text-rose-500">*</span></label>
-                <input type="text" placeholder="e.g. 11.0" value={capacityKg} onChange={(e) => setCapacityKg(e.target.value)} className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
+                <input
+                  ref={capacityKgRef}
+                  type="text"
+                  placeholder="e.g. 11.0"
+                  value={capacityKg}
+                  onChange={(e) => {
+                    setCapacityKg(e.target.value);
+                    clearError(setCapacityKgError);
+                  }}
+                  className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                    capacityKgError
+                      ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                      : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                  }`}
+                />
+                {capacityKgError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{capacityKgError}</p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Tare Weight (KG) <span className="text-rose-500">*</span></label>
-                <input type="text" placeholder="e.g. 8.5" value={tareWeightKg} onChange={(e) => setTareWeightKg(e.target.value)} className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
+                <input
+                  ref={tareWeightKgRef}
+                  type="text"
+                  placeholder="e.g. 8.5"
+                  value={tareWeightKg}
+                  onChange={(e) => {
+                    setTareWeightKg(e.target.value);
+                    clearError(setTareWeightKgError);
+                  }}
+                  className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                    tareWeightKgError
+                      ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                      : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                  }`}
+                />
+                {tareWeightKgError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{tareWeightKgError}</p>
+                )}
               </div>
 
               <div>
@@ -221,7 +355,24 @@ function UpdateCylinderType() {
             <div className="p-5 space-y-5">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Selling Price (Rs.) <span className="text-rose-500">*</span></label>
-                <input type="text" placeholder="0.00" value={sellingPrice} onChange={(e) => setSellingPrice(e.target.value)} className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
+                <input
+                  ref={sellingPriceRef}
+                  type="text"
+                  placeholder="0.00"
+                  value={sellingPrice}
+                  onChange={(e) => {
+                    setSellingPrice(e.target.value);
+                    clearError(setSellingPriceError);
+                  }}
+                  className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                    sellingPriceError
+                      ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                      : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                  }`}
+                />
+                {sellingPriceError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{sellingPriceError}</p>
+                )}
               </div>
 
               <div>

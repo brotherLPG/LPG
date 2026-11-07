@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { useEmployeeById, useUpdateEmployee } from "../../queries/employees/employees.queries";
@@ -11,6 +11,15 @@ function UpdateEmployee() {
   const { data, isLoading, error } = useEmployeeById(id);
   const updateMutation = useUpdateEmployee();
   const [isActive, setIsActive] = useState(true);
+
+  // Refs for required fields
+  const fullNameRef = useRef(null);
+  const phoneNumberRef = useRef(null);
+
+  // Error states
+  const [fullNameError, setFullNameError] = useState("");
+  const [phoneNumberError, setPhoneNumberError] = useState("");
+
   const [formData, setFormData] = useState({
     fullName: "",
     fatherHusbandName: "",
@@ -53,10 +62,37 @@ function UpdateEmployee() {
 
   const handleInputChange = (field, value) => {
     setFormData((previous) => ({ ...previous, [field]: value }));
+
+    // Clear errors on change
+    if (field === 'fullName') setFullNameError("");
+    if (field === 'phoneNumber') setPhoneNumberError("");
+  };
+
+  const validateForm = () => {
+    let hasError = false;
+
+    if (!formData.fullName.trim() || formData.fullName.trim().length < 2) {
+      setFullNameError("Full name must contain at least 2 characters");
+      fullNameRef.current?.focus();
+      hasError = true;
+    }
+
+    if (!formData.phoneNumber.trim()) {
+      setPhoneNumberError("Phone number is required");
+      if (!hasError) phoneNumberRef.current?.focus();
+      hasError = true;
+    }
+
+    return !hasError;
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     try {
       await updateMutation.mutateAsync({
         id,
@@ -81,7 +117,12 @@ function UpdateEmployee() {
       toast.success("Employee updated successfully!");
       navigate("/employees");
     } catch (updateError) {
-      toast.error(updateError.response?.data?.message || "Failed to update employee. Please try again.");
+      const firstError = updateError?.response?.data?.errors?.[0];
+      const mainMessage = updateError?.response?.data?.message;
+      const errorMessage = firstError
+        ? `${firstError.path}: ${firstError.message}`
+        : mainMessage || "Failed to update employee. Please try again.";
+      toast.error(errorMessage);
     }
   };
 
@@ -118,7 +159,14 @@ function UpdateEmployee() {
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-slate-700">Full Name <span className="text-rose-500">*</span></label>
-                <input required value={formData.fullName} onChange={(event) => handleInputChange("fullName", event.target.value)} placeholder="Enter legal full name" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
+                <input ref={fullNameRef} value={formData.fullName} onChange={(event) => handleInputChange("fullName", event.target.value)} placeholder="Enter legal full name" className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                  fullNameError
+                    ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                    : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                }`} />
+                {fullNameError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{fullNameError}</p>
+                )}
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-slate-700">Father / Husband Name</label>
@@ -152,7 +200,15 @@ function UpdateEmployee() {
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm lg:col-span-3">
           <div className="border-b border-slate-200 p-4"><h2 className="text-sm font-semibold text-slate-800">Contact & Emergency Details</h2></div>
           <div className="grid grid-cols-1 gap-5 p-5 md:grid-cols-2">
-            <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Phone Number <span className="text-rose-500">*</span></label><input required value={formData.phoneNumber} onChange={(event) => handleInputChange("phoneNumber", event.target.value)} placeholder="e.g. 0300-5550011" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
+            <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Phone Number <span className="text-rose-500">*</span></label><input ref={phoneNumberRef} value={formData.phoneNumber} onChange={(event) => handleInputChange("phoneNumber", event.target.value)} placeholder="e.g. 0300-5550011" className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                  phoneNumberError
+                    ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                    : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                }`} />
+                {phoneNumberError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{phoneNumberError}</p>
+                )}
+            </div>
             <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Email Address</label><input type="email" value={formData.emailAddress} onChange={(event) => handleInputChange("emailAddress", event.target.value)} placeholder="e.g. ahmad.h@brotherlpg.com" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
             <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Emergency Contact Name</label><input value={formData.emergencyContactName} onChange={(event) => handleInputChange("emergencyContactName", event.target.value)} placeholder="e.g. Muhammad Hassan (Brother)" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
             <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Emergency Contact Phone</label><input value={formData.emergencyContactPhone} onChange={(event) => handleInputChange("emergencyContactPhone", event.target.value)} placeholder="e.g. 0301-9998877" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>

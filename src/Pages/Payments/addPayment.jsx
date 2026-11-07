@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { useGetPaymentFormOptions, useCreatePayment } from "../../queries/payments/payments.queries";
@@ -78,6 +78,19 @@ const buildAutomaticAllocation = (invoiceList, amountValue, refund) => {
 function AddPayment() {
   const navigate = useNavigate();
   const toast = useToast();
+  
+  // Refs for required fields
+  const customerIdRef = useRef(null);
+  const paymentAmountRef = useRef(null);
+  const paymentMethodRef = useRef(null);
+  const accountIdRef = useRef(null);
+  
+  // Error states
+  const [customerIdError, setCustomerIdError] = useState("");
+  const [paymentAmountError, setPaymentAmountError] = useState("");
+  const [paymentMethodError, setPaymentMethodError] = useState("");
+  const [accountIdError, setAccountIdError] = useState("");
+  
   const [paymentDirection, setPaymentDirection] = useState("receive");
   const [allocationMode, setAllocationMode] = useState("automatic");
   const [selectedInvoices, setSelectedInvoices] = useState([]);
@@ -256,8 +269,55 @@ function AddPayment() {
       })
       .filter(Boolean);
 
+  const validateForm = () => {
+    let hasError = false;
+
+    if (!formData.customerId) {
+      setCustomerIdError(isCustomerParty ? "Customer is required" : "Supplier is required");
+      customerIdRef.current?.focus();
+      hasError = true;
+    } else {
+      setCustomerIdError("");
+    }
+
+    if (!paymentAmount || parseAmount(paymentAmount) <= 0) {
+      setPaymentAmountError("Payment amount must be greater than 0");
+      if (!hasError) paymentAmountRef.current?.focus();
+      hasError = true;
+    } else {
+      setPaymentAmountError("");
+    }
+
+    if (!formData.paymentMethod) {
+      setPaymentMethodError("Payment method is required");
+      if (!hasError) paymentMethodRef.current?.focus();
+      hasError = true;
+    } else {
+      setPaymentMethodError("");
+    }
+
+    if (!formData.accountId) {
+      setAccountIdError("Account is required");
+      if (!hasError) accountIdRef.current?.focus();
+      hasError = true;
+    } else {
+      setAccountIdError("");
+    }
+
+    return !hasError;
+  };
+
+  const clearError = (setErrorFn) => {
+    setErrorFn("");
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
     try {
       const allocations = buildAllocations();
       const allocatedTotal = allocations.reduce(
@@ -274,7 +334,7 @@ function AddPayment() {
         paymentType: paymentDirection,
         paymentDate: formData.paymentDate || null,
         paymentAmount: parseAmount(paymentAmount) || allocatedTotal,
-        paymentMethod: formData.paymentMethod,
+        paymentMethod: formData.paymentMethod?.toLowerCase() || 'cash',
         accountId: formData.accountId,
         referenceNumber: formData.referenceNumber,
         allocations,
@@ -294,7 +354,12 @@ function AddPayment() {
       );
       navigate("/payments");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to record payment. Please try again.");
+      const firstError = error?.response?.data?.errors?.[0];
+      const mainMessage = error?.response?.data?.message;
+      const errorMessage = firstError
+        ? `${firstError.path}: ${firstError.message}`
+        : mainMessage || "Failed to record payment. Please try again.";
+      toast.error(errorMessage);
     }
   };
 
@@ -436,12 +501,18 @@ function AddPayment() {
                     </label>
                     <div className="relative">
                       <select
+                        ref={customerIdRef}
                         value={formData.customerId}
-                        onChange={(event) =>
-                          handlePartyChange(event.target.value)
-                        }
+                        onChange={(event) => {
+                          handlePartyChange(event.target.value);
+                          clearError(setCustomerIdError);
+                        }}
                         disabled={optionsLoading}
-                        className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                        className={`w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:ring-2 ${
+                          customerIdError
+                            ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                            : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                        }`}
                       >
                         <option value="" disabled>
                           {isCustomerParty
@@ -462,6 +533,9 @@ function AddPayment() {
                       </select>
                       <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     </div>
+                    {customerIdError && (
+                      <p className="mt-1.5 text-xs text-rose-500">{customerIdError}</p>
+                    )}
                   </div>
 
                   <div>
@@ -497,12 +571,23 @@ function AddPayment() {
                       <span className="text-rose-500">*</span>
                     </label>
                     <input
+                      ref={paymentAmountRef}
                       type="text"
                       value={paymentAmount}
-                      onChange={(e) => setPaymentAmount(e.target.value)}
+                      onChange={(e) => {
+                        setPaymentAmount(e.target.value);
+                        clearError(setPaymentAmountError);
+                      }}
                       placeholder="50,000"
-                      className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                      className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                        paymentAmountError
+                          ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                          : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                      }`}
                     />
+                    {paymentAmountError && (
+                      <p className="mt-1.5 text-xs text-rose-500">{paymentAmountError}</p>
+                    )}
                   </div>
 
                   <div>
@@ -511,12 +596,18 @@ function AddPayment() {
                     </label>
                     <div className="relative">
                       <select
+                        ref={paymentMethodRef}
                         value={formData.paymentMethod}
-                        onChange={(event) =>
-                          handleInputChange("paymentMethod", event.target.value)
-                        }
+                        onChange={(event) => {
+                          handleInputChange("paymentMethod", event.target.value);
+                          clearError(setPaymentMethodError);
+                        }}
                         disabled={optionsLoading}
-                        className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                        className={`w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:ring-2 ${
+                          paymentMethodError
+                            ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                            : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                        }`}
                       >
                         <option value="" disabled>
                           Select payment method
@@ -529,6 +620,9 @@ function AddPayment() {
                       </select>
                       <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     </div>
+                    {paymentMethodError && (
+                      <p className="mt-1.5 text-xs text-rose-500">{paymentMethodError}</p>
+                    )}
                   </div>
 
                   <div>
@@ -540,12 +634,18 @@ function AddPayment() {
                     </label>
                     <div className="relative">
                       <select
+                        ref={accountIdRef}
                         value={formData.accountId}
-                        onChange={(event) =>
-                          handleInputChange("accountId", event.target.value)
-                        }
+                        onChange={(event) => {
+                          handleInputChange("accountId", event.target.value);
+                          clearError(setAccountIdError);
+                        }}
                         disabled={optionsLoading}
-                        className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                        className={`w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:ring-2 ${
+                          accountIdError
+                            ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                            : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                        }`}
                       >
                         <option value="" disabled>
                           Select account
@@ -558,6 +658,9 @@ function AddPayment() {
                       </select>
                       <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     </div>
+                    {accountIdError && (
+                      <p className="mt-1.5 text-xs text-rose-500">{accountIdError}</p>
+                    )}
                   </div>
 
                   <div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ChevronDown, CheckCircle2 } from "lucide-react";
 import { useToast } from "../../utils/GlobalToast";
@@ -23,6 +23,20 @@ function CreateBatch({ mode = "create" }) {
   const toast = useToast();
   const isUpdateMode = mode === "update";
 
+  // Refs for required fields
+  const storageTankIdRef = useRef(null);
+  const cylinderTypeIdRef = useRef(null);
+  const cylinderCountRef = useRef(null);
+  const targetFillWeightKgRef = useRef(null);
+  const operatorEmployeeIdRef = useRef(null);
+
+  // Error states
+  const [storageTankIdError, setStorageTankIdError] = useState("");
+  const [cylinderTypeIdError, setCylinderTypeIdError] = useState("");
+  const [cylinderCountError, setCylinderCountError] = useState("");
+  const [targetFillWeightKgError, setTargetFillWeightKgError] = useState("");
+  const [operatorEmployeeIdError, setOperatorEmployeeIdError] = useState("");
+
   const createMutation = useCreateFillingBatch();
   const updateMutation = useUpdateFillingBatch();
   const { data: formOptionsData, isLoading: isLoadingOptions } = useFillingBatchFormOptions();
@@ -37,15 +51,15 @@ function CreateBatch({ mode = "create" }) {
   const [formData, setFormData] = useState({
     storageTankId: "",
     cylinderTypeId: "",
-    cylinderCount: "250",
-    targetFillWeightKg: "11.0",
+    cylinderCount: "",
+    targetFillWeightKg: "",
     residualRecoveredKg: "",
     actualLpgUsedKg: "",
     usageInputMode: "",
     operatorEmployeeId: "",
     fillingDate: new Date().toISOString().slice(0, 10),
     batchStatus: "pending",
-    remarks: "Ensure manifold pressure does not exceed 15 bar. Recalibrate digital filling scales before initiation.",
+    remarks: "",
   });
 
   useEffect(() => {
@@ -136,8 +150,62 @@ function CreateBatch({ mode = "create" }) {
     });
   };
 
+  const validateForm = () => {
+    let hasError = false;
+
+    if (!formData.storageTankId) {
+      setStorageTankIdError("Storage Tank is required");
+      storageTankIdRef.current?.focus();
+      hasError = true;
+    } else {
+      setStorageTankIdError("");
+    }
+
+    if (!formData.cylinderTypeId) {
+      setCylinderTypeIdError("Cylinder Type is required");
+      if (!hasError) cylinderTypeIdRef.current?.focus();
+      hasError = true;
+    } else {
+      setCylinderTypeIdError("");
+    }
+
+    if (!formData.cylinderCount || Number(formData.cylinderCount) < 1) {
+      setCylinderCountError("Cylinder count must be at least 1");
+      if (!hasError) cylinderCountRef.current?.focus();
+      hasError = true;
+    } else {
+      setCylinderCountError("");
+    }
+
+    if (!formData.targetFillWeightKg || Number(formData.targetFillWeightKg) <= 0) {
+      setTargetFillWeightKgError("Target fill weight must be greater than 0");
+      if (!hasError) targetFillWeightKgRef.current?.focus();
+      hasError = true;
+    } else {
+      setTargetFillWeightKgError("");
+    }
+
+    if (!formData.operatorEmployeeId) {
+      setOperatorEmployeeIdError("Operator is required");
+      if (!hasError) operatorEmployeeIdRef.current?.focus();
+      hasError = true;
+    } else {
+      setOperatorEmployeeIdError("");
+    }
+
+    return !hasError;
+  };
+
+  const clearError = (setErrorFn) => {
+    setErrorFn("");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
 
     if (residualKg != null && residualKg < 0) {
       toast.error("Residual recovered cannot be negative.");
@@ -191,7 +259,12 @@ function CreateBatch({ mode = "create" }) {
       }
       navigate("/filling-batches");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to save filling batch. Please try again.");
+      const firstError = error?.response?.data?.errors?.[0];
+      const mainMessage = error?.response?.data?.message;
+      const errorMessage = firstError
+        ? `${firstError.path}: ${firstError.message}`
+        : mainMessage || "Failed to save filling batch. Please try again.";
+      toast.error(errorMessage);
     }
   };
 
@@ -269,17 +342,28 @@ function CreateBatch({ mode = "create" }) {
                 </label>
                 <div className="relative">
                   <select
+                    ref={storageTankIdRef}
                     value={formData.storageTankId}
-                    onChange={(e) => handleFieldChange("storageTankId", e.target.value)}
-                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    onChange={(e) => {
+                      handleFieldChange("storageTankId", e.target.value);
+                      clearError(setStorageTankIdError);
+                    }}
+                    className={`w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2.5 text-sm text-slate-700 outline-none focus:ring-1 ${
+                      storageTankIdError
+                        ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500"
+                        : "border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
+                    }`}
                   >
-                    <option value="">Select Storage Tank</option>
+                    <option >Select Storage Tank</option>
                     {tankOptions.map((tank) => (
                       <option key={tank._id} value={tank._id}>{tank.displayName}</option>
                     ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
+                {storageTankIdError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{storageTankIdError}</p>
+                )}
               </div>
             </div>
           </div>
@@ -296,9 +380,17 @@ function CreateBatch({ mode = "create" }) {
                 </label>
                 <div className="relative">
                   <select
+                    ref={cylinderTypeIdRef}
                     value={formData.cylinderTypeId}
-                    onChange={(e) => handleFieldChange("cylinderTypeId", e.target.value)}
-                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    onChange={(e) => {
+                      handleFieldChange("cylinderTypeId", e.target.value);
+                      clearError(setCylinderTypeIdError);
+                    }}
+                    className={`w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2.5 text-sm text-slate-700 outline-none focus:ring-1 ${
+                      cylinderTypeIdError
+                        ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500"
+                        : "border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
+                    }`}
                   >
                     <option value="">Select Cylinder Type</option>
                     {cylinderTypes.map((type) => (
@@ -307,6 +399,9 @@ function CreateBatch({ mode = "create" }) {
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
+                {cylinderTypeIdError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{cylinderTypeIdError}</p>
+                )}
               </div>
 
               <div>
@@ -314,11 +409,22 @@ function CreateBatch({ mode = "create" }) {
                   Cylinder Target Run Count <span className="text-rose-500">*</span>
                 </label>
                 <input
+                  ref={cylinderCountRef}
                   type="number"
                   value={formData.cylinderCount}
-                  onChange={(e) => handleFieldChange("cylinderCount", e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  onChange={(e) => {
+                    handleFieldChange("cylinderCount", e.target.value);
+                    clearError(setCylinderCountError);
+                  }}
+                  className={`w-full rounded-md border bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:ring-1 ${
+                    cylinderCountError
+                      ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500"
+                      : "border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
+                  }`}
                 />
+                {cylinderCountError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{cylinderCountError}</p>
+                )}
               </div>
 
               <div>
@@ -326,12 +432,23 @@ function CreateBatch({ mode = "create" }) {
                   Target Fill Weight per Cylinder <span className="text-rose-500">*</span>
                 </label>
                 <input
+                  ref={targetFillWeightKgRef}
                   type="number"
                   step="0.1"
                   value={formData.targetFillWeightKg}
-                  onChange={(e) => handleFieldChange("targetFillWeightKg", e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  onChange={(e) => {
+                    handleFieldChange("targetFillWeightKg", e.target.value);
+                    clearError(setTargetFillWeightKgError);
+                  }}
+                  className={`w-full rounded-md border bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:ring-1 ${
+                    targetFillWeightKgError
+                      ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500"
+                      : "border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
+                  }`}
                 />
+                {targetFillWeightKgError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{targetFillWeightKgError}</p>
+                )}
               </div>
 
               <div>
@@ -376,9 +493,17 @@ function CreateBatch({ mode = "create" }) {
                 </label>
                 <div className="relative">
                   <select
+                    ref={operatorEmployeeIdRef}
                     value={formData.operatorEmployeeId}
-                    onChange={(e) => handleFieldChange("operatorEmployeeId", e.target.value)}
-                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    onChange={(e) => {
+                      handleFieldChange("operatorEmployeeId", e.target.value);
+                      clearError(setOperatorEmployeeIdError);
+                    }}
+                    className={`w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2.5 text-sm text-slate-700 outline-none focus:ring-1 ${
+                      operatorEmployeeIdError
+                        ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500"
+                        : "border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
+                    }`}
                   >
                     <option value="">Select Employee</option>
                     {operatorOptions.map((operator) => (
@@ -387,6 +512,9 @@ function CreateBatch({ mode = "create" }) {
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
+                {operatorEmployeeIdError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{operatorEmployeeIdError}</p>
+                )}
               </div>
 
               <div>

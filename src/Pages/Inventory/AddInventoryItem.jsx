@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { useCreateInventoryItem, useInventoryFormOptions } from "../../queries/inventory/inventory.queries";
@@ -7,6 +7,20 @@ function AddInventoryItem() {
   const navigate = useNavigate();
   const createMutation = useCreateInventoryItem();
   const { data: formOptions, isLoading: optionsLoading } = useInventoryFormOptions();
+
+  // Refs for required fields
+  const itemNameRef = useRef(null);
+  const itemCategoryRef = useRef(null);
+  const unitOfMeasureRef = useRef(null);
+  const currentQuantityRef = useRef(null);
+  const minimumStockLevelRef = useRef(null);
+
+  // Error states
+  const [itemNameError, setItemNameError] = useState("");
+  const [itemCategoryError, setItemCategoryError] = useState("");
+  const [unitOfMeasureError, setUnitOfMeasureError] = useState("");
+  const [currentQuantityError, setCurrentQuantityError] = useState("");
+  const [minimumStockLevelError, setMinimumStockLevelError] = useState("");
   
   const [formData, setFormData] = useState({
     itemName: "",
@@ -39,11 +53,58 @@ function AddInventoryItem() {
       ...prev,
       [name]: type === 'number' ? (value === '' ? 0 : Number(value)) : value
     }));
+
+    // Clear errors on change
+    if (name === 'itemName') setItemNameError("");
+    if (name === 'itemCategory') setItemCategoryError("");
+    if (name === 'unitOfMeasure') setUnitOfMeasureError("");
+    if (name === 'currentQuantity') setCurrentQuantityError("");
+    if (name === 'minimumStockLevel') setMinimumStockLevelError("");
+  };
+
+  const validateForm = () => {
+    let hasError = false;
+
+    if (!formData.itemName.trim() || formData.itemName.trim().length < 2) {
+      setItemNameError("Item name must contain at least 2 characters");
+      itemNameRef.current?.focus();
+      hasError = true;
+    }
+
+    if (!formData.itemCategory) {
+      setItemCategoryError("Category is required");
+      if (!hasError) itemCategoryRef.current?.focus();
+      hasError = true;
+    }
+
+    if (!formData.unitOfMeasure) {
+      setUnitOfMeasureError("Unit of measure is required");
+      if (!hasError) unitOfMeasureRef.current?.focus();
+      hasError = true;
+    }
+
+    if (formData.currentQuantity < 0) {
+      setCurrentQuantityError("Current quantity cannot be negative");
+      if (!hasError) currentQuantityRef.current?.focus();
+      hasError = true;
+    }
+
+    if (formData.minimumStockLevel < 0) {
+      setMinimumStockLevelError("Minimum stock level cannot be negative");
+      if (!hasError) minimumStockLevelRef.current?.focus();
+      hasError = true;
+    }
+
+    return !hasError;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
+    if (!validateForm()) {
+      return;
+    }
+
     const payload = {
       itemName: formData.itemName,
       itemCategory: formData.itemCategory,
@@ -68,6 +129,11 @@ function AddInventoryItem() {
         navigate("/inventory");
       },
       onError: (error) => {
+        const firstError = error?.response?.data?.errors?.[0];
+        const mainMessage = error?.response?.data?.message;
+        const errorMessage = firstError
+          ? `${firstError.path}: ${firstError.message}`
+          : mainMessage || "Failed to create inventory item. Please try again.";
         console.error("Error creating inventory item:", error);
       }
     });
@@ -127,13 +193,21 @@ function AddInventoryItem() {
                 Item Name <span className="text-rose-500">*</span>
               </label>
               <input
+                ref={itemNameRef}
                 type="text"
                 name="itemName"
                 value={formData.itemName}
                 onChange={handleChange}
                 placeholder="Standard Brass Valves 12KG"
-                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
+                className={`w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-1 ${
+                  itemNameError
+                    ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500"
+                    : "border-gray-200 focus:border-emerald-600 focus:ring-emerald-600"
+                }`}
               />
+              {itemNameError && (
+                <p className="mt-1.5 text-xs text-rose-500">{itemNameError}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -143,11 +217,16 @@ function AddInventoryItem() {
                 </label>
                 <div className="relative">
                   <select
+                    ref={itemCategoryRef}
                     name="itemCategory"
                     value={formData.itemCategory}
                     onChange={handleChange}
                     disabled={optionsLoading}
-                    className="w-full appearance-none rounded-lg border border-gray-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 disabled:opacity-50"
+                    className={`w-full appearance-none rounded-lg border bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:ring-1 ${
+                      itemCategoryError
+                        ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500"
+                        : "border-gray-200 focus:border-emerald-600 focus:ring-emerald-600"
+                    } disabled:opacity-50`}
                   >
                     <option value="">Select Category</option>
                     {categories.map((cat) => (
@@ -156,6 +235,9 @@ function AddInventoryItem() {
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
+                {itemCategoryError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{itemCategoryError}</p>
+                )}
               </div>
 
               <div>
@@ -229,13 +311,21 @@ function AddInventoryItem() {
                 Current Stock Quantity <span className="text-rose-500">*</span>
               </label>
               <input
+                ref={currentQuantityRef}
                 type="number"
                 name="currentQuantity"
                 value={formData.currentQuantity}
                 onChange={handleChange}
                 placeholder="0"
-                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
+                className={`w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-1 ${
+                  currentQuantityError
+                    ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500"
+                    : "border-gray-200 focus:border-emerald-600 focus:ring-emerald-600"
+                }`}
               />
+              {currentQuantityError && (
+                <p className="mt-1.5 text-xs text-rose-500">{currentQuantityError}</p>
+              )}
             </div>
 
             <div>
@@ -243,13 +333,21 @@ function AddInventoryItem() {
                 Minimum Stock Level <span className="text-rose-500">*</span>
               </label>
               <input
+                ref={minimumStockLevelRef}
                 type="number"
                 name="minimumStockLevel"
                 value={formData.minimumStockLevel}
                 onChange={handleChange}
                 placeholder="30"
-                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
+                className={`w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-1 ${
+                  minimumStockLevelError
+                    ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500"
+                    : "border-gray-200 focus:border-emerald-600 focus:ring-emerald-600"
+                }`}
               />
+              {minimumStockLevelError && (
+                <p className="mt-1.5 text-xs text-rose-500">{minimumStockLevelError}</p>
+              )}
             </div>
 
             <div>
@@ -272,11 +370,16 @@ function AddInventoryItem() {
               </label>
               <div className="relative">
                 <select
+                  ref={unitOfMeasureRef}
                   name="unitOfMeasure"
                   value={formData.unitOfMeasure}
                   onChange={handleChange}
                   disabled={optionsLoading}
-                  className="w-full appearance-none rounded-lg border border-gray-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 disabled:opacity-50"
+                  className={`w-full appearance-none rounded-lg border bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:ring-1 ${
+                    unitOfMeasureError
+                      ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500"
+                      : "border-gray-200 focus:border-emerald-600 focus:ring-emerald-600"
+                  } disabled:opacity-50`}
                 >
                   <option value="">Select Unit</option>
                   {unitsOfMeasure.map((unit) => (
@@ -285,6 +388,9 @@ function AddInventoryItem() {
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
               </div>
+              {unitOfMeasureError && (
+                <p className="mt-1.5 text-xs text-rose-500">{unitOfMeasureError}</p>
+              )}
             </div>
 
             <div>

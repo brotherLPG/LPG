@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { useCreateEmployee, useEmployeeFormOptions } from "../../queries/employees/employees.queries";
@@ -10,6 +10,15 @@ function AddEmployee() {
   const [isActive, setIsActive] = useState(true);
   const createMutation = useCreateEmployee();
   const { data: formOptions, isLoading: optionsLoading } = useEmployeeFormOptions();
+
+  // Refs for required fields
+  const fullNameRef = useRef(null);
+  const phoneNumberRef = useRef(null);
+
+  // Error states
+  const [fullNameError, setFullNameError] = useState("");
+  const [phoneNumberError, setPhoneNumberError] = useState("");
+
   const [formData, setFormData] = useState({
     fullName: "",
     fatherHusbandName: "",
@@ -29,10 +38,37 @@ function AddEmployee() {
 
   const handleInputChange = (field, value) => {
     setFormData((previous) => ({ ...previous, [field]: value }));
+
+    // Clear errors on change
+    if (field === 'fullName') setFullNameError("");
+    if (field === 'phoneNumber') setPhoneNumberError("");
+  };
+
+  const validateForm = () => {
+    let hasError = false;
+
+    if (!formData.fullName.trim() || formData.fullName.trim().length < 2) {
+      setFullNameError("Full name must contain at least 2 characters");
+      fullNameRef.current?.focus();
+      hasError = true;
+    }
+
+    if (!formData.phoneNumber.trim()) {
+      setPhoneNumberError("Phone number is required");
+      if (!hasError) phoneNumberRef.current?.focus();
+      hasError = true;
+    }
+
+    return !hasError;
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     try {
       await createMutation.mutateAsync({
         fullName: formData.fullName,
@@ -54,7 +90,12 @@ function AddEmployee() {
       toast.success("Employee created successfully!");
       navigate("/employees");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to create employee. Please try again.");
+      const firstError = error?.response?.data?.errors?.[0];
+      const mainMessage = error?.response?.data?.message;
+      const errorMessage = firstError
+        ? `${firstError.path}: ${firstError.message}`
+        : mainMessage || "Failed to create employee. Please try again.";
+      toast.error(errorMessage);
     }
   };
 
@@ -116,12 +157,20 @@ function AddEmployee() {
                   Full Name <span className="text-rose-500">*</span>
                 </label>
                 <input
+                  ref={fullNameRef}
                   type="text"
                   value={formData.fullName}
                   onChange={(event) => handleInputChange("fullName", event.target.value)}
                   placeholder="Enter legal full name"
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                    fullNameError
+                      ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                      : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                  }`}
                 />
+                {fullNameError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{fullNameError}</p>
+                )}
               </div>
 
               <div>
@@ -295,12 +344,20 @@ function AddEmployee() {
                 Phone Number <span className="text-rose-500">*</span>
               </label>
               <input
+                ref={phoneNumberRef}
                 type="text"
                 value={formData.phoneNumber}
                 onChange={(event) => handleInputChange("phoneNumber", event.target.value)}
                 placeholder="e.g. 0300-5550011"
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                  phoneNumberError
+                    ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                    : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                }`}
               />
+              {phoneNumberError && (
+                <p className="mt-1.5 text-xs text-rose-500">{phoneNumberError}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2, ChevronDown } from "lucide-react";
 import { useToast } from "../../utils/GlobalToast";
@@ -17,6 +17,18 @@ function ReceiveLpg() {
   const [supplierInvoice, setSupplierInvoice] = useState("");
   const [receivedAt, setReceivedAt] = useState("");
   const [remarks, setRemarks] = useState("");
+
+  // Refs for required fields
+  const supplierIdRef = useRef(null);
+  const quantityRef = useRef(null);
+  const truckRegRef = useRef(null);
+  const supplierInvoiceRef = useRef(null);
+
+  // Error states
+  const [supplierIdError, setSupplierIdError] = useState("");
+  const [quantityError, setQuantityError] = useState("");
+  const [truckRegError, setTruckRegError] = useState("");
+  const [supplierInvoiceError, setSupplierInvoiceError] = useState("");
 
   const toast = useToast();
   const createMutation = useCreateLpgReceipt();
@@ -39,8 +51,54 @@ function ReceiveLpg() {
   const totalCost = (parseFloat(quantity || 0) * parseFloat(rate || 0)).toLocaleString();
   const formattedQuantity = parseFloat(quantity || 0).toLocaleString();
 
+  const clearError = (setErrorFn) => {
+    setErrorFn("");
+  };
+
+  const validateForm = () => {
+    let hasError = false;
+
+    if (!supplierId) {
+      setSupplierIdError("Supplier is required");
+      supplierIdRef.current?.focus();
+      hasError = true;
+    } else {
+      setSupplierIdError("");
+    }
+
+    if (!quantity || parseFloat(quantity) <= 0) {
+      setQuantityError("Received quantity must be greater than 0");
+      if (!hasError) quantityRef.current?.focus();
+      hasError = true;
+    } else {
+      setQuantityError("");
+    }
+
+    if (!truckReg.trim() || truckReg.trim().length < 3) {
+      setTruckRegError("Truck registration must contain at least 3 characters");
+      if (!hasError) truckRegRef.current?.focus();
+      hasError = true;
+    } else {
+      setTruckRegError("");
+    }
+
+    if (!supplierInvoice.trim() || supplierInvoice.trim().length < 2) {
+      setSupplierInvoiceError("Supplier invoice must contain at least 2 characters");
+      if (!hasError) supplierInvoiceRef.current?.focus();
+      hasError = true;
+    } else {
+      setSupplierInvoiceError("");
+    }
+
+    return !hasError;
+  };
+
    const handleSubmit = async (e) => {
      e.preventDefault();
+
+     if (!validateForm()) {
+       return;
+     }
 
  const payload = {
    supplierId,
@@ -62,9 +120,10 @@ function ReceiveLpg() {
    navigate("/lpg-receipts");
  } catch (err) {
    const firstError = err?.response?.data?.errors?.[0];
+   const mainMessage = err?.response?.data?.message;
    const errorMessage = firstError
      ? `${firstError.path}: ${firstError.message}`
-     : "Failed to create LPG receipt. Please try again.";
+     : mainMessage || "Failed to create LPG receipt. Please try again.";
    toast.error(errorMessage);
  }
    };
@@ -128,9 +187,17 @@ function ReceiveLpg() {
                 </label>
                 <div className="relative">
                   <select
+                      ref={supplierIdRef}
                       value={supplierId}
-                      onChange={(e) => setSupplierId(e.target.value)}
-                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                      onChange={(e) => {
+                        setSupplierId(e.target.value);
+                        clearError(setSupplierIdError);
+                      }}
+                      className={`w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:ring-2 ${
+                        supplierIdError
+                          ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                          : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                      }`}
                     >
                       <option value="">Select Supplier</option>
                       {suppliers.map((s) => (
@@ -139,6 +206,9 @@ function ReceiveLpg() {
                     </select>
                   <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 </div>
+                {supplierIdError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{supplierIdError}</p>
+                )}
               </div>
 
               <div>
@@ -146,13 +216,24 @@ function ReceiveLpg() {
                   Truck Registration Number <span className="text-rose-500">*</span>
                 </label>
                 <input
+                  ref={truckRegRef}
                   type="text"
                   // defaultValue="LEA-4521"
                   value={truckReg}
-                  onChange={(e) => setTruckReg(e.target.value)}
+                  onChange={(e) => {
+                    setTruckReg(e.target.value);
+                    clearError(setTruckRegError);
+                  }}
                   placeholder="LEA-4521"
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                    truckRegError
+                      ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                      : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                  }`}
                 />
+                {truckRegError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{truckRegError}</p>
+                )}
               </div>
 
               <div>
@@ -160,13 +241,24 @@ function ReceiveLpg() {
                   Supplier Invoice Number <span className="text-rose-500">*</span>
                 </label>
                 <input
+                  ref={supplierInvoiceRef}
                   type="text"
                   // defaultValue="PP-INV-88421"
                   placeholder="PP-INV-88421"
                   value={supplierInvoice}
-                  onChange={(e) => setSupplierInvoice(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  onChange={(e) => {
+                    setSupplierInvoice(e.target.value);
+                    clearError(setSupplierInvoiceError);
+                  }}
+                  className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                    supplierInvoiceError
+                      ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                      : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                  }`}
                 />
+                {supplierInvoiceError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{supplierInvoiceError}</p>
+                )}
               </div>
             </div>
           </div>
@@ -203,11 +295,22 @@ function ReceiveLpg() {
                     Received Quantity (KG) <span className="text-rose-500">*</span>
                   </label>
                   <input
+                    ref={quantityRef}
                     type="number"
                     value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    onChange={(e) => {
+                      setQuantity(e.target.value);
+                      clearError(setQuantityError);
+                    }}
+                    className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                      quantityError
+                        ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                        : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                    }`}
                   />
+                  {quantityError && (
+                    <p className="mt-1.5 text-xs text-rose-500">{quantityError}</p>
+                  )}
                 </div>
 
                 <div>
