@@ -68,14 +68,14 @@ function CreateBatch({ mode = "create" }) {
       const residualValue = record.residualRecoveredKg;
       const actualValue = record.actualLpgUsedKg;
       setFormData({
-        storageTankId: record.storageTankId?._id || record.storageTankId || tankOption?._id || "",
-        cylinderTypeId: record.cylinderType?._id || record.cylinderTypeId || cylinderTypes[0]?._id || "",
+        storageTankId: record.storageTankId?._id || record.storageTankId || "",
+        cylinderTypeId: record.cylinderType?._id || record.cylinderTypeId || "",
         cylinderCount: String(record.cylinderCount || record.targetCylinderCount || "0"),
         targetFillWeightKg: String(record.targetFillWeightKg || "0"),
         residualRecoveredKg: residualValue != null && residualValue !== "" ? String(residualValue) : "",
         actualLpgUsedKg: actualValue != null && actualValue !== "" ? String(actualValue) : "",
         usageInputMode: residualValue != null && Number(residualValue) > 0 ? "residual" : actualValue != null ? "actual" : "",
-        operatorEmployeeId: record.operatorEmployeeId?._id || record.operatorEmployeeId || operatorOptions[0]?._id || "",
+        operatorEmployeeId: record.operatorEmployeeId?._id || record.operatorEmployeeId || "",
         fillingDate: record.fillingDate ? new Date(record.fillingDate).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
         batchStatus: record.batchStatus?.toLowerCase() || statuses[0]?.value || "pending",
         remarks: record.remarks || "",
@@ -83,21 +83,16 @@ function CreateBatch({ mode = "create" }) {
     }
   }, [batchData, cylinderTypes, isUpdateMode, operatorOptions, statuses, tankOption]);
 
+  const defaultsAppliedRef = useRef(false);
+
   useEffect(() => {
-       if (!formData.cylinderTypeId && cylinderTypes[0]?._id) {
-         setFormData((prev) => ({
-           ...prev,
-           cylinderTypeId: cylinderTypes[0]._id,
-           storageTankId: prev.storageTankId || tankOption?._id || "",
-           operatorEmployeeId:
-             prev.operatorEmployeeId || operatorOptions[0]?._id || "",
-           batchStatus: prev.batchStatus || statuses[0]?.value || "pending",
-           targetFillWeightKg:
-             prev.targetFillWeightKg ||
-             String(cylinderTypes[0].capacityKg || ""),
-         }));
-       }
-  }, [cylinderTypes, formData.cylinderTypeId, operatorOptions, statuses, tankOption]);
+    if (isUpdateMode || defaultsAppliedRef.current || !cylinderTypes.length) return;
+    defaultsAppliedRef.current = true;
+    setFormData((prev) => ({
+      ...prev,
+      batchStatus: prev.batchStatus || statuses[0]?.value || "pending",
+    }));
+  }, [cylinderTypes, isUpdateMode, operatorOptions, statuses, tankOption]);
 
   const currentTankLevel = Number(formOptions.tank?.currentQuantityKg) || 0;
   const tankCapacity = Number(formOptions.tank?.capacityKg) || 0;
@@ -354,7 +349,7 @@ function CreateBatch({ mode = "create" }) {
                         : "border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
                     }`}
                   >
-                    <option >Select Storage Tank</option>
+                    <option value="">Select Storage Tank</option>
                     {tankOptions.map((tank) => (
                       <option key={tank._id} value={tank._id}>{tank.displayName}</option>
                     ))}
