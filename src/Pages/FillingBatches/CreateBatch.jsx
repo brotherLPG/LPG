@@ -87,13 +87,19 @@ function CreateBatch({ mode = "create" }) {
 
   useEffect(() => {
     if (isUpdateMode || defaultsAppliedRef.current || !tankOption?._id) return;
+    const defaultOperator = operatorOptions.find((employee) => {
+      const fullName = String(employee.fullName || "").trim().toLowerCase();
+      const displayName = String(employee.displayName || "").trim().toLowerCase();
+      return fullName === "wahab noor" || displayName.startsWith("wahab noor");
+    });
     defaultsAppliedRef.current = true;
     setFormData((prev) => ({
       ...prev,
       storageTankId: prev.storageTankId || tankOption._id,
       batchStatus: "completed",
+      operatorEmployeeId: prev.operatorEmployeeId || defaultOperator?._id || "",
     }));
-  }, [isUpdateMode, tankOption]);
+  }, [isUpdateMode, operatorOptions, tankOption]);
 
   const currentTankLevel = Number(formOptions.tank?.currentQuantityKg) || 0;
   const tankCapacity = Number(formOptions.tank?.capacityKg) || 0;
