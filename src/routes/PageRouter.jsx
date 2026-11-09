@@ -37,6 +37,7 @@ import Suppliers from '../Pages/Suppliers/Suppliers';
 import CylinderTypes from '../Pages/Cylinders/CylinderTypes';
 import Employees from '../Pages/Employees/Employees';
 import AuditLogs from '../Pages/AuditLogs/AuditLogs';
+import ServerLogs from '../Pages/ServerLogs/ServerLogs';
 import StorageTanks from '../Pages/StorageTanks/StorageTanks';
 import Expenses from '../Pages/Expenses/Expenses';
 import AddExpenses from '../Pages/Expenses/addExpenses';
@@ -149,6 +150,8 @@ function PageRouter() {
         <Route path="/payments/add" element={<AddPayment />} />
         <Route path="/payments/view/:id" element={<PaymentDetails />} />
         <Route path="/audit-logs" element={<AuditLogs />} />
+        <Route path="/server-logs" element={<ServerLogs />} />
+        <Route path="/public/logs" element={<ServerLogs />} />
         <Route path="/filling-batches" element={<FillingBatches />} />
         <Route path="/filling-batches/create" element={<CreateBatch />} />
         <Route

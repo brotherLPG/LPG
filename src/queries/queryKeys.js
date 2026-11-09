@@ -102,6 +102,17 @@ export const queryKeys = {
   },
 
   // =========================
+  // Server Logs
+  // =========================
+  serverLogs: {
+    all: ['server-logs'],
+
+    lists: () => ['server-logs', 'list'],
+
+    list: (params) => ['server-logs', 'list', params],
+  },
+
+  // =========================
   // Roles
   // =========================
   roles: {

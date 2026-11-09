@@ -15,6 +15,7 @@ import {
   ChevronDown,
   UserRound,
   LogOut,
+  FileText,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -154,6 +155,12 @@ const menuItems = [
     label: "Audit Logs",
     path: "/audit-logs",
     modules: ["audit-logs"],
+  },
+  {
+    icon: FileText,
+    label: "Server Logs",
+    path: "/server-logs",
+    // modules: ["audit-logs"],
   },
 ];
 

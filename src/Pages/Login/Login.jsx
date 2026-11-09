@@ -196,6 +196,16 @@ function Login() {
                   Contact Administrator for Account Access
                 </button>
               </div>
+
+              <div className="mt-4 text-center">
+                <button
+                  type="button"
+                  onClick={() => navigate("/public/logs")}
+                  className="text-sm font-medium text-accent-blue hover:underline"
+                >
+                  View Server Logs
+                </button>
+              </div>
             </div>
 
             <div className="mt-3 text-center">

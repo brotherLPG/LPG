@@ -6,7 +6,7 @@ import Header from './components/Header'
 import PageRouter from './routes/PageRouter';
 import { ToastProvider } from './utils/GlobalToast';
 
-const PUBLIC_PATHS = ['/', '/registration'];
+const PUBLIC_PATHS = ['/', '/registration', '/public/logs'];
 
 function hasAuthTokens() {
   return Boolean(
