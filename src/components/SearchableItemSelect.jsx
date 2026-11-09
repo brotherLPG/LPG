@@ -18,6 +18,14 @@ function itemKind(item) {
   return "other";
 }
 
+const kindRank = { filled: 0, empty: 1, other: 2 };
+
+function sortFilledFirst(list) {
+  return [...list].sort(
+    (a, b) => (kindRank[itemKind(a)] ?? 2) - (kindRank[itemKind(b)] ?? 2)
+  );
+}
+
 const kindStyles = {
   empty: {
     row: "bg-yellow-200 text-yellow-950",
@@ -84,12 +92,14 @@ function SearchableItemSelect({
     items.find((item) => itemId(item) === String(value || "")) || null;
   const selectedKind = selected ? itemKind(selected) : "other";
 
+  const ordered = useMemo(() => sortFilledFirst(items), [items]);
+
   const filtered = useMemo(() => {
     const term = query.trim().toLowerCase();
-    if (!term) return items;
+    if (!term) return ordered;
 
-    return items.filter((item) => itemLabel(item).toLowerCase().includes(term));
-  }, [items, query]);
+    return ordered.filter((item) => itemLabel(item).toLowerCase().includes(term));
+  }, [ordered, query]);
 
   useEffect(() => {
     if (!open || !buttonRef.current) return undefined;
@@ -134,7 +144,7 @@ function SearchableItemSelect({
 
   const openMenu = () => {
     if (disabled) return;
-    const selectedIndex = items.findIndex((item) => itemId(item) === String(value || ""));
+    const selectedIndex = ordered.findIndex((item) => itemId(item) === String(value || ""));
     setQuery("");
     setHighlight(selectedIndex >= 0 ? selectedIndex : 0);
     if (buttonRef.current) setMenuStyle(placeMenu(buttonRef.current));
