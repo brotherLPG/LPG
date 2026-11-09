@@ -5,6 +5,7 @@ import { useSaleById, useUpdateSale, useGetSaleFormOptions } from "../../../quer
 import { useToast } from "../../../utils/GlobalToast";
 import SearchableCustomerSelect from "../../../components/SearchableCustomerSelect";
 import SearchableItemSelect from "../../../components/SearchableItemSelect";
+import { applyFilledCylinderPrices } from "../../../utils/cylinderPrice";
 
 function UpdateSales() {
   const navigate = useNavigate();
@@ -81,8 +82,8 @@ function UpdateSales() {
   };
 
   const updateLineItem = (id, field, value) => {
-    setLineItems((prev) =>
-      prev.map((item) => {
+    setLineItems((prev) => {
+      const next = prev.map((item) => {
         if (item.id !== id) return item;
 
         const updatedItem = { ...item, [field]: value };
@@ -93,8 +94,10 @@ function UpdateSales() {
           total: computed.total,
           rowSubtotal: computed.subtotal,
         };
-      })
-    );
+      });
+      if (field !== "unitPrice") return next;
+      return applyFilledCylinderPrices(next, inventoryItems, id, calculateRow);
+    });
   };
 
   const addLineItem = () => {
@@ -376,8 +379,8 @@ function UpdateSales() {
                               const product = selectedItem
                                 ? String(selectedItem._id || selectedItem.id)
                                 : "";
-                              setLineItems((prev) =>
-                                prev.map((lineItem) => {
+                              setLineItems((prev) => {
+                                const next = prev.map((lineItem) => {
                                   if (lineItem.id !== item.id) return lineItem;
                                   const updatedItem = { ...lineItem, product, unitPrice };
                                   const computed = calculateRow(updatedItem);
@@ -386,8 +389,15 @@ function UpdateSales() {
                                     total: computed.total,
                                     rowSubtotal: computed.subtotal,
                                   };
-                                })
-                              );
+                                });
+                                return applyFilledCylinderPrices(
+                                  next,
+                                  inventoryItems,
+                                  item.id,
+                                  calculateRow,
+                                  "product"
+                                );
+                              });
                             }}
                           />
                         </td>
