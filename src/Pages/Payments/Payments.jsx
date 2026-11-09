@@ -1,4 +1,4 @@
-import { PlusCircle, Eye, ChevronDown, Loader } from "lucide-react";
+import { PlusCircle, Eye, ChevronDown, Loader, Printer } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Tooltip } from "@heroui/react";
@@ -7,11 +7,13 @@ import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useToast } from "../../utils/GlobalToast";
 import { useGetPayments, useDeletePayment } from "../../queries/payments/payments.queries";
 import { usePermissions } from "../../contexts/PermissionContext";
+import { usePrint } from "../../utils/usePrint";
 
 function Payments() {
   const navigate = useNavigate();
   const toast = useToast();
   const { can } = usePermissions();
+  const { printContent, getQRCodeImg } = usePrint();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [direction, setDirection] = useState("All");
@@ -81,6 +83,57 @@ function Payments() {
     });
   }, [paymentRecords]);
 
+
+  const handlePrintPayment = (item) => {
+    const qrData = [
+      `Voucher: ${item.voucherNo}`,
+      `Date: ${item.date}`,
+      `Party: ${item.party}`,
+      `Amount: ${item.amount}`,
+      `Method: ${item.method}`,
+      `Type: ${item.directionLabel}`,
+      `Status: ${item.status}`,
+    ].join('\n');
+
+    const statusClass = item.status === 'Recorded' ? 'active' : 'inactive';
+
+    const content = `
+      <!-- Top Row -->
+      <div class="receipt-top">
+        <div>
+          <p style="font-size: 15px; font-weight: 700; color: #1e293b; margin: 0;">
+            ${item.voucherNo}
+          </p>
+          <p style="font-size: 13px; color: #64748b; margin: 4px 0 0;">
+            ${item.date} &nbsp;•&nbsp; ${item.directionLabel}
+          </p>
+          <p style="margin: 8px 0 0;">
+            <span class="status-badge ${statusClass}">${item.status}</span>
+          </p>
+        </div>
+        ${getQRCodeImg(qrData)}
+      </div>
+
+      <!-- Payment Details -->
+      <div class="delivery-section">
+        <h3 style="font-size: 14px; color: #1e293b; margin-bottom: 4px;">Payment Details</h3>
+        <table class="spec-table">
+          <tr><th>Voucher No</th><td>${item.voucherNo}</td></tr>
+          <tr><th>Date</th><td>${item.date}</td></tr>
+          <tr><th>Party Name</th><td>${item.party}</td></tr>
+          <tr><th>Amount</th><td><strong>${item.amount}</strong></td></tr>
+          <tr><th>Payment Method</th><td>${item.method}</td></tr>
+          <tr><th>Direction</th><td>${item.directionLabel}</td></tr>
+          <tr><th>Status</th><td>${item.status}</td></tr>
+        </table>
+      </div>
+    `;
+
+    printContent({
+      title: `Payment Voucher - ${item.voucherNo}`,
+      content,
+    });
+  };
 
   const handleDeleteConfirm = async () => {
     if (deleteModal.item) {
@@ -199,6 +252,18 @@ function Payments() {
               </Tooltip.Content>
             </Tooltip>
           )}
+          <Tooltip delay={0}>
+            <Button
+              aria-label={`Print ${item.voucherNo}`}
+              onClick={() => handlePrintPayment(item)}
+              className="flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+            >
+              <Printer className="h-3.5 w-3.5" />
+            </Button>
+            <Tooltip.Content>
+              <p>Print Payment</p>
+            </Tooltip.Content>
+          </Tooltip>
           {/* <button
             type="button"
             aria-label={`Edit ${item.voucherNo}`}

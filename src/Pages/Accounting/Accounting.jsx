@@ -1,14 +1,16 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Eye, ChevronDown, Plus, Loader, Pencil } from "lucide-react";
+import { Search, Eye, ChevronDown, Plus, Loader, Pencil, Printer } from "lucide-react";
 import { Button, Tooltip } from "@heroui/react";
 import GlobalTable from "../../utils/GlobalTable";
 import { useGetAccounts, useAccountFormOptions } from "../../queries/accounts/accounts.queries";
 import { usePermissions } from "../../contexts/PermissionContext";
+import { usePrint } from "../../utils/usePrint";
 
 function Accounting() {
   const navigate = useNavigate();
   const { can } = usePermissions();
+  const { printContent, getQRCodeImg } = usePrint();
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [categoryFilter, setCategoryFilter] = useState("All");
@@ -47,6 +49,61 @@ function Accounting() {
       accountId: account._id,
     }));
   }, [accountRecords]);
+
+  const handlePrintAccount = (item) => {
+    const qrData = [
+      `Account: ${item.name} (${item.id})`,
+      `Bank: ${item.bank}`,
+      `Branch: ${item.branch}`,
+      `Type: ${item.accountType}`,
+      `Category: ${item.category}`,
+      `Opening Balance: Rs. ${item.openingBalance.toLocaleString()}`,
+      `Current Balance: Rs. ${item.currentBalance.toLocaleString()}`,
+      `Status: ${item.status}`,
+    ].join('\n');
+
+    const statusClass = item.status === 'Active' ? 'active' : 'inactive';
+
+    const content = `
+      <!-- Top Row -->
+      <div class="receipt-top">
+        <div>
+          <p style="font-size: 15px; font-weight: 700; color: #1e293b; margin: 0;">
+            ${item.name}
+          </p>
+          <p style="font-size: 13px; color: #64748b; margin: 4px 0 0;">
+            Account Code: <strong style="color: #1e293b;">${item.id}</strong>
+            &nbsp;•&nbsp; ${item.bank}
+          </p>
+          <p style="margin: 8px 0 0;">
+            <span class="status-badge ${statusClass}">${item.status}</span>
+          </p>
+        </div>
+        ${getQRCodeImg(qrData)}
+      </div>
+
+      <!-- Account Details -->
+      <div class="delivery-section">
+        <h3 style="font-size: 14px; color: #1e293b; margin-bottom: 4px;">Account Details</h3>
+        <table class="spec-table">
+          <tr><th>Account Code</th><td>${item.id}</td></tr>
+          <tr><th>Account Name</th><td>${item.name}</td></tr>
+          <tr><th>Bank</th><td>${item.bank}</td></tr>
+          <tr><th>Branch</th><td>${item.branch}</td></tr>
+          <tr><th>Account Type</th><td>${item.accountType}</td></tr>
+          <tr><th>Category</th><td>${item.category}</td></tr>
+          <tr><th>Opening Balance</th><td>Rs. ${item.openingBalance.toLocaleString()}</td></tr>
+          <tr><th>Current Balance</th><td><strong>Rs. ${item.currentBalance.toLocaleString()}</strong></td></tr>
+          <tr><th>Status</th><td>${item.status}</td></tr>
+        </table>
+      </div>
+    `;
+
+    printContent({
+      title: `Account - ${item.name}`,
+      content,
+    });
+  };
 
   const columns = [
     {
@@ -156,6 +213,18 @@ function Accounting() {
               </Tooltip.Content>
             </Tooltip>
           )}
+          <Tooltip delay={0}>
+            <Button
+              aria-label={`Print ${item.name}`}
+              onClick={() => handlePrintAccount(item)}
+              className="flex items-center gap-1.5 rounded-full bg-slate-50/70 border border-slate-200/60 px-3 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+            >
+              <Printer className="h-3.5 w-3.5" />
+            </Button>
+            <Tooltip.Content>
+              <p>Print Account</p>
+            </Tooltip.Content>
+          </Tooltip>
         </div>
       ),
     },

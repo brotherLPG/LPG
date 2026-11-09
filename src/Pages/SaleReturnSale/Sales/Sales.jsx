@@ -1,15 +1,17 @@
 import { useState } from "react";
-import { Search, CirclePlus, ArrowLeft, Eye, Edit3 } from "lucide-react";
+import { Search, CirclePlus, ArrowLeft, Eye, Edit3, Printer } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button, Tooltip } from "@heroui/react";
 import GlobalTable from "../../../utils/GlobalTable";
 import { useGetSaleFormOptions, useSales } from "../../../queries/sales/sales.queries";
 import Returnsales from "../ReturnSales/Returnsales";
 import { usePermissions } from "../../../contexts/PermissionContext";
+import { usePrint } from "../../../utils/usePrint";
 
 function Sales() {
   const navigate = useNavigate();
   const { can } = usePermissions();
+  const { printContent, getQRCodeImg } = usePrint();
   // const [activeTab, setActiveTab] = useState("sales");
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "sales";
@@ -66,6 +68,65 @@ function Sales() {
     totalCount: summary.todaySalesCount,
     cashCount: summary.cashSalesCount,
     creditCount: summary.creditSalesCount,
+  };
+
+  const handlePrintSale = (item) => {
+    const saleDate = new Date(item.invoiceDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    const qrData = [
+      `Sale: ${item.saleNumber}`,
+      `Invoice: ${item.invoiceNumber || 'N/A'}`,
+      `Customer: ${item.customerName}`,
+      `Type: ${item.saleTypeLabel}`,
+      `Amount: PKR ${item.totalAmount?.toLocaleString()}`,
+      `Paid: PKR ${item.paidAmount?.toLocaleString() || 0}`,
+      `Date: ${saleDate}`,
+      `Payment Status: ${item.paymentStatusLabel}`,
+      `Sale Status: ${item.saleStatusLabel}`,
+    ].join('\n');
+
+    const statusClass = item.paymentStatusLabel === 'Paid' ? 'active' : 'inactive';
+
+    const content = `
+      <!-- Top Row -->
+      <div class="receipt-top">
+        <div>
+          <p style="font-size: 15px; font-weight: 700; color: #1e293b; margin: 0;">
+            ${item.saleNumber}
+          </p>
+          <p style="font-size: 13px; color: #64748b; margin: 4px 0 0;">
+            Invoice: <strong style="color: #1e293b;">${item.invoiceNumber || 'N/A'}</strong>
+            &nbsp;•&nbsp; ${item.customerName}
+          </p>
+          <p style="margin: 8px 0 0;">
+            <span class="status-badge ${statusClass}">${item.paymentStatusLabel}</span>
+          </p>
+        </div>
+        ${getQRCodeImg(qrData)}
+      </div>
+
+      <!-- Sale Details -->
+      <div class="delivery-section">
+        <h3 style="font-size: 14px; color: #1e293b; margin-bottom: 4px;">Sale Details</h3>
+        <table class="spec-table">
+          <tr><th>Sale Number</th><td>${item.saleNumber}</td></tr>
+          <tr><th>Invoice Number</th><td>${item.invoiceNumber || 'N/A'}</td></tr>
+          <tr><th>Customer</th><td>${item.customerName}</td></tr>
+          <tr><th>Sale Type</th><td>${item.saleTypeLabel}</td></tr>
+          <tr><th>Items</th><td>${item.itemCount}</td></tr>
+          <tr><th>Total Amount</th><td><strong>PKR ${item.totalAmount?.toLocaleString()}</strong></td></tr>
+          <tr><th>Paid Amount</th><td>PKR ${(item.paidAmount || 0).toLocaleString()}</td></tr>
+          <tr><th>Returned Amount</th><td>PKR ${(item.returnedAmount || 0).toLocaleString()}</td></tr>
+          <tr><th>Date</th><td>${saleDate}</td></tr>
+          <tr><th>Payment Status</th><td>${item.paymentStatusLabel}</td></tr>
+          <tr><th>Sale Status</th><td>${item.saleStatusLabel}</td></tr>
+        </table>
+      </div>
+    `;
+
+    printContent({
+      title: `Sale - ${item.saleNumber}`,
+      content,
+    });
   };
 
   // Column definitions for sales table
@@ -257,6 +318,18 @@ function Sales() {
               </Tooltip.Content>
             </Tooltip>
           )}
+          <Tooltip delay={0}>
+            <Button
+              onClick={() => handlePrintSale(item)}
+              aria-label={`Print ${item.saleNumber}`}
+              className="text-slate-500 hover:text-slate-700 transition-colors bg-transparent min-w-0 px-1"
+            >
+              <Printer className="h-4 w-4" strokeWidth={2.5} />
+            </Button>
+            <Tooltip.Content>
+              <p>Print Sale</p>
+            </Tooltip.Content>
+          </Tooltip>
         </div>
       ),
     },
