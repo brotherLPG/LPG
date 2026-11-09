@@ -18,7 +18,7 @@ function UpdateSales() {
   const [invoiceDate, setInvoiceDate] = useState("");
   const [paymentTermDays, setPaymentTermDays] = useState(0);
   const [remarks, setRemarks] = useState("");
-  const [saleType, setSaleType] = useState("");
+  const [saleType, setSaleType] = useState("cash");
   const [paymentAccountId, setPaymentAccountId] = useState("");
   // const [paymentMethod, setPaymentMethod] = useState("cash");
   const [referenceNumber, setReferenceNumber] = useState("");
@@ -47,7 +47,7 @@ function UpdateSales() {
       setInvoiceDate(sale.invoiceDate?.split('T')[0] || "");
       setPaymentTermDays(sale.paymentTermDays || 0);
       setRemarks(sale.remarks || "");
-      setSaleType(sale.saleType || "");
+      setSaleType(sale.paymentMethod || "cash");
       setAmountPaid(sale.paidAmount || 0);
 
       if (sale.lineItems && sale.lineItems.length > 0) {
@@ -488,7 +488,7 @@ function UpdateSales() {
                     setAmountPaid(Math.min(Math.max(0, value), totals.grandTotal));
                   }}
                   placeholder="0"
-                  className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951] text-right"
+                  className="w-40 shrink-0 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951] text-right"
                 />
               </div>
 

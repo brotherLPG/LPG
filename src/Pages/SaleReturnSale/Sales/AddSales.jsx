@@ -28,7 +28,7 @@ function AddSales() {
   const [paymentTermDays, setPaymentTermDays] = useState(0);
   const [remarks, setRemarks] = useState("");
   const [referenceNumber, setReferenceNumber] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState('cash')
 
   // const [saveAsDraft, setSaveAsDraft] = useState(false);
 
@@ -596,7 +596,7 @@ function AddSales() {
                     setAmountPaid(Math.min(Math.max(0, value), totals.grandTotal));
                   }}
                   placeholder="0"
-                  className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951] text-right"
+                  className="w-40 shrink-0 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951] text-right"
                 />
               </div>
               {selectedCustomer && totals.grandTotal > 0 && (
