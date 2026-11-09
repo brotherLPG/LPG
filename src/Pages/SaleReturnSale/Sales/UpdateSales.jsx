@@ -3,6 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import { useSaleById, useUpdateSale, useGetSaleFormOptions } from "../../../queries/sales/sales.queries";
 import { useToast } from "../../../utils/GlobalToast";
+import SearchableCustomerSelect from "../../../components/SearchableCustomerSelect";
+import SearchableItemSelect from "../../../components/SearchableItemSelect";
 
 function UpdateSales() {
   const navigate = useNavigate();
@@ -266,23 +268,11 @@ function UpdateSales() {
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Customer <span className="text-rose-500">*</span>
                   </label>
-                  <div className="relative">
-                    <select
-                      value={customerId}
-                      // disabled
-                      onChange={(e) => setCustomerId(e.target.value)}
-                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                    >
-                      <option value="">Select customer</option>
-                      {customers.map((customer) => (
-                        <option key={customer._id} value={customer._id}>
-                          {customer.label ||
-                            `${customer.customerCode} - ${customer.customerName}`}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                  </div>
+                  <SearchableCustomerSelect
+                    customers={customers}
+                    value={customerId}
+                    onChange={(customer) => setCustomerId(customer?._id || "")}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
@@ -377,17 +367,19 @@ function UpdateSales() {
                     return (
                       <tr key={item.id} className="border-b border-slate-100 last:border-b-0">
                         <td className="px-2 py-2">
-                          <select
+                          <SearchableItemSelect
+                            items={inventoryItems}
                             value={item.product}
-                            onChange={(e) => {
-                              const selectedItem = inventoryItems.find(
-                                (inv) => String(inv._id || inv.id) === e.target.value
-                              );
+                            placeholder="Select"
+                            onChange={(selectedItem) => {
                               const unitPrice = selectedItem?.unitPriceAmount || 0;
+                              const product = selectedItem
+                                ? String(selectedItem._id || selectedItem.id)
+                                : "";
                               setLineItems((prev) =>
                                 prev.map((lineItem) => {
                                   if (lineItem.id !== item.id) return lineItem;
-                                  const updatedItem = { ...lineItem, product: e.target.value, unitPrice };
+                                  const updatedItem = { ...lineItem, product, unitPrice };
                                   const computed = calculateRow(updatedItem);
                                   return {
                                     ...updatedItem,
@@ -397,18 +389,7 @@ function UpdateSales() {
                                 })
                               );
                             }}
-                            className="w-56 max-w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-700 outline-none focus:border-[#008951]"
-                          >
-                            <option value="">Select</option>
-                            {inventoryItems.map((inv) => {
-                              const itemId = String(inv._id || inv.id);
-                              return (
-                                <option key={itemId} value={itemId}>
-                                  {`${inv.itemName}`} (Stock: {inv.currentQuantity})
-                                </option>
-                              );
-                            })}
-                          </select>
+                          />
                         </td>
                         <td className="px-2 py-2">
                           <input
