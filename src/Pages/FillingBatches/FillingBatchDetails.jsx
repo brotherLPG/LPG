@@ -91,13 +91,43 @@ function FillingBatchDetails() {
 
                 <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
                     <h2 className="border-b border-slate-100 px-4 py-3 text-base font-bold text-slate-800">Filling Details</h2>
-                    <dl className="grid gap-5 p-5 sm:grid-cols-2">
-                        <DetailItem label="Cylinder Type" value={batch.cylinderTypeName || cylinderType?.typeName} />
-                        <DetailItem label="Cylinder Quantity" value={batch.cylinderCount ? `${Number(batch.cylinderCount).toLocaleString()} Cylinders` : undefined} />
-                        <DetailItem label="Target Fill Weight" value={batch.targetFillWeightKg ? `${Number(batch.targetFillWeightKg).toLocaleString()} KG` : undefined} />
-                        <DetailItem label="Residual Recovered" value={`${Number(batch.residualRecoveredKg || 0).toLocaleString()} KG`} />
-                        <DetailItem label="Actual LPG Used" value={batch.actualLpgUsedKg != null ? `${Number(batch.actualLpgUsedKg).toLocaleString()} KG` : undefined} />
-                    </dl>
+                    <div className="p-5">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-sm">
+                                <thead>
+                                    <tr className="text-xs font-semibold text-slate-400">
+                                        <th className="pb-2 pr-3 font-semibold">Cylinder Type</th>
+                                        <th className="pb-2 pr-3 font-semibold">Qty</th>
+                                        <th className="pb-2 pr-3 font-semibold">Fill / Cyl</th>
+                                        <th className="pb-2 pr-3 font-semibold">Residual</th>
+                                        <th className="pb-2 font-semibold">LPG Used</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {(Array.isArray(batch.lines) && batch.lines.length ? batch.lines : [{
+                                        cylinderTypeName: batch.cylinderTypeName || cylinderType?.typeName,
+                                        cylinderCount: batch.cylinderCount,
+                                        targetFillWeightKg: batch.targetFillWeightKg,
+                                        residualRecoveredKg: batch.residualRecoveredKg,
+                                        actualLpgUsedKg: batch.actualLpgUsedKg,
+                                    }]).map((line, index) => (
+                                        <tr key={`${line.cylinderTypeId || index}`} className="border-t border-slate-100 text-slate-700">
+                                            <td className="py-2 pr-3">{line.cylinderTypeName || line.cylinderType?.typeName || "-"}</td>
+                                            <td className="py-2 pr-3">{Number(line.cylinderCount || 0).toLocaleString()}</td>
+                                            <td className="py-2 pr-3">{Number(line.targetFillWeightKg || 0).toLocaleString()} KG</td>
+                                            <td className="py-2 pr-3">{Number(line.residualRecoveredKg || 0).toLocaleString()} KG</td>
+                                            <td className="py-2">{Number(line.actualLpgUsedKg || 0).toLocaleString()} KG</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        <dl className="mt-4 grid gap-5 border-t border-slate-100 pt-4 sm:grid-cols-3">
+                            <DetailItem label="Total Cylinders" value={batch.cylinderCount ? `${Number(batch.cylinderCount).toLocaleString()} Cylinders` : undefined} />
+                            <DetailItem label="Residual Recovered" value={`${Number(batch.residualRecoveredKg || 0).toLocaleString()} KG`} />
+                            <DetailItem label="Actual LPG Used" value={batch.actualLpgUsedKg != null ? `${Number(batch.actualLpgUsedKg).toLocaleString()} KG` : undefined} />
+                        </dl>
+                    </div>
                 </section>
 
                 <section className="rounded-lg border border-slate-200 bg-white shadow-sm lg:col-span-2">
