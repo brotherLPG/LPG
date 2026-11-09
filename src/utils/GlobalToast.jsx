@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { AlertCircle, CheckCircle, Info, X, XCircle } from "lucide-react";
+
+const DEFAULT_TOAST_DURATION = 15000;
 
 const ToastContext = createContext();
 
@@ -14,7 +16,7 @@ export const useToast = () => {
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
-  const addToast = useCallback((message, type = "info", duration = 0) => {
+  const addToast = useCallback((message, type = "info", duration = DEFAULT_TOAST_DURATION) => {
     const id = Date.now();
     const toast = { id, message, type, duration };
     
@@ -63,7 +65,13 @@ const ToastContainer = ({ toasts, onRemove }) => {
 };
 
 const Toast = ({ toast, onRemove }) => {
-  const { id, message, type } = toast;
+  const { id, message, type, duration = DEFAULT_TOAST_DURATION } = toast;
+
+  useEffect(() => {
+    if (!duration) return undefined;
+    const timer = setTimeout(() => onRemove(id), duration);
+    return () => clearTimeout(timer);
+  }, [id, duration, onRemove]);
 
   const icons = {
     success: <CheckCircle className="h-5 w-5 text-green-500" />,

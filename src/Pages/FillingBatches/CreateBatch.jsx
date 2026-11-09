@@ -58,7 +58,7 @@ function CreateBatch({ mode = "create" }) {
     usageInputMode: "",
     operatorEmployeeId: "",
     fillingDate: new Date().toISOString().slice(0, 10),
-    batchStatus: "pending",
+    batchStatus: "completed",
     remarks: "",
   });
 
@@ -86,13 +86,14 @@ function CreateBatch({ mode = "create" }) {
   const defaultsAppliedRef = useRef(false);
 
   useEffect(() => {
-    if (isUpdateMode || defaultsAppliedRef.current || !cylinderTypes.length) return;
+    if (isUpdateMode || defaultsAppliedRef.current || !tankOption?._id) return;
     defaultsAppliedRef.current = true;
     setFormData((prev) => ({
       ...prev,
-      batchStatus: prev.batchStatus || statuses[0]?.value || "pending",
+      storageTankId: prev.storageTankId || tankOption._id,
+      batchStatus: "completed",
     }));
-  }, [cylinderTypes, isUpdateMode, operatorOptions, statuses, tankOption]);
+  }, [isUpdateMode, tankOption]);
 
   const currentTankLevel = Number(formOptions.tank?.currentQuantityKg) || 0;
   const tankCapacity = Number(formOptions.tank?.capacityKg) || 0;
@@ -118,6 +119,13 @@ function CreateBatch({ mode = "create" }) {
   const handleFieldChange = (field, value) => {
     setFormData((prev) => {
       const next = { ...prev, [field]: value };
+
+      if (field === "cylinderTypeId") {
+        const type = cylinderTypes.find((item) => String(item._id) === String(value));
+        const weight = type?.capacityKg;
+        next.targetFillWeightKg = weight != null && weight !== "" ? String(weight) : "";
+      }
+
       const expected = roundKg((Number(next.cylinderCount) || 0) * (Number(next.targetFillWeightKg) || 0));
 
       if (field === "residualRecoveredKg") {
@@ -380,6 +388,7 @@ function CreateBatch({ mode = "create" }) {
                     onChange={(e) => {
                       handleFieldChange("cylinderTypeId", e.target.value);
                       clearError(setCylinderTypeIdError);
+                      clearError(setTargetFillWeightKgError);
                     }}
                     className={`w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2.5 text-sm text-slate-700 outline-none focus:ring-1 ${
                       cylinderTypeIdError
