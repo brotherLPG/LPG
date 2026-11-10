@@ -1,7 +1,3 @@
-function sameKg(a, b) {
-  return Math.abs(Number(a) - Number(b)) < 0.001;
-}
-
 export function itemCapacityKg(item) {
   const fromField = Number(item?.capacityKg);
   if (fromField > 0) return fromField;
@@ -26,12 +22,7 @@ export function isEmptyCylinder(item) {
 function priceGroup(item) {
   if (isEmptyCylinder(item)) return "empty";
   if (!isFilledCylinder(item)) return "";
-  const category = String(item?.cylinderCategory || "").toLowerCase();
-  if (category) return `filled:${category}`;
-  const kg = itemCapacityKg(item);
-  if (sameKg(kg, 11.8) || sameKg(kg, 15)) return "filled:domestic";
-  if (sameKg(kg, 35) || sameKg(kg, 45.4)) return "filled:commercial";
-  return kg > 0 ? "filled" : "";
+  return itemCapacityKg(item) > 0 ? "filled" : "";
 }
 
 function findInventoryItem(inventoryItems, productId) {
@@ -66,8 +57,8 @@ function withRowTotals(item, calculateRow) {
 /**
  * The first cylinder in a price group sets the rate per kg.
  * Later cylinders in that group get unit price = rate × their kg.
- * Filled domestic (11.8, 15) and filled commercial (35, 45.4) stay on
- * separate rates. Every empty cylinder shares one rate, separate from filled.
+ * Every filled size (11.8, 15, 35, 45.4) shares one rate.
+ * Every empty cylinder shares one rate, separate from filled.
  * A later line keeps a hand-typed price until the source price changes,
  * or until that line's item is selected again.
  * mode "price": the user edited a unit price.
