@@ -14,6 +14,10 @@ function ViewSales() {
     return `PKR ${Number(amount || 0).toLocaleString()}`;
   };
 
+  const outstandingAmount = Number(sale?.outstandingAmount) || 0;
+  const invoiceCredit = outstandingAmount < 0 ? Math.abs(outstandingAmount) : 0;
+  const amountStillDue = outstandingAmount > 0 ? outstandingAmount : 0;
+
   if (isLoadingSale) {
     return (
       <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
@@ -247,10 +251,18 @@ function ViewSales() {
                   {formatCurrency(sale?.returnedAmount)}
                 </span>
               </div>
+              {invoiceCredit > 0 && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-slate-600">Customer Credit</span>
+                  <span className="text-sm font-medium text-emerald-600">
+                    {formatCurrency(invoiceCredit)}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-600">Remaining Amount</span>
                 <span className="text-sm font-medium text-orange">
-                  {formatCurrency(sale?.outstandingAmount)}
+                  {formatCurrency(amountStillDue)}
                 </span>
               </div>
               <div className="flex justify-between items-center">

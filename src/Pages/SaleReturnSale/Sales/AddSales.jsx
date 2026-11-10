@@ -133,7 +133,11 @@ function AddSales() {
     { subtotal: 0, discount: 0, grandTotal: 0 }
   );
 
-  const outstanding = totals.grandTotal - amountPaid;
+  const roundMoney = (value) =>
+    Math.round((Number(value) + Number.EPSILON) * 100) / 100;
+  const outstanding = roundMoney(totals.grandTotal - (Number(amountPaid) || 0));
+  const invoiceCredit = outstanding < 0 ? roundMoney(-outstanding) : 0;
+  const amountStillDue = outstanding > 0 ? outstanding : 0;
 
   // Negative customer outstanding = available credit to apply against this sale
   const customerOutstandingBalance = Number(selectedCustomer?.outstanding) || 0;
@@ -141,19 +145,23 @@ function AddSales() {
     customerOutstandingBalance < 0 ? Math.abs(customerOutstandingBalance) : 0;
   const expectedReceivedAmount = Math.max(
     0,
-    totals.grandTotal - customerCreditAvailable
+    roundMoney(totals.grandTotal - customerCreditAvailable)
   );
 
   const getPaymentStatus = () => {
-    if (totals.grandTotal === outstanding) {
-      return "Unpaid";
+    if (invoiceCredit > 0) {
+      return "Refund Due";
     }
 
-    if (outstanding === 0) {
+    if (amountStillDue === 0 && Number(amountPaid) > 0) {
       return "Paid";
     }
 
-    return "Partially Paid";
+    if (Number(amountPaid) > 0) {
+      return "Partially Paid";
+    }
+
+    return "Unpaid";
   };
 
   const paymentStatus = getPaymentStatus();
@@ -600,34 +608,46 @@ function AddSales() {
                 <input
                   type="number"
                   min="0"
-                  max={totals.grandTotal}
                   value={amountPaid === 0 || amountPaid === "0" ? "" : amountPaid}
                   onChange={(e) => {
-                    const value = Number(e.target.value) || 0;
-                    setAmountPaid(Math.min(Math.max(0, value), totals.grandTotal));
+                    const raw = e.target.value;
+                    if (raw === "") {
+                      setAmountPaid(0);
+                      return;
+                    }
+                    const value = Number(raw);
+                    setAmountPaid(Number.isFinite(value) ? Math.max(0, value) : 0);
                   }}
                   placeholder="0"
                   className="w-40 shrink-0 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#008951] text-right"
                 />
               </div>
-              {selectedCustomer && totals.grandTotal > 0 && (
+              {selectedCustomer && totals.grandTotal > 0 && invoiceCredit <= 0 && (
                 <div className="rounded-md border border-blue-100 bg-blue-50 px-3 py-2">
                   <p className="text-xs text-slate-500">Expected Received Amount</p>
                   <p className="text-sm font-semibold text-accent-blue">
                     {formatCurrency(expectedReceivedAmount)}
                   </p>
                   <p className="mt-1 text-xs text-slate-500">
-                    Tip: you want to receive from customer{" "}
-                    <span className="font-medium text-slate-700">
-                      {Number(expectedReceivedAmount).toLocaleString()}
-                    </span>
+                    You can receive more than this. Extra cash is saved as customer credit on this invoice.
+                  </p>
+                </div>
+              )}
+              {invoiceCredit > 0 && (
+                <div className="rounded-md border border-emerald-100 bg-emerald-50 px-3 py-2">
+                  <p className="text-xs text-slate-500">Customer Credit</p>
+                  <p className="text-sm font-semibold text-emerald-700">
+                    {formatCurrency(invoiceCredit)}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    This extra stays on this invoice. Refund it from Payments, or it applies on the next sale.
                   </p>
                 </div>
               )}
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-600">Remaining Amount</span>
                 <span className="text-sm font-medium text-orange">
-                  Rs. {outstanding.toFixed(2)}
+                  Rs. {amountStillDue.toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -635,9 +655,11 @@ function AddSales() {
                 <span
                   className={`text-sm font-medium px-3 py-1 rounded-full ${paymentStatus === "Paid"
                     ? "bg-green-100 text-green-700"
-                    : paymentStatus === "Partially Paid"
-                      ? "bg-amber-100 text-amber-700"
-                      : "bg-rose-100 text-rose-700"
+                    : paymentStatus === "Refund Due"
+                      ? "bg-purple-100 text-purple-700"
+                      : paymentStatus === "Partially Paid"
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-rose-100 text-rose-700"
                     }`}
                 >
                   {paymentStatus}
