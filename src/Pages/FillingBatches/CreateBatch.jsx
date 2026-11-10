@@ -27,6 +27,49 @@ const emptyLine = (key) => ({
   usageInputMode: "",
 });
 
+// Saved batches always store both numbers. A first fill is residual 0 and
+// tank usage equal to the full expected fill. That pair was not typed, so the
+// edit form leaves the boxes empty. The same applies when both saved numbers
+// are just the cylinder size (45.4 and 45.4 on a 2 × 45.4 fill).
+const savedLineUsage = (line) => {
+  const count = Number(line.cylinderCount) || 0;
+  const weight = Number(line.targetFillWeightKg) || 0;
+  const expected = roundKg(count * weight);
+  const residualNum = line.residualRecoveredKg != null && line.residualRecoveredKg !== ""
+    ? Number(line.residualRecoveredKg)
+    : null;
+  const actualNum = line.actualLpgUsedKg != null && line.actualLpgUsedKg !== ""
+    ? Number(line.actualLpgUsedKg)
+    : null;
+  const firstFill = (residualNum == null || residualNum === 0)
+    && (actualNum == null || roundKg(actualNum) === expected);
+  const copiedCylinderWeight = weight > 0
+    && count > 1
+    && residualNum != null
+    && actualNum != null
+    && roundKg(residualNum) === roundKg(weight)
+    && roundKg(actualNum) === roundKg(weight);
+
+  if (firstFill || copiedCylinderWeight || residualNum == null) {
+    return { residualRecoveredKg: "", actualLpgUsedKg: "", usageInputMode: "" };
+  }
+  if (residualNum > 0) {
+    return {
+      residualRecoveredKg: String(residualNum),
+      actualLpgUsedKg: actualNum != null ? String(roundKg(actualNum)) : "",
+      usageInputMode: "residual",
+    };
+  }
+  if (actualNum != null && roundKg(actualNum) !== expected) {
+    return {
+      residualRecoveredKg: String(roundKg(Math.max(0, expected - actualNum))),
+      actualLpgUsedKg: String(roundKg(actualNum)),
+      usageInputMode: "actual",
+    };
+  }
+  return { residualRecoveredKg: "", actualLpgUsedKg: "", usageInputMode: "" };
+};
+
 function CreateBatch({ mode = "create" }) {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -36,6 +79,7 @@ function CreateBatch({ mode = "create" }) {
   const storageTankIdRef = useRef(null);
   const operatorEmployeeIdRef = useRef(null);
   const lineKeyRef = useRef(1);
+  const hydratedBatchIdRef = useRef("");
 
   const [storageTankIdError, setStorageTankIdError] = useState("");
   const [operatorEmployeeIdError, setOperatorEmployeeIdError] = useState("");
@@ -67,45 +111,43 @@ function CreateBatch({ mode = "create" }) {
   };
 
   useEffect(() => {
-    if (isUpdateMode && batchData?.data) {
-      const record = batchData.data;
-      const sourceLines = Array.isArray(record.lines) && record.lines.length
-        ? record.lines
-        : [{
-            cylinderTypeId: record.cylinderType?._id || record.cylinderTypeId || "",
-            cylinderCount: record.cylinderCount,
-            targetFillWeightKg: record.targetFillWeightKg,
-            residualRecoveredKg: record.residualRecoveredKg,
-            actualLpgUsedKg: record.actualLpgUsedKg,
-          }];
+    if (!isUpdateMode || !batchData?.data) return;
+    const record = batchData.data;
+    const batchId = String(record._id || id || "");
+    if (!batchId || hydratedBatchIdRef.current === batchId) return;
+    hydratedBatchIdRef.current = batchId;
 
-      setFormData({
-        storageTankId: record.tank?._id || record.storageTankId?._id || record.storageTankId || "",
-        lines: sourceLines.map((line) => {
-          const residualValue = line.residualRecoveredKg;
-          const actualValue = line.actualLpgUsedKg;
-          const typeId = line.cylinderType?._id || line.cylinderTypeId?._id || line.cylinderTypeId || "";
-          return {
-            key: nextLineKey(),
-            cylinderTypeId: typeId ? String(typeId) : "",
-            cylinderCount: line.cylinderCount != null ? String(line.cylinderCount) : "",
-            targetFillWeightKg: line.targetFillWeightKg != null ? String(line.targetFillWeightKg) : "",
-            residualRecoveredKg: residualValue != null && residualValue !== "" ? String(residualValue) : "",
-            actualLpgUsedKg: actualValue != null && actualValue !== "" ? String(actualValue) : "",
-            usageInputMode: residualValue != null && Number(residualValue) > 0
-              ? "residual"
-              : actualValue != null
-                ? "actual"
-                : "",
-          };
-        }),
-        operatorEmployeeId: record.operator?._id || record.operatorEmployeeId?._id || record.operatorEmployeeId || "",
-        fillingDate: record.fillingDate ? new Date(record.fillingDate).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
-        batchStatus: record.batchStatus?.toLowerCase() || statuses[0]?.value || "pending",
-        remarks: record.remarks || "",
-      });
-    }
-  }, [batchData, isUpdateMode, statuses]);
+    const sourceLines = Array.isArray(record.lines) && record.lines.length
+      ? record.lines
+      : [{
+          cylinderTypeId: record.cylinderType?._id || record.cylinderTypeId || "",
+          cylinderCount: record.cylinderCount,
+          targetFillWeightKg: record.targetFillWeightKg,
+          residualRecoveredKg: record.residualRecoveredKg,
+          actualLpgUsedKg: record.actualLpgUsedKg,
+        }];
+
+    setFormData({
+      storageTankId: record.tank?._id || record.storageTankId?._id || record.storageTankId || "",
+      lines: sourceLines.map((line) => {
+        const typeId = line.cylinderType?._id || line.cylinderTypeId?._id || line.cylinderTypeId || "";
+        const usage = savedLineUsage(line);
+        return {
+          key: nextLineKey(),
+          cylinderTypeId: typeId ? String(typeId) : "",
+          cylinderCount: line.cylinderCount != null ? String(line.cylinderCount) : "",
+          targetFillWeightKg: line.targetFillWeightKg != null ? String(line.targetFillWeightKg) : "",
+          residualRecoveredKg: usage.residualRecoveredKg,
+          actualLpgUsedKg: usage.actualLpgUsedKg,
+          usageInputMode: usage.usageInputMode,
+        };
+      }),
+      operatorEmployeeId: record.operator?._id || record.operatorEmployeeId?._id || record.operatorEmployeeId || "",
+      fillingDate: record.fillingDate ? new Date(record.fillingDate).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+      batchStatus: record.batchStatus?.toLowerCase() || statuses[0]?.value || "pending",
+      remarks: record.remarks || "",
+    });
+  }, [batchData, id, isUpdateMode, statuses]);
 
   const defaultsAppliedRef = useRef(false);
 
@@ -326,12 +368,14 @@ function CreateBatch({ mode = "create" }) {
           targetFillWeightKg: Number(line.targetFillWeightKg) || 0,
         };
 
-        if (line.usageInputMode === "residual" && residualKg != null && residualKg > 0) {
-          item.residualRecoveredKg = residualKg;
-        } else if (line.usageInputMode === "actual" && actualLpgUsedKg != null) {
+        if (line.usageInputMode === "actual" && actualLpgUsedKg != null) {
           item.actualLpgUsedKg = actualLpgUsedKg;
-        } else if (residualKg != null && residualKg > 0) {
+        } else if (line.usageInputMode === "residual" && residualKg != null) {
           item.residualRecoveredKg = residualKg;
+        } else if (isUpdateMode) {
+          // An empty edit must clear a previously saved leftover.
+          // Omitting both fields makes the API keep the old numbers.
+          item.residualRecoveredKg = 0;
         }
 
         return item;
@@ -630,6 +674,7 @@ function CreateBatch({ mode = "create" }) {
                     <p className="mt-3 text-xs text-slate-500">
                       Expected for this type: {calc?.count?.toLocaleString() || 0} × {calc?.weight?.toLocaleString() || 0} KG = {calc?.expected?.toLocaleString() || 0} KG.
                       Tank usage for this type: {calc?.deducted?.toLocaleString() || 0} KG.
+                      {" "}Leave both boxes empty when there is no leftover. The cylinder size is not copied into them.
                     </p>
                   </div>
                 );
