@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreateAsset, useAssetFormOptions } from "../../queries/assets/assets.queries";
 import { useToast } from "../../utils/GlobalToast";
+import SearchableCustomerSelect from "../../components/SearchableCustomerSelect";
 
 function AddAsset() {
   const navigate = useNavigate();
@@ -18,6 +19,23 @@ function AddAsset() {
   const paymentMethods = formOptions.paymentMethods || [];
   const accounts = formOptions.accounts || [];
   const employeeList = formOptions.employees || [];
+
+  const toValueOptions = (items) =>
+    (items || []).map((item) => ({ _id: item.value, label: item.label }));
+  const assetCategoryOptions = toValueOptions(categoryOptions);
+  const assetStatusOptions = toValueOptions(statusOptions);
+  const depreciationMethodOptions = toValueOptions(depreciationOptions);
+  const paymentMethodOptions = toValueOptions(paymentMethods);
+  const accountSelectOptions = (accounts || []).map((acc) => ({
+    _id: acc._id,
+    label: `${acc.label || `${acc.accountCode} – ${acc.accountName}`} (Rs. ${Number(acc.currentBalanceAmount || 0).toLocaleString()})`,
+    searchText: `${acc.label || ""} ${acc.accountCode || ""} ${acc.accountName || ""}`.toLowerCase(),
+  }));
+  const employeeSelectOptions = (employeeList || []).map((emp) => ({
+    _id: emp._id,
+    label: emp.label || `${emp.employeeCode} – ${emp.fullName}`,
+    searchText: `${emp.label || ""} ${emp.employeeCode || ""} ${emp.fullName || ""}`.toLowerCase(),
+  }));
 
   const [assetName, setAssetName] = useState("");
   const [assetCategory, setAssetCategory] = useState("");
@@ -177,42 +195,32 @@ function AddAsset() {
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Asset Category <span className="text-rose-500">*</span>
                   </label>
-                  <select
-                    required
+                  <SearchableCustomerSelect
+                    customers={assetCategoryOptions}
                     value={assetCategory}
-                    onChange={(e) => setAssetCategory(e.target.value)}
+                    onChange={(option) => setAssetCategory(option?._id || "")}
                     disabled={optionsLoading}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
-                  >
-                    <option value="">
-                      {optionsLoading ? "Loading..." : "Select category"}
-                    </option>
-                    {categoryOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder={optionsLoading ? "Loading..." : "Select category"}
+                    getLabel={(option) => option.label}
+                    getSearchText={(option) => option.label.toLowerCase()}
+                    emptyText="No category found"
+                  />
                 </div>
 
                 <div>
                   <label className='block text-sm font-medium text-slate-700 mb-1.5'>
                     Asset Status <span className='text-rose-500'>*</span>
                   </label>
-                  <select
-                    required
+                  <SearchableCustomerSelect
+                    customers={assetStatusOptions}
                     value={assetStatus}
-                    onChange={e => setAssetStatus(e.target.value)}
+                    onChange={(option) => setAssetStatus(option?._id || "")}
                     disabled={optionsLoading}
-                    className='w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50'
-                  >
-                    <option value=''>{optionsLoading ? 'Loading...' : 'Select status'}</option>
-                    {statusOptions.map(opt => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder={optionsLoading ? "Loading..." : "Select status"}
+                    getLabel={(option) => option.label}
+                    getSearchText={(option) => option.label.toLowerCase()}
+                    emptyText="No status found"
+                  />
                 </div>
 
               </div>
@@ -316,44 +324,32 @@ function AddAsset() {
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Payment Method <span className="text-rose-500">*</span>
                   </label>
-                  <select
-                    required
+                  <SearchableCustomerSelect
+                    customers={paymentMethodOptions}
                     value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    onChange={(option) => setPaymentMethod(option?._id || "")}
                     disabled={optionsLoading}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
-                  >
-                    <option value="">
-                      {optionsLoading ? "Loading..." : "Select payment method"}
-                    </option>
-                    {paymentMethods.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder={optionsLoading ? "Loading..." : "Select payment method"}
+                    getLabel={(option) => option.label}
+                    getSearchText={(option) => option.label.toLowerCase()}
+                    emptyText="No payment method found"
+                  />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Account <span className="text-rose-500">*</span>
                   </label>
-                  <select
-                    required
+                  <SearchableCustomerSelect
+                    customers={accountSelectOptions}
                     value={accountId}
-                    onChange={(e) => setAccountId(e.target.value)}
+                    onChange={(option) => setAccountId(option?._id || "")}
                     disabled={optionsLoading}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
-                  >
-                    <option value="">
-                      {optionsLoading ? "Loading..." : "Select account"}
-                    </option>
-                    {accounts.map((acc) => (
-                      <option key={acc._id} value={acc._id}>
-                        {`${acc.label || `${acc.accountCode} – ${acc.accountName}`} (Rs. ${Number(acc.currentBalanceAmount || 0).toLocaleString()})`}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder={optionsLoading ? "Loading..." : "Select account"}
+                    getLabel={(option) => option.label}
+                    getSearchText={(option) => option.searchText || option.label.toLowerCase()}
+                    emptyText="No account found"
+                  />
                 </div>
 
                 <div>
@@ -374,43 +370,32 @@ function AddAsset() {
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Depreciation Method <span className="text-rose-500">*</span>
                   </label>
-                  <select
-                    required
+                  <SearchableCustomerSelect
+                    customers={depreciationMethodOptions}
                     value={depreciationMethod}
-                    onChange={(e) => setDepreciationMethod(e.target.value)}
+                    onChange={(option) => setDepreciationMethod(option?._id || "")}
                     disabled={optionsLoading}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
-                  >
-                    <option value="">
-                      {optionsLoading ? "Loading..." : "Select method"}
-                    </option>
-                    {depreciationOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder={optionsLoading ? "Loading..." : "Select method"}
+                    getLabel={(option) => option.label}
+                    getSearchText={(option) => option.label.toLowerCase()}
+                    emptyText="No method found"
+                  />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Assigned Employee
                   </label>
-                  <select
+                  <SearchableCustomerSelect
+                    customers={employeeSelectOptions}
                     value={assignedEmployeeId}
-                    onChange={(e) => setAssignedEmployeeId(e.target.value)}
+                    onChange={(option) => setAssignedEmployeeId(option?._id || "")}
                     disabled={optionsLoading}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
-                  >
-                    <option value="">
-                      {optionsLoading ? "Loading..." : "None / Unassigned"}
-                    </option>
-                    {employeeList.map((emp) => (
-                      <option key={emp._id} value={emp._id}>
-                        {emp.label || `${emp.employeeCode} – ${emp.fullName}`}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder={optionsLoading ? "Loading..." : "None / Unassigned"}
+                    getLabel={(option) => option.label}
+                    getSearchText={(option) => option.searchText || option.label.toLowerCase()}
+                    emptyText="No employee found"
+                  />
                 </div>
               </div>
 

@@ -6,6 +6,7 @@ import {
   useCreateExpense,
 } from "../../queries/expenses/expenses.queries";
 import { useToast } from "../../utils/GlobalToast";
+import SearchableCustomerSelect from "../../components/SearchableCustomerSelect";
 
 function AddExpenses() {
   const navigate = useNavigate();
@@ -20,6 +21,19 @@ function AddExpenses() {
   const accounts = formOptions.accounts || [];
   const statuses = formOptions.statuses || [];
   const nextExpenseNumber = formOptions.nextExpenseNumber || "Auto-generated";
+
+  const categoryOptions = (categories || []).map((cat) => ({
+    _id: cat._id,
+    label: cat.categoryName,
+    searchText: (cat.categoryName || "").toLowerCase(),
+  }));
+  const statusOptions = (statuses || []).map((s) => ({ _id: s.value, label: s.label }));
+  const paymentMethodOptions = (paymentMethods || []).map((m) => ({ _id: m.value, label: m.label }));
+  const accountOptions = (accounts || []).map((acc) => ({
+    _id: acc._id,
+    label: `${acc.label || `${acc.accountCode} – ${acc.accountName}`} (Rs. ${Number(acc.currentBalanceAmount || 0).toLocaleString()})`,
+    searchText: `${acc.label || ""} ${acc.accountCode || ""} ${acc.accountName || ""}`.toLowerCase(),
+  }));
 
   // Form state
   const [expenseCategoryId, setExpenseCategoryId] = useState("");
@@ -167,22 +181,16 @@ function AddExpenses() {
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Category <span className="text-rose-500">*</span>
                   </label>
-                  <div className="relative">
-                    <select
-                      value={expenseCategoryId}
-                      onChange={(e) => setExpenseCategoryId(e.target.value)}
-                      disabled={isLoadingOptions}
-                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
-                    >
-                      <option value="">{isLoadingOptions ? "Loading categories..." : "Select category"}</option>
-                      {categories.map((cat) => (
-                        <option key={cat._id} value={cat._id}>
-                          {cat.categoryName}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                  </div>
+                  <SearchableCustomerSelect
+                    customers={categoryOptions}
+                    value={expenseCategoryId}
+                    onChange={(option) => setExpenseCategoryId(option?._id || "")}
+                    disabled={isLoadingOptions}
+                    placeholder={isLoadingOptions ? "Loading categories..." : "Select category"}
+                    getLabel={(option) => option.label}
+                    getSearchText={(option) => option.searchText || option.label.toLowerCase()}
+                    emptyText="No category found"
+                  />
                 </div>
 
                 {/* Date */}
@@ -231,22 +239,16 @@ function AddExpenses() {
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Status <span className="text-rose-500">*</span>
                   </label>
-                  <div className="relative">
-                    <select
-                      value={expenseStatus}
-                      onChange={(e) => setExpenseStatus(e.target.value)}
-                      disabled={isLoadingOptions}
-                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
-                    >
-                      <option value="">{isLoadingOptions ? "Loading..." : "Select status"}</option>
-                      {statuses.map((s) => (
-                        <option key={s.value} value={s.value}>
-                          {s.label}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                  </div>
+                  <SearchableCustomerSelect
+                    customers={statusOptions}
+                    value={expenseStatus}
+                    onChange={(option) => setExpenseStatus(option?._id || "")}
+                    disabled={isLoadingOptions}
+                    placeholder={isLoadingOptions ? "Loading..." : "Select status"}
+                    getLabel={(option) => option.label}
+                    getSearchText={(option) => option.label.toLowerCase()}
+                    emptyText="No status found"
+                  />
                 </div>
 
                 {/* Remarks */}
@@ -317,22 +319,16 @@ function AddExpenses() {
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Payment Method <span className="text-rose-500">*</span>
                   </label>
-                  <div className="relative">
-                    <select
-                      value={paymentMethod}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      disabled={isLoadingOptions}
-                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
-                    >
-                      <option value="">{isLoadingOptions ? "Loading..." : "Select payment method"}</option>
-                      {paymentMethods.map((m) => (
-                        <option key={m.value} value={m.value}>
-                          {m.label}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                  </div>
+                  <SearchableCustomerSelect
+                    customers={paymentMethodOptions}
+                    value={paymentMethod}
+                    onChange={(option) => setPaymentMethod(option?._id || "")}
+                    disabled={isLoadingOptions}
+                    placeholder={isLoadingOptions ? "Loading..." : "Select payment method"}
+                    getLabel={(option) => option.label}
+                    getSearchText={(option) => option.label.toLowerCase()}
+                    emptyText="No payment method found"
+                  />
                 </div>
 
                 {/* Source Account */}
@@ -340,22 +336,16 @@ function AddExpenses() {
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Source Account <span className="text-rose-500">*</span>
                   </label>
-                  <div className="relative">
-                    <select
-                      value={paidFromAccountId}
-                      onChange={(e) => setPaidFromAccountId(e.target.value)}
-                      disabled={isLoadingOptions}
-                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
-                    >
-                      <option value="">{isLoadingOptions ? "Loading..." : "Select source account"}</option>
-                      {accounts.map((acc) => (
-                        <option key={acc._id} value={acc._id}>
-                          {`${acc.label || `${acc.accountCode} – ${acc.accountName}`} (Rs. ${Number(acc.currentBalanceAmount || 0).toLocaleString()})`}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                  </div>
+                  <SearchableCustomerSelect
+                    customers={accountOptions}
+                    value={paidFromAccountId}
+                    onChange={(option) => setPaidFromAccountId(option?._id || "")}
+                    disabled={isLoadingOptions}
+                    placeholder={isLoadingOptions ? "Loading..." : "Select source account"}
+                    getLabel={(option) => option.label}
+                    getSearchText={(option) => option.searchText || option.label.toLowerCase()}
+                    emptyText="No account found"
+                  />
                 </div>
 
                 {/* Reference Number */}

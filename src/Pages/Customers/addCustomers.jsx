@@ -3,6 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { useCustomers, useCreateCustomer } from "../../queries/customers/customers.queries";
 import { useToast } from "../../utils/GlobalToast";
+import SearchableCustomerSelect from "../../components/SearchableCustomerSelect";
+
+const PAYMENT_TERM_OPTIONS = [
+  { _id: "15", label: "Net 15 Days" },
+  { _id: "30", label: "Net 30 Days" },
+  { _id: "60", label: "Net 60 Days" },
+  { _id: "0", label: "Cash on Delivery" },
+];
+
 
 function AddCustomers() {
   const navigate = useNavigate();
@@ -268,19 +277,17 @@ function AddCustomers() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Payment Terms
                 </label>
-                <div className="relative">
-                  <select
-                    value={formData.paymentTermDays}
-                    onChange={(e) => handleInputChange("paymentTermDays", e.target.value)}
-                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                  >
-                    <option value="15">Net 15 Days</option>
-                    <option value="30">Net 30 Days</option>
-                    <option value="60">Net 60 Days</option>
-                    <option value="0">Cash on Delivery</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                </div>
+                <SearchableCustomerSelect
+                  customers={PAYMENT_TERM_OPTIONS}
+                  value={String(formData.paymentTermDays)}
+                  onChange={(term) =>
+                    handleInputChange("paymentTermDays", term?._id || "")
+                  }
+                  placeholder="Select payment terms"
+                  getLabel={(term) => term.label}
+                  getSearchText={(term) => term.label.toLowerCase()}
+                  emptyText="No payment term found"
+                />
               </div>
 
               <div>

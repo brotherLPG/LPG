@@ -3,6 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { useToast } from "../../utils/GlobalToast";
 import { useCreateSupplier } from "../../queries/suppliers/suppliers.queries";
+import SearchableCustomerSelect from "../../components/SearchableCustomerSelect";
+
+const PAYMENT_TERM_OPTIONS = [
+  { _id: "15", label: "Net 15 Days" },
+  { _id: "30", label: "Net 30 Days" },
+  { _id: "45", label: "Net 45 Days" },
+  { _id: "60", label: "Net 60 Days" },
+  { _id: "COD", label: "Cash On Delivery" },
+];
 
 const PK_IBAN_LENGTH = 24;
 
@@ -357,22 +366,15 @@ function AddSupplier() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Payment Terms <span className="text-rose-500">*</span>
                 </label>
-                <div className="relative">
-                  <select
-                    ref={paymentTermDaysRef}
-                    value={paymentTermDays}
-                    onChange={(e) => setPaymentTermDays(e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(e, businessAddressRef)}
-                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                  >
-                    <option value="15">Net 15 Days</option>
-                    <option value="30">Net 30 Days</option>
-                    <option value="45">Net 45 Days</option>
-                    <option value="60">Net 60 Days</option>
-                    <option value="COD">Cash On Delivery</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                </div>
+                <SearchableCustomerSelect
+                  customers={PAYMENT_TERM_OPTIONS}
+                  value={paymentTermDays}
+                  onChange={(term) => setPaymentTermDays(term?._id || "")}
+                  placeholder="Select payment terms"
+                  getLabel={(term) => term.label}
+                  getSearchText={(term) => term.label.toLowerCase()}
+                  emptyText="No payment term found"
+                />
               </div>
 
               <div>

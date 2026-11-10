@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { useToast } from "../../utils/GlobalToast";
+import SearchableCustomerSelect from "../../components/SearchableCustomerSelect";
 import {
   useCreateCylinderType,
   useCylinderTypeFormOptions,
@@ -50,6 +51,14 @@ function AddCylinderType() {
   const valveTypes = formOptions.valveTypes || [];
   const materials = formOptions.materials || [];
   const statuses = formOptions.statuses || [];
+
+  const toOptions = (items) =>
+    (items || []).map((item) => ({ _id: item.value, label: item.label }));
+  const categoryOptions = toOptions(categories);
+  const colorCodeOptions = toOptions(colorCodes);
+  const valveTypeOptions = toOptions(valveTypes);
+  const materialOptions = toOptions(materials);
+
   const activeLabel =
     statuses.find((status) => status.value === true)?.label || "Active Type";
   const inactiveLabel =
@@ -233,32 +242,21 @@ function AddCylinderType() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Category <span className="text-rose-500">*</span>
                 </label>
-                <div className="relative">
-                  <select
-                    ref={categoryRef}
-                    value={category}
-                    onChange={(e) => {
-                      setCategory(e.target.value);
-                      clearError(setCategoryError);
-                    }}
-                    disabled={optionsLoading}
-                    className={`w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:ring-2 ${
-                      categoryError
-                        ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
-                        : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
-                    } disabled:bg-slate-100 disabled:cursor-not-allowed`}
-                  >
-                    <option value="" disabled>
-                      {optionsLoading ? "Loading..." : "Select Category"}
-                    </option>
-                    {categories.map((cat) => (
-                      <option key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                </div>
+                <SearchableCustomerSelect
+                  customers={categoryOptions}
+                  value={category}
+                  onChange={(option) => {
+                    setCategory(option?._id || "");
+                    clearError(setCategoryError);
+                  }}
+                  triggerRef={categoryRef}
+                  disabled={optionsLoading}
+                  error={!!categoryError}
+                  placeholder={optionsLoading ? "Loading..." : "Select Category"}
+                  getLabel={(option) => option.label}
+                  getSearchText={(option) => option.label.toLowerCase()}
+                  emptyText="No category found"
+                />
                 {categoryError && (
                   <p className="mt-1.5 text-xs text-rose-500">{categoryError}</p>
                 )}
@@ -316,24 +314,16 @@ function AddCylinderType() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Color Code
                 </label>
-                <div className="relative">
-                  <select
-                    value={colorCode}
-                    onChange={(e) => setColorCode(e.target.value)}
-                    disabled={optionsLoading}
-                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:cursor-not-allowed"
-                  >
-                    <option value="" disabled>
-                      {optionsLoading ? "Loading..." : "Select Color Identification"}
-                    </option>
-                    {colorCodes.map((color) => (
-                      <option key={color.value} value={color.value}>
-                        {color.label}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                </div>
+                <SearchableCustomerSelect
+                  customers={colorCodeOptions}
+                  value={colorCode}
+                  onChange={(option) => setColorCode(option?._id || "")}
+                  disabled={optionsLoading}
+                  placeholder={optionsLoading ? "Loading..." : "Select Color Identification"}
+                  getLabel={(option) => option.label}
+                  getSearchText={(option) => option.label.toLowerCase()}
+                  emptyText="No color code found"
+                />
                 <p className="mt-1.5 text-xs text-slate-400">
                   Color identification for cylinder body status/brand
                 </p>
@@ -477,47 +467,31 @@ function AddCylinderType() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Valve Type
                 </label>
-                <div className="relative">
-                  <select
-                    value={valveType}
-                    onChange={(e) => setValveType(e.target.value)}
-                    disabled={optionsLoading}
-                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:cursor-not-allowed"
-                  >
-                    <option value="" disabled>
-                      {optionsLoading ? "Loading..." : "Select Valve Type"}
-                    </option>
-                    {valveTypes.map((valve) => (
-                      <option key={valve.value} value={valve.value}>
-                        {valve.label}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                </div>
+                <SearchableCustomerSelect
+                  customers={valveTypeOptions}
+                  value={valveType}
+                  onChange={(option) => setValveType(option?._id || "")}
+                  disabled={optionsLoading}
+                  placeholder={optionsLoading ? "Loading..." : "Select Valve Type"}
+                  getLabel={(option) => option.label}
+                  getSearchText={(option) => option.label.toLowerCase()}
+                  emptyText="No valve type found"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Material
                 </label>
-                <div className="relative">
-                  <select
-                    value={material}
-                    onChange={(e) => setMaterial(e.target.value)}
-                    disabled={optionsLoading}
-                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:cursor-not-allowed"
-                  >
-                    <option value="" disabled>
-                      {optionsLoading ? "Loading..." : "Select Material"}
-                    </option>
-                    {materials.map((mat) => (
-                      <option key={mat.value} value={mat.value}>
-                        {mat.label}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                </div>
+                <SearchableCustomerSelect
+                  customers={materialOptions}
+                  value={material}
+                  onChange={(option) => setMaterial(option?._id || "")}
+                  disabled={optionsLoading}
+                  placeholder={optionsLoading ? "Loading..." : "Select Material"}
+                  getLabel={(option) => option.label}
+                  getSearchText={(option) => option.label.toLowerCase()}
+                  emptyText="No material found"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">

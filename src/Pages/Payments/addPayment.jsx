@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { useGetPaymentFormOptions, useCreatePayment } from "../../queries/payments/payments.queries";
 import { useToast } from "../../utils/GlobalToast";
+import SearchableCustomerSelect from "../../components/SearchableCustomerSelect";
 
 const DEFAULT_DIRECTION_OPTIONS = [
   { value: "receive", label: "Customer Receipt (Inward)" },
@@ -31,6 +32,24 @@ const formatAccountOptionLabel = (account) => {
   const balance = Number(account.currentBalanceAmount || 0);
   return `${base} (Rs. ${balance.toLocaleString()})`;
 };
+
+const partyLabel = (party) =>
+  party.label ||
+  `${party.customerCode || party.supplierCode || ""} - ${
+    party.customerName || party.supplierName || ""
+  }`.trim();
+
+const partySearchText = (party) =>
+  [
+    party.customerName,
+    party.customerCode,
+    party.supplierName,
+    party.supplierCode,
+    party.label,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
 
 const getRefundDueAmount = (invoice) => {
   if (invoice?.refundDueAmount != null) {
@@ -135,6 +154,28 @@ function AddPayment() {
   )
     ? partyFormOptions.data.refundDueInvoices
     : [];
+  const partyOptions = useMemo(
+    () =>
+      (isCustomerParty
+        ? formOptions?.data?.customers
+        : formOptions?.data?.suppliers) || [],
+    [formOptions?.data?.customers, formOptions?.data?.suppliers, isCustomerParty]
+  );
+
+  const paymentMethodOptions = useMemo(
+    () =>
+      (formOptions?.data?.paymentMethods || []).map((method) => ({
+        _id: method.value,
+        label: method.label,
+      })),
+    [formOptions?.data?.paymentMethods]
+  );
+
+  const accountOptions = useMemo(
+    () => formOptions?.data?.accounts || [],
+    [formOptions?.data?.accounts]
+  );
+
   const invoices = isRefund
     ? (outstandingInvoices.length ? outstandingInvoices : refundDueInvoices)
     : outstandingInvoices;
@@ -499,40 +540,26 @@ function AddPayment() {
                         : "Select Supplier"}{" "}
                       <span className="text-rose-500">*</span>
                     </label>
-                    <div className="relative">
-                      <select
-                        ref={customerIdRef}
-                        value={formData.customerId}
-                        onChange={(event) => {
-                          handlePartyChange(event.target.value);
-                          clearError(setCustomerIdError);
-                        }}
-                        disabled={optionsLoading}
-                        className={`w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:ring-2 ${
-                          customerIdError
-                            ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
-                            : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
-                        }`}
-                      >
-                        <option value="" disabled>
-                          {isCustomerParty
-                            ? "Select customer"
-                            : "Select supplier"}
-                        </option>
-                        {isCustomerParty
-                          ? formOptions?.data?.customers?.map((customer) => (
-                              <option key={customer._id} value={customer._id}>
-                                {customer.label}
-                              </option>
-                            ))
-                          : formOptions?.data?.suppliers?.map((supplier) => (
-                              <option key={supplier._id} value={supplier._id}>
-                                {supplier.label}
-                              </option>
-                            ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                    </div>
+                    <SearchableCustomerSelect
+                      customers={partyOptions}
+                      value={formData.customerId}
+                      onChange={(party) => {
+                        handlePartyChange(party?._id || "");
+                        clearError(setCustomerIdError);
+                      }}
+                      disabled={optionsLoading}
+                      error={Boolean(customerIdError)}
+                      placeholder={
+                        isCustomerParty ? "Select customer" : "Select supplier"
+                      }
+                      getLabel={partyLabel}
+                      getSearchText={partySearchText}
+                      emptyText={
+                        isCustomerParty
+                          ? "No customer found"
+                          : "No supplier found"
+                      }
+                    />
                     {customerIdError && (
                       <p className="mt-1.5 text-xs text-rose-500">{customerIdError}</p>
                     )}
@@ -594,32 +621,22 @@ function AddPayment() {
                     <label className="block text-sm font-semibold text-BLUE-dark mb-1.5">
                       Payment Method <span className="text-rose-500">*</span>
                     </label>
-                    <div className="relative">
-                      <select
-                        ref={paymentMethodRef}
-                        value={formData.paymentMethod}
-                        onChange={(event) => {
-                          handleInputChange("paymentMethod", event.target.value);
-                          clearError(setPaymentMethodError);
-                        }}
-                        disabled={optionsLoading}
-                        className={`w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:ring-2 ${
-                          paymentMethodError
-                            ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
-                            : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
-                        }`}
-                      >
-                        <option value="" disabled>
-                          Select payment method
-                        </option>
-                        {formOptions?.data?.paymentMethods?.map((method) => (
-                          <option key={method.value} value={method.value}>
-                            {method.label}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                    </div>
+                    <SearchableCustomerSelect
+                      customers={paymentMethodOptions}
+                      value={formData.paymentMethod}
+                      onChange={(method) => {
+                        handleInputChange("paymentMethod", method?._id || "");
+                        clearError(setPaymentMethodError);
+                      }}
+                      disabled={optionsLoading}
+                      error={Boolean(paymentMethodError)}
+                      placeholder="Select payment method"
+                      getLabel={(method) => method.label}
+                      getSearchText={(method) =>
+                        String(method.label || "").toLowerCase()
+                      }
+                      emptyText="No payment method found"
+                    />
                     {paymentMethodError && (
                       <p className="mt-1.5 text-xs text-rose-500">{paymentMethodError}</p>
                     )}
@@ -632,32 +649,30 @@ function AddPayment() {
                         : "Target Plant Account"}{" "}
                       <span className="text-rose-500">*</span>
                     </label>
-                    <div className="relative">
-                      <select
-                        ref={accountIdRef}
-                        value={formData.accountId}
-                        onChange={(event) => {
-                          handleInputChange("accountId", event.target.value);
-                          clearError(setAccountIdError);
-                        }}
-                        disabled={optionsLoading}
-                        className={`w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:ring-2 ${
-                          accountIdError
-                            ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
-                            : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
-                        }`}
-                      >
-                        <option value="" disabled>
-                          Select account
-                        </option>
-                        {formOptions?.data?.accounts?.map((account) => (
-                          <option key={account._id} value={account._id}>
-                            {formatAccountOptionLabel(account)}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                    </div>
+                    <SearchableCustomerSelect
+                      customers={accountOptions}
+                      value={formData.accountId}
+                      onChange={(account) => {
+                        handleInputChange("accountId", account?._id || "");
+                        clearError(setAccountIdError);
+                      }}
+                      disabled={optionsLoading}
+                      error={Boolean(accountIdError)}
+                      placeholder="Select account"
+                      getLabel={(account) => formatAccountOptionLabel(account)}
+                      getSearchText={(account) =>
+                        [
+                          account.accountName,
+                          account.accountCode,
+                          account.label,
+                          account.currentBalanceAmount,
+                        ]
+                          .filter((v) => v != null && v !== "")
+                          .join(" ")
+                          .toLowerCase()
+                      }
+                      emptyText="No account found"
+                    />
                     {accountIdError && (
                       <p className="mt-1.5 text-xs text-rose-500">{accountIdError}</p>
                     )}

@@ -9,6 +9,19 @@ function customerLabel(customer) {
   );
 }
 
+function customerSearchText(customer) {
+  return [
+    customer.customerName,
+    customer.customerCode,
+    customer.label,
+    customer.supplierName,
+    customer.supplierCode,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
 function placeMenu(button) {
   const rect = button.getBoundingClientRect();
   const gap = 4;
@@ -40,6 +53,10 @@ function SearchableCustomerSelect({
   disabled = false,
   error = false,
   placeholder = "Select customer",
+  getLabel = customerLabel,
+  getSearchText = customerSearchText,
+  emptyText = "No customer found",
+  triggerRef,
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -55,13 +72,10 @@ function SearchableCustomerSelect({
     const term = query.trim().toLowerCase();
     if (!term) return customers;
 
-    return customers.filter((customer) => {
-      const name = String(customer.customerName || "").toLowerCase();
-      const code = String(customer.customerCode || "").toLowerCase();
-      const label = String(customer.label || "").toLowerCase();
-      return name.includes(term) || code.includes(term) || label.includes(term);
-    });
-  }, [customers, query]);
+    return customers.filter((customer) =>
+      getSearchText(customer).includes(term)
+    );
+  }, [customers, query, getSearchText]);
 
   useEffect(() => {
     if (!open || !buttonRef.current) return undefined;
@@ -171,7 +185,7 @@ function SearchableCustomerSelect({
               </li>
             )}
             {filtered.length === 0 ? (
-              <li className="px-3 py-2 text-sm text-slate-500">No customer found</li>
+              <li className="px-3 py-2 text-sm text-slate-500">{emptyText}</li>
             ) : (
               filtered.map((customer, index) => {
                 const isSelected = customer._id === value;
@@ -193,7 +207,7 @@ function SearchableCustomerSelect({
                             : "text-slate-800 hover:bg-slate-50"
                       }`}
                     >
-                      {customerLabel(customer)}
+                      {getLabel(customer)}
                     </button>
                   </li>
                 );
@@ -209,7 +223,12 @@ function SearchableCustomerSelect({
     <div className="relative">
       <button
         type="button"
-        ref={buttonRef}
+        ref={(el) => {
+          buttonRef.current = el;
+          if (!triggerRef) return;
+          if (typeof triggerRef === "function") triggerRef(el);
+          else triggerRef.current = el;
+        }}
         disabled={disabled}
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -227,7 +246,7 @@ function SearchableCustomerSelect({
         }`}
       >
         <span className={`truncate ${selected ? "text-slate-700" : "text-slate-500"}`}>
-          {selected ? customerLabel(selected) : placeholder}
+          {selected ? getLabel(selected) : placeholder}
         </span>
         <ChevronDown
           className={`ml-2 h-4 w-4 shrink-0 text-slate-400 transition ${open ? "rotate-180" : ""}`}

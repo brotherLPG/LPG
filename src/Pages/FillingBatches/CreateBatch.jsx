@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ChevronDown, CheckCircle2, Plus, Trash2 } from "lucide-react";
 import { useToast } from "../../utils/GlobalToast";
+import SearchableCustomerSelect from "../../components/SearchableCustomerSelect";
 import {
   useCreateFillingBatch,
   useFillingBatchFormOptions,
@@ -475,27 +476,22 @@ function CreateBatch({ mode = "create" }) {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Source Storage Tank <span className="text-rose-500">*</span>
                 </label>
-                <div className="relative">
-                  <select
-                    ref={storageTankIdRef}
-                    value={formData.storageTankId}
-                    onChange={(e) => {
-                      handleFieldChange("storageTankId", e.target.value);
-                      setStorageTankIdError("");
-                    }}
-                    className={`w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2.5 text-sm text-slate-700 outline-none focus:ring-1 ${
-                      storageTankIdError
-                        ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500"
-                        : "border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
-                    }`}
-                  >
-                    <option value="">Select Storage Tank</option>
-                    {tankOptions.map((tank) => (
-                      <option key={tank._id} value={tank._id}>{tank.displayName}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                </div>
+                <SearchableCustomerSelect
+                  customers={tankOptions}
+                  value={formData.storageTankId}
+                  onChange={(tank) => {
+                    handleFieldChange("storageTankId", tank?._id || "");
+                    setStorageTankIdError("");
+                  }}
+                  triggerRef={storageTankIdRef}
+                  error={!!storageTankIdError}
+                  placeholder="Select Storage Tank"
+                  getLabel={(tank) => tank.displayName}
+                  getSearchText={(tank) =>
+                    (tank.displayName || "").toLowerCase()
+                  }
+                  emptyText="No storage tank found"
+                />
                 {storageTankIdError && (
                   <p className="mt-1.5 text-xs text-rose-500">{storageTankIdError}</p>
                 )}
@@ -552,36 +548,31 @@ function CreateBatch({ mode = "create" }) {
                         <label className="block text-sm font-medium text-slate-700 mb-1.5">
                           Target Cylinder Type <span className="text-rose-500">*</span>
                         </label>
-                        <div className="relative">
-                          <select
-                            value={line.cylinderTypeId}
-                            onChange={(e) => {
-                              handleLineChange(line.key, "cylinderTypeId", e.target.value);
-                              setLineErrors((prev) => ({
-                                ...prev,
-                                [line.key]: { ...prev[line.key], cylinderTypeId: "", targetFillWeightKg: "" },
-                              }));
-                            }}
-                            className={`w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2.5 text-sm text-slate-700 outline-none focus:ring-1 ${
-                              errors.cylinderTypeId
-                                ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500"
-                                : "border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
-                            }`}
-                          >
-                            <option value="">Select Cylinder Type</option>
-                            {cylinderTypes.map((type) => (
-                              <option
-                                key={type._id}
-                                value={type._id}
-                                disabled={takenIds.has(String(type._id))}
-                              >
-                                {type.typeName || type.name}
-                                {type.capacityKg != null ? ` (${type.capacityKg} KG)` : ""}
-                              </option>
-                            ))}
-                          </select>
-                          <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                        </div>
+                        <SearchableCustomerSelect
+                          customers={cylinderTypes.filter(
+                            (type) => !takenIds.has(String(type._id))
+                          )}
+                          value={line.cylinderTypeId}
+                          onChange={(type) => {
+                            handleLineChange(line.key, "cylinderTypeId", type?._id || "");
+                            setLineErrors((prev) => ({
+                              ...prev,
+                              [line.key]: { ...prev[line.key], cylinderTypeId: "", targetFillWeightKg: "" },
+                            }));
+                          }}
+                          error={!!errors.cylinderTypeId}
+                          placeholder="Select Cylinder Type"
+                          getLabel={(type) =>
+                            `${type.typeName || type.name || "Cylinder"}${
+                              type.capacityKg != null ? ` (${type.capacityKg} KG)` : ""
+                            }`
+                          }
+                          getSearchText={(type) =>
+                            `${type.typeName || ""} ${type.name || ""} ${type.capacityKg ?? ""}`
+                              .toLowerCase()
+                          }
+                          emptyText="No cylinder type found"
+                        />
                         {errors.cylinderTypeId && (
                           <p className="mt-1.5 text-xs text-rose-500">{errors.cylinderTypeId}</p>
                         )}
@@ -690,27 +681,23 @@ function CreateBatch({ mode = "create" }) {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Assigned Batch Operator (Employee) <span className="text-rose-500">*</span>
                 </label>
-                <div className="relative">
-                  <select
-                    ref={operatorEmployeeIdRef}
-                    value={formData.operatorEmployeeId}
-                    onChange={(e) => {
-                      handleFieldChange("operatorEmployeeId", e.target.value);
-                      setOperatorEmployeeIdError("");
-                    }}
-                    className={`w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2.5 text-sm text-slate-700 outline-none focus:ring-1 ${
-                      operatorEmployeeIdError
-                        ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500"
-                        : "border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
-                    }`}
-                  >
-                    <option value="">Select Employee</option>
-                    {operatorOptions.map((operator) => (
-                      <option key={operator._id} value={operator._id}>{operator.displayName}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                </div>
+                <SearchableCustomerSelect
+                  customers={operatorOptions}
+                  value={formData.operatorEmployeeId}
+                  onChange={(operator) => {
+                    handleFieldChange("operatorEmployeeId", operator?._id || "");
+                    setOperatorEmployeeIdError("");
+                  }}
+                  triggerRef={operatorEmployeeIdRef}
+                  error={!!operatorEmployeeIdError}
+                  placeholder="Select Employee"
+                  getLabel={(operator) => operator.displayName}
+                  getSearchText={(operator) =>
+                    `${operator.displayName || ""} ${operator.fullName || ""}`
+                      .toLowerCase()
+                  }
+                  emptyText="No employee found"
+                />
                 {operatorEmployeeIdError && (
                   <p className="mt-1.5 text-xs text-rose-500">{operatorEmployeeIdError}</p>
                 )}

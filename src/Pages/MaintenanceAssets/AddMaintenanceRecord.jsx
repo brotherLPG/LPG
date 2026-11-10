@@ -5,6 +5,7 @@ import {
   useMaintenanceRecordFormOptions,
 } from "../../queries/maintenanceRecords/maintenanceRecords.queries";
 import { useToast } from "../../utils/GlobalToast";
+import SearchableCustomerSelect from "../../components/SearchableCustomerSelect";
 
 function AddMaintenanceRecord() {
   const navigate = useNavigate();
@@ -21,6 +22,24 @@ function AddMaintenanceRecord() {
   const assetList = formOptions.assets || [];
   const employeeList = formOptions.employees || [];
   const accounts = formOptions.accounts || [];
+
+  const assetOptions = (assetList || []).map((asset) => ({
+    _id: asset._id,
+    label: asset.label || `${asset.assetCode} – ${asset.assetName}`,
+    searchText: `${asset.label || ""} ${asset.assetCode || ""} ${asset.assetName || ""}`.toLowerCase(),
+  }));
+  const maintenanceTypeOptions = (maintenanceTypes || []).map((type) => ({ _id: type.value, label: type.label }));
+  const employeeOptions = (employeeList || []).map((emp) => ({
+    _id: emp._id,
+    label: emp.label || `${emp.employeeCode} – ${emp.fullName}`,
+    searchText: `${emp.label || ""} ${emp.employeeCode || ""} ${emp.fullName || ""}`.toLowerCase(),
+  }));
+  const paymentMethodOptions = (paymentMethods || []).map((method) => ({ _id: method.value, label: method.label }));
+  const accountOptions = (accounts || []).map((acc) => ({
+    _id: acc._id,
+    label: `${acc.label || `${acc.accountCode} – ${acc.accountName}`} (Rs. ${Number(acc.currentBalanceAmount || 0).toLocaleString()})`,
+    searchText: `${acc.label || ""} ${acc.accountCode || ""} ${acc.accountName || ""}`.toLowerCase(),
+  }));
 
   const [assetId, setassetId] = useState("");
   const [maintenanceType, setMaintenanceType] = useState("");
@@ -214,22 +233,16 @@ function AddMaintenanceRecord() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Select Asset <span className="text-rose-500">*</span>
                 </label>
-                <select
+                <SearchableCustomerSelect
+                  customers={assetOptions}
                   value={assetId}
-                  onChange={(e) => setassetId(e.target.value)}
-                  required
+                  onChange={(option) => setassetId(option?._id || "")}
                   disabled={isLoadingOptions}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
-                >
-                  <option value="">
-                    {isLoadingOptions ? "Loading assets..." : "Select an asset..."}
-                  </option>
-                  {assetList.map((asset) => (
-                    <option key={asset._id} value={asset._id}>
-                      {asset.label || `${asset.assetCode} – ${asset.assetName}`}
-                    </option>
-                  ))}
-                </select>
+                  placeholder={isLoadingOptions ? "Loading assets..." : "Select an asset..."}
+                  getLabel={(option) => option.label}
+                  getSearchText={(option) => option.searchText || option.label.toLowerCase()}
+                  emptyText="No asset found"
+                />
 
                 {selectedAsset && (
                   <div className="mt-2 rounded-md bg-blue-50 border border-blue-100 p-3 text-xs flex flex-wrap gap-4 text-slate-700">
@@ -254,22 +267,16 @@ function AddMaintenanceRecord() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Maintenance Type <span className="text-rose-500">*</span>
                 </label>
-                <select
+                <SearchableCustomerSelect
+                  customers={maintenanceTypeOptions}
                   value={maintenanceType}
-                  onChange={(e) => setMaintenanceType(e.target.value)}
-                  required
+                  onChange={(option) => setMaintenanceType(option?._id || "")}
                   disabled={isLoadingOptions}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
-                >
-                  <option value="">
-                    {isLoadingOptions ? "Loading types..." : "Select maintenance type..."}
-                  </option>
-                  {maintenanceTypes.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
+                  placeholder={isLoadingOptions ? "Loading types..." : "Select maintenance type..."}
+                  getLabel={(option) => option.label}
+                  getSearchText={(option) => option.label.toLowerCase()}
+                  emptyText="No maintenance type found"
+                />
               </div>
 
               {/* Performed By Employee */}
@@ -277,22 +284,16 @@ function AddMaintenanceRecord() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Performed By Employee <span className="text-rose-500">*</span>
                 </label>
-                <select
+                <SearchableCustomerSelect
+                  customers={employeeOptions}
                   value={performedByEmployeeId}
-                  onChange={(e) => setPerformedByEmployeeId(e.target.value)}
-                  required
+                  onChange={(option) => setPerformedByEmployeeId(option?._id || "")}
                   disabled={isLoadingOptions}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
-                >
-                  <option value="">
-                    {isLoadingOptions ? "Loading employees..." : "Select employee / technician..."}
-                  </option>
-                  {employeeList.map((emp) => (
-                    <option key={emp._id} value={emp._id}>
-                      {emp.label || `${emp.employeeCode} – ${emp.fullName}`}
-                    </option>
-                  ))}
-                </select>
+                  placeholder={isLoadingOptions ? "Loading employees..." : "Select employee / technician..."}
+                  getLabel={(option) => option.label}
+                  getSearchText={(option) => option.searchText || option.label.toLowerCase()}
+                  emptyText="No employee found"
+                />
               </div>
 
               {/* Maintenance Cost Amount */}
@@ -316,22 +317,16 @@ function AddMaintenanceRecord() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Payment Method <span className="text-rose-500">*</span>
                 </label>
-                <select
+                <SearchableCustomerSelect
+                  customers={paymentMethodOptions}
                   value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  required
+                  onChange={(option) => setPaymentMethod(option?._id || "")}
                   disabled={isLoadingOptions}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
-                >
-                  <option value="">
-                    {isLoadingOptions ? "Loading..." : "Select payment method"}
-                  </option>
-                  {paymentMethods.map((method) => (
-                    <option key={method.value} value={method.value}>
-                      {method.label}
-                    </option>
-                  ))}
-                </select>
+                  placeholder={isLoadingOptions ? "Loading..." : "Select payment method"}
+                  getLabel={(option) => option.label}
+                  getSearchText={(option) => option.label.toLowerCase()}
+                  emptyText="No payment method found"
+                />
               </div>
 
               {/* Account */}
@@ -339,22 +334,16 @@ function AddMaintenanceRecord() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Account <span className="text-rose-500">*</span>
                 </label>
-                <select
+                <SearchableCustomerSelect
+                  customers={accountOptions}
                   value={accountId}
-                  onChange={(e) => setAccountId(e.target.value)}
-                  required
+                  onChange={(option) => setAccountId(option?._id || "")}
                   disabled={isLoadingOptions}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50"
-                >
-                  <option value="">
-                    {isLoadingOptions ? "Loading..." : "Select account"}
-                  </option>
-                  {accounts.map((acc) => (
-                    <option key={acc._id} value={acc._id}>
-                      {`${acc.label || `${acc.accountCode} – ${acc.accountName}`} (Rs. ${Number(acc.currentBalanceAmount || 0).toLocaleString()})`}
-                    </option>
-                  ))}
-                </select>
+                  placeholder={isLoadingOptions ? "Loading..." : "Select account"}
+                  getLabel={(option) => option.label}
+                  getSearchText={(option) => option.searchText || option.label.toLowerCase()}
+                  emptyText="No account found"
+                />
               </div>
 
               {

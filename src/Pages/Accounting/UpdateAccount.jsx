@@ -6,6 +6,7 @@ import {
   useAccountFormOptions,
 } from "../../queries/accounts/accounts.queries";
 import { useToast } from "../../utils/GlobalToast";
+import SearchableCustomerSelect from "../../components/SearchableCustomerSelect";
 import { AlertCircle, Loader } from "lucide-react";
 
 function UpdateAccount() {
@@ -23,6 +24,15 @@ function UpdateAccount() {
     (account) => account._id !== id
   );
   const statuses = formOptions.statuses || [];
+
+  const accountTypeOptions = accountTypes.map((type) => ({
+    _id: type.value,
+    label: type.label,
+  }));
+  const accountCategoryOptions = accountCategories.map((category) => ({
+    _id: category.value,
+    label: category.label,
+  }));
 
   // Fetch existing account data
   const { data: accountData, isLoading: isLoadingAccount } = useGetAccountById(id);
@@ -213,23 +223,19 @@ function UpdateAccount() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Account Type <span className="text-red-500">*</span>
                 </label>
-                <select
+                <SearchableCustomerSelect
+                  customers={accountTypeOptions}
                   value={formData.accountType}
-                  onChange={(e) => handleChange("accountType", e.target.value)}
+                  onChange={(option) =>
+                    handleChange("accountType", option?._id || "")
+                  }
                   disabled={optionsLoading}
-                  className={`w-full rounded-md border ${
-                    formErrors.accountType ? "border-red-500" : "border-slate-200"
-                  } bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:cursor-not-allowed`}
-                >
-                  <option value="">
-                    {optionsLoading ? "Loading..." : "Select account type"}
-                  </option>
-                  {accountTypes.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
+                  error={!!formErrors.accountType}
+                  placeholder={optionsLoading ? "Loading..." : "Select account type"}
+                  getLabel={(option) => option.label}
+                  getSearchText={(option) => option.label.toLowerCase()}
+                  emptyText="No account type found"
+                />
                 {formErrors.accountType && (
                   <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" /> {formErrors.accountType}
@@ -241,25 +247,19 @@ function UpdateAccount() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Account Category <span className="text-red-500">*</span>
                 </label>
-                <select
+                <SearchableCustomerSelect
+                  customers={accountCategoryOptions}
                   value={formData.accountCategory}
-                  onChange={(e) =>
-                    handleChange("accountCategory", e.target.value)
+                  onChange={(option) =>
+                    handleChange("accountCategory", option?._id || "")
                   }
                   disabled={optionsLoading}
-                  className={`w-full rounded-md border ${
-                    formErrors.accountCategory ? "border-red-500" : "border-slate-200"
-                  } bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:cursor-not-allowed`}
-                >
-                  <option value="">
-                    {optionsLoading ? "Loading..." : "Select category"}
-                  </option>
-                  {accountCategories.map((category) => (
-                    <option key={category.value} value={category.value}>
-                      {category.label}
-                    </option>
-                  ))}
-                </select>
+                  error={!!formErrors.accountCategory}
+                  placeholder={optionsLoading ? "Loading..." : "Select category"}
+                  getLabel={(option) => option.label}
+                  getSearchText={(option) => option.label.toLowerCase()}
+                  emptyText="No category found"
+                />
                 {formErrors.accountCategory && (
                   <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" /> {formErrors.accountCategory}
@@ -271,23 +271,20 @@ function UpdateAccount() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Parent Account
                 </label>
-                <select
-                  value={formData.parentAccountId || ""}
-                  onChange={(e) =>
-                    handleChange("parentAccountId", e.target.value ? e.target.value : null)
+                <SearchableCustomerSelect
+                  customers={parentAccounts}
+                  value={formData.parentAccountId}
+                  onChange={(account) =>
+                    handleChange("parentAccountId", account?._id || null)
                   }
                   disabled={optionsLoading}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:cursor-not-allowed"
-                >
-                  <option value="">
-                    {optionsLoading ? "Loading..." : "Select parent account"}
-                  </option>
-                  {parentAccounts.map((account) => (
-                    <option key={account._id} value={account._id}>
-                      {account.label}
-                    </option>
-                  ))}
-                </select>
+                  placeholder={optionsLoading ? "Loading..." : "Select parent account"}
+                  getLabel={(account) => account.label}
+                  getSearchText={(account) =>
+                    (account.label || "").toLowerCase()
+                  }
+                  emptyText="No parent account found"
+                />
               </div>
 
               <div className="md:col-span-2">

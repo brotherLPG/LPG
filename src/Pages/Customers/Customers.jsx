@@ -61,7 +61,10 @@ function Customers() {
         toast.success(`Customer ${deleteModal.item.name} has been deleted successfully`);
         setDeleteModal({ isOpen: false, item: null });
       } catch (error) {
-        toast.error("Failed to delete customer. Please try again.");
+        toast.error(
+          error?.response?.data?.message ||
+            "Failed to delete customer. Please try again."
+        );
       }
     }
   };

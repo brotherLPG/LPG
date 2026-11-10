@@ -3,6 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { useUpdateInventoryItem, useInventoryItemById, useInventoryFormOptions } from "../../queries/inventory/inventory.queries";
 import { useToast } from "../../utils/GlobalToast";
+import SearchableCustomerSelect from "../../components/SearchableCustomerSelect";
+
+const WAREHOUSE_OPTIONS = [
+  { _id: "Sector I-9 Warehouse A", label: "Sector I-9 Warehouse A" },
+  { _id: "Sector I-9 Warehouse B", label: "Sector I-9 Warehouse B" },
+];
 
 function UpdateInventoryItem() {
   const navigate = useNavigate();
@@ -47,10 +53,17 @@ function UpdateInventoryItem() {
     isActive: true
   });
 
+  const [warehouseArea, setWarehouseArea] = useState("Sector I-9 Warehouse A");
+
   const categories = formOptions?.data?.categories || [];
   const unitsOfMeasure = formOptions?.data?.unitsOfMeasure || [];
   const suppliers = formOptions?.data?.suppliers || [];
   const cylinderTypes = formOptions?.data?.cylinderTypes || [];
+
+  const toOptions = (items) =>
+    (items || []).map((item) => ({ _id: item.value ?? item._id, label: item.label ?? item.supplierName ?? item.typeName ?? item.name }));
+  const categoryOptions = toOptions(categories);
+  const supplierOptions = toOptions(suppliers);
 
   useEffect(() => {
     if (item) {
@@ -254,26 +267,21 @@ function UpdateInventoryItem() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Category <span className="text-rose-500">*</span>
                 </label>
-                <div className="relative">
-                  <select
-                    ref={itemCategoryRef}
-                    name="itemCategory"
-                    value={formData.itemCategory}
-                    onChange={handleChange}
-                    disabled={optionsLoading}
-                    className={`w-full appearance-none rounded-lg border bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:ring-1 ${
-                      itemCategoryError
-                        ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500"
-                        : "border-gray-200 focus:border-emerald-600 focus:ring-emerald-600"
-                    } disabled:opacity-50`}
-                  >
-                    <option value="">Select Category</option>
-                    {categories.map((cat) => (
-                      <option key={cat.value} value={cat.value}>{cat.label}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                </div>
+                <SearchableCustomerSelect
+                  customers={categoryOptions}
+                  value={formData.itemCategory}
+                  onChange={(option) => {
+                    setFormData((prev) => ({ ...prev, itemCategory: option?._id || "" }));
+                    setItemCategoryError("");
+                  }}
+                  triggerRef={itemCategoryRef}
+                  disabled={optionsLoading}
+                  error={!!itemCategoryError}
+                  placeholder={optionsLoading ? "Loading..." : "Select Category"}
+                  getLabel={(option) => option.label}
+                  getSearchText={(option) => option.label.toLowerCase()}
+                  emptyText="No category found"
+                />
                 {itemCategoryError && (
                   <p className="mt-1.5 text-xs text-rose-500">{itemCategoryError}</p>
                 )}
@@ -460,21 +468,18 @@ function UpdateInventoryItem() {
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Preferred Supplier
               </label>
-              <div className="relative">
-                <select
-                  name="preferredSupplierId"
-                  value={formData.preferredSupplierId}
-                  onChange={handleChange}
-                  disabled={optionsLoading}
-                  className="w-full appearance-none rounded-lg border border-gray-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 disabled:opacity-50"
-                >
-                  <option value="">Select Supplier</option>
-                  {suppliers.map((supplier) => (
-                    <option key={supplier._id} value={supplier._id}>{supplier.supplierName}</option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-              </div>
+              <SearchableCustomerSelect
+                customers={supplierOptions}
+                value={formData.preferredSupplierId}
+                onChange={(option) =>
+                  setFormData((prev) => ({ ...prev, preferredSupplierId: option?._id || "" }))
+                }
+                disabled={optionsLoading}
+                placeholder={optionsLoading ? "Loading..." : "Select Supplier"}
+                getLabel={(option) => option.label}
+                getSearchText={(option) => option.label.toLowerCase()}
+                emptyText="No supplier found"
+              />
             </div>
 
             <div>
@@ -534,16 +539,15 @@ function UpdateInventoryItem() {
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Warehouse / Storage Area
               </label>
-              <div className="relative">
-                <select
-                  defaultValue="Sector I-9 Warehouse A"
-                  className="w-full appearance-none rounded-lg border border-gray-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
-                >
-                  <option value="Sector I-9 Warehouse A">Sector I-9 Warehouse A</option>
-                  <option value="Sector I-9 Warehouse B">Sector I-9 Warehouse B</option>
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-              </div>
+              <SearchableCustomerSelect
+                customers={WAREHOUSE_OPTIONS}
+                value={warehouseArea}
+                onChange={(option) => setWarehouseArea(option?._id || "")}
+                placeholder="Select Warehouse / Storage Area"
+                getLabel={(option) => option.label}
+                getSearchText={(option) => option.label.toLowerCase()}
+                emptyText="No warehouse found"
+              />
             </div>
 
             <div>

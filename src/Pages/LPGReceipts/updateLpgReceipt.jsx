@@ -5,6 +5,7 @@ import { useToast } from "../../utils/GlobalToast";
 import { useLpgReceiptById, useUpdateLpgReceipt } from "../../queries/lpgReceipts/lpgReceipts.queries";
 import { useSuppliers } from "../../queries/suppliers/suppliers.queries";
 import { useEmployees } from "../../queries/employees/employees.queries";
+import SearchableCustomerSelect from "../../components/SearchableCustomerSelect";
 
 const toDateTimeLocal = (value) => {
   if (!value) return "";
@@ -232,29 +233,22 @@ function UpdateLpgReceipt() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Supplier <span className="text-rose-500">*</span>
                 </label>
-                <div className="relative">
-                  <select
-                    ref={supplierIdRef}
-                    value={supplierId}
-                    onChange={(e) => {
-                      setSupplierId(e.target.value);
-                      clearError(setSupplierIdError);
-                    }}
-                    className={`w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:ring-2 ${
-                      supplierIdError
-                        ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
-                        : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
-                    }`}
-                  >
-                    <option value="">Select Supplier</option>
-                    {supplierOptions.map((s) => (
-                      <option key={s._id} value={s._id}>
-                        {s.supplierName || s.supplierCode || s.name}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                </div>
+                <SearchableCustomerSelect
+                  customers={supplierOptions}
+                  value={supplierId}
+                  onChange={(option) => {
+                    setSupplierId(option?._id || "");
+                    clearError(setSupplierIdError);
+                  }}
+                  triggerRef={supplierIdRef}
+                  error={!!supplierIdError}
+                  placeholder="Select Supplier"
+                  getLabel={(s) => s.supplierName || s.supplierCode || s.name}
+                  getSearchText={(s) =>
+                    `${s.supplierName || ""} ${s.supplierCode || ""} ${s.name || ""}`.toLowerCase()
+                  }
+                  emptyText="No supplier found"
+                />
                 {supplierIdError && (
                   <p className="mt-1.5 text-xs text-rose-500">{supplierIdError}</p>
                 )}
@@ -377,21 +371,17 @@ function UpdateLpgReceipt() {
                     Received By (Employee){" "}
                     
                   </label>
-                  <div className="relative">
-                    <select
-                      value={receivedByEmployeeId}
-                      onChange={(e) => setReceivedByEmployeeId(e.target.value)}
-                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                    >
-                      <option value="">Select Employee</option>
-                      {employees.map((employee) => (
-                        <option key={employee._id} value={employee._id}>
-                          {employee.fullName || employee.employeeCode}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                  </div>
+                  <SearchableCustomerSelect
+                    customers={employees}
+                    value={receivedByEmployeeId}
+                    onChange={(option) => setReceivedByEmployeeId(option?._id || "")}
+                    placeholder="Select Employee"
+                    getLabel={(employee) => employee.fullName || employee.employeeCode}
+                    getSearchText={(employee) =>
+                      `${employee.fullName || ""} ${employee.employeeCode || ""}`.toLowerCase()
+                    }
+                    emptyText="No employee found"
+                  />
                 </div>
 
                 <div>

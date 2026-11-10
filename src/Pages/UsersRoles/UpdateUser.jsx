@@ -9,6 +9,7 @@ import {
     useUserById,
 } from "../../queries/users/users.queries";
 import { useToast } from "../../utils/GlobalToast";
+import SearchableCustomerSelect from "../../components/SearchableCustomerSelect";
 
 const badgeColors = {
     emerald: "bg-emerald-50 text-emerald-600",
@@ -75,6 +76,17 @@ function UpdateUser() {
     const passwordMutation = useChangeUserPassword();
     const roles = rolesData?.data?.items || [];
     const employees = employeesData?.data?.items || [];
+
+    const roleOptions = roles.map((role) => ({
+        _id: role._id,
+        label: role.roleName || role.name || role.title || role.displayName,
+        searchText: `${role.roleName || ""} ${role.name || ""} ${role.title || ""} ${role.displayName || ""}`.toLowerCase(),
+    }));
+    const employeeOptions = employees.map((employee) => ({
+        _id: employee._id,
+        label: `${employee.fullName} (${employee.employeeCode})`,
+        searchText: `${employee.fullName || ""} ${employee.employeeCode || ""}`.toLowerCase(),
+    }));
     const user = userData?.data?.user || userData?.data;
 
     useEffect(() => {
@@ -359,35 +371,27 @@ function UpdateUser() {
                 </h2>
                 <div className="space-y-2.5 p-3">
                   <Field label="Assigned Role" required>
-                    <select
+                    <SearchableCustomerSelect
+                      customers={roleOptions}
                       value={form.role}
-                      onChange={updateField("role")}
-                      className={selectClass}
+                      onChange={(option) => updateField("role")({ target: { value: option?._id || "" } })}
                       disabled={areRolesLoading}
-                    >
-                      <option value="" disabled>
-                        Select the Assigned Role
-                      </option>
-                      {roles.map((role) => (
-                        <option key={role._id} value={role._id}>
-                          {role.roleName}
-                        </option>
-                      ))}
-                    </select>
+                      placeholder="Select the Assigned Role"
+                      getLabel={(option) => option.label}
+                      getSearchText={(option) => option.searchText || option.label.toLowerCase()}
+                      emptyText="No role found"
+                    />
                   </Field>
                   <Field label="Linked Employee">
-                    <select
+                    <SearchableCustomerSelect
+                      customers={employeeOptions}
                       value={form.employee}
-                      onChange={updateField("employee")}
-                      className={selectClass}
-                    >
-                      <option value="">Not linked</option>
-                      {employees.map((employee) => (
-                        <option key={employee._id} value={employee._id}>
-                          {employee.fullName} ({employee.employeeCode})
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(option) => updateField("employee")({ target: { value: option?._id || "" } })}
+                      placeholder="Not linked"
+                      getLabel={(option) => option.label}
+                      getSearchText={(option) => option.searchText || option.label.toLowerCase()}
+                      emptyText="No employee found"
+                    />
                   </Field>
                   <p className="rounded bg-slate-50 px-2 py-2 text-[12px] leading-3">
                     <span>Role Description:</span>
