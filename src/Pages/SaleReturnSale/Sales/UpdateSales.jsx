@@ -375,7 +375,8 @@ function UpdateSales() {
                             value={item.product}
                             placeholder="Select"
                             onChange={(selectedItem) => {
-                              const unitPrice = selectedItem?.unitPriceAmount || 0;
+                              const amount = Number(selectedItem?.unitPriceAmount);
+                              const unitPrice = amount > 0 ? amount : "";
                               const product = selectedItem
                                 ? String(selectedItem._id || selectedItem.id)
                                 : "";
@@ -407,16 +408,16 @@ function UpdateSales() {
                             value={item.quantity}
                             onChange={(e) => updateLineItem(item.id, "quantity", e.target.value)}
                             placeholder="0"
-                            className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
+                            className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#008951]"
                           />
                         </td>
                         <td className="px-2 py-2">
                           <input
                             type="number"
-                            value={item.unitPrice}
+                            value={item.unitPrice === 0 || item.unitPrice === "0" ? "" : item.unitPrice}
                             onChange={(e) => updateLineItem(item.id, "unitPrice", e.target.value)}
                             placeholder="0"
-                            className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
+                            className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#008951]"
                           />
                         </td>
                         <td className="px-2 py-2">
@@ -425,7 +426,7 @@ function UpdateSales() {
                             value={item.discount}
                             onChange={(e) => updateLineItem(item.id, "discount", e.target.value)}
                             placeholder="0"
-                            className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
+                            className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#008951]"
                           />
                         </td>
                         <td className="px-2 py-2">
@@ -492,13 +493,13 @@ function UpdateSales() {
                   type="number"
                   min="0"
                   max={totals.grandTotal}
-                  value={amountPaid}
+                  value={amountPaid === 0 || amountPaid === "0" ? "" : amountPaid}
                   onChange={(e) => {
                     const value = Number(e.target.value) || 0;
                     setAmountPaid(Math.min(Math.max(0, value), totals.grandTotal));
                   }}
                   placeholder="0"
-                  className="w-40 shrink-0 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951] text-right"
+                  className="w-40 shrink-0 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#008951] text-right"
                 />
               </div>
 
