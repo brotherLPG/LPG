@@ -8,6 +8,23 @@ import Returnsales from "../ReturnSales/Returnsales";
 import { usePermissions } from "../../../contexts/PermissionContext";
 import { usePrint } from "../../../utils/usePrint";
 
+const formatMoney = (value) =>
+  Number(value || 0).toLocaleString("en-PK", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+const saleOutstanding = (sale) => {
+  if (sale.outstandingAmount !== undefined && sale.outstandingAmount !== null && sale.outstandingAmount !== "") {
+    return Number(sale.outstandingAmount) || 0;
+  }
+  return (
+    (Number(sale.totalAmount) || 0)
+    - (Number(sale.returnedAmount) || 0)
+    - (Number(sale.paidAmount) || 0)
+  );
+};
+
 function Sales() {
   const navigate = useNavigate();
   const { can } = usePermissions();
@@ -56,6 +73,12 @@ function Sales() {
   const cardSales = cardSalesData?.data?.items || sales;
   const cardTotal = cardSalesData?.data?.pagination?.total ?? pagination.total ?? 0;
   const cardsCoverAllSales = cardSales.length > 0 && cardSales.length >= cardTotal;
+  const pendingFromSales = Math.round(
+    cardSales.reduce((sum, sale) => {
+      if (sale.saleStatus === "cancelled" || sale.saleStatus === "draft") return sum;
+      return sum + saleOutstanding(sale);
+    }, 0) * 100
+  ) / 100;
   const totalsFromPage = cardSales.reduce(
     (totals, sale) => {
       if (sale.saleStatus === "cancelled" || sale.saleStatus === "draft") return totals;
@@ -91,7 +114,9 @@ function Sales() {
       : cardsCoverAllSales
         ? totalsFromPage.credit
         : summary.creditSalesAmount || 0,
-    pendingCredit: summary.pendingCreditAmount || 0,
+    pendingCredit: cardsCoverAllSales
+      ? pendingFromSales
+      : summary.pendingCreditAmount || 0,
     totalCount: hasAllTimeSummary
       ? summary.totalSalesCount
       : cardsCoverAllSales
@@ -226,8 +251,8 @@ function Sales() {
         "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
       cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
       renderCell: (item) => (
-        <span className="text-slate-900 font-bold text-[13px]">
-          PKR {item.totalAmount.toLocaleString()}
+        <span className="text-slate-900 font-semibold text-[13px] tabular-nums tracking-tight">
+          {formatMoney(item.totalAmount)}
         </span>
       ),
     },
@@ -246,8 +271,8 @@ function Sales() {
         "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
       cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
       renderCell: (item) => (
-        <span className="text-emerald-600 font-bold text-[13px]">
-          PKR {item.paidAmount?.toLocaleString() || 0}
+        <span className="text-emerald-600 font-semibold text-[13px] tabular-nums tracking-tight">
+          {formatMoney(item.paidAmount)}
         </span>
       ),
     },
@@ -258,8 +283,8 @@ function Sales() {
         "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
       cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
       renderCell: (item) => (
-        <span className="text-orange-600 font-bold text-[13px]">
-          PKR {item.returnedAmount?.toLocaleString() || 0}
+        <span className="text-orange-600 font-semibold text-[13px] tabular-nums tracking-tight">
+          {formatMoney(item.returnedAmount)}
         </span>
       ),
     },
@@ -443,67 +468,59 @@ function Sales() {
           <>
             {/* Summary Cards */}
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-tertiary">
-                      Total Sales
-                    </p>
-                    <p className="mt-2 text-2xl font-extrabold text-accent-blue">
-                      PKR {Number(summaryStats.total || 0).toLocaleString()}
-                    </p>
-                    <p className="mt-1 text-xs text-tertiary">
-                      {summaryStats.totalCount} sales
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-tertiary">
-                      Cash Sales
-                    </p>
-                    <p className="mt-2 text-2xl font-extrabold text-emerald-600">
-                      PKR {Number(summaryStats.cash || 0).toLocaleString()}
-                    </p>
-                    <p className="mt-1 text-xs text-tertiary">
-                      {summaryStats.cashCount} sales
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-tertiary">
-                      Credit Sales
-                    </p>
-                    <p className="mt-2 text-2xl font-extrabold text-blue-600">
-                      PKR {Number(summaryStats.credit || 0).toLocaleString()}
-                    </p>
-                    <p className="mt-1 text-xs text-tertiary">
-                      {summaryStats.creditCount} sales
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-tertiary">
-                      Pending Credit
-                    </p>
-                    <p className="mt-2 text-2xl font-extrabold text-purple-600">
-                      PKR {Number(summaryStats.pendingCredit || 0).toLocaleString()}
-                    </p>
-                    <p className="mt-1 text-xs text-slate-400">Outstanding</p>
-                  </div>
-                </div>
-              </div>
+              {[
+                {
+                  label: "Total Sales",
+                  amount: summaryStats.total,
+                  hint: `${summaryStats.totalCount} sales`,
+                  card: "border-slate-200/80 bg-white",
+                  labelClass: "text-slate-500",
+                  valueClass: "text-slate-900",
+                  hintClass: "text-slate-400",
+                },
+                {
+                  label: "Cash Sales",
+                  amount: summaryStats.cash,
+                  hint: `${summaryStats.cashCount} sales`,
+                  card: "border-emerald-100 bg-white",
+                  labelClass: "text-emerald-700/80",
+                  valueClass: "text-emerald-600",
+                  hintClass: "text-slate-400",
+                },
+                {
+                  label: "Credit Sales",
+                  amount: summaryStats.credit,
+                  hint: `${summaryStats.creditCount} sales`,
+                  card: "border-blue-100 bg-white",
+                  labelClass: "text-blue-700/80",
+                  valueClass: "text-blue-600",
+                  hintClass: "text-slate-400",
+                },
+                {
+                  label: "Pending Credit",
+                  amount: summaryStats.pendingCredit,
+                  hint: "Outstanding",
+                  card: "border-violet-200 bg-violet-50/80",
+                  labelClass: "text-violet-700",
+                  valueClass: "text-violet-600",
+                  hintClass: "text-violet-400",
+                },
+              ].map((card) => (
+                <article
+                  key={card.label}
+                  className={`rounded-2xl border px-5 py-4 shadow-sm ${card.card}`}
+                >
+                  <p className={`text-[13px] font-medium tracking-wide ${card.labelClass}`}>
+                    {card.label}
+                  </p>
+                  <p className={`mt-2.5 text-[1.7rem] font-semibold leading-none tracking-tight tabular-nums ${card.valueClass}`}>
+                    {formatMoney(card.amount)}
+                  </p>
+                  <p className={`mt-2.5 text-xs font-medium ${card.hintClass}`}>
+                    {card.hint}
+                  </p>
+                </article>
+              ))}
             </div>
 
             {/* Filters */}
