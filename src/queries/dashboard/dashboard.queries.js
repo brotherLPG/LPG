@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../queryKeys";
 import {
   getOperationsOverview,
@@ -6,7 +6,7 @@ import {
 } from "../../api/dashboard.api";
 
 export const DEFAULT_OPERATIONS_PARAMS = {
-  days: 7,
+  days: 90,
   alertLimit: 10,
   recentLimit: 5,
 };
@@ -20,6 +20,7 @@ export const useOperationsOverview = (params = DEFAULT_OPERATIONS_PARAMS, option
     queryKey: queryKeys.dashboard.operations(params),
     queryFn: () => getOperationsOverview(params),
     enabled: options.enabled ?? true,
+    placeholderData: keepPreviousData,
   });
 };
 

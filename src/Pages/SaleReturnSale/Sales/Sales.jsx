@@ -42,32 +42,71 @@ function Sales() {
   };
 
   const { data: salesData, isLoading } = useSales(params);
+  const { data: cardSalesData } = useSales({ page: 1, limit: 100 });
 
   const sales = salesData?.data?.items || [];
   const pagination = salesData?.data?.pagination || { total: 0, totalPages: 0, page: 1, limit: 10 };
-  const summary = salesData?.data?.summary || {
-    todaySalesAmount: 0,
-    todaySalesCount: 0,
-    cashSalesAmount: 0,
-    cashSalesCount: 0,
-    creditSalesAmount: 0,
-    creditSalesCount: 0,
-    pendingCreditAmount: 0,
-  };
+  const summary = cardSalesData?.data?.summary || salesData?.data?.summary || {};
   const meta = salesData?.data?.meta || {
     saleTypes: [],
     paymentStatuses: [],
     saleStatuses: [],
   };
 
+  const cardSales = cardSalesData?.data?.items || sales;
+  const cardTotal = cardSalesData?.data?.pagination?.total ?? pagination.total ?? 0;
+  const cardsCoverAllSales = cardSales.length > 0 && cardSales.length >= cardTotal;
+  const totalsFromPage = cardSales.reduce(
+    (totals, sale) => {
+      if (sale.saleStatus === "cancelled" || sale.saleStatus === "draft") return totals;
+      const amount = Number(sale.totalAmount) || 0;
+      const isCredit = sale.saleType === "credit" || sale.type === "credit";
+      totals.total += amount;
+      totals.totalCount += 1;
+      if (isCredit) {
+        totals.credit += amount;
+        totals.creditCount += 1;
+      } else {
+        totals.cash += amount;
+        totals.cashCount += 1;
+      }
+      return totals;
+    },
+    { total: 0, totalCount: 0, cash: 0, cashCount: 0, credit: 0, creditCount: 0 }
+  );
+  const hasAllTimeSummary = summary.totalSalesAmount != null;
   const summaryStats = {
-    total: summary.todaySalesAmount,
-    cash: summary.cashSalesAmount,
-    credit: summary.creditSalesAmount,
-    pendingCredit: summary.pendingCreditAmount,
-    totalCount: summary.todaySalesCount,
-    cashCount: summary.cashSalesCount,
-    creditCount: summary.creditSalesCount,
+    total: hasAllTimeSummary
+      ? summary.totalSalesAmount
+      : cardsCoverAllSales
+        ? totalsFromPage.total
+        : summary.todaySalesAmount || 0,
+    cash: hasAllTimeSummary
+      ? summary.cashSalesAmount
+      : cardsCoverAllSales
+        ? totalsFromPage.cash
+        : summary.cashSalesAmount || 0,
+    credit: hasAllTimeSummary
+      ? summary.creditSalesAmount
+      : cardsCoverAllSales
+        ? totalsFromPage.credit
+        : summary.creditSalesAmount || 0,
+    pendingCredit: summary.pendingCreditAmount || 0,
+    totalCount: hasAllTimeSummary
+      ? summary.totalSalesCount
+      : cardsCoverAllSales
+        ? totalsFromPage.totalCount
+        : summary.todaySalesCount || 0,
+    cashCount: hasAllTimeSummary
+      ? summary.cashSalesCount
+      : cardsCoverAllSales
+        ? totalsFromPage.cashCount
+        : summary.cashSalesCount || 0,
+    creditCount: hasAllTimeSummary
+      ? summary.creditSalesCount
+      : cardsCoverAllSales
+        ? totalsFromPage.creditCount
+        : summary.creditSalesCount || 0,
   };
 
   const handlePrintSale = (item) => {
@@ -408,10 +447,10 @@ function Sales() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-semibold text-tertiary">
-                      Today's Sales
+                      Total Sales
                     </p>
                     <p className="mt-2 text-2xl font-extrabold text-accent-blue">
-                      PKR {summaryStats.total.toLocaleString()}
+                      PKR {Number(summaryStats.total || 0).toLocaleString()}
                     </p>
                     <p className="mt-1 text-xs text-tertiary">
                       {summaryStats.totalCount} sales
@@ -427,7 +466,7 @@ function Sales() {
                       Cash Sales
                     </p>
                     <p className="mt-2 text-2xl font-extrabold text-emerald-600">
-                      PKR {summaryStats.cash.toLocaleString()}
+                      PKR {Number(summaryStats.cash || 0).toLocaleString()}
                     </p>
                     <p className="mt-1 text-xs text-tertiary">
                       {summaryStats.cashCount} sales
@@ -443,7 +482,7 @@ function Sales() {
                       Credit Sales
                     </p>
                     <p className="mt-2 text-2xl font-extrabold text-blue-600">
-                      PKR {summaryStats.credit.toLocaleString()}
+                      PKR {Number(summaryStats.credit || 0).toLocaleString()}
                     </p>
                     <p className="mt-1 text-xs text-tertiary">
                       {summaryStats.creditCount} sales
@@ -459,7 +498,7 @@ function Sales() {
                       Pending Credit
                     </p>
                     <p className="mt-2 text-2xl font-extrabold text-purple-600">
-                      PKR {summaryStats.pendingCredit.toLocaleString()}
+                      PKR {Number(summaryStats.pendingCredit || 0).toLocaleString()}
                     </p>
                     <p className="mt-1 text-xs text-slate-400">Outstanding</p>
                   </div>

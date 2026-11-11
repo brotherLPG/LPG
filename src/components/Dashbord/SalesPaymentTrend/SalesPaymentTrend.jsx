@@ -76,6 +76,7 @@ function SalesPaymentTrend({ trend }) {
     Math.round((maxY / tickCount) * (tickCount - index))
   );
 
+  const labelStep = Math.max(1, Math.ceil(series.length / 6));
   const salesPoints = toPoints(
     series.map((item) => item.sales),
     maxY
@@ -159,18 +160,23 @@ function SalesPaymentTrend({ trend }) {
               );
             })}
 
-            {series.map((item, index) => (
-              <text
-                key={`${item.date}-${index}`}
-                x={salesPoints[index].x}
-                y={CHART_HEIGHT - 12}
-                textAnchor="middle"
-                className="fill-slate-400"
-                fontSize="11"
-              >
-                {item.date}
-              </text>
-            ))}
+            {series.map((item, index) => {
+              const showLabel =
+                index % labelStep === 0 || index === series.length - 1;
+              if (!showLabel) return null;
+              return (
+                <text
+                  key={`${item.date}-${index}`}
+                  x={salesPoints[index].x}
+                  y={CHART_HEIGHT - 12}
+                  textAnchor="middle"
+                  className="fill-slate-400"
+                  fontSize="11"
+                >
+                  {item.date}
+                </text>
+              );
+            })}
 
             <path
               d={toSmoothPath(salesPoints)}

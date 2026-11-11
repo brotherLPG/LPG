@@ -1,8 +1,36 @@
 import { useNavigate } from "react-router-dom";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, CirclePlus } from "lucide-react";
 import StorageTanksimage from "../../assets/Images/StorageTanks.jpg"
 import GlobalTable from "../../utils/GlobalTable"
 import { useStorageTankDashboard } from "../../queries/storageTanks/storageTanks.queries"
+
+function stockLevelTone(percent) {
+  if (percent >= 70) {
+    return {
+      bar: "from-emerald-400 via-green-500 to-emerald-600",
+      badge: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      alert: "bg-emerald-50 border-emerald-200",
+      alertText: "text-emerald-800",
+      icon: "text-emerald-600",
+    };
+  }
+  if (percent >= 35) {
+    return {
+      bar: "from-amber-300 via-yellow-400 to-amber-500",
+      badge: "bg-amber-50 text-amber-800 border-amber-200",
+      alert: "bg-amber-50 border-amber-200",
+      alertText: "text-amber-800",
+      icon: "text-amber-500",
+    };
+  }
+  return {
+    bar: "from-red-400 via-rose-500 to-red-600",
+    badge: "bg-red-50 text-red-700 border-red-200",
+    alert: "bg-red-50 border-red-200",
+    alertText: "text-red-800",
+    icon: "text-red-500",
+  };
+}
 
 function StorageTanks() {
   const navigate = useNavigate();
@@ -48,6 +76,8 @@ function StorageTanks() {
     percentage: tankData?.data?.fillPercent || 0,
     warning: tankData?.data?.stockAlert || "Stock status normal",
   };
+  const fillPercent = Math.max(0, Math.min(100, Number(currentStock.percentage) || 0));
+  const stockTone = stockLevelTone(fillPercent);
 
   const recentReceipts = tankData?.data?.recentReceipts?.map(receipt => ({
     receipt: receipt.receiptNumber,
@@ -160,14 +190,24 @@ function StorageTanks() {
         {/* =========================================
             HEADER
         ========================================= */}
-        <div className="pb-2 my-1">
-          <h1 className=" text-2xl font-bold tracking-tight text-BLUE-dark">
-            {tankData?.data?.tankName || 'Tank'}
-          </h1>
+        <div className="my-1 flex flex-col gap-3 pb-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className=" text-2xl font-bold tracking-tight text-BLUE-dark">
+              {tankData?.data?.tankName || 'Tank'}
+            </h1>
 
-          <p className="text-sm text-tertiary">
-            Real-time storage telemetry, capacity status, and operational logs
-          </p>
+            <p className="text-sm text-tertiary">
+              Real-time storage telemetry, capacity status, and operational logs
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate("/lpg-receipts/receive")}
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-bg-blue px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#007545]"
+          >
+            <CirclePlus className="h-4 w-4" strokeWidth={3} />
+            Create Receipt
+          </button>
         </div>
 
         {/* =========================================
@@ -288,27 +328,27 @@ function StorageTanks() {
                 </span>
               </div>
 
-              <div className="w-full h-6 bg-slate-200 rounded-full overflow-hidden">
+              <div className="h-3.5 w-full overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200">
                 <div
-                  className="h-full bg-linear-to-r from-orange-400 to-orange-500 rounded-full transition-all duration-300"
-                  style={{ width: `${currentStock.percentage}%` }}
+                  className={`h-full rounded-full bg-linear-to-r shadow-sm transition-all duration-500 ${stockTone.bar}`}
+                  style={{ width: `${fillPercent}%` }}
                 />
               </div>
 
-              <div className="flex justify-between items-center mt-2">
+              <div className="mt-2 flex items-center justify-between">
                 <span className="text-[12px] text-tertiary">0 KG</span>
-                <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-[11px] font-semibold rounded-full border border-orange-300">
-                  {currentStock.percentage}% Filled
+                <span className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${stockTone.badge}`}>
+                  {fillPercent}% Filled
                 </span>
                 <span className="text-[12px] text-tertiary">{formatNumber(tankData?.data?.capacityKg)} KG</span>
               </div>
-            </div>
 
-            <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-              <p className="text-[11px] text-amber-700 font-medium">
-                {currentStock.warning}
-              </p>
+              <div className={`mt-4 flex items-start gap-2 rounded-lg border p-3 ${stockTone.alert}`}>
+                <AlertTriangle className={`mt-0.5 h-5 w-5 shrink-0 ${stockTone.icon}`} />
+                <p className={`text-[11px] font-medium ${stockTone.alertText}`}>
+                  {currentStock.warning}
+                </p>
+              </div>
             </div>
           </div>
         </div>

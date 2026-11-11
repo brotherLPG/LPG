@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   AlertTriangle,
@@ -21,14 +21,22 @@ import {
   useOperationsOverview,
 } from "../../queries/dashboard/dashboard.queries";
 
+const TREND_RANGES = [
+  { days: 7, label: "7 days" },
+  { days: 30, label: "30 days" },
+  { days: 90, label: "90 days" },
+];
+
 function Dashboard() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [trendDays, setTrendDays] = useState(DEFAULT_OPERATIONS_PARAMS.days);
+  const operationsParams = { ...DEFAULT_OPERATIONS_PARAMS, days: trendDays };
   const {
     data: operationsResponse,
     isLoading,
     error,
-  } = useOperationsOverview(DEFAULT_OPERATIONS_PARAMS);
+  } = useOperationsOverview(operationsParams);
   const {
     data: inventoryAlertsResponse,
     isLoading: isAlertsLoading,
@@ -149,6 +157,25 @@ function Dashboard() {
 
           <div className="mt-2 mb-2 flex flex-wrap items-center gap-2">
             <span className="text-xs text-slate-400">{todayLabel}</span>
+            <div className="flex rounded-full bg-white p-1 shadow-sm ring-1 ring-slate-200">
+              {TREND_RANGES.map((range) => {
+                const active = trendDays === range.days;
+                return (
+                  <button
+                    key={range.days}
+                    type="button"
+                    onClick={() => setTrendDays(range.days)}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                      active
+                        ? "bg-[#2563EB] text-white"
+                        : "text-slate-500 hover:text-slate-700"
+                    }`}
+                  >
+                    {range.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
