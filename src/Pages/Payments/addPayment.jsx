@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { useGetPaymentFormOptions, useCreatePayment } from "../../queries/payments/payments.queries";
@@ -122,7 +122,29 @@ function AddPayment() {
     accountId: "",
     referenceNumber: "",
   });
+  const defaultsApplied = useRef(false);
   const { data: formOptions, isLoading: optionsLoading } = useGetPaymentFormOptions();
+
+  useEffect(() => {
+    if (defaultsApplied.current || !formOptions?.data) return;
+    const methods = formOptions.data.paymentMethods || [];
+    const accounts = formOptions.data.accounts || [];
+    const cashMethod = methods.find(
+      (method) => String(method.value || "").toLowerCase() === "cash"
+    );
+    const cashAccount = accounts.find((account) =>
+      /cash on hand/i.test(
+        `${account.accountName || ""} ${account.label || ""}`
+      )
+    );
+    if (!cashMethod && !cashAccount) return;
+    defaultsApplied.current = true;
+    setFormData((previous) => ({
+      ...previous,
+      paymentMethod: previous.paymentMethod || cashMethod?.value || "",
+      accountId: previous.accountId || cashAccount?._id || "",
+    }));
+  }, [formOptions]);
 
   const isRefund = paymentDirection === "refund";
   const isCustomerReceipt = paymentDirection === "receive";
