@@ -76,7 +76,8 @@ export function salePriceTip({ unitPrice, discount, quantity, exact, profitable 
   }
 
   const gap = roundMoney(target - net);
-  if (target > cost && gap > 0.009) {
+  const aboveCost = roundMoney(net - cost);
+  if (target > cost && aboveCost > 0.009 && gap > 0.009) {
     return {
       level: "thin",
       message: `Thin profit. Rs ${gap.toFixed(2)} under the profitable price.`,

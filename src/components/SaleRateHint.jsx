@@ -16,7 +16,7 @@ function SaleRateHint({ suggestion, tip, unitPrice, onPick }) {
   const profitableOn = priceMatches(unitPrice, suggestion.profitable);
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex w-full max-w-[680px] flex-wrap items-center gap-x-2 gap-y-1">
       <span className="text-[11px] text-slate-500">
         Purchase rate Rs {formatRs(suggestion.averageCostPerKg)}/kg
       </span>
