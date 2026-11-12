@@ -86,16 +86,13 @@ function Sales() {
       const isCredit = sale.saleType === "credit" || sale.type === "credit";
       totals.total += amount;
       totals.totalCount += 1;
-      if (isCredit) {
-        totals.credit += amount;
-        totals.creditCount += 1;
-      } else {
+      if (!isCredit) {
         totals.cash += amount;
         totals.cashCount += 1;
       }
       return totals;
     },
-    { total: 0, totalCount: 0, cash: 0, cashCount: 0, credit: 0, creditCount: 0 }
+    { total: 0, totalCount: 0, cash: 0, cashCount: 0 }
   );
   const hasAllTimeSummary = summary.totalSalesAmount != null;
   const summaryStats = {
@@ -109,11 +106,6 @@ function Sales() {
       : cardsCoverAllSales
         ? totalsFromPage.cash
         : summary.cashSalesAmount || 0,
-    credit: hasAllTimeSummary
-      ? summary.creditSalesAmount
-      : cardsCoverAllSales
-        ? totalsFromPage.credit
-        : summary.creditSalesAmount || 0,
     pendingCredit: cardsCoverAllSales
       ? pendingFromSales
       : summary.pendingCreditAmount || 0,
@@ -127,11 +119,6 @@ function Sales() {
       : cardsCoverAllSales
         ? totalsFromPage.cashCount
         : summary.cashSalesCount || 0,
-    creditCount: hasAllTimeSummary
-      ? summary.creditSalesCount
-      : cardsCoverAllSales
-        ? totalsFromPage.creditCount
-        : summary.creditSalesCount || 0,
   };
 
   const handlePrintSale = (item) => {
@@ -467,7 +454,7 @@ function Sales() {
         {activeTab === "sales" && (
           <>
             {/* Summary Cards */}
-            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
               {[
                 {
                   label: "Total Sales",
@@ -485,15 +472,6 @@ function Sales() {
                   card: "border-emerald-100 bg-white",
                   labelClass: "text-emerald-700/80",
                   valueClass: "text-emerald-600",
-                  hintClass: "text-slate-400",
-                },
-                {
-                  label: "Credit Sales",
-                  amount: summaryStats.credit,
-                  hint: `${summaryStats.creditCount} sales`,
-                  card: "border-blue-100 bg-white",
-                  labelClass: "text-blue-700/80",
-                  valueClass: "text-blue-600",
                   hintClass: "text-slate-400",
                 },
                 {
