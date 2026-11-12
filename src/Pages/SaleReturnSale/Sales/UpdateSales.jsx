@@ -44,17 +44,19 @@ function UpdateSales() {
   useEffect(() => {
     if (saleData?.data) {
       const sale = saleData.data;
-      setCustomerId(sale.customerId);
+      setCustomerId(sale.customerId?._id || sale.customerId || "");
       setInvoiceDate(sale.invoiceDate?.split('T')[0] || "");
       setPaymentTermDays(sale.paymentTermDays || 0);
       setRemarks(sale.remarks || "");
       setSaleType(sale.paymentMethod || "cash");
       setAmountPaid(sale.paidAmount || 0);
+      setPaymentAccountId(sale.accountId?._id || sale.accountId || "");
+      setReferenceNumber(sale.referenceNumber || "");
 
       if (sale.lineItems && sale.lineItems.length > 0) {
         const mappedLineItems = sale.lineItems.map((item, index) => ({
           id: index + 1,
-          product: item.inventoryItemId,
+          product: item.inventoryItemId?._id || item.inventoryItemId,
           cylinderType: "",
           quantity: item.quantity,
           unitPrice: item.unitPriceAmount,
@@ -124,7 +126,10 @@ function UpdateSales() {
 
   const roundMoney = (value) =>
     Math.round((Number(value) + Number.EPSILON) * 100) / 100;
-  const outstanding = roundMoney(totals.grandTotal - (Number(amountPaid) || 0));
+  const returnedAmount = roundMoney(saleData?.data?.returnedAmount || 0);
+  const netTotal = roundMoney(totals.grandTotal - returnedAmount);
+  const outstanding = roundMoney(netTotal - (Number(amountPaid) || 0));
+  const isCancelled = saleData?.data?.saleStatus === "cancelled";
   const invoiceCredit = outstanding < 0 ? roundMoney(-outstanding) : 0;
   const amountStillDue = outstanding > 0 ? outstanding : 0;
 
@@ -147,6 +152,11 @@ function UpdateSales() {
   const paymentStatus = getPaymentStatus();
 
   const handleSubmit = async () => {
+    if (isCancelled) {
+      toast.error("A cancelled sale cannot be edited.");
+      return;
+    }
+
     const saleData = {
       customerId,
       invoiceDate: invoiceDate || new Date().toISOString().split('T')[0],
@@ -215,6 +225,11 @@ function UpdateSales() {
         <p className="text-sm text-tertiary">
           Update sales invoice and modify inventory allocation
         </p>
+        {isCancelled && (
+          <p className="mt-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+            This sale is cancelled, so it cannot be edited.
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -495,6 +510,14 @@ function UpdateSales() {
                   Rs. {totals.grandTotal.toFixed(2)}
                 </span>
               </div>
+              {returnedAmount > 0 && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-slate-600">Already Returned</span>
+                  <span className="text-sm font-medium text-slate-900">
+                    Rs. {returnedAmount.toFixed(2)}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-600">Amount Paid</span>
                 <input
@@ -584,10 +607,14 @@ function UpdateSales() {
         </button>
         <button
           onClick={handleSubmit}
-          disabled={updateSaleMutation.isPending}
+          disabled={updateSaleMutation.isPending || isCancelled}
           className="rounded-lg bg-gradient-bg-blue  px-6 py-2 text-sm font-medium text-white transition hover:bg-[#007545] disabled:opacity-50"
         >
-          {updateSaleMutation.isPending ? "Updating..." : "Update Invoice"}
+          {isCancelled
+            ? "Cancelled"
+            : updateSaleMutation.isPending
+              ? "Updating..."
+              : "Update Invoice"}
         </button>
       </div>
     </main>
