@@ -1,11 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { Fragment, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
-import { useCreateSale, useGetSaleFormOptions } from "../../../queries/sales/sales.queries";
+import { useCreateSale, useGetSaleFormOptions, useSaleGasRate } from "../../../queries/sales/sales.queries";
 import { useToast } from "../../../utils/GlobalToast";
 import SearchableCustomerSelect from "../../../components/SearchableCustomerSelect";
 import SearchableItemSelect from "../../../components/SearchableItemSelect";
-import { applyFilledCylinderPrices } from "../../../utils/cylinderPrice";
+import SaleRateHint from "../../../components/SaleRateHint";
+import { applyFilledCylinderPrices, salePriceTip, suggestedCylinderPrices } from "../../../utils/cylinderPrice";
 // import { useGetAccounts } from "../../../queries/accounts/accounts.queries";
 
 function AddSales() {
@@ -41,6 +42,7 @@ function AddSales() {
   const customers = formOptions.customers || [];
   const inventoryItems = formOptions.inventoryItems || [];
   const accounts = formOptions.accounts || [];
+  const gasRate = useSaleGasRate(formOptions.gasRate);
   const paymentTerms = formOptions.paymentTerms || [];
   const saleTypesOptions = formOptions.paymentMethods || []
 
@@ -481,9 +483,23 @@ function AddSales() {
                 <tbody>
                   {lineItems.map((item) => {
                     const row = calculateRow(item);
+                    const product = inventoryItems.find(
+                      (entry) => String(entry._id || entry.id) === String(item.product)
+                    );
+                    const suggestion = suggestedCylinderPrices(product, gasRate);
+                    const tip = suggestion
+                      ? salePriceTip({
+                          unitPrice: item.unitPrice,
+                          discount: item.discount,
+                          quantity: item.quantity,
+                          exact: suggestion.exact,
+                          profitable: suggestion.profitable,
+                        })
+                      : null;
 
                     return (
-                      <tr key={item.id} className="border-b border-slate-100 last:border-b-0">
+                      <Fragment key={item.id}>
+                      <tr className={suggestion ? "" : "border-b border-slate-100"}>
                         <td className="px-2 py-2">
                           <SearchableItemSelect
                             items={inventoryItems}
@@ -565,6 +581,19 @@ function AddSales() {
                           )}
                         </td>
                       </tr>
+                      {suggestion ? (
+                        <tr className="border-b border-slate-100 bg-slate-50/80">
+                          <td colSpan={6} className="px-2 py-2">
+                            <SaleRateHint
+                              suggestion={suggestion}
+                              tip={tip}
+                              unitPrice={item.unitPrice}
+                              onPick={(price) => updateLineItem(item.id, "unitPrice", String(price))}
+                            />
+                          </td>
+                        </tr>
+                      ) : null}
+                      </Fragment>
                     );
                   })}
                 </tbody>

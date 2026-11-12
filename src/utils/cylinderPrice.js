@@ -37,6 +37,55 @@ function roundMoney(value) {
   return Math.round((Number(value) + Number.EPSILON) * 100) / 100;
 }
 
+export function suggestedCylinderPrices(item, gasRate) {
+  if (!item || !isFilledCylinder(item)) return null;
+  const kg = itemCapacityKg(item);
+  const cost = Number(gasRate?.averageCostPerKg);
+  if (!(kg > 0) || !(cost > 0)) return null;
+
+  const profitPerKg = Number(gasRate?.profitPerKg);
+  const profitableRate = Number(gasRate?.profitableRatePerKg);
+  const rate = profitableRate > 0
+    ? profitableRate
+    : cost + (Number.isFinite(profitPerKg) && profitPerKg > 0 ? profitPerKg : 0);
+
+  return {
+    kg,
+    averageCostPerKg: cost,
+    profitPerKg: Number.isFinite(profitPerKg) ? profitPerKg : roundMoney(rate - cost),
+    exact: roundMoney(kg * cost),
+    profitable: roundMoney(kg * rate),
+  };
+}
+
+export function salePriceTip({ unitPrice, discount, quantity, exact, profitable }) {
+  const price = Number(unitPrice);
+  const cost = Number(exact);
+  const target = Number(profitable);
+  if (!(price > 0) || !(cost > 0)) return null;
+
+  const qty = Number(quantity) || 0;
+  const disc = Number(discount) || 0;
+  const net = roundMoney(price - (qty > 0 ? disc / qty : 0));
+  const loss = roundMoney(cost - net);
+  if (loss > 0.009) {
+    return {
+      level: "loss",
+      message: `Below purchase cost. Loss about Rs ${loss.toFixed(2)} on each cylinder.`,
+    };
+  }
+
+  const gap = roundMoney(target - net);
+  if (target > cost && gap > 0.009) {
+    return {
+      level: "thin",
+      message: `Thin profit. Rs ${gap.toFixed(2)} under the profitable price.`,
+    };
+  }
+
+  return null;
+}
+
 export function linkedUnitPrice(sourcePrice, sourceKg, targetKg) {
   const price = Number(sourcePrice);
   const from = Number(sourceKg);
