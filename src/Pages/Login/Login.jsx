@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertCircle, LoaderCircle} from "lucide-react";
 import logo from "../../assets/Images/logo.jpeg";
 import loginpimage from "../../assets/Images/loginpage.jpg";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../utils/GlobalToast";
 import { useLogin } from "../../queries/auth/auth.queries";
+import { hasOfflineProfile, saveOfflineVerifier, unlockOffline } from "../../offline/session";
+import { afterOnlineLogin } from "../../offline/httpOffline";
 
 function Login() {
   const navigate = useNavigate();
@@ -12,6 +14,11 @@ function Login() {
   const loginMutation = useLogin();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [canUnlockOffline, setCanUnlockOffline] = useState(false);
+
+  useEffect(() => {
+    hasOfflineProfile().then(setCanUnlockOffline);
+  }, []);
   const [form, setForm] = useState({
     emailAddress: "",
     password: "",
@@ -27,8 +34,26 @@ function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    if (!navigator.onLine) {
+      const unlocked = await unlockOffline(form.emailAddress, form.password);
+      if (!unlocked.ok) {
+        toast.error(unlocked.message);
+        return;
+      }
+      navigate("/dashboard");
+      toast.success("Offline session unlocked.");
+      return;
+    }
+
     loginMutation.mutate(form, {
-      onSuccess: () => {
+      onSuccess: async () => {
+        const user = JSON.parse(localStorage.getItem("user") || "null");
+        await saveOfflineVerifier({
+          email: form.emailAddress,
+          password: form.password,
+          user,
+        });
+        afterOnlineLogin();
         navigate("/dashboard");
         toast.success("Login successful!");
       },
@@ -94,6 +119,11 @@ function Login() {
             <p className="mt-2 text-sm text-tertiary">
               Access your LPG plant operations, inventory, and reports securely.
             </p>
+            {!navigator.onLine && canUnlockOffline && (
+              <p className="mt-3 text-sm font-medium text-amber-700">
+                No internet. Enter the same password to unlock this computer.
+              </p>
+            )}
 
             {loginMutation.isError && (
               <div className="mt-6 p-4 rounded-xl flex items-start gap-3 bg-error-light border border-error-light">

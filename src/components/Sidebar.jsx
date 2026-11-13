@@ -22,6 +22,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from "../assets/Images/logo.jpeg";
 import { useCurrentUser } from "../queries/auth/auth.queries";
 import { useRoleById } from "../queries/roles/roles.queries";
+import { endBrowserSession } from "../offline/session";
+import { SyncBadge } from "./SyncStatus";
 
 const isAllowedAccess = (permission) => {
   const access = String(permission?.access || "").trim().toLowerCase();
@@ -243,9 +245,7 @@ const Sidebar = () => {
   }, []);
 
   const handleSignOut = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("user");
+    endBrowserSession();
     navigate("/");
   };
 
@@ -260,6 +260,7 @@ const Sidebar = () => {
           <div>
             <h1 className="text-white text-lg font-bold">Brother LPG</h1>
             <p className="text-white/50 text-xs">ERP Management System</p>
+            <SyncBadge />
           </div>
         </div>
       </div>

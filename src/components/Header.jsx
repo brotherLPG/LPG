@@ -6,6 +6,7 @@ import {
   useNotifications,
   useMarkNotificationAsRead,
 } from '../queries/Notification/notificationQueries';
+import { endBrowserSession } from '../offline/session';
 
 function formatRelativeTime(value) {
   if (!value) return '—';
@@ -289,9 +290,7 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
                   <div className="border-t border-slate-100 my-1"></div>
                   <button
                     onClick={() => {
-                      localStorage.removeItem('token');
-                      localStorage.removeItem('refreshToken');
-                      localStorage.removeItem('user');
+                      endBrowserSession();
                       navigate('/');
                     }}
                     className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"

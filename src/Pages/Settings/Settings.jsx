@@ -4,6 +4,7 @@ import { Switch } from "@heroui/react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useChangePassword, useCurrentUser } from "../../queries/auth/auth.queries";
+import { updateOfflinePassword } from "../../offline/session";
 import { useUpdateUser } from "../../queries/users/users.queries";
 import { queryKeys } from "../../queries/queryKeys";
 import { useToast } from "../../utils/GlobalToast";
@@ -104,6 +105,9 @@ function Settings() {
         currentPassword: passwordForm.currentPassword,
         newPassword: passwordForm.newPassword,
       });
+      const email = currentUserResponse?.data?.emailAddress
+        || currentUserResponse?.data?.user?.emailAddress;
+      await updateOfflinePassword(email, passwordForm.newPassword);
       setPasswordForm({
         currentPassword: "",
         newPassword: "",

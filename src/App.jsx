@@ -9,9 +9,8 @@ import { ToastProvider } from './utils/GlobalToast';
 const PUBLIC_PATHS = ['/', '/registration', '/public/logs'];
 
 function hasAuthTokens() {
-  return Boolean(
-    localStorage.getItem('token') && localStorage.getItem('refreshToken')
-  );
+  if (localStorage.getItem('token') && localStorage.getItem('refreshToken')) return true;
+  return sessionStorage.getItem('offlineSession') === '1';
 }
 
 function App() {

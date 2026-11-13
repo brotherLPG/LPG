@@ -20,6 +20,7 @@ import {
   useInventoryAlerts,
   useOperationsOverview,
 } from "../../queries/dashboard/dashboard.queries";
+import { SyncStatus } from "../../components/SyncStatus";
 
 const TREND_RANGES = [
   { days: 7, label: "7 days" },
@@ -121,9 +122,12 @@ function Dashboard() {
 
   if (error) {
     return (
-      <div className="flex min-h-screen w-full items-center justify-center bg-slate-50">
-        <p className="text-error">
-          Error loading dashboard:{" "}
+      <div className="min-h-screen w-full bg-slate-50 px-4 py-6 md:px-6">
+        <SyncStatus />
+        <p className="text-sm text-slate-600">
+          Live dashboard totals need an internet connection. Customers, sales, and payments already saved on this computer are still available.
+        </p>
+        <p className="mt-2 text-xs text-slate-400">
           {error?.response?.data?.message || error.message}
         </p>
       </div>
@@ -144,6 +148,7 @@ function Dashboard() {
           <span className="font-medium text-slate-600">Dashboard</span>
         </div>
 
+        <SyncStatus />
         <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h1 className="text-[28px] font-bold tracking-tight text-slate-800">
