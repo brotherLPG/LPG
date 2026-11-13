@@ -469,7 +469,7 @@ function AddSales() {
               </button>
             </div>
             <div className="p-5 overflow-x-auto">
-              <table className="w-full min-w-[720px] border-collapse">
+              <table className="w-full min-w-180 border-collapse">
                 <thead>
                   <tr className="border-b border-slate-200">
                     <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">Item Name</th>
