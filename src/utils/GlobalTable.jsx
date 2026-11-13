@@ -5,6 +5,7 @@ const GlobalTable = ({
   columns = [],
   data = [],
   pagination = false,
+  highlightFirstRow = false,
   rowsPerPage = 5,
   ariaLabel = "Table",
   className = "",
@@ -18,14 +19,18 @@ const GlobalTable = ({
   const [internalPage, setInternalPage] = useState(1);
 
   // Determine whether we're in server-side mode by presence of totalCount or controlled page/onPageChange
-  const isServerSide = typeof totalCount === 'number' || typeof pageProp === 'number' || typeof onPageChange === 'function';
+  const isServerSide =
+    typeof totalCount === "number" ||
+    typeof pageProp === "number" ||
+    typeof onPageChange === "function";
 
-  const effectiveTotal = typeof totalCount === 'number' ? totalCount : data.length;
+  const effectiveTotal =
+    typeof totalCount === "number" ? totalCount : data.length;
 
   const totalPages = Math.max(1, Math.ceil(effectiveTotal / rowsPerPage));
 
   // effectivePage: prefer controlled prop, otherwise internal state
-  const effectivePage = typeof pageProp === 'number' ? pageProp : internalPage;
+  const effectivePage = typeof pageProp === "number" ? pageProp : internalPage;
 
   useEffect(() => {
     // reset to first page when data length or rowsPerPage changes (client-side mode)
@@ -51,10 +56,14 @@ const GlobalTable = ({
 
   const start = effectiveTotal === 0 ? 0 : startIndex + 1;
 
-  const end = effectiveTotal === 0 ? 0 : Math.min(startIndex + rowsPerPage, effectiveTotal);
+  const end =
+    effectiveTotal === 0
+      ? 0
+      : Math.min(startIndex + rowsPerPage, effectiveTotal);
 
   const getVisiblePages = () => {
-    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, index) => index + 1);
+    if (totalPages <= 5)
+      return Array.from({ length: totalPages }, (_, index) => index + 1);
 
     const pages = [];
 
@@ -63,10 +72,25 @@ const GlobalTable = ({
     }
 
     if (effectivePage >= totalPages - 2) {
-      return [1, "ellipsis-start", totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+      return [
+        1,
+        "ellipsis-start",
+        totalPages - 3,
+        totalPages - 2,
+        totalPages - 1,
+        totalPages,
+      ];
     }
 
-    return [1, "ellipsis-start", effectivePage - 1, effectivePage, effectivePage + 1, "ellipsis-end", totalPages];
+    return [
+      1,
+      "ellipsis-start",
+      effectivePage - 1,
+      effectivePage,
+      effectivePage + 1,
+      "ellipsis-end",
+      totalPages,
+    ];
   };
 
   const visiblePages = getVisiblePages();
@@ -107,24 +131,39 @@ const GlobalTable = ({
               </div>
             )}
           >
-            {(item) => (
-              <Table.Row key={item.id || item.key} className={rowClassName}>
-                {columns.map((column) => (
-                  <Table.Cell
-                    key={column.key}
-                    className={`px-2 py-2 ${column.cellClassName || ""}`}
-                  >
-                    {column.renderCell ? (
-                      column.renderCell(item)
-                    ) : (
-                      <span className="text-[12px] text-tertiary">
-                        {item[column.key]}
-                      </span>
-                    )}
-                  </Table.Cell>
-                ))}
-              </Table.Row>
-            )}
+            {(item) => {
+              const rowIndex = paginatedData.indexOf(item);
+              const resolvedRowClassName =
+                typeof rowClassName === "function"
+                  ? rowClassName(item, rowIndex)
+                  : rowClassName;
+              return (
+                <Table.Row
+                  key={item.id || item.key}
+                  // className={resolvedRowClassName}
+                  className={
+                    highlightFirstRow && rowIndex === 0
+                      ? "sales-highlight-row"
+                      : resolvedRowClassName
+                  }
+                >
+                  {columns.map((column) => (
+                    <Table.Cell
+                      key={column.key}
+                      className={`px-2 py-2 ${column.cellClassName || ""}`}
+                    >
+                      {column.renderCell ? (
+                        column.renderCell(item)
+                      ) : (
+                        <span className="text-[12px] text-tertiary">
+                          {item[column.key]}
+                        </span>
+                      )}
+                    </Table.Cell>
+                  ))}
+                </Table.Row>
+              );
+            }}
           </Table.Body>
         </Table.Content>
       </Table.ScrollContainer>
@@ -169,7 +208,9 @@ const GlobalTable = ({
                         if (onPageChange) onPageChange(page);
                         else setInternalPage(page);
                       }}
-                      className={page === effectivePage ? "bg-[#0f4bb8] text-white" : ""}
+                      className={
+                        page === effectivePage ? "bg-[#0f4bb8] text-white" : ""
+                      }
                     >
                       {page}
                     </Pagination.Link>

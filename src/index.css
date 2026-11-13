@@ -108,6 +108,13 @@ button:disabled {
   color: var(--color-accent-blue);
 }
 
+.sales-highlight-row,
+.sales-highlight-row:hover,
+.sales-highlight-row td,
+.sales-highlight-row:hover td {
+  background-color: #D0FAE5 !important;
+}
+
 .text-tertiary {
   color: var(--color-tertiary);
 }
