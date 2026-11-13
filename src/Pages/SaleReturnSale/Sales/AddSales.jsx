@@ -1,6 +1,6 @@
 import { Fragment, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, Plus, Sparkles, Trash2 } from "lucide-react";
 import { useCreateSale, useGetSaleFormOptions, useSaleGasRate } from "../../../queries/sales/sales.queries";
 import { useToast } from "../../../utils/GlobalToast";
 import SearchableCustomerSelect from "../../../components/SearchableCustomerSelect";
@@ -632,24 +632,36 @@ function AddSales() {
                   Rs. {totals.grandTotal.toFixed(2)}
                 </span>
               </div>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center gap-3">
                 <span className="text-sm text-slate-600">Amount Paid</span>
-                <input
-                  type="number"
-                  min="0"
-                  value={amountPaid === 0 || amountPaid === "0" ? "" : amountPaid}
-                  onChange={(e) => {
-                    const raw = e.target.value;
-                    if (raw === "") {
-                      setAmountPaid(0);
-                      return;
-                    }
-                    const value = Number(raw);
-                    setAmountPaid(Number.isFinite(value) ? Math.max(0, value) : 0);
-                  }}
-                  placeholder="0"
-                  className="w-40 shrink-0 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#008951] text-right"
-                />
+                <div className="relative w-40 shrink-0">
+                  <button
+                    type="button"
+                    title="Fill full amount"
+                    aria-label="Fill full amount"
+                    disabled={totals.grandTotal <= 0}
+                    onClick={() => setAmountPaid(roundMoney(totals.grandTotal))}
+                    className="absolute left-1 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-accent-blue transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent"
+                  >
+                    <Sparkles size={15} strokeWidth={1.75} />
+                  </button>
+                  <input
+                    type="number"
+                    min="0"
+                    value={amountPaid === 0 || amountPaid === "0" ? "" : amountPaid}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      if (raw === "") {
+                        setAmountPaid(0);
+                        return;
+                      }
+                      const value = Number(raw);
+                      setAmountPaid(Number.isFinite(value) ? Math.max(0, value) : 0);
+                    }}
+                    placeholder="0"
+                    className="w-full rounded-md border border-slate-200 bg-white py-1.5 pl-8 pr-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#008951] text-right"
+                  />
+                </div>
               </div>
               {selectedCustomer && totals.grandTotal > 0 && invoiceCredit <= 0 && (
                 <div className="rounded-md border border-blue-100 bg-blue-50 px-3 py-2">
