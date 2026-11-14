@@ -106,6 +106,9 @@ async function absorbServerEnvelope(path, payload) {
   if (path === '/sales') {
     for (const item of items) await upsertServerRow(db.sales, item);
   }
+  if (path === '/suppliers') {
+    for (const item of items) await upsertServerRow(db.suppliers, item);
+  }
   if (path === '/payments') {
     for (const item of items) {
       await upsertServerRow(db.payments, item);
@@ -154,6 +157,10 @@ async function allCustomers() {
   return db.customers.toArray();
 }
 
+async function allSuppliers() {
+  return db.suppliers.toArray();
+}
+
 async function allSales() {
   return db.sales.toArray();
 }
@@ -169,6 +176,31 @@ function customerMatches(row, id) {
 async function findCustomer(id) {
   const rows = await allCustomers();
   return rows.find((row) => customerMatches(row, id)) || null;
+}
+
+async function findSupplier(id) {
+  const rows = await allSuppliers();
+  return rows.find((row) => customerMatches(row, id)) || null;
+}
+
+const SUPPLIER_TERMS = new Set([0, 7, 15, 30, 45, 60, 90]);
+
+function assertSupplierPayload(payload) {
+  if (String(payload.supplierName || '').trim().length < 2) {
+    throw offlineReject('Supplier name must be at least 2 characters.');
+  }
+  if (String(payload.contactPersonName || '').trim().length < 2) {
+    throw offlineReject('Contact person must be at least 2 characters.');
+  }
+  if (String(payload.phoneNumber || '').trim().length < 7) {
+    throw offlineReject('Phone number must be at least 7 characters.');
+  }
+  if (String(payload.businessAddress || '').trim().length < 5) {
+    throw offlineReject('Business address must be at least 5 characters.');
+  }
+  if (!SUPPLIER_TERMS.has(Number(payload.paymentTermDays))) {
+    throw offlineReject('Invalid payment terms.');
+  }
 }
 
 async function findSale(id) {
@@ -193,6 +225,22 @@ async function assertCustomerUnique(payload, ignoreLocalId) {
   });
   if (duplicate) {
     throw offlineReject('A customer with the same phone or name is already on this computer.');
+  }
+}
+
+async function assertSupplierUnique(payload, ignoreLocalId) {
+  const name = String(payload.supplierName || '').trim().toLowerCase();
+  const phone = digits(payload.phoneNumber);
+  const rows = await allSuppliers();
+  const duplicate = rows.find((row) => {
+    if (ignoreLocalId && row.localId === ignoreLocalId) return false;
+    const record = rowRecord(row);
+    const sameName = name && String(record.supplierName || '').trim().toLowerCase() === name;
+    const samePhone = phone && digits(record.phoneNumber) === phone;
+    return samePhone || (sameName && !phone && !digits(record.phoneNumber));
+  });
+  if (duplicate) {
+    throw offlineReject('A supplier with the same phone or name is already on this computer.');
   }
 }
 
@@ -391,8 +439,38 @@ async function buildCustomerRecord(payload, localId) {
   };
 }
 
+async function buildSupplierRecord(payload, localId, existing) {
+  const now = new Date().toISOString();
+  const previous = existing ? rowRecord(existing) : {};
+  return {
+    _id: previous._id || localId,
+    supplierCode: previous.supplierCode || `OFF-${localId.slice(-6).toUpperCase()}`,
+    supplierName: payload.supplierName,
+    contactPersonName: payload.contactPersonName || '',
+    phoneNumber: payload.phoneNumber || '',
+    emailAddress: payload.emailAddress || '',
+    isActive: payload.isActive !== false,
+    paymentTermDays: Number(payload.paymentTermDays) || 0,
+    creditLimitAmount: Number(payload.creditLimitAmount) || 0,
+    openingBalanceAmount: Number(payload.openingBalanceAmount) || 0,
+    businessAddress: payload.businessAddress || '',
+    city: payload.city || '',
+    stateProvince: payload.stateProvince || '',
+    taxRegistrationNumber: payload.taxRegistrationNumber || '',
+    bankName: payload.bankName || '',
+    bankAccountTitle: payload.bankAccountTitle || '',
+    bankAccountNumber: payload.bankAccountNumber || '',
+    iban: String(payload.iban || '').replace(/\s/g, '').toUpperCase(),
+    syncStatus: 'pending',
+    provisional: true,
+    createdAt: previous.createdAt || now,
+    updatedAt: now,
+  };
+}
+
 async function buildPaymentRecord(payload, localId) {
   const customer = payload.customerId ? await findCustomer(payload.customerId) : null;
+  const supplier = payload.supplierId ? await findSupplier(payload.supplierId) : null;
   const maps = await catalogMaps();
   const account = maps.accounts.get(String(payload.accountId));
   const sales = await allSales();
@@ -446,8 +524,8 @@ async function buildPaymentRecord(payload, localId) {
     direction: paymentType === 'receive' ? 'receive' : 'pay',
     customerId: payload.customerId || null,
     supplierId: payload.supplierId || null,
-    partyName: rowRecord(customer).customerName || '',
-    partyCode: rowRecord(customer).customerCode || '',
+    partyName: rowRecord(customer).customerName || rowRecord(supplier).supplierName || '',
+    partyCode: rowRecord(customer).customerCode || rowRecord(supplier).supplierCode || '',
     accountId: payload.accountId,
     accountName: account ? `${account.accountCode || ''} – ${account.accountName}` : '',
     paymentAmount: roundMoney(payload.paymentAmount),
@@ -526,6 +604,49 @@ export async function queueCustomerUpdate(id, payload) {
   }
   emitSync();
   return envelope('Customer updated on this computer', record);
+}
+
+export async function queueSupplierCreate(payload) {
+  assertSupplierPayload(payload);
+  await assertSupplierUnique(payload);
+  const localId = newLocalId();
+  const record = await buildSupplierRecord(payload, localId);
+  const serverPayload = { ...payload };
+  delete serverPayload.supplierCode;
+  await db.suppliers.put({
+    localId,
+    serverId: '',
+    syncStatus: 'pending',
+    origin: 'local',
+    record,
+    updatedAt: record.updatedAt,
+  });
+  await enqueue({ entity: 'supplier', action: 'create', localId, payload: serverPayload });
+  return envelope('Supplier saved on this computer', record);
+}
+
+export async function queueSupplierUpdate(id, payload) {
+  const existing = await findSupplier(id);
+  if (!existing) throw offlineReject('Supplier is not on this computer yet.');
+  const merged = { ...rowRecord(existing), ...payload };
+  assertSupplierPayload(merged);
+  await assertSupplierUnique(merged, existing.localId);
+  const record = await buildSupplierRecord(merged, existing.localId, existing);
+  await db.suppliers.put({ ...existing, syncStatus: 'pending', record, updatedAt: record.updatedAt });
+  const createOp = await pendingCreate('supplier', existing.localId);
+  if (createOp) {
+    createOp.payload = { ...createOp.payload, ...payload };
+    delete createOp.payload.supplierCode;
+    createOp.status = 'pending';
+    createOp.updatedAt = new Date().toISOString();
+    await db.queue.put(createOp);
+  } else if (existing.serverId) {
+    const serverPayload = { ...payload };
+    delete serverPayload.supplierCode;
+    await enqueue({ entity: 'supplier', action: 'update', localId: existing.localId, payload: serverPayload });
+  }
+  emitSync();
+  return envelope('Supplier updated on this computer', record);
 }
 
 export async function queueSaleCreate(payload) {
@@ -634,6 +755,12 @@ export async function queuePaymentCreate(payload) {
     const createOp = await pendingCreate('customer', payload.customerId);
     if (createOp) dependsOn.push(createOp.operationId);
   }
+  if (isLocalId(payload.supplierId)) {
+    const supplier = await findSupplier(payload.supplierId);
+    if (!supplier) throw offlineReject('Select a supplier saved on this computer.');
+    const createOp = await pendingCreate('supplier', payload.supplierId);
+    if (createOp) dependsOn.push(createOp.operationId);
+  }
   for (const line of payload.allocations || []) {
     if (isLocalId(line.saleId)) {
       const createOp = await pendingCreate('sale', line.saleId);
@@ -668,6 +795,29 @@ function filterCustomers(rows, params) {
   });
 }
 
+function filterSuppliers(rows, params) {
+  return rows.filter((row) => {
+    const record = rowRecord(row);
+    if (params.isActive === true || params.isActive === 'true') {
+      if (record.isActive === false) return false;
+    }
+    if (params.isActive === false || params.isActive === 'false') {
+      if (record.isActive !== false) return false;
+    }
+    if (!params.search) return true;
+    return [
+      record.supplierName,
+      record.supplierCode,
+      record.contactPersonName,
+      record.phoneNumber,
+      record.emailAddress,
+      record.city,
+      record.taxRegistrationNumber,
+      record.bankName,
+    ].some((value) => includesText(value, params.search));
+  });
+}
+
 function filterSales(rows, params) {
   return rows.filter((row) => {
     const record = rowRecord(row);
@@ -696,6 +846,7 @@ function filterPayments(rows, params) {
     if (params.customerId && !sameParty(record.customerId, params.customerId) && !sameParty(row.customerLocalId, params.customerId)) {
       return false;
     }
+    if (params.supplierId && !sameParty(record.supplierId, params.supplierId)) return false;
     if (params.paymentType && record.paymentType !== params.paymentType) return false;
     if (!params.search) return true;
     return [record.paymentNumber, record.partyName, record.referenceNumber]
@@ -764,6 +915,40 @@ async function customerLedger(id) {
   });
 }
 
+async function supplierLedger(id) {
+  const supplier = await findSupplier(id);
+  if (!supplier) return null;
+  const record = rowRecord(supplier);
+  const payments = (await allPayments()).filter((row) => {
+    const payment = rowRecord(row);
+    return payment.paymentType === 'pay'
+      && (sameParty(payment.supplierId, id) || sameParty(payment.supplierId, supplier.localId) || sameParty(payment.supplierId, supplier.serverId));
+  });
+  const paid = roundMoney(payments.reduce((sum, row) => sum + (Number(rowRecord(row).paymentAmount) || 0), 0));
+  const lastPayment = payments
+    .map(rowRecord)
+    .sort((left, right) => new Date(right.paymentDate) - new Date(left.paymentDate))[0];
+  return envelope('Supplier ledger fetched', {
+    supplier: {
+      ...record,
+      accountStatus: record.isActive === false ? 'Inactive Account' : 'Active Account',
+    },
+    summary: {
+      totalPurchases: 0,
+      purchaseCount: 0,
+      totalQuantityKg: 0,
+      outstandingBalance: roundMoney(0 - paid),
+      lastPaymentAmount: lastPayment ? roundMoney(lastPayment.paymentAmount) : 0,
+      lastPaymentDate: lastPayment?.paymentDate || null,
+      lastPaymentNumber: lastPayment?.paymentNumber || null,
+      lastPaymentMethod: lastPayment?.paymentMethod || null,
+      lastPaymentMethodLabel: lastPayment?.paymentMethodLabel || lastPayment?.paymentMethod || null,
+      creditLimitAmount: roundMoney(record.creditLimitAmount),
+      provisional: supplier.syncStatus !== 'synced' || payments.some((row) => row.syncStatus !== 'synced'),
+    },
+  });
+}
+
 async function adjustStock(items) {
   if (!Array.isArray(items)) return items;
   const copy = [];
@@ -796,6 +981,20 @@ async function withPendingParties(data) {
     });
     const seen = new Set(data.customers.map((customer) => String(customer._id)));
     next.customers = [...extras.filter((customer) => !seen.has(String(customer._id))), ...data.customers];
+  }
+  if (Array.isArray(data.suppliers)) {
+    const pending = (await allSuppliers()).filter((row) => row.syncStatus !== 'synced');
+    const extras = pending.map((row) => {
+      const record = rowRecord(row);
+      return {
+        _id: record._id,
+        supplierCode: record.supplierCode,
+        supplierName: record.supplierName,
+        label: `${record.supplierCode} – ${record.supplierName}`,
+      };
+    });
+    const seen = new Set(data.suppliers.map((supplier) => String(supplier._id)));
+    next.suppliers = [...extras.filter((supplier) => !seen.has(String(supplier._id))), ...data.suppliers];
   }
   if (Array.isArray(data.inventoryItems)) {
     next.inventoryItems = await adjustStock(data.inventoryItems);
@@ -832,9 +1031,12 @@ async function outstandingForCustomer(customerId) {
 export async function serveGet(config) {
   const path = requestPath(config);
   const params = paramsOf(config);
-  const idMatch = path.match(/^\/(customers|sales|payments)\/([^/]+)$/);
+  const idMatch = path.match(/^\/(customers|suppliers|sales|payments)\/([^/]+)$/);
   if (idMatch && idMatch[2] !== 'form-options') {
-    const table = idMatch[1] === 'customers' ? await findCustomer(idMatch[2]) : idMatch[1] === 'sales' ? await findSale(idMatch[2]) : (await allPayments()).find((row) => sameParty(row.localId, idMatch[2]) || sameParty(row.serverId, idMatch[2]));
+    const table = idMatch[1] === 'customers' ? await findCustomer(idMatch[2])
+      : idMatch[1] === 'suppliers' ? await findSupplier(idMatch[2])
+        : idMatch[1] === 'sales' ? await findSale(idMatch[2])
+          : (await allPayments()).find((row) => sameParty(row.localId, idMatch[2]) || sameParty(row.serverId, idMatch[2]));
     if (table) return envelope('Saved on this computer', rowRecord(table));
   }
   if (/^\/customers\/[^/]+\/ledger$/.test(path)) {
@@ -851,9 +1053,60 @@ export async function serveGet(config) {
     const rows = filterPayments(await allPayments(), { ...params, customerId: id });
     return envelope('Customer payment history fetched', paginate(rows.map(rowRecord), params));
   }
+  if (/^\/suppliers\/[^/]+\/ledger$/.test(path)) {
+    const supplier = await findSupplier(path.split('/')[2]);
+    if (supplier && supplier.syncStatus !== 'synced') {
+      const ledger = await supplierLedger(path.split('/')[2]);
+      if (ledger) return ledger;
+    }
+  }
+  if (/^\/suppliers\/[^/]+\/purchase-history$/.test(path)) {
+    const supplier = await findSupplier(path.split('/')[2]);
+    if (supplier && supplier.syncStatus !== 'synced') {
+      return envelope('Supplier purchase history fetched', paginate([], params));
+    }
+  }
+  if (/^\/suppliers\/[^/]+\/payment-history$/.test(path)) {
+    const id = path.split('/')[2];
+    const supplier = await findSupplier(id);
+    if (supplier && supplier.syncStatus !== 'synced') {
+      const rows = filterPayments(await allPayments(), { ...params, supplierId: supplier.localId });
+      const alsoServer = supplier.serverId
+        ? filterPayments(await allPayments(), { ...params, supplierId: supplier.serverId })
+        : [];
+      const seen = new Set();
+      const combined = [...rows, ...alsoServer].filter((row) => {
+        if (seen.has(row.localId)) return false;
+        seen.add(row.localId);
+        return true;
+      });
+      return envelope('Supplier payment history fetched', paginate(combined.map(rowRecord), params));
+    }
+  }
   if (path === '/customers' && (await allCustomers()).length) {
     const rows = filterCustomers(await allCustomers(), params);
     return envelope('Customers fetched', paginate(rows.map(rowRecord), params));
+  }
+  if (path === '/suppliers') {
+    const localRows = filterSuppliers(await allSuppliers(), params);
+    const listed = await db.snapshots.get(cacheKey(config));
+    const snapItems = Array.isArray(listed?.envelope?.data?.items) ? listed.envelope.data.items : [];
+    if (localRows.length || snapItems.length) {
+      const covered = new Set();
+      for (const row of await allSuppliers()) {
+        if (row.serverId) covered.add(String(row.serverId));
+        const recordId = rowRecord(row)._id;
+        if (recordId) covered.add(String(recordId));
+      }
+      const extras = filterSuppliers(
+        snapItems
+          .filter((item) => item?._id && !covered.has(String(item._id)))
+          .map((item) => ({ record: item })),
+        params,
+      ).map(rowRecord);
+      const items = [...localRows.map(rowRecord), ...extras];
+      if (items.length) return envelope('Suppliers fetched', paginate(items, params));
+    }
   }
   if (path === '/sales' && (await allSales()).length) {
     const rows = filterSales(await allSales(), params);
@@ -866,7 +1119,13 @@ export async function serveGet(config) {
   }
 
   const snap = await db.snapshots.get(cacheKey(config));
-  if (!snap?.envelope) return null;
+  if (!snap?.envelope) {
+    if (/^\/suppliers\/[^/]+\/ledger$/.test(path)) {
+      const ledger = await supplierLedger(path.split('/')[2]);
+      if (ledger) return ledger;
+    }
+    return null;
+  }
   const data = await withPendingParties(snap.envelope.data);
   if (path === '/payments/form-options' && params.customerId) {
     data.outstandingInvoices = await outstandingForCustomer(params.customerId);
@@ -892,6 +1151,10 @@ export async function serveWrite(config) {
   if (method === 'patch' && /^\/customers\/[^/]+$/.test(path)) {
     return queueCustomerUpdate(path.split('/')[2], payload);
   }
+  if (method === 'post' && path === '/suppliers') return queueSupplierCreate(payload);
+  if (method === 'patch' && /^\/suppliers\/[^/]+$/.test(path)) {
+    return queueSupplierUpdate(path.split('/')[2], payload);
+  }
   if (method === 'post' && path === '/sales') return queueSaleCreate(payload);
   if (method === 'patch' && /^\/sales\/[^/]+$/.test(path)) {
     return queueSaleUpdate(path.split('/')[2], payload);
@@ -912,13 +1175,14 @@ export async function mergePendingIntoResponse(config, payload) {
   if (requestMethod(config) !== 'get' || !payload?.data) return payload;
   const path = requestPath(config);
   const params = paramsOf(config);
-  if (!['/customers', '/sales', '/payments'].includes(path) || !Array.isArray(payload.data.items)) {
+  if (!['/customers', '/suppliers', '/sales', '/payments'].includes(path) || !Array.isArray(payload.data.items)) {
     const data = await withPendingParties(payload.data);
     return { ...payload, data };
   }
   const table = path === '/customers' ? filterCustomers(await allCustomers(), params)
-    : path === '/sales' ? filterSales(await allSales(), params)
-      : filterPayments(await allPayments(), params);
+    : path === '/suppliers' ? filterSuppliers(await allSuppliers(), params)
+      : path === '/sales' ? filterSales(await allSales(), params)
+        : filterPayments(await allPayments(), params);
   const pending = table
     .filter((row) => row.syncStatus !== 'synced' && row.origin !== 'sale-receipt')
     .map(rowRecord);
@@ -939,7 +1203,10 @@ export async function mergePendingIntoResponse(config, payload) {
 }
 
 export async function applyServerResult(localId, entity, serverRecord) {
-  const table = entity === 'customer' ? db.customers : entity === 'sale' ? db.sales : db.payments;
+  const table = entity === 'customer' ? db.customers
+    : entity === 'supplier' ? db.suppliers
+      : entity === 'sale' ? db.sales
+        : db.payments;
   const existing = await table.get(localId);
   if (!existing || !serverRecord?._id) return;
   await table.put({
@@ -997,7 +1264,10 @@ export async function retryOperation(operationId) {
 export async function discardFailedOperation(operationId) {
   const row = await db.queue.get(operationId);
   if (!row || row.status !== 'failed') return;
-  const table = row.entity === 'customer' ? db.customers : row.entity === 'sale' ? db.sales : db.payments;
+  const table = row.entity === 'customer' ? db.customers
+    : row.entity === 'supplier' ? db.suppliers
+      : row.entity === 'sale' ? db.sales
+        : db.payments;
   const record = await table.get(row.localId);
   if (row.action === 'create' && record && !record.serverId) {
     await table.delete(row.localId);
@@ -1016,6 +1286,7 @@ export async function exportOfflineBackup() {
   const payload = {
     exportedAt: new Date().toISOString(),
     customers: await db.customers.toArray(),
+    suppliers: await db.suppliers.toArray(),
     sales: await db.sales.toArray(),
     payments: await db.payments.toArray(),
     queue: await db.queue.toArray(),
@@ -1042,8 +1313,8 @@ export async function markSyncMeta(patch) {
 export function canQueueWrite(config) {
   const path = requestPath(config);
   const method = requestMethod(config);
-  if (method === 'post' && ['/customers', '/sales', '/payments'].includes(path)) return true;
-  if (method === 'patch' && /^\/(customers|sales)\/[^/]+$/.test(path)) return true;
+  if (method === 'post' && ['/customers', '/suppliers', '/sales', '/payments'].includes(path)) return true;
+  if (method === 'patch' && /^\/(customers|suppliers|sales)\/[^/]+$/.test(path)) return true;
   return false;
 }
 

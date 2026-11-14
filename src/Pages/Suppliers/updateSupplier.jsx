@@ -31,6 +31,7 @@ function UpdateSupplier() {
   const [supplierNameError, setSupplierNameError] = useState("");
   const [contactPersonNameError, setContactPersonNameError] = useState("");
   const [phoneNumberError, setPhoneNumberError] = useState("");
+  const [businessAddressError, setBusinessAddressError] = useState("");
 
   const { data: supplierData, isLoading } = useSupplierById(id);
   const supplier =
@@ -85,28 +86,36 @@ function UpdateSupplier() {
   const validateRequiredFields = () => {
     let hasError = false;
 
-    if (!formData.supplierName.trim()) {
-      setSupplierNameError("Supplier Name is required");
+    if (formData.supplierName.trim().length < 2) {
+      setSupplierNameError("Supplier name must be at least 2 characters");
       supplierNameRef.current?.focus();
       hasError = true;
     } else {
       setSupplierNameError("");
     }
 
-    if (!formData.contactPersonName.trim()) {
-      setContactPersonNameError("Contact Person is required");
+    if (formData.contactPersonName.trim().length < 2) {
+      setContactPersonNameError("Contact person must be at least 2 characters");
       if (!hasError) contactPersonNameRef.current?.focus();
       hasError = true;
     } else {
       setContactPersonNameError("");
     }
 
-    if (!formData.phoneNumber.trim()) {
-      setPhoneNumberError("Phone Number is required");
+    if (formData.phoneNumber.trim().length < 7) {
+      setPhoneNumberError("Phone number must be at least 7 characters");
       if (!hasError) phoneNumberRef.current?.focus();
       hasError = true;
     } else {
       setPhoneNumberError("");
+    }
+
+    if (formData.businessAddress.trim().length < 5) {
+      setBusinessAddressError("Business address must be at least 5 characters");
+      if (!hasError) businessAddressRef.current?.focus();
+      hasError = true;
+    } else {
+      setBusinessAddressError("");
     }
 
     return !hasError;
@@ -159,7 +168,7 @@ function UpdateSupplier() {
       const firstError = error?.response?.data?.errors?.[0];
       const errorMessage = firstError
         ? `${firstError.path}: ${firstError.message}`
-        : "Failed to update supplier. Please try again.";
+        : error?.response?.data?.message || "Failed to update supplier. Please try again.";
       toast.error(errorMessage);
     }
   };
@@ -428,18 +437,26 @@ function UpdateSupplier() {
                   ref={businessAddressRef}
                   rows="3"
                   value={formData.businessAddress}
-                  onChange={(e) =>
-                    handleInputChange("businessAddress", e.target.value)
-                  }
+                  onChange={(e) => {
+                    handleInputChange("businessAddress", e.target.value);
+                    if (businessAddressError) setBusinessAddressError("");
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
                       handleSubmit(e);
                     }
                   }}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-500 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
+                  className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-500 outline-none focus:ring-2 resize-none ${
+                    businessAddressError
+                      ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                      : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                  }`}
                   placeholder="Enter business address"
                 />
+                {businessAddressError && (
+                  <p className="mt-1.5 text-xs text-rose-500">{businessAddressError}</p>
+                )}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div>

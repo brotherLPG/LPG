@@ -60,8 +60,8 @@ function Suppliers() {
           toast.success(`Supplier ${deleteModal.item.name} has been deleted successfully`);
           setDeleteModal({ isOpen: false, item: null });
         },
-        onError: () => {
-          toast.error("Failed to delete supplier. Please try again.");
+        onError: (error) => {
+          toast.error(error?.response?.data?.message || "Failed to delete supplier. Please try again.");
         }
       });
     }

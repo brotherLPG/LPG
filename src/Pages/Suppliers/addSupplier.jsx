@@ -65,6 +65,7 @@ function AddSupplier() {
   const [supplierNameError, setSupplierNameError] = useState("");
   const [contactPersonNameError, setContactPersonNameError] = useState("");
   const [phoneNumberError, setPhoneNumberError] = useState("");
+  const [businessAddressError, setBusinessAddressError] = useState("");
   const [paymentTermDaysError, setPaymentTermDaysError] = useState("");
 
   const createMutation = useCreateSupplier();
@@ -93,28 +94,36 @@ function AddSupplier() {
   const validateRequiredFields = () => {
     let hasError = false;
 
-    if (!supplierName.trim()) {
-      setSupplierNameError("Supplier Name is required");
+    if (supplierName.trim().length < 2) {
+      setSupplierNameError("Supplier name must be at least 2 characters");
       supplierNameRef.current?.focus();
       hasError = true;
     } else {
       setSupplierNameError("");
     }
 
-    if (!contactPersonName.trim()) {
-      setContactPersonNameError("Contact Person is required");
+    if (contactPersonName.trim().length < 2) {
+      setContactPersonNameError("Contact person must be at least 2 characters");
       if (!hasError) contactPersonNameRef.current?.focus();
       hasError = true;
     } else {
       setContactPersonNameError("");
     }
 
-    if (!phoneNumber.trim()) {
-      setPhoneNumberError("Phone Number is required");
+    if (phoneNumber.trim().length < 7) {
+      setPhoneNumberError("Phone number must be at least 7 characters");
       if (!hasError) phoneNumberRef.current?.focus();
       hasError = true;
     } else {
       setPhoneNumberError("");
+    }
+
+    if (businessAddress.trim().length < 5) {
+      setBusinessAddressError("Business address must be at least 5 characters");
+      if (!hasError) businessAddressRef.current?.focus();
+      hasError = true;
+    } else {
+      setBusinessAddressError("");
     }
 
     return !hasError;
@@ -172,10 +181,11 @@ function AddSupplier() {
         toast.success("supplier created successfully!");
         navigate("/suppliers");
       } catch (error) {
+        const firstError = error?.response?.data?.errors?.[0];
         toast.error(
-          error?.response?.data?.errors?.[0]
-            ? `${error?.response?.data?.errors?.[0].path}: ${error?.response?.data?.errors?.[0].message}`
-            : "Failed to create supplier. Please try again.",
+          firstError
+            ? `${firstError.path}: ${firstError.message}`
+            : error?.response?.data?.message || "Failed to create supplier. Please try again.",
         );
       }
     };
@@ -422,15 +432,25 @@ function AddSupplier() {
                 rows="2"
                 placeholder="Plot, Street, Area, Sector, Industrial Area..."
                 value={businessAddress}
-                onChange={(e) => setBusinessAddress(e.target.value)}
+                onChange={(e) => {
+                  setBusinessAddress(e.target.value);
+                  if (businessAddressError) setBusinessAddressError("");
+                }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     handleSubmit(e);
                   }
                 }}
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
+                className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 resize-none ${
+                  businessAddressError
+                    ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                    : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                }`}
               />
+              {businessAddressError && (
+                <p className="mt-1.5 text-xs text-rose-500">{businessAddressError}</p>
+              )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>

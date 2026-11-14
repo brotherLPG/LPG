@@ -18,6 +18,8 @@ async function resolveId(value) {
   if (!value || !isLocalId(value)) return value || null;
   const customer = await db.customers.get(value);
   if (customer?.serverId) return customer.serverId;
+  const supplier = await db.suppliers.get(value);
+  if (supplier?.serverId) return supplier.serverId;
   const sale = await db.sales.get(value);
   if (sale?.serverId) return sale.serverId;
   const payment = await db.payments.get(value);
@@ -32,7 +34,11 @@ async function readyPayload(operation) {
     if (!resolved) return null;
     payload.customerId = resolved;
   }
-  if (payload.supplierId && isLocalId(payload.supplierId)) return null;
+  if (payload.supplierId) {
+    const resolved = await resolveId(payload.supplierId);
+    if (!resolved) return null;
+    payload.supplierId = resolved;
+  }
   if (payload.saleId) {
     const resolved = await resolveId(payload.saleId);
     if (!resolved) return null;
@@ -64,6 +70,7 @@ async function readyPayload(operation) {
   delete payload.saleNumber;
   delete payload.paymentNumber;
   delete payload.customerCode;
+  delete payload.supplierCode;
   return payload;
 }
 
@@ -73,6 +80,12 @@ function requestFor(operation, serverId) {
   }
   if (operation.entity === 'customer' && operation.action === 'update') {
     return { method: 'patch', url: `/customers/${serverId}` };
+  }
+  if (operation.entity === 'supplier' && operation.action === 'create') {
+    return { method: 'post', url: '/suppliers' };
+  }
+  if (operation.entity === 'supplier' && operation.action === 'update') {
+    return { method: 'patch', url: `/suppliers/${serverId}` };
   }
   if (operation.entity === 'sale' && operation.action === 'create') {
     return { method: 'post', url: '/sales' };
@@ -97,9 +110,11 @@ async function operationBlocked(operation, byId) {
 async function sendOperation(operation) {
   const row = operation.entity === 'customer'
     ? await db.customers.get(operation.localId)
-    : operation.entity === 'sale'
-      ? await db.sales.get(operation.localId)
-      : await db.payments.get(operation.localId);
+    : operation.entity === 'supplier'
+      ? await db.suppliers.get(operation.localId)
+      : operation.entity === 'sale'
+        ? await db.sales.get(operation.localId)
+        : await db.payments.get(operation.localId);
   const target = requestFor(operation, row?.serverId);
   if (!target || (operation.action === 'update' && !row?.serverId)) {
     throw new Error('This offline change is missing its server record.');
