@@ -400,13 +400,19 @@ function Sales() {
                 Dashboard
               </span>{" "}
               <span className="px-1 text-slate-400">/</span>{" "}
-              <span className="font-semibold">{activeTab === "sales" ? "Sales" : "Return Sales"}</span>
+              <span className="font-semibold">
+                {activeTab === "sales" ? "Sales" : "Return Sales"}
+              </span>
             </p>
             <h1 className="text-2xl font-bold tracking-tight text-BLUE-dark">
-              {activeTab === "sales" ? "Sales Management" : "Return Sales Management"}
+              {activeTab === "sales"
+                ? "Sales Management"
+                : "Return Sales Management"}
             </h1>
             <p className="text-sm text-tertiary">
-              {activeTab === "sales" ? "Track cash and credit sales for LPG and other gases" : "Track and manage customer returns and credit notes"}
+              {activeTab === "sales"
+                ? "Track cash and credit sales for LPG and other gases"
+                : "Track and manage customer returns and credit notes"}
             </p>
           </div>
           <div className="flex gap-3">
@@ -488,10 +494,14 @@ function Sales() {
                   key={card.label}
                   className={`rounded-2xl border px-5 py-4 shadow-sm ${card.card}`}
                 >
-                  <p className={`text-[13px] font-medium tracking-wide ${card.labelClass}`}>
+                  <p
+                    className={`text-[13px] font-medium tracking-wide ${card.labelClass}`}
+                  >
                     {card.label}
                   </p>
-                  <p className={`mt-2.5 text-[1.7rem] font-semibold leading-none tracking-tight tabular-nums ${card.valueClass}`}>
+                  <p
+                    className={`mt-2.5 text-[1.7rem] font-semibold leading-none tracking-tight tabular-nums ${card.valueClass}`}
+                  >
                     {formatMoney(card.amount)}
                   </p>
                   <p className={`mt-2.5 text-xs font-medium ${card.hintClass}`}>
@@ -528,7 +538,8 @@ function Sales() {
                     <option value="">Customer: All</option>
                     {customers.map((customer) => (
                       <option key={customer._id} value={customer._id}>
-                        {customer.label || `${customer.customerCode} – ${customer.customerName}`}
+                        {customer.label ||
+                          `${customer.customerCode} – ${customer.customerName}`}
                       </option>
                     ))}
                   </select>
@@ -600,9 +611,17 @@ function Sales() {
               <GlobalTable
                 columns={salesColumns}
                 data={sales}
+                highlightFirstRow={true}
                 ariaLabel="Sales Table"
                 className=""
-                rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors whitespace-nowrap text-nowrap"
+                rowClassName={(item, index) =>
+                  `border-b border-slate-100 last:border-0 transition-colors whitespace-nowrap text-nowrap ${
+                    index === 0
+                      ? "bg-emerald-100 border-emerald-200"
+                      : "hover:bg-slate-50"
+                  }`
+                }
+                // rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors whitespace-nowrap text-nowrap first:bg-emerald-50! first:border-emerald-100"
                 emptyContent={
                   isLoading ? "Loading sales..." : "No sales match your search."
                 }
@@ -616,9 +635,7 @@ function Sales() {
           </>
         )}
 
-        {activeTab === "returns" && (
-          <Returnsales />
-        )}
+        {activeTab === "returns" && <Returnsales />}
       </section>
     </main>
   );

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Sparkles } from "lucide-react";
 import { useGetPaymentFormOptions, useCreatePayment } from "../../queries/payments/payments.queries";
 import { useToast } from "../../utils/GlobalToast";
 import SearchableCustomerSelect from "../../components/SearchableCustomerSelect";
@@ -426,6 +426,12 @@ function AddPayment() {
     }
   };
 
+  const totalAllocatableAmount = roundMoney(
+    invoices.reduce(
+      (total, invoice) => total + getAllocatableAmount(invoice, isRefund),
+      0
+    )
+  );
   const appliedAmountsTotal = activeSelectedInvoices.reduce(
     (total, invoiceId) => total + parseAmount(activeAllocationAmounts[invoiceId]),
     0
@@ -619,21 +625,36 @@ function AddPayment() {
                           : "Payment Amount Paid (Rs.)"}{" "}
                       <span className="text-rose-500">*</span>
                     </label>
-                    <input
-                      ref={paymentAmountRef}
-                      type="text"
-                      value={paymentAmount}
-                      onChange={(e) => {
-                        setPaymentAmount(e.target.value);
-                        clearError(setPaymentAmountError);
-                      }}
-                      placeholder="50,000"
-                      className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
-                        paymentAmountError
-                          ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
-                          : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
-                      }`}
-                    />
+                    <div className="relative">
+                      <button
+                        type="button"
+                        title="Fill remaining amount"
+                        aria-label="Fill remaining amount"
+                        disabled={totalAllocatableAmount <= 0}
+                        onClick={() => {
+                          setPaymentAmount(String(totalAllocatableAmount));
+                          clearError(setPaymentAmountError);
+                        }}
+                        className="absolute left-1 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-accent-blue transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent"
+                      >
+                        <Sparkles size={15} strokeWidth={1.75} />
+                      </button>
+                      <input
+                        ref={paymentAmountRef}
+                        type="text"
+                        value={paymentAmount}
+                        onChange={(e) => {
+                          setPaymentAmount(e.target.value);
+                          clearError(setPaymentAmountError);
+                        }}
+                        placeholder="50,000"
+                        className={`w-full rounded-md border bg-white py-2 pl-10 pr-3 text-sm text-slate-900 outline-none focus:ring-2 ${
+                          paymentAmountError
+                            ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
+                            : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                        }`}
+                      />
+                    </div>
                     {paymentAmountError && (
                       <p className="mt-1.5 text-xs text-rose-500">{paymentAmountError}</p>
                     )}
