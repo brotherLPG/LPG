@@ -3,6 +3,7 @@ import { Search, CirclePlus, ArrowLeft, Eye, Edit3, Printer } from "lucide-react
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button, Tooltip } from "@heroui/react";
 import GlobalTable from "../../../utils/GlobalTable";
+import SearchableCustomerSelect from "../../../components/SearchableCustomerSelect";
 import { useGetSaleFormOptions, useSales } from "../../../queries/sales/sales.queries";
 import Returnsales from "../ReturnSales/Returnsales";
 import { usePermissions } from "../../../contexts/PermissionContext";
@@ -59,7 +60,11 @@ function Sales() {
   };
 
   const { data: salesData, isLoading } = useSales(params);
-  const { data: cardSalesData } = useSales({ page: 1, limit: 100 });
+  const { data: cardSalesData } = useSales({
+    page: 1,
+    limit: 1,
+    ...(customerId && { customerId }),
+  });
 
   const sales = (salesData?.data?.items || []).map((sale) => ({
     ...sale,
@@ -122,6 +127,20 @@ function Sales() {
       : cardsCoverAllSales
         ? totalsFromPage.cashCount
         : summary.cashSalesCount || 0,
+  };
+
+  const hasFilters = Boolean(
+    searchTerm || customerId || saleType || paymentStatus || startDate || endDate
+  );
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setCustomerId("");
+    setSaleType("");
+    setPaymentStatus("");
+    setStartDate("");
+    setEndDate("");
+    setPage(1);
   };
 
   const handlePrintSale = (item) => {
@@ -529,25 +548,15 @@ function Sales() {
                     placeholder="Search by customer or invoice ID..."
                   />
                 </label>
-                <div className="relative">
-                  <select
-                    value={customerId}
-                    onChange={(event) => {
-                      setCustomerId(event.target.value);
-                      setPage(1);
-                    }}
-                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951]"
-                  >
-                    <option value="">Customer: All</option>
-                    {customers.map((customer) => (
-                      <option key={customer._id} value={customer._id}>
-                        {customer.label ||
-                          `${customer.customerCode} – ${customer.customerName}`}
-                      </option>
-                    ))}
-                  </select>
-                  <ArrowLeft className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 rotate-180 pointer-events-none" />
-                </div>
+                <SearchableCustomerSelect
+                  customers={customers}
+                  value={customerId}
+                  placeholder="Customer: All"
+                  onChange={(customer) => {
+                    setCustomerId(customer?._id || "");
+                    setPage(1);
+                  }}
+                />
                 <div className="relative">
                   <select
                     value={saleType}
@@ -606,6 +615,14 @@ function Sales() {
                     className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951]"
                   />
                 </div>
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  disabled={!hasFilters}
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-400 disabled:hover:bg-white"
+                >
+                  Clear Filter
+                </button>
               </div>
             </div>
 
