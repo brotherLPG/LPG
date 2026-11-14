@@ -1,4 +1,5 @@
 import {
+  keepPreviousData,
   useMutation,
   useQuery,
   useQueryClient,
@@ -43,6 +44,7 @@ export const useCustomerSalesHistory = (id, params) => {
     queryKey: queryKeys.customers.salesHistory(id, params),
     queryFn: () => getCustomerSalesHistory(id, params),
     enabled: !!id,
+    placeholderData: keepPreviousData,
   });
 };
 
@@ -51,6 +53,7 @@ export const useCustomerPaymentHistory = (id, params) => {
     queryKey: queryKeys.customers.paymentHistory(id, params),
     queryFn: () => getCustomerPaymentHistory(id, params),
     enabled: !!id,
+    placeholderData: keepPreviousData,
   });
 };
 

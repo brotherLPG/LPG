@@ -1,4 +1,5 @@
 import {
+  keepPreviousData,
   useMutation,
   useQuery,
   useQueryClient,
@@ -17,6 +18,7 @@ export const useReturnSales = (params) => {
   return useQuery({
     queryKey: queryKeys.returnSales.list(params),
     queryFn: () => getReturnSales(params),
+    placeholderData: keepPreviousData,
   });
 };
 

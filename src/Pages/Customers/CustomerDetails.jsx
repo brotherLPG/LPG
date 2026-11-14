@@ -718,6 +718,7 @@ function CustomerDetails() {
               <GlobalTable
                 columns={salesColumns}
                 data={salesRows}
+                highlightFirstRow
                 pagination
                 rowsPerPage={salesPagination.limit || salesLimit}
                 ariaLabel="Customer sales history"
@@ -737,6 +738,7 @@ function CustomerDetails() {
             <GlobalTable
               columns={paymentColumns}
               data={paymentRows}
+              highlightFirstRow
               pagination
               rowsPerPage={paymentsPagination.limit || paymentsLimit}
               ariaLabel="Customer payment history"

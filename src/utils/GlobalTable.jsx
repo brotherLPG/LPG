@@ -38,12 +38,14 @@ const GlobalTable = ({
   }, [data.length, rowsPerPage, isServerSide]);
 
   useEffect(() => {
+    // A zero total means the next page is still loading, not that the page is invalid.
+    if (effectiveTotal === 0) return;
     if (effectivePage > totalPages) {
       // if controlled, invoke callback; otherwise update internal
       if (onPageChange) onPageChange(totalPages);
       else setInternalPage(totalPages);
     }
-  }, [effectivePage, totalPages, onPageChange]);
+  }, [effectivePage, totalPages, onPageChange, effectiveTotal]);
 
   const startIndex = (effectivePage - 1) * rowsPerPage;
 

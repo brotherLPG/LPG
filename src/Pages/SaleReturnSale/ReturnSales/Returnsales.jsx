@@ -23,7 +23,10 @@ function Returnsales() {
 
   const { data: returnSalesData, isLoading } = useReturnSales(params);
 
-  const returnSales = returnSalesData?.data?.items || [];
+  const returnSales = (returnSalesData?.data?.items || []).map((item) => ({
+    ...item,
+    id: item.id || item._id,
+  }));
   const pagination = returnSalesData?.data?.pagination || { total: 0, totalPages: 0, page: 1, limit: 20 };
 
   const returnSalesColumns = [
@@ -153,9 +156,9 @@ function Returnsales() {
           }
           pagination={true}
           rowsPerPage={pagination.limit || 10}
-          currentPage={pagination.page}
-          totalPages={pagination.totalPages}
-          onPageChange={(newPage) => setPage(newPage)}
+          totalCount={pagination.total}
+          page={page}
+          onPageChange={setPage}
         />
       </div>
     </>

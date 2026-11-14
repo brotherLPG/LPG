@@ -1,4 +1,5 @@
 import {
+  keepPreviousData,
   useMutation,
   useQuery,
   useQueryClient,
@@ -21,6 +22,7 @@ export const useSales = (params, options = {}) => {
     queryKey: queryKeys.sales.list(params),
     queryFn: () => getSales(params),
     enabled: options.enabled ?? true,
+    placeholderData: keepPreviousData,
   });
 };
 
