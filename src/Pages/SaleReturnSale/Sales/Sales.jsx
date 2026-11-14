@@ -61,7 +61,10 @@ function Sales() {
   const { data: salesData, isLoading } = useSales(params);
   const { data: cardSalesData } = useSales({ page: 1, limit: 100 });
 
-  const sales = salesData?.data?.items || [];
+  const sales = (salesData?.data?.items || []).map((sale) => ({
+    ...sale,
+    id: sale.id || sale._id,
+  }));
   const pagination = salesData?.data?.pagination || { total: 0, totalPages: 0, page: 1, limit: 10 };
   const summary = cardSalesData?.data?.summary || salesData?.data?.summary || {};
   const meta = salesData?.data?.meta || {
@@ -627,9 +630,9 @@ function Sales() {
                 }
                 pagination={true}
                 rowsPerPage={pagination.limit || 10}
-                currentPage={pagination.page}
-                totalPages={pagination.totalPages}
-                onPageChange={(newPage) => setPage(newPage)}
+                totalCount={pagination.total}
+                page={page}
+                onPageChange={setPage}
               />
             </div>
           </>
