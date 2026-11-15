@@ -26,6 +26,86 @@ export const useSales = (params, options = {}) => {
   });
 };
 
+function invoiceNumberParts(invoiceNumber) {
+  return String(invoiceNumber || "").match(/\d+/g)?.map((part) => Number(part)) || [];
+}
+
+function compareLatestInvoice(left, right) {
+  const leftParts = invoiceNumberParts(left?.invoiceNumber);
+  const rightParts = invoiceNumberParts(right?.invoiceNumber);
+  const length = Math.max(leftParts.length, rightParts.length);
+
+  for (let index = 0; index < length; index += 1) {
+    const diff = (rightParts[index] || 0) - (leftParts[index] || 0);
+    if (diff) return diff;
+  }
+
+  return new Date(right?.createdAt || 0).getTime() - new Date(left?.createdAt || 0).getTime();
+}
+
+async function fetchSalesLatestFirst(filters) {
+  const limit = 100;
+  const first = await getSales({ ...filters, page: 1, limit });
+  const totalPages = Math.min(Number(first?.data?.pagination?.totalPages) || 1, 30);
+  const rest = totalPages > 1
+    ? await Promise.all(
+        Array.from({ length: totalPages - 1 }, (_, index) =>
+          getSales({ ...filters, page: index + 2, limit })
+        )
+      )
+    : [];
+  const items = [
+    ...(first?.data?.items || []),
+    ...rest.flatMap((page) => page?.data?.items || []),
+  ].sort(compareLatestInvoice);
+  const total = Number(first?.data?.pagination?.total);
+
+  return {
+    items,
+    total: Number.isFinite(total) ? total : items.length,
+    summary: first?.data?.summary,
+    meta: first?.data?.meta,
+  };
+}
+
+export const useSalesLatestFirst = (params = {}, options = {}) => {
+  const page = Number(params.page) || 1;
+  const limit = Number(params.limit) || 10;
+  const filters = { ...params };
+  delete filters.page;
+  delete filters.limit;
+
+  const query = useQuery({
+    queryKey: queryKeys.sales.list({ ...filters, order: "invoiceNumberDesc" }),
+    queryFn: () => fetchSalesLatestFirst(filters),
+    enabled: options.enabled ?? true,
+    placeholderData: keepPreviousData,
+  });
+
+  const allItems = query.data?.items || [];
+  const total = query.data?.total ?? allItems.length;
+  const start = (page - 1) * limit;
+
+  return {
+    ...query,
+    data: query.data
+      ? {
+          data: {
+            items: allItems.slice(start, start + limit),
+            pagination: {
+              total,
+              page,
+              limit,
+              totalPages: Math.max(1, Math.ceil(total / limit)),
+            },
+            summary: query.data.summary,
+            meta: query.data.meta,
+          },
+        }
+      : undefined,
+  };
+};
+
 export const useSaleById = (id) => {
   return useQuery({
     queryKey: queryKeys.sales.detail(id),
