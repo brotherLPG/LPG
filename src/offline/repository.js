@@ -109,6 +109,9 @@ async function absorbServerEnvelope(path, payload) {
   if (path === '/suppliers') {
     for (const item of items) await upsertServerRow(db.suppliers, item);
   }
+  if (path === '/accounts') {
+    for (const item of items) await upsertServerRow(db.accounts, item);
+  }
   if (path === '/payments') {
     for (const item of items) {
       await upsertServerRow(db.payments, item);
@@ -161,6 +164,10 @@ async function allSuppliers() {
   return db.suppliers.toArray();
 }
 
+async function allAccounts() {
+  return db.accounts.toArray();
+}
+
 async function allSales() {
   return db.sales.toArray();
 }
@@ -181,6 +188,54 @@ async function findCustomer(id) {
 async function findSupplier(id) {
   const rows = await allSuppliers();
   return rows.find((row) => customerMatches(row, id)) || null;
+}
+
+async function findAccount(id) {
+  const rows = await allAccounts();
+  return rows.find((row) => customerMatches(row, id)) || null;
+}
+
+const ACCOUNT_TYPES = new Set(['cash', 'bank', 'receivable', 'payable', 'income', 'expense', 'equity']);
+const ACCOUNT_TYPE_LABELS = {
+  cash: 'Cash',
+  bank: 'Bank',
+  receivable: 'Receivable',
+  payable: 'Payable',
+  income: 'Income',
+  expense: 'Expense',
+  equity: 'Equity',
+};
+const ACCOUNT_CATEGORIES = new Set(['operating', 'banking', 'fleet', 'payroll', 'payable', 'receivable', 'other']);
+const ACCOUNT_CATEGORY_LABELS = {
+  operating: 'Operating',
+  banking: 'Banking',
+  fleet: 'Fleet / Vehicle',
+  payroll: 'Payroll',
+  payable: 'Payables',
+  receivable: 'Receivables',
+  other: 'Other',
+};
+
+function accountStatusOf(record) {
+  if (record.isActive === false) return { status: 'inactive', statusLabel: 'Inactive' };
+  if (record.needsReview) return { status: 'review', statusLabel: 'Review' };
+  return { status: 'active', statusLabel: 'Active' };
+}
+
+function assertAccountPayload(payload, partial) {
+  if (!partial || payload.accountName != null) {
+    if (String(payload.accountName || '').trim().length < 2) {
+      throw offlineReject('Account name must be at least 2 characters.');
+    }
+  }
+  if (!partial || payload.accountType != null) {
+    if (!ACCOUNT_TYPES.has(payload.accountType)) {
+      throw offlineReject('Select an account type.');
+    }
+  }
+  if (payload.accountCategory && !ACCOUNT_CATEGORIES.has(payload.accountCategory)) {
+    throw offlineReject('Select an account category.');
+  }
 }
 
 const SUPPLIER_TERMS = new Set([0, 7, 15, 30, 45, 60, 90]);
@@ -272,6 +327,11 @@ async function catalogMaps() {
         if (customer?._id) customers.set(String(customer._id), customer);
       }
     }
+  }
+  for (const row of await allAccounts()) {
+    const record = rowRecord(row);
+    if (record._id) accounts.set(String(record._id), record);
+    if (row.serverId) accounts.set(String(row.serverId), record);
   }
   return { items, accounts, customers };
 }
@@ -649,6 +709,142 @@ export async function queueSupplierUpdate(id, payload) {
   return envelope('Supplier updated on this computer', record);
 }
 
+function accountOption(record) {
+  return {
+    _id: record._id,
+    accountCode: record.accountCode,
+    accountName: record.accountName,
+    accountType: record.accountType,
+    isPrimary: Boolean(record.isPrimary),
+    currentBalanceAmount: Number(record.currentBalanceAmount) || 0,
+    label: `${record.accountCode} – ${record.accountName}`,
+  };
+}
+
+async function buildAccountRecord(payload, localId, existing) {
+  const now = new Date().toISOString();
+  const previous = existing ? rowRecord(existing) : {};
+  const opening = payload.openingBalanceAmount != null
+    ? Number(payload.openingBalanceAmount) || 0
+    : Number(previous.openingBalanceAmount) || 0;
+  const current = existing && payload.openingBalanceAmount == null
+    ? Number(previous.currentBalanceAmount) || 0
+    : opening;
+  const accountType = payload.accountType || previous.accountType;
+  const accountCategory = payload.accountCategory || previous.accountCategory || 'operating';
+  const bankName = payload.bankName ?? previous.bankName ?? '';
+  const branchName = payload.branchName ?? previous.branchName ?? '';
+  const branchDisplay = bankName && branchName ? `${bankName} – ${branchName}` : bankName || branchName || '';
+  const parent = payload.parentAccountId
+    ? await findAccount(payload.parentAccountId)
+    : null;
+  const parentRecord = parent ? rowRecord(parent) : {};
+  const isActive = payload.isActive != null ? payload.isActive !== false : previous.isActive !== false;
+  const needsReview = payload.needsReview != null ? Boolean(payload.needsReview) : Boolean(previous.needsReview);
+  const record = {
+    _id: previous._id || localId,
+    accountCode: previous.accountCode || `OFF-${localId.slice(-6).toUpperCase()}`,
+    accountName: payload.accountName ?? previous.accountName,
+    accountType,
+    accountTypeLabel: ACCOUNT_TYPE_LABELS[accountType] || accountType || '',
+    accountCategory,
+    accountCategoryLabel: ACCOUNT_CATEGORY_LABELS[accountCategory] || accountCategory,
+    parentAccountId: payload.parentAccountId ?? previous.parentAccountId ?? null,
+    parentAccountName: parentRecord.accountName || previous.parentAccountName || '',
+    parentAccountCode: parentRecord.accountCode || previous.parentAccountCode || '',
+    description: payload.description ?? previous.description ?? '',
+    bankName,
+    branchName,
+    branchDisplay,
+    accountNumber: payload.accountNumber ?? previous.accountNumber ?? '',
+    ibanOrSwift: String(payload.ibanOrSwift ?? previous.ibanOrSwift ?? '').trim().toUpperCase(),
+    openingBalanceAmount: roundMoney(opening),
+    currentBalanceAmount: roundMoney(current),
+    openedAt: payload.openedAt ?? previous.openedAt ?? null,
+    allowManualEntries: payload.allowManualEntries != null
+      ? payload.allowManualEntries !== false
+      : previous.allowManualEntries !== false,
+    isPrimary: payload.isPrimary != null ? Boolean(payload.isPrimary) : Boolean(previous.isPrimary),
+    needsReview,
+    isActive,
+    ...accountStatusOf({ isActive, needsReview }),
+    syncStatus: 'pending',
+    provisional: true,
+    createdAt: previous.createdAt || now,
+    updatedAt: now,
+  };
+  return record;
+}
+
+async function clearOtherPrimaryAccounts(localId) {
+  const rows = await allAccounts();
+  for (const row of rows) {
+    if (row.localId === localId) continue;
+    const record = rowRecord(row);
+    if (!record.isPrimary) continue;
+    await db.accounts.put({
+      ...row,
+      record: { ...record, isPrimary: false },
+      updatedAt: new Date().toISOString(),
+    });
+  }
+}
+
+export async function queueAccountCreate(payload) {
+  assertAccountPayload(payload);
+  if (payload.parentAccountId && isLocalId(payload.parentAccountId)) {
+    const parent = await findAccount(payload.parentAccountId);
+    if (!parent) throw offlineReject('Select a parent account saved on this computer.');
+  }
+  const localId = newLocalId();
+  const record = await buildAccountRecord(payload, localId);
+  if (record.isPrimary) await clearOtherPrimaryAccounts(localId);
+  const serverPayload = { ...payload };
+  delete serverPayload.accountCode;
+  delete serverPayload.currentBalanceAmount;
+  await db.accounts.put({
+    localId,
+    serverId: '',
+    syncStatus: 'pending',
+    origin: 'local',
+    record,
+    updatedAt: record.updatedAt,
+  });
+  const dependsOn = [];
+  if (isLocalId(payload.parentAccountId)) {
+    const createOp = await pendingCreate('account', payload.parentAccountId);
+    if (createOp) dependsOn.push(createOp.operationId);
+  }
+  await enqueue({ entity: 'account', action: 'create', localId, payload: serverPayload, dependsOn });
+  return envelope('Account saved on this computer', record);
+}
+
+export async function queueAccountUpdate(id, payload) {
+  const existing = await findAccount(id);
+  if (!existing) throw offlineReject('Account is not on this computer yet.');
+  const merged = { ...rowRecord(existing), ...payload };
+  assertAccountPayload(merged);
+  const record = await buildAccountRecord(merged, existing.localId, existing);
+  if (record.isPrimary) await clearOtherPrimaryAccounts(existing.localId);
+  await db.accounts.put({ ...existing, syncStatus: 'pending', record, updatedAt: record.updatedAt });
+  const createOp = await pendingCreate('account', existing.localId);
+  if (createOp) {
+    createOp.payload = { ...createOp.payload, ...payload };
+    delete createOp.payload.accountCode;
+    delete createOp.payload.currentBalanceAmount;
+    createOp.status = 'pending';
+    createOp.updatedAt = new Date().toISOString();
+    await db.queue.put(createOp);
+  } else if (existing.serverId) {
+    const serverPayload = { ...payload };
+    delete serverPayload.accountCode;
+    delete serverPayload.currentBalanceAmount;
+    await enqueue({ entity: 'account', action: 'update', localId: existing.localId, payload: serverPayload });
+  }
+  emitSync();
+  return envelope('Account updated on this computer', record);
+}
+
 export async function queueSaleCreate(payload) {
   const customer = await findCustomer(payload.customerId);
   if (!customer && isLocalId(payload.customerId)) {
@@ -672,6 +868,12 @@ export async function queueSaleCreate(payload) {
   const dependsOn = [];
   if (isLocalId(payload.customerId)) {
     const createOp = await pendingCreate('customer', payload.customerId);
+    if (createOp) dependsOn.push(createOp.operationId);
+  }
+  if (isLocalId(payload.accountId)) {
+    const account = await findAccount(payload.accountId);
+    if (!account) throw offlineReject('Select an account saved on this computer.');
+    const createOp = await pendingCreate('account', payload.accountId);
     if (createOp) dependsOn.push(createOp.operationId);
   }
   await enqueue({ entity: 'sale', action: 'create', localId, payload: serverPayload, dependsOn });
@@ -761,6 +963,12 @@ export async function queuePaymentCreate(payload) {
     const createOp = await pendingCreate('supplier', payload.supplierId);
     if (createOp) dependsOn.push(createOp.operationId);
   }
+  if (isLocalId(payload.accountId)) {
+    const account = await findAccount(payload.accountId);
+    if (!account) throw offlineReject('Select an account saved on this computer.');
+    const createOp = await pendingCreate('account', payload.accountId);
+    if (createOp) dependsOn.push(createOp.operationId);
+  }
   for (const line of payload.allocations || []) {
     if (isLocalId(line.saleId)) {
       const createOp = await pendingCreate('sale', line.saleId);
@@ -816,6 +1024,47 @@ function filterSuppliers(rows, params) {
       record.bankName,
     ].some((value) => includesText(value, params.search));
   });
+}
+
+function filterAccounts(rows, params) {
+  return rows.filter((row) => {
+    const record = rowRecord(row);
+    if (params.accountType && params.accountType !== 'all' && record.accountType !== params.accountType) return false;
+    if (params.status === 'inactive' && record.isActive !== false) return false;
+    if (params.status === 'review' && !record.needsReview) return false;
+    if (params.status === 'active' && (record.isActive === false || record.needsReview)) return false;
+    if (!params.search) return true;
+    return [record.accountCode, record.accountName, record.bankName, record.branchName, record.accountNumber]
+      .some((value) => includesText(value, params.search));
+  });
+}
+
+function accountListSummary(items) {
+  return {
+    totalAccounts: items.length,
+    activeAccounts: items.filter((account) => account.isActive !== false && !account.needsReview).length,
+    totalOpeningBalance: roundMoney(items.reduce((sum, account) => sum + (Number(account.openingBalanceAmount) || 0), 0)),
+    totalCurrentBalance: roundMoney(items.reduce((sum, account) => sum + (Number(account.currentBalanceAmount) || 0), 0)),
+    needsReviewCount: items.filter((account) => account.needsReview).length,
+  };
+}
+
+function accountFormOptionsData(parentRecords) {
+  return {
+    nextAccountCode: '',
+    accountTypes: Object.entries(ACCOUNT_TYPE_LABELS).map(([value, label]) => ({ value, label })),
+    accountCategories: Object.entries(ACCOUNT_CATEGORY_LABELS).map(([value, label]) => ({ value, label })),
+    statuses: [
+      { value: 'active', label: 'Active' },
+      { value: 'review', label: 'Review' },
+      { value: 'inactive', label: 'Inactive' },
+    ],
+    activeStatuses: [
+      { value: 'active', label: 'Active' },
+      { value: 'inactive', label: 'Inactive' },
+    ],
+    parentAccounts: parentRecords.filter((account) => account.isActive !== false).map(accountOption),
+  };
 }
 
 function filterSales(rows, params) {
@@ -949,6 +1198,31 @@ async function supplierLedger(id) {
   });
 }
 
+async function accountLedger(id) {
+  const account = await findAccount(id);
+  if (!account) return null;
+  const record = rowRecord(account);
+  return envelope('Account ledger fetched', {
+    account: record,
+    summary: {
+      openingBalanceAmount: roundMoney(record.openingBalanceAmount),
+      currentBalanceAmount: roundMoney(record.currentBalanceAmount),
+      totalInward: 0,
+      totalOutward: 0,
+      netMovement: 0,
+      inwardCount: 0,
+      outwardCount: 0,
+      transactionCount: 0,
+      lastTransactionAmount: 0,
+      lastTransactionDate: null,
+      lastTransactionNumber: null,
+      lastTransactionDirection: null,
+      lastTransactionDirectionLabel: null,
+      provisional: account.syncStatus !== 'synced',
+    },
+  });
+}
+
 async function adjustStock(items) {
   if (!Array.isArray(items)) return items;
   const copy = [];
@@ -996,6 +1270,17 @@ async function withPendingParties(data) {
     const seen = new Set(data.suppliers.map((supplier) => String(supplier._id)));
     next.suppliers = [...extras.filter((supplier) => !seen.has(String(supplier._id))), ...data.suppliers];
   }
+  const pendingAccounts = (await allAccounts())
+    .filter((row) => row.syncStatus !== 'synced' && rowRecord(row).isActive !== false)
+    .map((row) => accountOption(rowRecord(row)));
+  if (pendingAccounts.length && Array.isArray(data.accounts)) {
+    const seen = new Set(data.accounts.map((account) => String(account._id)));
+    next.accounts = [...pendingAccounts.filter((account) => !seen.has(String(account._id))), ...data.accounts];
+  }
+  if (pendingAccounts.length && Array.isArray(data.parentAccounts)) {
+    const seen = new Set(data.parentAccounts.map((account) => String(account._id)));
+    next.parentAccounts = [...pendingAccounts.filter((account) => !seen.has(String(account._id))), ...data.parentAccounts];
+  }
   if (Array.isArray(data.inventoryItems)) {
     next.inventoryItems = await adjustStock(data.inventoryItems);
   }
@@ -1031,12 +1316,13 @@ async function outstandingForCustomer(customerId) {
 export async function serveGet(config) {
   const path = requestPath(config);
   const params = paramsOf(config);
-  const idMatch = path.match(/^\/(customers|suppliers|sales|payments)\/([^/]+)$/);
+  const idMatch = path.match(/^\/(customers|suppliers|accounts|sales|payments)\/([^/]+)$/);
   if (idMatch && idMatch[2] !== 'form-options') {
     const table = idMatch[1] === 'customers' ? await findCustomer(idMatch[2])
       : idMatch[1] === 'suppliers' ? await findSupplier(idMatch[2])
-        : idMatch[1] === 'sales' ? await findSale(idMatch[2])
-          : (await allPayments()).find((row) => sameParty(row.localId, idMatch[2]) || sameParty(row.serverId, idMatch[2]));
+        : idMatch[1] === 'accounts' ? await findAccount(idMatch[2])
+          : idMatch[1] === 'sales' ? await findSale(idMatch[2])
+            : (await allPayments()).find((row) => sameParty(row.localId, idMatch[2]) || sameParty(row.serverId, idMatch[2]));
     if (table) return envelope('Saved on this computer', rowRecord(table));
   }
   if (/^\/customers\/[^/]+\/ledger$/.test(path)) {
@@ -1108,6 +1394,32 @@ export async function serveGet(config) {
       if (items.length) return envelope('Suppliers fetched', paginate(items, params));
     }
   }
+  if (path === '/accounts') {
+    const localRows = filterAccounts(await allAccounts(), params);
+    const listed = await db.snapshots.get(cacheKey(config));
+    const snapItems = Array.isArray(listed?.envelope?.data?.items) ? listed.envelope.data.items : [];
+    if (localRows.length || snapItems.length) {
+      const covered = new Set();
+      for (const row of await allAccounts()) {
+        if (row.serverId) covered.add(String(row.serverId));
+        const recordId = rowRecord(row)._id;
+        if (recordId) covered.add(String(recordId));
+      }
+      const extras = filterAccounts(
+        snapItems
+          .filter((item) => item?._id && !covered.has(String(item._id)))
+          .map((item) => ({ record: item })),
+        params,
+      ).map(rowRecord);
+      const items = [...localRows.map(rowRecord), ...extras];
+      if (items.length) {
+        return envelope('Accounts fetched', {
+          ...paginate(items, params),
+          summary: accountListSummary(items),
+        });
+      }
+    }
+  }
   if (path === '/sales' && (await allSales()).length) {
     const rows = filterSales(await allSales(), params);
     return envelope('Sales fetched', paginate(rows.map(rowRecord), params));
@@ -1123,6 +1435,23 @@ export async function serveGet(config) {
     if (/^\/suppliers\/[^/]+\/ledger$/.test(path)) {
       const ledger = await supplierLedger(path.split('/')[2]);
       if (ledger) return ledger;
+    }
+    if (/^\/accounts\/[^/]+\/ledger$/.test(path)) {
+      const ledger = await accountLedger(path.split('/')[2]);
+      if (ledger) return ledger;
+    }
+    if (/^\/accounts\/[^/]+\/transactions$/.test(path)) {
+      const account = await findAccount(path.split('/')[2]);
+      if (account && account.syncStatus !== 'synced') {
+        return envelope('Account transactions fetched', {
+          account: rowRecord(account),
+          ...paginate([], params),
+        });
+      }
+    }
+    if (path === '/accounts/form-options') {
+      const parents = (await allAccounts()).map(rowRecord);
+      return envelope('Account form options fetched', accountFormOptionsData(parents));
     }
     return null;
   }
@@ -1155,6 +1484,10 @@ export async function serveWrite(config) {
   if (method === 'patch' && /^\/suppliers\/[^/]+$/.test(path)) {
     return queueSupplierUpdate(path.split('/')[2], payload);
   }
+  if (method === 'post' && path === '/accounts') return queueAccountCreate(payload);
+  if (method === 'patch' && /^\/accounts\/[^/]+$/.test(path)) {
+    return queueAccountUpdate(path.split('/')[2], payload);
+  }
   if (method === 'post' && path === '/sales') return queueSaleCreate(payload);
   if (method === 'patch' && /^\/sales\/[^/]+$/.test(path)) {
     return queueSaleUpdate(path.split('/')[2], payload);
@@ -1175,25 +1508,36 @@ export async function mergePendingIntoResponse(config, payload) {
   if (requestMethod(config) !== 'get' || !payload?.data) return payload;
   const path = requestPath(config);
   const params = paramsOf(config);
-  if (!['/customers', '/suppliers', '/sales', '/payments'].includes(path) || !Array.isArray(payload.data.items)) {
+  if (!['/customers', '/suppliers', '/accounts', '/sales', '/payments'].includes(path) || !Array.isArray(payload.data.items)) {
     const data = await withPendingParties(payload.data);
     return { ...payload, data };
   }
   const table = path === '/customers' ? filterCustomers(await allCustomers(), params)
     : path === '/suppliers' ? filterSuppliers(await allSuppliers(), params)
-      : path === '/sales' ? filterSales(await allSales(), params)
-        : filterPayments(await allPayments(), params);
+      : path === '/accounts' ? filterAccounts(await allAccounts(), params)
+        : path === '/sales' ? filterSales(await allSales(), params)
+          : filterPayments(await allPayments(), params);
   const pending = table
     .filter((row) => row.syncStatus !== 'synced' && row.origin !== 'sale-receipt')
     .map(rowRecord);
   if (!pending.length || Number(params.page || 1) !== 1) return payload;
   const seen = new Set(payload.data.items.map((item) => String(item._id)));
   const extras = pending.filter((item) => !seen.has(String(item._id)));
+  const summary = payload.data.summary;
+  const nextSummary = path === '/accounts' && summary ? {
+    ...summary,
+    totalAccounts: (summary.totalAccounts || 0) + extras.length,
+    activeAccounts: (summary.activeAccounts || 0) + extras.filter((account) => account.isActive !== false && !account.needsReview).length,
+    totalOpeningBalance: roundMoney((summary.totalOpeningBalance || 0) + extras.reduce((sum, account) => sum + (Number(account.openingBalanceAmount) || 0), 0)),
+    totalCurrentBalance: roundMoney((summary.totalCurrentBalance || 0) + extras.reduce((sum, account) => sum + (Number(account.currentBalanceAmount) || 0), 0)),
+    needsReviewCount: (summary.needsReviewCount || 0) + extras.filter((account) => account.needsReview).length,
+  } : summary;
   return {
     ...payload,
     data: {
       ...payload.data,
       items: [...extras, ...payload.data.items],
+      ...(nextSummary ? { summary: nextSummary } : {}),
       pagination: {
         ...payload.data.pagination,
         total: (payload.data.pagination?.total || payload.data.items.length) + extras.length,
@@ -1205,8 +1549,9 @@ export async function mergePendingIntoResponse(config, payload) {
 export async function applyServerResult(localId, entity, serverRecord) {
   const table = entity === 'customer' ? db.customers
     : entity === 'supplier' ? db.suppliers
-      : entity === 'sale' ? db.sales
-        : db.payments;
+      : entity === 'account' ? db.accounts
+        : entity === 'sale' ? db.sales
+          : db.payments;
   const existing = await table.get(localId);
   if (!existing || !serverRecord?._id) return;
   await table.put({
@@ -1266,8 +1611,9 @@ export async function discardFailedOperation(operationId) {
   if (!row || row.status !== 'failed') return;
   const table = row.entity === 'customer' ? db.customers
     : row.entity === 'supplier' ? db.suppliers
-      : row.entity === 'sale' ? db.sales
-        : db.payments;
+      : row.entity === 'account' ? db.accounts
+        : row.entity === 'sale' ? db.sales
+          : db.payments;
   const record = await table.get(row.localId);
   if (row.action === 'create' && record && !record.serverId) {
     await table.delete(row.localId);
@@ -1287,6 +1633,7 @@ export async function exportOfflineBackup() {
     exportedAt: new Date().toISOString(),
     customers: await db.customers.toArray(),
     suppliers: await db.suppliers.toArray(),
+    accounts: await db.accounts.toArray(),
     sales: await db.sales.toArray(),
     payments: await db.payments.toArray(),
     queue: await db.queue.toArray(),
@@ -1313,8 +1660,8 @@ export async function markSyncMeta(patch) {
 export function canQueueWrite(config) {
   const path = requestPath(config);
   const method = requestMethod(config);
-  if (method === 'post' && ['/customers', '/suppliers', '/sales', '/payments'].includes(path)) return true;
-  if (method === 'patch' && /^\/(customers|suppliers|sales)\/[^/]+$/.test(path)) return true;
+  if (method === 'post' && ['/customers', '/suppliers', '/accounts', '/sales', '/payments'].includes(path)) return true;
+  if (method === 'patch' && /^\/(customers|suppliers|accounts|sales)\/[^/]+$/.test(path)) return true;
   return false;
 }
 

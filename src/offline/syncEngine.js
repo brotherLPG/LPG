@@ -20,6 +20,8 @@ async function resolveId(value) {
   if (customer?.serverId) return customer.serverId;
   const supplier = await db.suppliers.get(value);
   if (supplier?.serverId) return supplier.serverId;
+  const account = await db.accounts.get(value);
+  if (account?.serverId) return account.serverId;
   const sale = await db.sales.get(value);
   if (sale?.serverId) return sale.serverId;
   const payment = await db.payments.get(value);
@@ -43,6 +45,16 @@ async function readyPayload(operation) {
     const resolved = await resolveId(payload.saleId);
     if (!resolved) return null;
     payload.saleId = resolved;
+  }
+  if (payload.accountId) {
+    const resolved = await resolveId(payload.accountId);
+    if (!resolved) return null;
+    payload.accountId = resolved;
+  }
+  if (payload.parentAccountId) {
+    const resolved = await resolveId(payload.parentAccountId);
+    if (!resolved) return null;
+    payload.parentAccountId = resolved;
   }
   if (Array.isArray(payload.allocations)) {
     payload.allocations = [];
@@ -71,6 +83,8 @@ async function readyPayload(operation) {
   delete payload.paymentNumber;
   delete payload.customerCode;
   delete payload.supplierCode;
+  delete payload.accountCode;
+  delete payload.currentBalanceAmount;
   return payload;
 }
 
@@ -86,6 +100,12 @@ function requestFor(operation, serverId) {
   }
   if (operation.entity === 'supplier' && operation.action === 'update') {
     return { method: 'patch', url: `/suppliers/${serverId}` };
+  }
+  if (operation.entity === 'account' && operation.action === 'create') {
+    return { method: 'post', url: '/accounts' };
+  }
+  if (operation.entity === 'account' && operation.action === 'update') {
+    return { method: 'patch', url: `/accounts/${serverId}` };
   }
   if (operation.entity === 'sale' && operation.action === 'create') {
     return { method: 'post', url: '/sales' };
@@ -112,7 +132,9 @@ async function sendOperation(operation) {
     ? await db.customers.get(operation.localId)
     : operation.entity === 'supplier'
       ? await db.suppliers.get(operation.localId)
-      : operation.entity === 'sale'
+      : operation.entity === 'account'
+        ? await db.accounts.get(operation.localId)
+        : operation.entity === 'sale'
         ? await db.sales.get(operation.localId)
         : await db.payments.get(operation.localId);
   const target = requestFor(operation, row?.serverId);

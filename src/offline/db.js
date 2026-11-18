@@ -23,4 +23,16 @@ db.version(2).stores({
   meta: 'key',
 });
 
+db.version(3).stores({
+  customers: 'localId, serverId, syncStatus, updatedAt',
+  suppliers: 'localId, serverId, syncStatus, updatedAt',
+  accounts: 'localId, serverId, syncStatus, updatedAt',
+  sales: 'localId, serverId, syncStatus, customerLocalId, updatedAt',
+  payments: 'localId, serverId, syncStatus, customerLocalId, updatedAt',
+  queue: 'operationId, status, entity, createdAt',
+  snapshots: 'key',
+  auth: 'email',
+  meta: 'key',
+});
+
 export default db;

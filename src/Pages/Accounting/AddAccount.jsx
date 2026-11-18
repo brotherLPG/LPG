@@ -60,7 +60,7 @@ function AddAccount() {
 
   const validateForm = () => {
     const errors = {};
-    if (!formData.accountName.trim()) errors.accountName = "Account name is required";
+    if (formData.accountName.trim().length < 2) errors.accountName = "Account name must be at least 2 characters";
     if (!formData.accountType) errors.accountType = "Account type is required";
     if (!formData.accountCategory) errors.accountCategory = "Account category is required";
     if (formData.openingBalanceAmount && isNaN(formData.openingBalanceAmount)) {
