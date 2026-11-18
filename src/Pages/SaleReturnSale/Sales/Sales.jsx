@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button, Tooltip } from "@heroui/react";
 import GlobalTable from "../../../utils/GlobalTable";
 import SearchableCustomerSelect from "../../../components/SearchableCustomerSelect";
-import { useGetSaleFormOptions, useSales } from "../../../queries/sales/sales.queries";
+import { useGetSaleFormOptions, useSales, useSalesLatestFirst } from "../../../queries/sales/sales.queries";
 import Returnsales from "../ReturnSales/Returnsales";
 import { usePermissions } from "../../../contexts/PermissionContext";
 import { usePrint } from "../../../utils/usePrint";
@@ -59,7 +59,7 @@ function Sales() {
     ...(endDate && { endDate }),
   };
 
-  const { data: salesData, isLoading } = useSales(params);
+  const { data: salesData, isLoading } = useSalesLatestFirst(params);
   const { data: cardSalesData } = useSales({
     page: 1,
     limit: 1,
