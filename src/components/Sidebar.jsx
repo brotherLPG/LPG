@@ -25,6 +25,8 @@ import logo from "../assets/Images/logo.jpeg";
 import { useCurrentUser } from "../queries/auth/auth.queries";
 import { useRoleById } from "../queries/roles/roles.queries";
 import { useTheme } from "../contexts/ThemeContext";
+import { endBrowserSession } from "../offline/session";
+import { SyncBadge } from "./SyncStatus";
 
 const isAllowedAccess = (permission) => {
   const access = String(permission?.access || "").trim().toLowerCase();
