@@ -108,7 +108,7 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
         opacity: isSidebarOpen ? 1 : 0.95,
       }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="shadow-lg bg-white"
+      className="shadow-lg bg-white dark:bg-gray-900"
     >
       <div className="flex items-center justify-between px-6 py-3">
 
@@ -120,7 +120,7 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
             placeholder="Search transactions, cylinders, or customers..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-4 py-2 rounded-xl bg-[#E5E7EB] border border-text-tertiary text-tertiary placeholder-text-tertiary focus:outline-none focus:ring-2 focus:ring-white/30  w-96 text-sm"
+            className="pl-10 pr-4 py-2 rounded-xl bg-[#E5E7EB] dark:bg-gray-700 border border-text-tertiary text-tertiary placeholder-text-tertiary focus:outline-none focus:ring-2 focus:ring-white/30  w-96 text-sm"
           />
         </div>
         {/* </div> */}
@@ -142,7 +142,7 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
             </button>
 
             {isPlantDropdownOpen && (
-              <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl overflow-hidden z-50">
+              <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-900 rounded-xl shadow-xl overflow-hidden z-50">
                 {plants.map((plant) => (
                   <button
                     key={plant}
@@ -150,7 +150,7 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
                       setSelectedPlant(plant);
                       setIsPlantDropdownOpen(false);
                     }}
-                    className="w-full px-4 py-3 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                    className="w-full px-4 py-3 text-left text-sm font-medium text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
                   >
                     {plant}
                   </button>
@@ -163,9 +163,9 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
           <div className="relative" ref={notificationRef}>
             <button
               onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-              className="relative p-2.5 rounded-xl hover:bg-slate-100 transition-colors"
+              className="relative p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors"
             >
-              <Bell className="w-5 h-5 text-slate-600" />
+              <Bell className="w-5 h-5 text-slate-600 dark:text-gray-400" />
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 bg-red-500 rounded-full text-xs flex items-center justify-center font-bold text-white">
                   {unreadCount > 9 ? '9+' : unreadCount}
@@ -174,22 +174,22 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
             </button>
 
             {isNotificationOpen && (
-              <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-xl shadow-xl overflow-hidden z-50">
-                <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-                  <h3 className="font-semibold text-slate-800">
+              <div className="absolute right-0 top-full mt-2 w-96 bg-white dark:bg-gray-900 rounded-xl shadow-xl overflow-hidden z-50">
+                <div className="p-4 border-b border-slate-200 dark:border-gray-700 flex items-center justify-between">
+                  <h3 className="font-semibold text-slate-800 dark:text-gray-100">
                     Notifications
                   </h3>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-slate-500 dark:text-gray-400">
                     {unreadCount} unread
                   </span>
                 </div>
                 <div className="max-h-80 overflow-y-auto">
                   {areNotificationsLoading && (
-                    <p className="p-4 text-sm text-slate-500">Loading notifications...</p>
+                    <p className="p-4 text-sm text-slate-500 dark:text-gray-400">Loading notifications...</p>
                   )}
 
                   {!areNotificationsLoading && notifications.length === 0 && (
-                    <p className="p-4 text-sm text-slate-500">No notifications found</p>
+                    <p className="p-4 text-sm text-slate-500 dark:text-gray-400">No notifications found</p>
                   )}
 
                   {notifications.map((notification) => {
@@ -199,7 +199,7 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
                       <div
                         key={notification._id}
                         onClick={() => handleNotificationClick(notification)}
-                        className={`p-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100 transition-colors ${
+                        className={`p-4 hover:bg-slate-50 dark:hover:bg-gray-800 cursor-pointer border-b border-slate-100 dark:border-gray-800 transition-colors ${
                           !notification.isRead ? "bg-blue-50/50" : ""
                         }`}
                       >
@@ -207,30 +207,30 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
                           <div
                             className={`p-2 rounded-full ${
                               type === "success"
-                                ? "bg-green-100"
+                                ? "bg-green-100 dark:bg-green-900"
                                 : type === "warning"
-                                  ? "bg-orange-100"
-                                  : "bg-blue-100"
+                                  ? "bg-orange-100 dark:bg-orange-900"
+                                  : "bg-blue-100 dark:bg-blue-900"
                             }`}
                           >
                             {type === "success" && (
-                              <CheckCircle className="w-4 h-4 text-green-600" />
+                              <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
                             )}
                             {type === "warning" && (
-                              <AlertTriangle className="w-4 h-4 text-orange-600" />
+                              <AlertTriangle className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                             )}
                             {type === "info" && (
-                              <Info className="w-4 h-4 text-blue-600" />
+                              <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-slate-800">
+                            <p className="text-sm font-semibold text-slate-800 dark:text-gray-100">
                               {notification.notificationTitle}
                             </p>
-                            <p className="text-xs text-slate-600 mt-1">
+                            <p className="text-xs text-slate-600 dark:text-gray-400 mt-1">
                               {notification.notificationMessage}
                             </p>
-                            <p className="text-xs text-slate-400 mt-1">
+                            <p className="text-xs text-slate-400 dark:text-gray-500 mt-1">
                               {formatRelativeTime(notification.createdAt)}
                             </p>
                           </div>
@@ -242,13 +242,13 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
                     );
                   })}
                 </div>
-                <div className="p-3 border-t border-slate-200 bg-slate-50">
+                <div className="p-3 border-t border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800">
                   <button
                     onClick={() => {
                       setIsNotificationOpen(false);
                       navigate("/notifications");
                     }}
-                    className="w-full text-sm font-medium text-accent-blue hover:text-blue-700 transition-colors"
+                    className="w-full text-sm font-medium text-accent-blue hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
                   >
                     View All Notifications
                   </button>
@@ -260,8 +260,8 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
           {/* Profile Menu */}
           <div className="relative" ref={profileMenuRef}>
             {isProfileMenuOpen && (
-              <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl overflow-hidden z-50">
-                <div className="p-4 border-b border-slate-200 bg-gradient-primary">
+              <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-900 rounded-xl shadow-xl overflow-hidden z-50">
+                <div className="p-4 border-b border-slate-200 dark:border-gray-700 bg-gradient-primary">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
                       <span className="text-white font-bold text-lg">
@@ -282,18 +282,18 @@ function Header({ onToggleSidebar, isSidebarOpen }) {
                       setIsProfileMenuOpen(false);
                       navigate("/settings");
                     }}
-                    className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
                   >
-                    <UserRound className="h-4 w-4 text-slate-400" /> Profile And
+                    <UserRound className="h-4 w-4 text-slate-400 dark:text-gray-500" /> Profile And
                     settings
                   </button>
-                  <div className="border-t border-slate-100 my-1"></div>
+                  <div className="border-t border-slate-100 dark:border-gray-800 my-1"></div>
                   <button
                     onClick={() => {
                       endBrowserSession();
                       navigate('/');
                     }}
-                    className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
                   >
                     <LogOut className="h-4 w-4" /> Sign Out
                   </button>

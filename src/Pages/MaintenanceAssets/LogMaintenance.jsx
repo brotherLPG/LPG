@@ -93,40 +93,40 @@ function LogMaintenance() {
       key: "assetCode",
       label: "Asset Code",
       isRowHeader: true,
-      className: "bg-slate-50/80 px-4 py-3 text-[12px] font-bold text-slate-700",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-3 text-[12px] font-bold text-slate-700 dark:text-gray-300",
       cellClassName: "px-4 py-2",
       renderCell: (item) => (
-        <span className="font-bold text-slate-800 text-[12px]">{item.assetCode}</span>
+        <span className="font-bold text-slate-800 dark:text-gray-100 text-[12px]">{item.assetCode}</span>
       ),
     },
     {
       key: "assetName",
       label: "Asset Name",
-      className: "bg-slate-50/80 px-4 py-3 text-[12px] font-bold text-slate-700",
-      cellClassName: "px-4 py-2 text-slate-600 text-[12px]",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-3 text-[12px] font-bold text-slate-700 dark:text-gray-300",
+      cellClassName: "px-4 py-2 text-slate-600 dark:text-gray-400 text-[12px]",
     },
     {
       key: "category",
       label: "Category",
-      className: "bg-slate-50/80 px-4 py-3 text-[12px] font-bold text-slate-700",
-      cellClassName: "px-4 py-2 text-slate-600 text-[12px]",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-3 text-[12px] font-bold text-slate-700 dark:text-gray-300",
+      cellClassName: "px-4 py-2 text-slate-600 dark:text-gray-400 text-[12px]",
     },
     {
       key: "zone",
       label: "Zone",
-      className: "bg-slate-50/80 px-4 py-3 text-[12px] font-bold text-slate-700",
-      cellClassName: "px-4 py-2 text-slate-600 text-[12px]",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-3 text-[12px] font-bold text-slate-700 dark:text-gray-300",
+      cellClassName: "px-4 py-2 text-slate-600 dark:text-gray-400 text-[12px]",
     },
     {
       key: "currentStatus",
       label: "Status",
-      className: "bg-slate-50/80 px-4 py-3 text-[12px] font-bold text-slate-700",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-3 text-[12px] font-bold text-slate-700 dark:text-gray-300",
       cellClassName: "px-4 py-2",
       renderCell: (item) => (
         <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${
           item.currentStatus === "Operational" 
-            ? "bg-emerald-50 text-emerald-600" 
-            : "bg-amber-50 text-amber-600"
+            ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400" 
+            : "bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400"
         }`}>
           {item.currentStatus}
         </span>
@@ -135,7 +135,7 @@ function LogMaintenance() {
     {
       key: "action",
       label: "Action",
-      className: "bg-slate-50/80 px-4 py-3 text-[12px] font-bold text-slate-700",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-3 text-[12px] font-bold text-slate-700 dark:text-gray-300",
       cellClassName: "px-4 py-2",
       renderCell: (item) => (
         <button
@@ -150,7 +150,7 @@ function LogMaintenance() {
   ];
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
       <section className="max-w-5xl mx-auto">
         {/* Header & Breadcrumbs */}
         <div className="mb-6">
@@ -162,7 +162,7 @@ function LogMaintenance() {
               >
                 Dashboard
               </span>{" "}
-              <span className="px-1 text-slate-400">/</span>{" "}
+              <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
               <span
                 // onClick={() => navigate("/maintenance-assets")}
                 onClick={() => navigate("/assets?tab=maintenance-assets")}
@@ -170,8 +170,8 @@ function LogMaintenance() {
               >
                 Maintenance Assets
               </span>{" "}
-              <span className="px-1 text-slate-400">/</span>{" "}
-              <span className="font-semibold text-slate-700">
+              <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
+              <span className="font-semibold text-slate-700 dark:text-gray-300">
                 Log Maintenance Record
               </span>
             </p>
@@ -185,26 +185,26 @@ function LogMaintenance() {
         </div>
 
         {/* Form Card */}
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
           <form onSubmit={handleSubmit} className="p-6">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* Maintenance ID */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Maintenance ID
                 </label>
                 <input
                   type="text"
                   value={formData.maintenanceId}
                   readOnly
-                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-600 outline-none"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-3 py-2.5 text-sm text-slate-600 dark:text-gray-400 outline-none"
                 />
               </div>
 
               {/* Maintenance Date */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Maintenance Date <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Maintenance Date <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
                 <input
                   type="date"
@@ -216,38 +216,38 @@ function LogMaintenance() {
                     })
                   }
                   required
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
                 />
               </div>
 
               {/* Selected Asset */}
               <div className="lg:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Selected Asset <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Selected Asset <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
                 <div className="space-y-2">
                   <button
                     type="button"
                     onClick={() => setShowAssetTable(!showAssetTable)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-left text-slate-700 outline-none focus:border-[#008951] focus:ring-1 focus:ring-[#008951] flex items-center justify-between"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-left text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-1 focus:ring-[#008951] flex items-center justify-between"
                   >
                     {formData.selectedAsset
                       ? `${formData.selectedAsset.assetCode} - ${formData.selectedAsset.assetName}`
                       : "Click to select an asset..."}
-                    <span className="text-xs text-slate-400">▼</span>
+                    <span className="text-xs text-slate-400 dark:text-gray-500">▼</span>
                   </button>
 
                   {formData.selectedAsset && (
                     <div className="flex flex-wrap gap-3 text-xs">
-                      <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-slate-600">
+                      <span className="inline-flex items-center rounded-md bg-slate-100 dark:bg-gray-800 px-2 py-1 text-slate-600 dark:text-gray-400">
                         <span className="font-medium">CATEGORY:</span>{" "}
                         {formData.selectedAsset.category}
                       </span>
-                      <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-slate-600">
+                      <span className="inline-flex items-center rounded-md bg-slate-100 dark:bg-gray-800 px-2 py-1 text-slate-600 dark:text-gray-400">
                         <span className="font-medium">ZONE:</span>{" "}
                         {formData.selectedAsset.zone}
                       </span>
-                      <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-slate-600">
+                      <span className="inline-flex items-center rounded-md bg-slate-100 dark:bg-gray-800 px-2 py-1 text-slate-600 dark:text-gray-400">
                         <span className="font-medium">CURRENT STATUS:</span>{" "}
                         {formData.selectedAsset.currentStatus}
                       </span>
@@ -255,13 +255,13 @@ function LogMaintenance() {
                   )}
 
                   {showAssetTable && (
-                    <div className="mt-3 rounded-lg border border-slate-200 bg-white p-3">
+                    <div className="mt-3 rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3">
                       <GlobalTable
                         columns={assetColumns}
                         data={availableAssets}
                         ariaLabel="Available Assets Table"
                         className=""
-                        rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+                        rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
                         emptyContent="No assets available"
                         pagination={false}
                       />
@@ -272,8 +272,8 @@ function LogMaintenance() {
 
               {/* Maintenance Type */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Maintenance Type <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Maintenance Type <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
                 <select
                   value={formData.maintenanceType}
@@ -284,7 +284,7 @@ function LogMaintenance() {
                     })
                   }
                   required
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
                 >
                   <option value="">Select maintenance type...</option>
                   <option value="Preventive">Preventive</option>
@@ -296,7 +296,7 @@ function LogMaintenance() {
 
               {/* Maintenance Cost */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Maintenance Cost (Rs.)
                 </label>
                 <input
@@ -309,13 +309,13 @@ function LogMaintenance() {
                     })
                   }
                   placeholder="0.00"
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
                 />
               </div>
 
               {/* Problem Description */}
               <div className="lg:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Problem Description
                 </label>
                 <textarea
@@ -328,14 +328,14 @@ function LogMaintenance() {
                   }
                   rows={3}
                   placeholder="Describe the problem or issue..."
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-1 focus:ring-[#008951] resize-none"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-1 focus:ring-[#008951] resize-none"
                 />
               </div>
 
               {/* Work Performed */}
               <div className="lg:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Work Performed <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Work Performed <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
                 <textarea
                   value={formData.workPerformed}
@@ -345,13 +345,13 @@ function LogMaintenance() {
                   rows={3}
                   placeholder="Describe the work performed..."
                   required
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-1 focus:ring-[#008951] resize-none"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-1 focus:ring-[#008951] resize-none"
                 />
               </div>
 
               {/* Next Maintenance Date */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Next Maintenance Date
                 </label>
                 <input
@@ -363,14 +363,14 @@ function LogMaintenance() {
                       nextMaintenanceDate: e.target.value,
                     })
                   }
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
                 />
               </div>
 
               {/* Performed By */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Performed By <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Performed By <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
                 <input
                   type="text"
@@ -380,13 +380,13 @@ function LogMaintenance() {
                   }
                   placeholder="Enter technician name..."
                   required
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
                 />
               </div>
 
               {/* Approved By */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Approved By
                 </label>
                 <input
@@ -396,7 +396,7 @@ function LogMaintenance() {
                     setFormData({ ...formData, approvedBy: e.target.value })
                   }
                   placeholder="Enter supervisor name..."
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
                 />
               </div>
             </div>
@@ -406,14 +406,14 @@ function LogMaintenance() {
               <button
                 type="button"
                 onClick={() => navigate("/maintenance-assets")}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+                className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-gray-300 shadow-sm transition hover:bg-slate-50 dark:hover:bg-gray-800"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleSaveAndAddAnother}
-                className="rounded-lg border border-[#1a56db] bg-white px-4 py-2.5 text-sm font-medium text-[#1a56db] shadow-sm transition hover:bg-slate-50"
+                className="rounded-lg border border-[#1a56db] bg-white dark:bg-gray-900 px-4 py-2.5 text-sm font-medium text-[#1a56db] dark:text-blue-400 shadow-sm transition hover:bg-slate-50 dark:hover:bg-gray-800"
               >
                 Save & Add Another
               </button>

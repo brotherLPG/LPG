@@ -192,16 +192,16 @@ function UpdateSales() {
 
   if (isLoadingSale) {
     return (
-      <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+      <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
         <div className="text-center py-20">
-          <p className="text-slate-600">Loading sale details...</p>
+          <p className="text-slate-600 dark:text-gray-400">Loading sale details...</p>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
       {/* Header & Breadcrumbs */}
       <div className="mb-6">
         <p className="text-xs mb-2">
@@ -211,14 +211,14 @@ function UpdateSales() {
           >
             Dashboard
           </span>{" "}
-          <span className="px-1 text-slate-400">/</span>{" "}
+          <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
           <span
             onClick={() => navigate("/sales")}
             className="cursor-pointer font-medium text-4th-color transition-colors duration-200"
           >
             Sales
           </span>{" "}
-          <span className="px-1 text-slate-400">/</span>{" "}
+          <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
           <span className="font-semibold">Update Sales Invoice</span>
         </p>
         <h1 className="text-2xl font-bold tracking-tight text-BLUE-dark">
@@ -228,7 +228,7 @@ function UpdateSales() {
           Update sales invoice and modify inventory allocation
         </p>
         {isCancelled && (
-          <p className="mt-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+          <p className="mt-3 rounded-md border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">
             This sale is cancelled, so it cannot be edited.
           </p>
         )}
@@ -238,8 +238,8 @@ function UpdateSales() {
         {/* Left Column (lg:col-span-2) */}
         <div className="lg:col-span-2 space-y-6">
           {/* Card 1: Invoice General Information */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4">
               <h2 className="text-[16px] font-bold text-BLUE-dark">
                 Invoice General Information
               </h2>
@@ -247,40 +247,40 @@ function UpdateSales() {
             <div className="p-5 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                     Invoice Number
                   </label>
                   <input
                     type="text"
                     disabled
                     value={saleData?.data?.invoiceNumber || ""}
-                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-3 py-2 text-sm text-slate-500 dark:text-gray-400 outline-none cursor-not-allowed"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Invoice Date <span className="text-rose-500">*</span>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                    Invoice Date <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <input
                     type="date"
                     value={invoiceDate}
                     onChange={(e) => setInvoiceDate(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Payment Terms <span className="text-rose-500">*</span>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                    Payment Terms <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <div className="relative">
                     <select
                       value={paymentTermDays}
                       disabled
                       onChange={(e) => setPaymentTermDays(Number(e.target.value))}
-                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                      className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     >
                       <option value="">Select payment terms</option>
                       {paymentTermsOptions.map((term) => (
@@ -289,12 +289,12 @@ function UpdateSales() {
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500 pointer-events-none" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Customer <span className="text-rose-500">*</span>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                    Customer <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <SearchableCustomerSelect
                     customers={customers}
@@ -303,14 +303,14 @@ function UpdateSales() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                     Payment Method
                   </label>
                   <div className="relative">
                     <select
                       value={saleType}
                       onChange={(e) => setSaleType(e.target.value)}
-                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                      className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     >
                       <option value="">Select sale type</option>
                       {saleTypesOptions.map((type) => (
@@ -319,7 +319,7 @@ function UpdateSales() {
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500 pointer-events-none" />
                   </div>
                 </div>
               </div>
@@ -328,13 +328,13 @@ function UpdateSales() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 ">
                 <div className='flex flex-col gap-2'>
-                  <label className='block text-sm font-medium text-slate-700'>
+                  <label className='block text-sm font-medium text-slate-700 dark:text-gray-300'>
                     Payment Account
                   </label>
                   <select
                     value={paymentAccountId}
                     onChange={e => setPaymentAccountId(e.target.value)}
-                    className='w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#008951]'
+                    className='w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951]'
                   >
                     <option value=''>Select account</option>
                     {accounts.map(account => (
@@ -346,7 +346,7 @@ function UpdateSales() {
                 </div>
 
                 <div className='flex flex-col gap-2'>
-                  <label className='block text-sm font-medium text-slate-700'>
+                  <label className='block text-sm font-medium text-slate-700 dark:text-gray-300'>
                     Reference Number
                   </label>
                   <input
@@ -354,7 +354,7 @@ function UpdateSales() {
                     value={referenceNumber}
                     onChange={e => setReferenceNumber(e.target.value)}
                     placeholder='Enter reference number'
-                    className='w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951]'
+                    className='w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951]'
                   />
                 </div>
               </div>
@@ -364,8 +364,8 @@ function UpdateSales() {
           </div>
 
           {/* Card 2: Line Items & Inventory Allocation */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4 flex justify-between items-center">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4 flex justify-between items-center">
               <h2 className="text-[16px] font-bold text-BLUE-dark">
                 Line Items & Inventory Allocation
               </h2>
@@ -379,12 +379,12 @@ function UpdateSales() {
             <div className="p-5 overflow-x-auto">
               <table className="w-full min-w-[720px] border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-200">
-                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">Item Name</th>
-                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">Qty</th>
-                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">Unit Price (Rs.)</th>
-                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">Discount (Rs.)</th>
-                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">Total (Rs.)</th>
+                  <tr className="border-b border-slate-200 dark:border-gray-700">
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600 dark:text-gray-400">Item Name</th>
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600 dark:text-gray-400">Qty</th>
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600 dark:text-gray-400">Unit Price (Rs.)</th>
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600 dark:text-gray-400">Discount (Rs.)</th>
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600 dark:text-gray-400">Total (Rs.)</th>
                     <th className="px-2 py-2"></th>
                   </tr>
                 </thead>
@@ -407,7 +407,7 @@ function UpdateSales() {
 
                     return (
                       <Fragment key={item.id}>
-                      <tr className={suggestion ? "" : "border-b border-slate-100"}>
+                      <tr className={suggestion ? "" : "border-b border-slate-100 dark:border-gray-800"}>
                         <td className="px-2 py-2">
                           <SearchableItemSelect
                             items={inventoryItems}
@@ -447,7 +447,7 @@ function UpdateSales() {
                             value={item.quantity}
                             onChange={(e) => updateLineItem(item.id, "quantity", e.target.value)}
                             placeholder="0"
-                            className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#008951]"
+                            className="w-24 rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-slate-900 dark:text-gray-100 outline-none placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-[#008951]"
                           />
                         </td>
                         <td className="px-2 py-2">
@@ -456,7 +456,7 @@ function UpdateSales() {
                             value={item.unitPrice === 0 || item.unitPrice === "0" ? "" : item.unitPrice}
                             onChange={(e) => updateLineItem(item.id, "unitPrice", e.target.value)}
                             placeholder="0"
-                            className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#008951]"
+                            className="w-24 rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-slate-900 dark:text-gray-100 outline-none placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-[#008951]"
                           />
                         </td>
                         <td className="px-2 py-2">
@@ -465,7 +465,7 @@ function UpdateSales() {
                             value={item.discount}
                             onChange={(e) => updateLineItem(item.id, "discount", e.target.value)}
                             placeholder="0"
-                            className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#008951]"
+                            className="w-24 rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-slate-900 dark:text-gray-100 outline-none placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-[#008951]"
                           />
                         </td>
                         <td className="px-2 py-2">
@@ -473,7 +473,7 @@ function UpdateSales() {
                             type="text"
                             value={row.total ? row.total.toFixed(2) : "0.00"}
                             disabled
-                            className="w-28 rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-sm text-slate-500 outline-none cursor-not-allowed"
+                            className="w-28 rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-2 py-1.5 text-sm text-slate-500 dark:text-gray-400 outline-none cursor-not-allowed"
                           />
                         </td>
                         <td className="px-2 py-2">
@@ -481,7 +481,7 @@ function UpdateSales() {
                             <button
                               type="button"
                               onClick={() => removeLineItem(item.id)}
-                              className="text-rose-500 hover:text-rose-700 transition"
+                              className="text-rose-500 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -489,7 +489,7 @@ function UpdateSales() {
                         </td>
                       </tr>
                       {suggestion ? (
-                        <tr className="border-b border-slate-100 bg-slate-50/80">
+                        <tr className="border-b border-slate-100 dark:border-gray-800 bg-slate-50/80 dark:bg-gray-800/80">
                           <td colSpan={6} className="px-2 py-2">
                             <SaleRateHint
                               suggestion={suggestion}
@@ -512,26 +512,26 @@ function UpdateSales() {
         {/* Right Column (lg:col-span-1) */}
         <div className="lg:col-span-1 space-y-6">
           {/* Card 3: Invoice Financial Summary */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4">
               <h2 className="text-[16px] font-bold text-BLUE-dark">
                 Invoice Financial Summary
               </h2>
             </div>
             <div className="p-5 space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-600">Subtotal</span>
-                <span className="text-sm font-medium text-slate-900">
+                <span className="text-sm text-slate-600 dark:text-gray-400">Subtotal</span>
+                <span className="text-sm font-medium text-slate-900 dark:text-gray-100">
                   Rs. {totals.subtotal.toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-600">Trade Discount</span>
-                <span className="text-sm font-medium text-slate-900">
+                <span className="text-sm text-slate-600 dark:text-gray-400">Trade Discount</span>
+                <span className="text-sm font-medium text-slate-900 dark:text-gray-100">
                   Rs. {totals.discount.toFixed(2)}
                 </span>
               </div>
-              <div className="border-t border-slate-200 pt-4 flex justify-between items-center">
+              <div className="border-t border-slate-200 dark:border-gray-700 pt-4 flex justify-between items-center">
                 <span className="text-sm font-bold text-BLUE-dark">
                   Grand Total
                 </span>
@@ -541,14 +541,14 @@ function UpdateSales() {
               </div>
               {returnedAmount > 0 && (
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-slate-600">Already Returned</span>
-                  <span className="text-sm font-medium text-slate-900">
+                  <span className="text-sm text-slate-600 dark:text-gray-400">Already Returned</span>
+                  <span className="text-sm font-medium text-slate-900 dark:text-gray-100">
                     Rs. {returnedAmount.toFixed(2)}
                   </span>
                 </div>
               )}
               <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-600">Amount Paid</span>
+                <span className="text-sm text-slate-600 dark:text-gray-400">Amount Paid</span>
                 <input
                   type="number"
                   min="0"
@@ -563,36 +563,36 @@ function UpdateSales() {
                     setAmountPaid(Number.isFinite(value) ? Math.max(0, value) : 0);
                   }}
                   placeholder="0"
-                  className="w-40 shrink-0 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#008951] text-right"
+                  className="w-40 shrink-0 rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-1.5 text-sm text-slate-900 dark:text-gray-100 outline-none placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-[#008951] text-right"
                 />
               </div>
               {invoiceCredit > 0 && (
-                <div className="rounded-md border border-emerald-100 bg-emerald-50 px-3 py-2">
-                  <p className="text-xs text-slate-500">Customer Credit</p>
-                  <p className="text-sm font-semibold text-emerald-700">
+                <div className="rounded-md border border-emerald-100 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950 px-3 py-2">
+                  <p className="text-xs text-slate-500 dark:text-gray-400">Customer Credit</p>
+                  <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
                     Rs. {invoiceCredit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-slate-500 dark:text-gray-400">
                     This extra stays on this invoice. Refund it from Payments, or it applies on the next sale.
                   </p>
                 </div>
               )}
               <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-600">Remaining Amount</span>
+                <span className="text-sm text-slate-600 dark:text-gray-400">Remaining Amount</span>
                 <span className="text-sm font-medium text-orange">
                   Rs. {amountStillDue.toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-600">Payment Status</span>
+                <span className="text-sm text-slate-600 dark:text-gray-400">Payment Status</span>
                 <span
                   className={`text-sm font-medium px-3 py-1 rounded-full ${paymentStatus === "Paid"
-                      ? "bg-green-100 text-green-700"
+                      ? "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300"
                       : paymentStatus === "Refund Due"
-                        ? "bg-purple-100 text-purple-700"
+                        ? "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300"
                         : paymentStatus === "Partially Paid"
-                          ? "bg-amber-100 text-amber-700"
-                          : "bg-rose-100 text-rose-700"
+                          ? "bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300"
+                          : "bg-rose-100 dark:bg-rose-900 text-rose-700 dark:text-rose-300"
                     }`}
                 >
                   {paymentStatus}
@@ -602,15 +602,15 @@ function UpdateSales() {
           </div>
 
           {/* Card 4: Terms & Internal Remarks */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4">
               <h2 className="text-[16px] font-bold text-BLUE-dark">
                 Terms & Internal Remarks
               </h2>
             </div>
             <div className="p-5 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Internal Remarks
                 </label>
                 <textarea
@@ -618,7 +618,7 @@ function UpdateSales() {
                   value={remarks}
                   onChange={(e) => setRemarks(e.target.value)}
                   placeholder="Add internal notes for reference..."
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
                 />
               </div>
             </div>
@@ -627,10 +627,10 @@ function UpdateSales() {
       </div>
 
       {/* Bottom Action Bar */}
-      <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm">
         <button
           onClick={() => navigate("/sales")}
-          className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-5 py-2 text-sm font-medium text-slate-700 dark:text-gray-300 transition hover:bg-slate-50 dark:hover:bg-gray-800"
         >
           Cancel
         </button>

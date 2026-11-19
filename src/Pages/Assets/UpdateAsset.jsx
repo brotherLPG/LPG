@@ -152,19 +152,19 @@ function UpdateAsset() {
 
   if (isLoading) {
     return (
-      <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8 flex items-center justify-center">
-        <p className="text-slate-500 text-sm">Loading asset details...</p>
+      <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+        <p className="text-slate-500 dark:text-gray-400 text-sm">Loading asset details...</p>
       </main>
     );
   }
 
   if (error || !asset) {
     return (
-      <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
-        <p className="text-red-500 text-sm">Failed to load asset details.</p>
+      <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
+        <p className="text-red-500 dark:text-red-400 text-sm">Failed to load asset details.</p>
         <button
           onClick={() => navigate("/assets")}
-          className="mt-4 rounded-lg bg-slate-200 px-4 py-2 text-sm text-slate-700 hover:bg-slate-300"
+          className="mt-4 rounded-lg bg-slate-200 dark:bg-gray-700 px-4 py-2 text-sm text-slate-700 dark:text-gray-300 hover:bg-slate-300"
         >
           Back to Assets
         </button>
@@ -173,7 +173,7 @@ function UpdateAsset() {
   }
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
       {/* Header & Breadcrumbs */}
       <div className="mb-6">
         <p className="text-xs mb-2">
@@ -183,14 +183,14 @@ function UpdateAsset() {
           >
             Dashboard
           </span>{" "}
-          <span className="px-1 text-slate-400">/</span>{" "}
+          <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
           <span
             onClick={() => navigate("/assets")}
             className="cursor-pointer font-medium text-4th-color transition-colors duration-200"
           >
             Fixed Assets
           </span>{" "}
-          <span className="px-1 text-slate-400">/</span>{" "}
+          <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
           <span className="font-semibold">Edit Asset</span>
         </p>
         <h1 className="text-2xl font-bold tracking-tight text-BLUE-dark">
@@ -204,8 +204,8 @@ function UpdateAsset() {
       <form onSubmit={handleUpdate}>
         <div className="space-y-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Card 1: Asset Information */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden col-span-2">
-            <div className="border-b border-slate-200 p-4">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden col-span-2">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4">
               <h2 className="text-[16px] font-bold text-BLUE-dark">
                 Asset Information
               </h2>
@@ -213,20 +213,20 @@ function UpdateAsset() {
             <div className="p-5 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                     Asset Code
                   </label>
                   <input
                     type="text"
                     disabled
                     value={assetCode}
-                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed font-medium"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-3 py-2 text-sm text-slate-500 dark:text-gray-400 outline-none cursor-not-allowed font-medium"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Asset Name <span className="text-rose-500">*</span>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                    Asset Name <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <input
                     type="text"
@@ -234,15 +234,15 @@ function UpdateAsset() {
                     value={assetName}
                     onChange={(e) => setAssetName(e.target.value)}
                     placeholder="e.g. Delivery truck"
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Asset Category <span className="text-rose-500">*</span>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                    Asset Category <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <SearchableCustomerSelect
                     customers={assetCategoryOptions}
@@ -257,7 +257,7 @@ function UpdateAsset() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                     Manufacturer Name
                   </label>
                   <input
@@ -265,14 +265,14 @@ function UpdateAsset() {
                     value={manufacturerName}
                     onChange={(e) => setManufacturerName(e.target.value)}
                     placeholder="e.g. Toyota"
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                     Model Number
                   </label>
                   <input
@@ -280,12 +280,12 @@ function UpdateAsset() {
                     value={modelNumber}
                     onChange={(e) => setModelNumber(e.target.value)}
                     placeholder="e.g. TRK-2025"
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                     Serial Number
                   </label>
                   <input
@@ -293,15 +293,15 @@ function UpdateAsset() {
                     value={serialNumber}
                     onChange={(e) => setSerialNumber(e.target.value)}
                     placeholder="e.g. SN-99120"
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Location Name <span className="text-rose-500">*</span>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                    Location Name <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   {locationOptions.length ? (
                     <select
@@ -309,7 +309,7 @@ function UpdateAsset() {
                       value={locationName}
                       onChange={(e) => setLocationName(e.target.value)}
                       disabled={optionsLoading}
-                      className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                      className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
                     >
                       <option value="">
                         {optionsLoading ? "Loading..." : "Select location"}
@@ -327,14 +327,14 @@ function UpdateAsset() {
                       value={locationName}
                       onChange={(e) => setLocationName(e.target.value)}
                       placeholder="e.g. Yard"
-                      className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                      className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     />
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Asset Status <span className="text-rose-500">*</span>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                    Asset Status <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <SearchableCustomerSelect
                     customers={assetStatusOptions}
@@ -352,28 +352,28 @@ function UpdateAsset() {
           </div>
 
           {/* Card 2: Financial & Assignment Details */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden col-span-1">
-            <div className="border-b border-slate-200 p-4 bg-white">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden col-span-1">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900">
               <h2 className="text-[16px] font-bold text-BLUE-dark">
                 Financial & Assignment
               </h2>
             </div>
             <div className="p-5 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Purchase Date
                 </label>
                 <input
                   type="date"
                   value={purchaseDate}
                   onChange={(e) => setPurchaseDate(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Purchase Cost (Rs.) <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Purchase Cost (Rs.) <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   type="number"
@@ -382,13 +382,13 @@ function UpdateAsset() {
                   value={purchaseCostAmount}
                   onChange={(e) => setPurchaseCostAmount(e.target.value)}
                   placeholder="e.g. 2500000"
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Payment Method <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Payment Method <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={paymentMethodOptions}
@@ -403,8 +403,8 @@ function UpdateAsset() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Account <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Account <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={accountSelectOptions}
@@ -419,7 +419,7 @@ function UpdateAsset() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Current Book Value (Rs.)
                 </label>
                 <input
@@ -428,13 +428,13 @@ function UpdateAsset() {
                   value={currentBookValueAmount}
                   onChange={(e) => setCurrentBookValueAmount(e.target.value)}
                   placeholder="e.g. 2100000"
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Depreciation Method <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Depreciation Method <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={depreciationMethodOptions}
@@ -449,7 +449,7 @@ function UpdateAsset() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Assigned Employee
                 </label>
                 <SearchableCustomerSelect
@@ -468,11 +468,11 @@ function UpdateAsset() {
         </div>
 
         {/* Bottom Action Bar */}
-        <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm">
           <button
             type="button"
             onClick={() => navigate("/assets")}
-            className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-5 py-2 text-sm font-medium text-slate-700 dark:text-gray-300 transition hover:bg-slate-50 dark:hover:bg-gray-800"
           >
             Cancel
           </button>

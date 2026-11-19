@@ -16,14 +16,15 @@ import {
   UserRound,
   LogOut,
   FileText,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from "../assets/Images/logo.jpeg";
 import { useCurrentUser } from "../queries/auth/auth.queries";
 import { useRoleById } from "../queries/roles/roles.queries";
-import { endBrowserSession } from "../offline/session";
-import { SyncBadge } from "./SyncStatus";
+import { useTheme } from "../contexts/ThemeContext";
 
 const isAllowedAccess = (permission) => {
   const access = String(permission?.access || "").trim().toLowerCase();
@@ -190,6 +191,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef(null);
+  const { isDark, toggleTheme } = useTheme();
   const {
     data: currentUserResponse,
     isLoading: isUserLoading,
@@ -262,6 +264,14 @@ const Sidebar = () => {
             <p className="text-white/50 text-xs">ERP Management System</p>
             <SyncBadge />
           </div>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+            className="ml-auto flex h-9 w-9 items-center justify-center rounded-lg text-white/70 transition-colors hover:bg-white/15 hover:text-white"
+          >
+            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
         </div>
       </div>
 
@@ -303,8 +313,8 @@ const Sidebar = () => {
 
       <div className="relative shrink-0 border-t border-white/10 p-3" ref={profileMenuRef}>
         {isProfileMenuOpen && (
-          <div className="absolute bottom-full left-3 right-3 mb-2 overflow-hidden rounded-xl bg-white shadow-xl z-50">
-            <div className="bg-gradient-primary p-4 border-b border-slate-200">
+          <div className="absolute bottom-full left-3 right-3 mb-2 overflow-hidden rounded-xl bg-white dark:bg-gray-900 shadow-xl z-50">
+            <div className="bg-gradient-primary p-4 border-b border-slate-200 dark:border-gray-700">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
                   <span className="text-lg font-bold text-white">{profileInitial}</span>
@@ -322,9 +332,9 @@ const Sidebar = () => {
                   setIsProfileMenuOpen(false);
                   navigate("/settings");
                 }}
-                className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-700 dark:text-gray-300 transition-colors hover:bg-slate-50 dark:hover:bg-gray-800"
               >
-                <UserRound className="h-4 w-4 text-slate-400" /> Profile And
+                <UserRound className="h-4 w-4 text-slate-400 dark:text-gray-500" /> Profile And
                 settings
               </button>
               <button
@@ -333,15 +343,15 @@ const Sidebar = () => {
                   setIsProfileMenuOpen(false);
                   navigate("/notifications");
                 }}
-                className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-700 dark:text-gray-300 transition-colors hover:bg-slate-50 dark:hover:bg-gray-800"
               >
-                <Bell className="h-4 w-4 text-slate-400" /> Notifications
+                <Bell className="h-4 w-4 text-slate-400 dark:text-gray-500" /> Notifications
               </button>
-              <div className="my-1 border-t border-slate-100" />
+              <div className="my-1 border-t border-slate-100 dark:border-gray-800" />
               <button
                 type="button"
                 onClick={handleSignOut}
-                className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+                className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-950"
               >
                 <LogOut className="h-4 w-4" /> Sign Out
               </button>

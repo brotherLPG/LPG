@@ -133,7 +133,7 @@ function Settings() {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-slate-50">
+    <div className="min-h-screen w-full bg-slate-50 dark:bg-gray-800">
       <div className="w-full px-4 md:px-6 lg:px-8 py-3">
         <div className="text-xs">
           <span
@@ -159,11 +159,11 @@ function Settings() {
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3">
           {/* Sidebar */}
-          <div className="col-span-1 bg-white rounded-xl shadow-sm border border-gray-200 p-4 h-full mt-2.5  ">
-            <h1 className="text-xl font-bold text-gray-800 mb-2">
+          <div className="col-span-1 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 h-full mt-2.5  ">
+            <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
               System Settings
             </h1>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-6">
               Configure your LPG plant settings
             </p>
 
@@ -176,8 +176,8 @@ function Settings() {
                     onClick={() => setActiveTab(tab.id)}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                       activeTab === tab.id
-                        ? "bg-blue-50 text-blue-600"
-                        : "text-gray-600 hover:bg-gray-50"
+                        ? "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400"
+                        : "text-gray-600 dark:text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
                     }`}
                   >
                     <Icon className="h-5 w-5" />
@@ -197,18 +197,18 @@ function Settings() {
               {activeTab !== "password" && (
               <form
                 onSubmit={handleUpdateProfile}
-                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+                className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
               >
-                <h2 className="text-xl font-bold text-gray-800 mb-2">
+                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                   Account Profile Details
                 </h2>
 
                 {isLoading && (
-                  <p className="py-6 text-sm text-slate-500">Loading current user...</p>
+                  <p className="py-6 text-sm text-slate-500 dark:text-gray-400">Loading current user...</p>
                 )}
 
                 {error && !isLoading && (
-                  <p className="py-6 text-sm text-red-500">
+                  <p className="py-6 text-sm text-red-500 dark:text-red-400">
                     Unable to load current user.
                   </p>
                 )}
@@ -217,98 +217,98 @@ function Settings() {
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           Full Name
                         </label>
                         <input
                           type="text"
                           value={form.fullName}
                           onChange={updateField("fullName")}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           Username
                         </label>
                         <input
                           type="text"
                           value={form.username}
                           readOnly
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-slate-50 outline-none"
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-slate-50 dark:bg-gray-800 outline-none"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           Official Email Address
                         </label>
                         <input
                           type="email"
                           value={form.email}
                           onChange={updateField("email")}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           Contact Phone
                         </label>
                         <input
                           type="text"
                           value={form.phone}
                           readOnly
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-slate-50 outline-none"
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-slate-50 dark:bg-gray-800 outline-none"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           CNIC Number
                         </label>
                         <input
                           type="text"
                           value={form.cnic}
                           readOnly
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-slate-50 outline-none"
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-slate-50 dark:bg-gray-800 outline-none"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           Assigned Role
                         </label>
                         <input
                           type="text"
                           value={form.role}
                           readOnly
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-slate-50 outline-none"
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-slate-50 dark:bg-gray-800 outline-none"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           Status
                         </label>
                         <input
                           type="text"
                           value={user.isActive ? "Active" : "Inactive"}
                           readOnly
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-slate-50 outline-none"
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-slate-50 dark:bg-gray-800 outline-none"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           Last Login
                         </label>
                         <input
                           type="text"
                           value={formatDate(user.lastLoginAt)}
                           readOnly
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-slate-50 outline-none"
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-slate-50 dark:bg-gray-800 outline-none"
                         />
                       </div>
                     </div>
@@ -322,18 +322,18 @@ function Settings() {
               {activeTab === "password" && (
               <form
                 onSubmit={handleChangePassword}
-                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+                className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
               >
-                <h2 className="text-xl font-bold text-gray-800 mb-2">
+                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                   Change Password
                 </h2>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-4">
                   Enter your current password and choose a new one.
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Current Password
                     </label>
                     <span className="relative block">
@@ -342,12 +342,12 @@ function Settings() {
                         value={passwordForm.currentPassword}
                         onChange={updatePasswordField("currentPassword")}
                         placeholder="Enter current password"
-                        className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full px-4 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
                       <button
                         type="button"
                         onClick={() => togglePasswordVisibility("current")}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500"
                       >
                         {showPasswords.current ? (
                           <EyeOff className="h-4 w-4" />
@@ -361,7 +361,7 @@ function Settings() {
                   <div className="hidden md:block" />
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       New Password
                     </label>
                     <span className="relative block">
@@ -370,12 +370,12 @@ function Settings() {
                         value={passwordForm.newPassword}
                         onChange={updatePasswordField("newPassword")}
                         placeholder="Enter new password"
-                        className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full px-4 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
                       <button
                         type="button"
                         onClick={() => togglePasswordVisibility("next")}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500"
                       >
                         {showPasswords.next ? (
                           <EyeOff className="h-4 w-4" />
@@ -387,7 +387,7 @@ function Settings() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Confirm New Password
                     </label>
                     <span className="relative block">
@@ -396,12 +396,12 @@ function Settings() {
                         value={passwordForm.confirmPassword}
                         onChange={updatePasswordField("confirmPassword")}
                         placeholder="Confirm new password"
-                        className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="w-full px-4 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                       />
                       <button
                         type="button"
                         onClick={() => togglePasswordVisibility("confirm")}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500"
                       >
                         {showPasswords.confirm ? (
                           <EyeOff className="h-4 w-4" />
@@ -431,17 +431,17 @@ function Settings() {
               {activeTab !== "password" && (
               <>
               {/* Operational & Financial Settings */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-2">
+              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                   Operational & Financial Settings
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Default Payment Terms
                     </label>
-                    <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
+                    <select className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white dark:bg-gray-900">
                       <option>Net 30 Days</option>
                       <option>Net 15 Days</option>
                       <option>Net 45 Days</option>
@@ -450,10 +450,10 @@ function Settings() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Financial Year Cycle
                     </label>
-                    <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
+                    <select className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white dark:bg-gray-900">
                       <option>July - June</option>
                       <option>January - December</option>
                       <option>April - March</option>
@@ -461,35 +461,35 @@ function Settings() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Sales Tax Rate (GST)
                     </label>
                     <input
                       type="text"
                       defaultValue="17%"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Low Stock Alert Level
                     </label>
                     <input
                       type="text"
                       defaultValue="20% of minimum threshold"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                     />
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Cylinder Auto-Inspection Interval
                     </label>
                     <input
                       type="text"
                       defaultValue="180 Days"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                     />
                   </div>
                 </div>
@@ -503,17 +503,17 @@ function Settings() {
               </div>
 
               {/* Localisation & Automated Systems */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-2">
+              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                   Localisation & Automated Systems
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Date Formatting
                     </label>
-                    <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
+                    <select className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white dark:bg-gray-900">
                       <option>DD/MM/YYYY</option>
                       <option>MM/DD/YYYY</option>
                       <option>YYYY-MM-DD</option>
@@ -521,10 +521,10 @@ function Settings() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Time Zone
                     </label>
-                    <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
+                    <select className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white dark:bg-gray-900">
                       <option>Asia/Karachi (PKT +05:00)</option>
                       <option>UTC</option>
                       <option>Asia/Dubai (GST +04:00)</option>
@@ -532,12 +532,12 @@ function Settings() {
                   </div>
                 </div>
 
-                <div className="mt-6 flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="mt-6 flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div>
-                    <h3 className="font-medium text-gray-800">
+                    <h3 className="font-medium text-gray-800 dark:text-gray-100">
                       Automated Server Cloud Backups
                     </h3>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-500 mt-1">
                       Automatically backup SQLite operational databases every
                       night at 02:00 AM
                     </p>
@@ -549,20 +549,20 @@ function Settings() {
                         isSelected={autoBackup}
                         onValueChange={setAutoBackup}
                         classNames={{
-                          wrapper: autoBackup ? "bg-[#008951]" : "bg-slate-200",
+                          wrapper: autoBackup ? "bg-[#008951]" : "bg-slate-200 dark:bg-gray-700",
                         }}
                         size="sm"
                       />
                       <button
                         type="button"
                         onClick={() => setAutoBackup(!autoBackup)}
-                        className={`relative inline-flex h-6 w-11 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${autoBackup ? "bg-[#10b981]" : "bg-slate-200"}`}
+                        className={`relative inline-flex h-6 w-11 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${autoBackup ? "bg-[#10b981]" : "bg-slate-200 dark:bg-gray-700"}`}
                         role="switch"
                         aria-checked={autoBackup}
                       >
                         <span
                           aria-hidden="true"
-                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${autoBackup ? "translate-x-5" : "translate-x-0"}`}
+                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white dark:bg-gray-900 shadow ring-0 transition duration-200 ease-in-out ${autoBackup ? "translate-x-5" : "translate-x-0"}`}
                         />
                       </button>
                     </div>
@@ -570,7 +570,7 @@ function Settings() {
                 </div>
 
                 <div className="mt-6 flex justify-between items-center my-auto">
-                  <p className="text-[#9CA3AF] text-[11px]">
+                  <p className="text-[#9CA3AF] dark:text-gray-500 text-[11px]">
                     Last Settings update by {user?.fullName || "—"}
                     {user?.username ? ` (${user.username})` : ""} on{" "}
                     {formatDate(user?.updatedAt)}

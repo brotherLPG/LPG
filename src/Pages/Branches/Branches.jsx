@@ -22,78 +22,78 @@ function Branches() {
     <div className="flex min-h-screen bg-linear-to-br from-emerald-50 to-blue-100 w-full">
       <div className="flex-1 p-8">
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">Branch Management</h1>
-          <p className="text-slate-500">Monitor and manage multiple branches with central owner-level control</p>
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-gray-100 mb-2">Branch Management</h1>
+          <p className="text-slate-500 dark:text-gray-400">Monitor and manage multiple branches with central owner-level control</p>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6">
             <div className="flex items-center gap-3 mb-2">
-              <div className="bg-emerald-100 p-2 rounded-lg"><Building2 className="w-5 h-5 text-emerald-600" /></div>
-              <span className="text-slate-500 text-sm">Total Branches</span>
+              <div className="bg-emerald-100 dark:bg-emerald-900 p-2 rounded-lg"><Building2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" /></div>
+              <span className="text-slate-500 dark:text-gray-400 text-sm">Total Branches</span>
             </div>
-            <p className="text-3xl font-bold text-slate-800">5</p>
+            <p className="text-3xl font-bold text-slate-800 dark:text-gray-100">5</p>
           </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6">
             <div className="flex items-center gap-3 mb-2">
-              <div className="bg-green-100 p-2 rounded-lg"><Building2 className="w-5 h-5 text-green-600" /></div>
-              <span className="text-slate-500 text-sm">Active</span>
+              <div className="bg-green-100 dark:bg-green-900 p-2 rounded-lg"><Building2 className="w-5 h-5 text-green-600 dark:text-green-400" /></div>
+              <span className="text-slate-500 dark:text-gray-400 text-sm">Active</span>
             </div>
-            <p className="text-3xl font-bold text-slate-800">5</p>
+            <p className="text-3xl font-bold text-slate-800 dark:text-gray-100">5</p>
           </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6">
             <div className="flex items-center gap-3 mb-2">
-              <div className="bg-blue-100 p-2 rounded-lg"><Users className="w-5 h-5 text-blue-600" /></div>
-              <span className="text-slate-500 text-sm">Total Staff</span>
+              <div className="bg-blue-100 dark:bg-blue-900 p-2 rounded-lg"><Users className="w-5 h-5 text-blue-600 dark:text-blue-400" /></div>
+              <span className="text-slate-500 dark:text-gray-400 text-sm">Total Staff</span>
             </div>
-            <p className="text-3xl font-bold text-slate-800">108</p>
+            <p className="text-3xl font-bold text-slate-800 dark:text-gray-100">108</p>
           </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6">
             <div className="flex items-center gap-3 mb-2">
-              <div className="bg-teal-100 p-2 rounded-lg"><MapPin className="w-5 h-5 text-teal-600" /></div>
-              <span className="text-slate-500 text-sm">Cities Covered</span>
+              <div className="bg-teal-100 dark:bg-teal-900 p-2 rounded-lg"><MapPin className="w-5 h-5 text-teal-600 dark:text-teal-400" /></div>
+              <span className="text-slate-500 dark:text-gray-400 text-sm">Cities Covered</span>
             </div>
-            <p className="text-3xl font-bold text-slate-800">5</p>
+            <p className="text-3xl font-bold text-slate-800 dark:text-gray-100">5</p>
           </div>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-            <input type="text" placeholder="Search branches..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500 w-5 h-5" />
+            <input type="text" placeholder="Search branches..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-gray-700 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition" />
           </div>
           <button className="flex items-center gap-2 px-6 py-3 bg-linear-to-r from-emerald-600 to-blue-600 text-white rounded-xl font-medium hover:from-emerald-700 hover:to-blue-700 transition shadow-lg shadow-emerald-500/30">
             <Plus className="w-5 h-5" /> Add Branch
           </button>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-50 border-b border-slate-200">
+              <thead className="bg-slate-50 dark:bg-gray-800 border-b border-slate-200 dark:border-gray-700">
                 <tr>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Branch ID</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Name</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Location</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Manager</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Phone</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Email</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Staff</th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Status</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-gray-400">Branch ID</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-gray-400">Name</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-gray-400">Location</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-gray-400">Manager</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-gray-400">Phone</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-gray-400">Email</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-gray-400">Staff</th>
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-gray-400">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredBranches.map((branch) => (
-                  <tr key={branch.id} className="border-b border-slate-100 hover:bg-slate-50 transition">
-                    <td className="px-6 py-4 font-medium text-slate-800">{branch.id}</td>
-                    <td className="px-6 py-4 text-slate-600">{branch.name}</td>
-                    <td className="px-6 py-4 text-slate-600">{branch.location}</td>
-                    <td className="px-6 py-4 text-slate-600">{branch.manager}</td>
-                    <td className="px-6 py-4 text-slate-600">{branch.phone}</td>
-                    <td className="px-6 py-4 text-slate-600">{branch.email}</td>
-                    <td className="px-6 py-4 text-slate-600">{branch.staff}</td>
+                  <tr key={branch.id} className="border-b border-slate-100 dark:border-gray-800 hover:bg-slate-50 dark:hover:bg-gray-800 transition">
+                    <td className="px-6 py-4 font-medium text-slate-800 dark:text-gray-100">{branch.id}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-gray-400">{branch.name}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-gray-400">{branch.location}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-gray-400">{branch.manager}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-gray-400">{branch.phone}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-gray-400">{branch.email}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-gray-400">{branch.staff}</td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${branch.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{branch.status}</span>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${branch.status === 'Active' ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300'}`}>{branch.status}</span>
                     </td>
                   </tr>
                 ))}

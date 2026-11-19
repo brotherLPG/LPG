@@ -154,11 +154,11 @@ function SearchableCustomerSelect({
         <div
           ref={panelRef}
           style={menuStyle}
-          className="flex flex-col overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg"
+          className="flex flex-col overflow-hidden rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg"
         >
-          <div className="shrink-0 border-b border-slate-100 p-2">
+          <div className="shrink-0 border-b border-slate-100 dark:border-gray-800 p-2">
             <div className="relative">
-              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 dark:text-gray-500" />
               <input
                 ref={inputRef}
                 value={query}
@@ -168,7 +168,7 @@ function SearchableCustomerSelect({
                 }}
                 onKeyDown={onSearchKeyDown}
                 placeholder="Search by name"
-                className="w-full rounded-md border border-slate-200 bg-white py-1.5 pl-8 pr-2 text-sm text-slate-800 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-1.5 pl-8 pr-2 text-sm text-slate-800 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
               />
             </div>
           </div>
@@ -178,14 +178,14 @@ function SearchableCustomerSelect({
                 <button
                   type="button"
                   onClick={() => choose(null)}
-                  className="w-full px-3 py-2 text-left text-sm text-slate-500 hover:bg-slate-50"
+                  className="w-full px-3 py-2 text-left text-sm text-slate-500 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-gray-800"
                 >
                   {placeholder}
                 </button>
               </li>
             )}
             {filtered.length === 0 ? (
-              <li className="px-3 py-2 text-sm text-slate-500">{emptyText}</li>
+              <li className="px-3 py-2 text-sm text-slate-500 dark:text-gray-400">{emptyText}</li>
             ) : (
               filtered.map((customer, index) => {
                 const isSelected = customer._id === value;
@@ -203,8 +203,8 @@ function SearchableCustomerSelect({
                         isHighlighted
                           ? "bg-blue-600 text-white"
                           : isSelected
-                            ? "bg-blue-50 text-blue-700"
-                            : "text-slate-800 hover:bg-slate-50"
+                            ? "bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300"
+                            : "text-slate-800 dark:text-gray-100 hover:bg-slate-50 dark:hover:bg-gray-800"
                       }`}
                     >
                       {getLabel(customer)}
@@ -239,17 +239,17 @@ function SearchableCustomerSelect({
             if (!open) openMenu();
           }
         }}
-        className={`flex w-full items-center justify-between rounded-md border bg-white py-2 pl-3 pr-3 text-left text-sm outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-slate-50 ${
+        className={`flex w-full items-center justify-between rounded-md border bg-white dark:bg-gray-900 py-2 pl-3 pr-3 text-left text-sm outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-slate-50 dark:disabled:bg-gray-800 ${
           error
             ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
-            : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+            : "border-slate-200 dark:border-gray-700 focus:border-[#008951] focus:ring-emerald-100"
         }`}
       >
-        <span className={`truncate ${selected ? "text-slate-700" : "text-slate-500"}`}>
+        <span className={`truncate ${selected ? "text-slate-700 dark:text-gray-300" : "text-slate-500 dark:text-gray-400"}`}>
           {selected ? getLabel(selected) : placeholder}
         </span>
         <ChevronDown
-          className={`ml-2 h-4 w-4 shrink-0 text-slate-400 transition ${open ? "rotate-180" : ""}`}
+          className={`ml-2 h-4 w-4 shrink-0 text-slate-400 dark:text-gray-500 transition ${open ? "rotate-180" : ""}`}
         />
       </button>
       {menu}

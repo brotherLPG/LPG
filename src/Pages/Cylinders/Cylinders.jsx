@@ -41,10 +41,10 @@ function Cylinders() {
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-gray-100 mb-2">
             Cylinder Management
           </h1>
-          <p className="text-slate-500">
+          <p className="text-slate-500 dark:text-gray-400">
             Track and manage customer-owned cylinders with barcode system
           </p>
         </motion.div>
@@ -56,41 +56,41 @@ function Cylinders() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
         >
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6">
             <div className="flex items-center gap-3 mb-2">
-              <div className="bg-emerald-100 p-2 rounded-lg">
-                <Package className="w-5 h-5 text-emerald-600" />
+              <div className="bg-emerald-100 dark:bg-emerald-900 p-2 rounded-lg">
+                <Package className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <span className="text-slate-500 text-sm">Total Cylinders</span>
+              <span className="text-slate-500 dark:text-gray-400 text-sm">Total Cylinders</span>
             </div>
-            <p className="text-3xl font-bold text-slate-800">2,456</p>
+            <p className="text-3xl font-bold text-slate-800 dark:text-gray-100">2,456</p>
           </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6">
             <div className="flex items-center gap-3 mb-2">
-              <div className="bg-blue-100 p-2 rounded-lg">
-                <ScanBarcode className="w-5 h-5 text-blue-600" />
+              <div className="bg-blue-100 dark:bg-blue-900 p-2 rounded-lg">
+                <ScanBarcode className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
-              <span className="text-slate-500 text-sm">Registered</span>
+              <span className="text-slate-500 dark:text-gray-400 text-sm">Registered</span>
             </div>
-            <p className="text-3xl font-bold text-slate-800">2,408</p>
+            <p className="text-3xl font-bold text-slate-800 dark:text-gray-100">2,408</p>
           </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6">
             <div className="flex items-center gap-3 mb-2">
-              <div className="bg-teal-100 p-2 rounded-lg">
-                <Package className="w-5 h-5 text-teal-600" />
+              <div className="bg-teal-100 dark:bg-teal-900 p-2 rounded-lg">
+                <Package className="w-5 h-5 text-teal-600 dark:text-teal-400" />
               </div>
-              <span className="text-slate-500 text-sm">Filled</span>
+              <span className="text-slate-500 dark:text-gray-400 text-sm">Filled</span>
             </div>
-            <p className="text-3xl font-bold text-slate-800">1,890</p>
+            <p className="text-3xl font-bold text-slate-800 dark:text-gray-100">1,890</p>
           </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6">
             <div className="flex items-center gap-3 mb-2">
-              <div className="bg-orange-100 p-2 rounded-lg">
-                <Package className="w-5 h-5 text-orange-600" />
+              <div className="bg-orange-100 dark:bg-orange-900 p-2 rounded-lg">
+                <Package className="w-5 h-5 text-orange-600 dark:text-orange-400" />
               </div>
-              <span className="text-slate-500 text-sm">Empty</span>
+              <span className="text-slate-500 dark:text-gray-400 text-sm">Empty</span>
             </div>
-            <p className="text-3xl font-bold text-slate-800">566</p>
+            <p className="text-3xl font-bold text-slate-800 dark:text-gray-100">566</p>
           </div>
         </motion.div>
 
@@ -102,13 +102,13 @@ function Cylinders() {
           className="flex flex-col md:flex-row gap-4 mb-6"
         >
           <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500 w-5 h-5" />
             <input
               type="text"
               placeholder="Search by ID, barcode, or owner..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition"
+              className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-gray-700 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition"
             />
           </div>
           <button
@@ -118,7 +118,7 @@ function Cylinders() {
             <Plus className="w-5 h-5" />
             Add Cylinder
           </button>
-          <button className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-medium hover:bg-slate-50 transition">
+          <button className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-700 text-slate-700 dark:text-gray-300 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-gray-800 transition">
             <Filter className="w-5 h-5" />
             Filter
           </button>
@@ -129,34 +129,34 @@ function Cylinders() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="bg-white rounded-2xl shadow-lg overflow-hidden"
+          className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg overflow-hidden"
         >
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-50 border-b border-slate-200">
+              <thead className="bg-slate-50 dark:bg-gray-800 border-b border-slate-200 dark:border-gray-700">
                 <tr>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-gray-400">
                     Cylinder ID
                   </th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-gray-400">
                     Barcode
                   </th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-gray-400">
                     Owner
                   </th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-gray-400">
                     Type
                   </th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-gray-400">
                     Status
                   </th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-gray-400">
                     Location
                   </th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-gray-400">
                     Last Fill
                   </th>
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-gray-400">
                     Actions
                   </th>
                 </tr>
@@ -165,42 +165,42 @@ function Cylinders() {
                 {filteredCylinders.map((cylinder, index) => (
                   <tr
                     key={cylinder.id}
-                    className="border-b border-slate-100 hover:bg-slate-50 transition"
+                    className="border-b border-slate-100 dark:border-gray-800 hover:bg-slate-50 dark:hover:bg-gray-800 transition"
                   >
-                    <td className="px-6 py-4 font-medium text-slate-800">
+                    <td className="px-6 py-4 font-medium text-slate-800 dark:text-gray-100">
                       {cylinder.id}
                     </td>
-                    <td className="px-6 py-4 text-slate-600">
+                    <td className="px-6 py-4 text-slate-600 dark:text-gray-400">
                       {cylinder.barcode}
                     </td>
-                    <td className="px-6 py-4 text-slate-600">
+                    <td className="px-6 py-4 text-slate-600 dark:text-gray-400">
                       {cylinder.owner}
                     </td>
-                    <td className="px-6 py-4 text-slate-600">
+                    <td className="px-6 py-4 text-slate-600 dark:text-gray-400">
                       {cylinder.type}
                     </td>
                     <td className="px-6 py-4">
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-semibold ${
                           cylinder.status === "Filled"
-                            ? "bg-emerald-100 text-emerald-700"
+                            ? "bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300"
                             : cylinder.status === "Empty"
-                              ? "bg-orange-100 text-orange-700"
-                              : "bg-blue-100 text-blue-700"
+                              ? "bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300"
+                              : "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
                         }`}
                       >
                         {cylinder.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-slate-600">
+                    <td className="px-6 py-4 text-slate-600 dark:text-gray-400">
                       {cylinder.location}
                     </td>
-                    <td className="px-6 py-4 text-slate-600">
+                    <td className="px-6 py-4 text-slate-600 dark:text-gray-400">
                       {cylinder.lastFill}
                     </td>
                     <td className="px-6 py-4">
-                      <button className="p-2 hover:bg-slate-100 rounded-lg transition">
-                        <MoreVertical className="w-5 h-5 text-slate-400" />
+                      <button className="p-2 hover:bg-slate-100 dark:hover:bg-gray-800 rounded-lg transition">
+                        <MoreVertical className="w-5 h-5 text-slate-400 dark:text-gray-500" />
                       </button>
                     </td>
                   </tr>

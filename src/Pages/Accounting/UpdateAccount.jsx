@@ -137,11 +137,11 @@ function UpdateAccount() {
 
   if (isLoadingAccount) {
     return (
-      <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+      <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
         <div className="flex items-center justify-center h-96">
           <div className="flex flex-col items-center gap-3">
-            <Loader className="h-8 w-8 animate-spin text-slate-400" />
-            <p className="text-sm text-slate-500">Loading account...</p>
+            <Loader className="h-8 w-8 animate-spin text-slate-400 dark:text-gray-500" />
+            <p className="text-sm text-slate-500 dark:text-gray-400">Loading account...</p>
           </div>
         </div>
       </main>
@@ -149,27 +149,27 @@ function UpdateAccount() {
   }
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
         <p className="text-xs mb-2">
           <span
             onClick={() => navigate("/dashboard")}
-            className="cursor-pointer font-medium text-slate-400 hover:text-slate-600 transition-colors duration-200"
+            className="cursor-pointer font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors duration-200"
           >
             Dashboard
           </span>{" "}
-          <span className="px-1 text-slate-400">/</span>{" "}
+          <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
           <span
             onClick={() => navigate("/accounting")}
-            className="cursor-pointer font-medium text-slate-400 hover:text-slate-600 transition-colors duration-200"
+            className="cursor-pointer font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors duration-200"
           >
             Accounts
           </span>{" "}
-          <span className="px-1 text-slate-400">/</span>{" "}
-          <span className="font-semibold text-slate-600">Update Account</span>
+          <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
+          <span className="font-semibold text-slate-600 dark:text-gray-400">Update Account</span>
         </p>
 
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-gray-100">
           Update Account
         </h1>
         <p className="text-sm text-tertiary">
@@ -178,16 +178,16 @@ function UpdateAccount() {
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <div className="border-b border-slate-200 px-6 py-4 ">
-            <h2 className="text-lg font-semibold text-slate-800">
+        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+          <div className="border-b border-slate-200 dark:border-gray-700 px-6 py-4 ">
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-gray-100">
               Account Details
             </h2>
           </div>
           <div className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Account Code
                 </label>
                 <input
@@ -195,13 +195,13 @@ function UpdateAccount() {
                   value={accountData?.data?.accountCode || ""}
                   disabled
                   placeholder="Auto-generated"
-                  className="w-full rounded-md border border-slate-200 bg-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-200 dark:bg-gray-700 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Account Name <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Account Name <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
                 <input
                   type="text"
@@ -209,19 +209,19 @@ function UpdateAccount() {
                   onChange={(e) => handleChange("accountName", e.target.value)}
                   placeholder="Enter account name"
                   className={`w-full rounded-md border ${
-                    formErrors.accountName ? "border-red-500" : "border-slate-200"
-                  } bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100`}
+                    formErrors.accountName ? "border-red-500" : "border-slate-200 dark:border-gray-700"
+                  } bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100`}
                 />
                 {formErrors.accountName && (
-                  <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                  <p className="text-xs text-red-500 dark:text-red-400 mt-1 flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" /> {formErrors.accountName}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Account Type <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Account Type <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={accountTypeOptions}
@@ -237,15 +237,15 @@ function UpdateAccount() {
                   emptyText="No account type found"
                 />
                 {formErrors.accountType && (
-                  <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                  <p className="text-xs text-red-500 dark:text-red-400 mt-1 flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" /> {formErrors.accountType}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Account Category <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Account Category <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={accountCategoryOptions}
@@ -261,14 +261,14 @@ function UpdateAccount() {
                   emptyText="No category found"
                 />
                 {formErrors.accountCategory && (
-                  <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                  <p className="text-xs text-red-500 dark:text-red-400 mt-1 flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" /> {formErrors.accountCategory}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Parent Account
                 </label>
                 <SearchableCustomerSelect
@@ -288,7 +288,7 @@ function UpdateAccount() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Description
                 </label>
                 <textarea
@@ -296,23 +296,23 @@ function UpdateAccount() {
                   value={formData.description}
                   onChange={(e) => handleChange("description", e.target.value)}
                   placeholder="Add a short description for this account"
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden my-2">
-          <div className="border-b border-slate-200 px-6 py-4 ">
-            <h2 className="text-lg font-semibold text-slate-800">
+        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden my-2">
+          <div className="border-b border-slate-200 dark:border-gray-700 px-6 py-4 ">
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-gray-100">
               Opening Balance
             </h2>
           </div>
           <div className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Bank Name
                 </label>
                 <input
@@ -320,12 +320,12 @@ function UpdateAccount() {
                   value={formData.bankName}
                   onChange={(e) => handleChange("bankName", e.target.value)}
                   placeholder="Enter bank name"
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Branch Name
                 </label>
                 <input
@@ -333,12 +333,12 @@ function UpdateAccount() {
                   value={formData.branchName}
                   onChange={(e) => handleChange("branchName", e.target.value)}
                   placeholder="Enter branch name"
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Account Number
                 </label>
                 <input
@@ -348,12 +348,12 @@ function UpdateAccount() {
                     handleChange("accountNumber", e.target.value)
                   }
                   placeholder="Enter account number"
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   IBAN / Swift Code
                 </label>
                 <input
@@ -361,12 +361,12 @@ function UpdateAccount() {
                   value={formData.ibanOrSwift}
                   onChange={(e) => handleChange("ibanOrSwift", e.target.value)}
                   placeholder="Enter IBAN or Swift"
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Opening Balance
                 </label>
                 <input
@@ -377,46 +377,46 @@ function UpdateAccount() {
                   }
                   placeholder="0.00"
                   step="0.01"
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
                 {formErrors.openingBalanceAmount && (
-                  <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                  <p className="text-xs text-red-500 dark:text-red-400 mt-1 flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" /> {formErrors.openingBalanceAmount}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Date Opened
                 </label>
                 <input
                   type="date"
                   value={formData.openedAt}
                   onChange={(e) => handleChange("openedAt", e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden my-2">
-          <div className="rounded-xl border border-slate-200 p-4">
-            <h2 className="mb-3 text-sm font-extrabold text-slate-700">
+        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden my-2">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 p-4">
+            <h2 className="mb-3 text-sm font-extrabold text-slate-700 dark:text-gray-300">
               Account Settings
             </h2>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Status
                 </label>
                 <select
                   value={formData.isActive}
                   onChange={(e) => handleChange("isActive", e.target.value)}
                   disabled={optionsLoading}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
                 >
                   {optionsLoading && <option value="">Loading...</option>}
                   {statuses.map((status) => (
@@ -427,8 +427,8 @@ function UpdateAccount() {
                 </select>
               </div>
 
-              <label className="flex items-center justify-between gap-3 rounded-md border border-slate-200 bg-white px-3 py-2">
-                <span className="text-sm text-slate-700">
+              <label className="flex items-center justify-between gap-3 rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2">
+                <span className="text-sm text-slate-700 dark:text-gray-300">
                   Allow manual entries
                 </span>
                 <button
@@ -439,15 +439,15 @@ function UpdateAccount() {
                   }`}
                 >
                   <span
-                    className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white dark:bg-gray-900 transition-transform ${
                       formData.allowManualEntries ? "translate-x-5" : "translate-x-1"
                     }`}
                   />
                 </button>
               </label>
 
-              <label className="flex items-center justify-between gap-3 rounded-md border border-slate-200 bg-white px-3 py-2">
-                <span className="text-sm text-slate-700">Primary Account</span>
+              <label className="flex items-center justify-between gap-3 rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2">
+                <span className="text-sm text-slate-700 dark:text-gray-300">Primary Account</span>
                 <button
                   type="button"
                   onClick={() => handleChange("isPrimary", !formData.isPrimary)}
@@ -456,7 +456,7 @@ function UpdateAccount() {
                   }`}
                 >
                   <span
-                    className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white dark:bg-gray-900 transition-transform ${
                       formData.isPrimary ? "translate-x-5" : "translate-x-1"
                     }`}
                   />
@@ -466,12 +466,12 @@ function UpdateAccount() {
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
+        <div className="flex items-center justify-end gap-3 border-t border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-6 py-4">
           <button
             type="button"
             onClick={() => navigate("/accounting")}
             disabled={updateMutation.isPending}
-            className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm font-medium text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>

@@ -22,22 +22,22 @@ const formatTimestamp = timestamp => {
 const getLevelClass = level => {
   switch ((level || '').toLowerCase()) {
     case 'error':
-      return 'bg-red-50 text-red-600 border border-red-100'
+      return 'bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900'
     case 'warn':
     case 'warning':
-      return 'bg-amber-50 text-amber-600 border border-amber-100'
+      return 'bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900'
     case 'debug':
-      return 'bg-slate-100 text-slate-600 border border-slate-200'
+      return 'bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-400 border border-slate-200 dark:border-gray-700'
     default:
-      return 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+      return 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900'
   }
 }
 
 const getStatusClass = statusCode => {
-  if (!statusCode) return 'text-slate-400'
-  if (statusCode >= 500) return 'text-red-600 font-semibold'
-  if (statusCode >= 400) return 'text-amber-600 font-semibold'
-  return 'text-emerald-600 font-semibold'
+  if (!statusCode) return 'text-slate-400 dark:text-gray-500'
+  if (statusCode >= 500) return 'text-red-600 dark:text-red-400 font-semibold'
+  if (statusCode >= 400) return 'text-amber-600 dark:text-amber-400 font-semibold'
+  return 'text-emerald-600 dark:text-emerald-400 font-semibold'
 }
 
 function ServerLogs () {
@@ -124,16 +124,16 @@ function ServerLogs () {
       key: 'timestamp',
       label: 'Timestamp',
       isRowHeader: true,
-      className: 'bg-slate-50/80 text-[13px] font-bold text-slate-700',
+      className: 'bg-slate-50/80 dark:bg-gray-800/80 text-[13px] font-bold text-slate-700 dark:text-gray-300',
       cellClassName: 'px-4 py-3 whitespace-nowrap',
       renderCell: item => (
-        <span className='text-slate-500 text-[13px]'>{item.timestamp}</span>
+        <span className='text-slate-500 dark:text-gray-400 text-[13px]'>{item.timestamp}</span>
       )
     },
     {
       key: 'level',
       label: 'Level',
-      className: 'bg-slate-50/80 text-[13px] font-bold text-slate-700',
+      className: 'bg-slate-50/80 dark:bg-gray-800/80 text-[13px] font-bold text-slate-700 dark:text-gray-300',
       cellClassName: 'px-4 py-3 whitespace-nowrap',
       renderCell: item => (
         <span
@@ -146,28 +146,28 @@ function ServerLogs () {
     {
       key: 'kind',
       label: 'Type',
-      className: 'bg-slate-50/80 text-[13px] font-bold text-slate-700',
-      cellClassName: 'px-4 py-3 text-slate-600 text-[13px] capitalize whitespace-nowrap'
+      className: 'bg-slate-50/80 dark:bg-gray-800/80 text-[13px] font-bold text-slate-700 dark:text-gray-300',
+      cellClassName: 'px-4 py-3 text-slate-600 dark:text-gray-400 text-[13px] capitalize whitespace-nowrap'
     },
     {
       key: 'method',
       label: 'Method',
-      className: 'bg-slate-50/80 text-[13px] font-bold text-slate-700',
+      className: 'bg-slate-50/80 dark:bg-gray-800/80 text-[13px] font-bold text-slate-700 dark:text-gray-300',
       cellClassName: 'px-4 py-3 whitespace-nowrap',
       renderCell: item => (
-        <span className='font-semibold text-slate-700 text-[13px]'>{item.method}</span>
+        <span className='font-semibold text-slate-700 dark:text-gray-300 text-[13px]'>{item.method}</span>
       )
     },
     {
       key: 'path',
       label: 'Path',
-      className: 'bg-slate-50/80 text-[13px] font-bold text-slate-700',
-      cellClassName: 'px-4 py-3 text-slate-600 text-[13px] max-w-[280px] truncate'
+      className: 'bg-slate-50/80 dark:bg-gray-800/80 text-[13px] font-bold text-slate-700 dark:text-gray-300',
+      cellClassName: 'px-4 py-3 text-slate-600 dark:text-gray-400 text-[13px] max-w-[280px] truncate'
     },
     {
       key: 'statusCode',
       label: 'Status',
-      className: 'bg-slate-50/80 text-[13px] font-bold text-slate-700',
+      className: 'bg-slate-50/80 dark:bg-gray-800/80 text-[13px] font-bold text-slate-700 dark:text-gray-300',
       cellClassName: 'px-4 py-3 whitespace-nowrap',
       renderCell: item => (
         <span className={`text-[13px] ${getStatusClass(item.statusCode)}`}>
@@ -178,34 +178,34 @@ function ServerLogs () {
     {
       key: 'durationMs',
       label: 'Duration',
-      className: 'bg-slate-50/80 text-[13px] font-bold text-slate-700',
-      cellClassName: 'px-4 py-3 text-slate-500 text-[13px] whitespace-nowrap',
+      className: 'bg-slate-50/80 dark:bg-gray-800/80 text-[13px] font-bold text-slate-700 dark:text-gray-300',
+      cellClassName: 'px-4 py-3 text-slate-500 dark:text-gray-400 text-[13px] whitespace-nowrap',
       renderCell: item =>
         item.durationMs != null ? `${item.durationMs} ms` : '—'
     },
     {
       key: 'ipAddress',
       label: 'IP Address',
-      className: 'bg-slate-50/80 text-[13px] font-bold text-slate-700',
-      cellClassName: 'px-4 py-3 text-slate-500 text-[13px] whitespace-nowrap'
+      className: 'bg-slate-50/80 dark:bg-gray-800/80 text-[13px] font-bold text-slate-700 dark:text-gray-300',
+      cellClassName: 'px-4 py-3 text-slate-500 dark:text-gray-400 text-[13px] whitespace-nowrap'
     },
     {
       key: 'message',
       label: 'Message',
-      className: 'bg-slate-50/80 text-[13px] font-bold text-slate-700',
-      cellClassName: 'px-4 py-3 text-slate-600 text-[13px] max-w-[320px] truncate'
+      className: 'bg-slate-50/80 dark:bg-gray-800/80 text-[13px] font-bold text-slate-700 dark:text-gray-300',
+      cellClassName: 'px-4 py-3 text-slate-600 dark:text-gray-400 text-[13px] max-w-[320px] truncate'
     },
     {
       key: 'actions',
       label: 'Actions',
-      className: 'bg-slate-50/80 text-[13px] font-bold text-slate-700',
+      className: 'bg-slate-50/80 dark:bg-gray-800/80 text-[13px] font-bold text-slate-700 dark:text-gray-300',
       cellClassName: 'px-4 py-3',
       renderCell: item => (
         <Tooltip delay={0}>
           <Button
             aria-label="View log details"
             onClick={() => setViewLog(item)}
-            className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+            className="flex items-center gap-1.5 rounded-full bg-blue-50 dark:bg-blue-950 px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors"
           >
             <Eye className="h-3.5 w-3.5" />
           </Button>
@@ -218,7 +218,7 @@ function ServerLogs () {
   ]
 
   return (
-    <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-slate-50 dark:bg-gray-800 p-4 sm:p-6 lg:p-8">
       <section>
         <div className="text-xs">
           <span
@@ -240,17 +240,17 @@ function ServerLogs () {
           </p>
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+        <div className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 shadow-sm">
           <div className="flex flex-col gap-3 lg:flex-row">
             <label className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500" />
               <input
                 value={search}
                 onChange={(event) =>
                   resetPageAndSet(setSearch)(event.target.value)
                 }
                 placeholder="Search by path, message, IP, or status..."
-                className="w-full rounded-md border border-slate-200 py-2 pl-9 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-md border border-slate-200 dark:border-gray-700 py-2 pl-9 pr-3 text-sm text-slate-700 dark:text-gray-300 outline-none transition placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
               />
             </label>
             <div className="relative">
@@ -259,7 +259,7 @@ function ServerLogs () {
                 onChange={(event) =>
                   resetPageAndSet(setSelectedLevel)(event.target.value)
                 }
-                className="w-full appearance-none rounded-md border border-slate-200 bg-white py-2 pl-3 pr-10 text-sm text-slate-600 outline-none focus:border-[#008951]"
+                className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-2 pl-3 pr-10 text-sm text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951]"
               >
                 <option value="All Levels">All Levels</option>
                 {levels.map((level) => (
@@ -268,7 +268,7 @@ function ServerLogs () {
                   </option>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500" />
             </div>
             <div className="relative">
               <select
@@ -276,7 +276,7 @@ function ServerLogs () {
                 onChange={(event) =>
                   resetPageAndSet(setSelectedKind)(event.target.value)
                 }
-                className="w-full appearance-none rounded-md border border-slate-200 bg-white py-2 pl-3 pr-10 text-sm text-slate-600 outline-none focus:border-[#008951]"
+                className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-2 pl-3 pr-10 text-sm text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951]"
               >
                 <option value="All Types">All Types</option>
                 {kinds.map((kind) => (
@@ -285,16 +285,16 @@ function ServerLogs () {
                   </option>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500" />
             </div>
           </div>
         </div>
 
-        <div className="mt-5 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div className="mt-5 overflow-hidden rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
           {isLoading ? (
             <div className="flex items-center justify-center p-8">
               <svg
-                className="h-6 w-6 animate-spin text-slate-400"
+                className="h-6 w-6 animate-spin text-slate-400 dark:text-gray-500"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -315,7 +315,7 @@ function ServerLogs () {
               </svg>
             </div>
           ) : error ? (
-            <div className="flex items-center justify-center p-8 text-sm text-red-500">
+            <div className="flex items-center justify-center p-8 text-sm text-red-500 dark:text-red-400">
               Error loading server logs. Please try again.
             </div>
           ) : (
@@ -324,7 +324,7 @@ function ServerLogs () {
               data={filteredLogs}
               ariaLabel="Server logs"
               className="w-full"
-              rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+              rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
               emptyContent="No logs found."
               pagination={true}
               rowsPerPage={pagination.limit || 20}
@@ -337,13 +337,13 @@ function ServerLogs () {
 
         {viewLog && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
-            <div className="w-full max-w-lg rounded-xl bg-white shadow-xl">
-              <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-                <h2 className="text-base font-bold text-slate-800">Log Details</h2>
+            <div className="w-full max-w-lg rounded-xl bg-white dark:bg-gray-900 shadow-xl">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-gray-700 px-5 py-4">
+                <h2 className="text-base font-bold text-slate-800 dark:text-gray-100">Log Details</h2>
                 <button
                   type="button"
                   onClick={() => setViewLog(null)}
-                  className="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                  className="rounded-full p-1 text-slate-400 dark:text-gray-500 hover:bg-slate-100 dark:hover:bg-gray-800 hover:text-slate-600 dark:hover:text-gray-400"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -362,20 +362,20 @@ function ServerLogs () {
                     ['User ID', viewLog.userId || '—'],
                   ].map(([label, value]) => (
                     <div key={label} className="flex justify-between gap-4">
-                      <dt className="shrink-0 font-medium text-slate-500">{label}</dt>
-                      <dd className="text-right font-semibold text-slate-800 break-all">{value}</dd>
+                      <dt className="shrink-0 font-medium text-slate-500 dark:text-gray-400">{label}</dt>
+                      <dd className="text-right font-semibold text-slate-800 dark:text-gray-100 break-all">{value}</dd>
                     </div>
                   ))}
                   <div>
-                    <dt className="font-medium text-slate-500">Message</dt>
-                    <dd className="mt-1 rounded-md bg-slate-50 p-3 text-slate-800 break-all">
+                    <dt className="font-medium text-slate-500 dark:text-gray-400">Message</dt>
+                    <dd className="mt-1 rounded-md bg-slate-50 dark:bg-gray-800 p-3 text-slate-800 dark:text-gray-100 break-all">
                       {viewLog.message}
                     </dd>
                   </div>
                   {viewLog.meta != null && (
                     <div>
-                      <dt className="font-medium text-slate-500">Meta</dt>
-                      <dd className="mt-1 rounded-md bg-slate-50 p-3 text-xs text-slate-700 break-all">
+                      <dt className="font-medium text-slate-500 dark:text-gray-400">Meta</dt>
+                      <dd className="mt-1 rounded-md bg-slate-50 dark:bg-gray-800 p-3 text-xs text-slate-700 dark:text-gray-300 break-all">
                         <pre className="whitespace-pre-wrap">{JSON.stringify(viewLog.meta, null, 2)}</pre>
                       </dd>
                     </div>

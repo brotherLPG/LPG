@@ -76,7 +76,7 @@ function RolePermissions() {
   };
 
   return (
-    <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-slate-50 dark:bg-gray-800 p-4 sm:p-6 lg:p-8">
       <section>
         <div className="mb-5">
           <p className="text-xs">
@@ -95,14 +95,14 @@ function RolePermissions() {
             </span>{" "}
               <span className="px-1">/</span> Role: {selectedRoleName}
           </p>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-800">
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-800 dark:text-gray-100">
             Role Permissions - {selectedRoleName}
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">
             Configure module-level access permissions for the {selectedRoleName} role
           </p>
         </div>
-        <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+        <div className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 shadow-sm">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center my-auto">
               <p className="text-sm font-semibold text-tertiary">
@@ -114,7 +114,7 @@ function RolePermissions() {
                   value={selectedRoleId || selectedRole?._id || ""}
                   onChange={(event) => setSelectedRoleId(event.target.value)}
                   disabled={areRolesLoading || rolesError || roles.length === 0}
-                  className="inline-flex w-fit appearance-none items-center gap-2 rounded-md border border-[#1E40AF] bg-white py-2 pl-3 pr-9 text-sm font-semibold text-accent-blue hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex w-fit appearance-none items-center gap-2 rounded-md border border-[#1E40AF] bg-white dark:bg-gray-900 py-2 pl-3 pr-9 text-sm font-semibold text-accent-blue hover:bg-slate-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {areRolesLoading && <option value="">Loading roles...</option>}
                   {!areRolesLoading && rolesError && <option value="">Unable to load roles</option>}
@@ -138,22 +138,22 @@ function RolePermissions() {
                 onChange={toggleAllPermissions}
                 className="peer sr-only"
               />
-              <span className="relative h-5 w-9 cursor-pointer rounded-full bg-slate-200 transition peer-checked:bg-emerald-500 after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:shadow-sm after:transition peer-checked:after:translate-x-4" />
+              <span className="relative h-5 w-9 cursor-pointer rounded-full bg-slate-200 dark:bg-gray-700 transition peer-checked:bg-emerald-500 after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white dark:after:bg-gray-900 after:shadow-sm after:transition peer-checked:after:translate-x-4" />
             </label>
           </div>
         </div>
-        <div className="mt-5 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div className="mt-5 overflow-hidden rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
           <div className="overflow-x-auto">
             {permissionsError ? (
-              <p className="p-6 text-center text-sm text-red-500">
+              <p className="p-6 text-center text-sm text-red-500 dark:text-red-400">
                 Unable to load permissions. Please try again.
               </p>
             ) : arePermissionsLoading ? (
-              <p className="p-6 text-center text-sm text-slate-500">
+              <p className="p-6 text-center text-sm text-slate-500 dark:text-gray-400">
                 Loading permissions...
               </p>
             ) : <table className="w-full min-w-190 text-left text-xs">
-              <thead className="border-b border-slate-200 bg-slate-50 text-slate-500">
+              <thead className="border-b border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 text-slate-500 dark:text-gray-400">
                 <tr>
                   <th className="px-4 py-3 text-tertiary text-sm font-bold">
                     System Module
@@ -172,9 +172,9 @@ function RolePermissions() {
                 {(arePermissionsLoading ? [] : permissionModules).map((module) => (
                   <tr
                     key={module}
-                    className="border-b border-slate-100 last:border-0 hover:bg-slate-50/70"
+                    className="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50/70 dark:hover:bg-gray-800/70"
                   >
-                    <td className="px-4 py-2.5 font-medium text-slate-600 flex items-center my-auto">
+                    <td className="px-4 py-2.5 font-medium text-slate-600 dark:text-gray-400 flex items-center my-auto">
                       <span className="mr-2 text-accent-blue">
                         <Folder className="w-6 h-6" />
                       </span>
@@ -191,7 +191,7 @@ function RolePermissions() {
                             aria-pressed={isGranted}
                             aria-label={`${isGranted ? "Remove" : "Grant"} ${actionLabels[action] || action} permission for ${module}`}
                             onClick={() => togglePermission(module, action)}
-                            className={`inline-flex h-4 w-4 items-center justify-center rounded border transition ${isGranted ? "border-emerald-400 bg-emerald-50 text-emerald-500" : "border-slate-300 bg-white text-transparent hover:border-emerald-400"}`}
+                            className={`inline-flex h-4 w-4 items-center justify-center rounded border transition ${isGranted ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-950 text-emerald-500 dark:text-emerald-400" : "border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-transparent hover:border-emerald-400"}`}
                           >
                             <Check className="h-3 w-3 stroke-3" />
                           </button>
@@ -207,13 +207,13 @@ function RolePermissions() {
         <div className="mt-5 flex flex-wrap justify-end gap-2">
           <button
             type="button"
-            className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+            className="rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm font-semibold text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-gray-800"
           >
             Cancel
           </button>
           <button
             type="button"
-            className="rounded-md border border-[#1E40AF] bg-white px-4 py-2 text-sm font-semibold text-accent-blue hover:bg-blue-50"
+            className="rounded-md border border-[#1E40AF] bg-white dark:bg-gray-900 px-4 py-2 text-sm font-semibold text-accent-blue hover:bg-blue-50 dark:hover:bg-blue-950"
           >
             Reset to Default
           </button>

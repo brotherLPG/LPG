@@ -234,7 +234,7 @@ function CreateReturn() {
   };
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
       {/* Header & Breadcrumbs */}
       <div className="mb-6">
         <p className="text-xs mb-2">
@@ -244,14 +244,14 @@ function CreateReturn() {
           >
             Dashboard
           </span>{" "}
-          <span className="px-1 text-slate-400">/</span>{" "}
+          <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
           <span
             onClick={() => navigate("/sales?tab=returns")}
             className="cursor-pointer font-medium text-4th-color transition-colors duration-200"
           >
             Sales
           </span>{" "}
-          <span className="px-1 text-slate-400">/</span>{" "}
+          <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
           <span className="font-semibold">Process Sales Return</span>
         </p>
         <h1 className="text-2xl font-bold tracking-tight text-BLUE-dark">
@@ -266,8 +266,8 @@ function CreateReturn() {
         {/* Left Column (lg:col-span-2) */}
         <div className="lg:col-span-2 space-y-6">
           {/* Card 1: Return Information */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4">
               <h2 className="text-[16px] font-bold text-BLUE-dark">
                 Return Information
               </h2>
@@ -275,37 +275,37 @@ function CreateReturn() {
             <div className="p-5 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                     Return Reference No
                   </label>
                   <input
                     type="text"
                     disabled
                     value={nextReturnNumber || "(Loading...)"}
-                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-3 py-2 text-sm text-slate-500 dark:text-gray-400 outline-none cursor-not-allowed"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Return Date <span className="text-rose-500">*</span>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                    Return Date <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <input
                     type="date"
                     value={returnDate}
                     onChange={(e) => setReturnDate(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Customer entity <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Customer entity <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <select
                   value={selectedCustomer}
                   onChange={(e) => handleCustomerChange(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 >
                   <option value="">Select Customer</option>
                   {customers.map((customer) => (
@@ -320,23 +320,23 @@ function CreateReturn() {
           </div>
 
           {/* Card 2: Original Sale / Invoice Reference */}
-          <div className="rounded-xl border border-slate-200  shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4 bg-white">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700  shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900">
               <h2 className="text-[16px] font-bold text-BLUE-dark">
                 Original Sale / Invoice Reference
               </h2>
             </div>
             <div className="p-5 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Original Invoice Number{" "}
-                  <span className="text-rose-500">*</span>
+                  <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <select
                   value={selectedSaleId}
                   onChange={(e) => handleSaleChange(e.target.value)}
                   disabled={!selectedCustomer}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50 dark:disabled:bg-gray-800 disabled:text-slate-400 dark:disabled:text-gray-500 disabled:cursor-not-allowed"
                 >
                   <option value="">
                     {!selectedCustomer
@@ -393,8 +393,8 @@ function CreateReturn() {
           </div>
 
           {/* Card 3: Returned Items Details */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4 flex justify-between items-center">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4 flex justify-between items-center">
               <h2 className="text-[16px] font-bold text-BLUE-dark">
                 Returned Items Details
               </h2>
@@ -402,20 +402,20 @@ function CreateReturn() {
             <div className="p-5 overflow-x-auto">
               <table className="w-full min-w-180 border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-200">
-                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">
+                  <tr className="border-b border-slate-200 dark:border-gray-700">
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600 dark:text-gray-400">
                       Item Name
                     </th>
-                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600 dark:text-gray-400">
                       Original Invoice Qty
                     </th>
-                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600 dark:text-gray-400">
                       Return Qty
                     </th>
-                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600 dark:text-gray-400">
                       Unit Price (Rs.)
                     </th>
-                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600 dark:text-gray-400">
                       Return Amount (Rs.)
                     </th>
                   </tr>
@@ -425,7 +425,7 @@ function CreateReturn() {
                     <tr>
                       <td
                         colSpan={5}
-                        className="px-2 py-6 text-center text-sm text-slate-500"
+                        className="px-2 py-6 text-center text-sm text-slate-500 dark:text-gray-400"
                       >
                         {selectedSaleId
                           ? isLoadingSale
@@ -443,12 +443,12 @@ function CreateReturn() {
                       return (
                         <tr
                           key={item.id}
-                          className="border-b border-slate-100 last:border-b-0"
+                          className="border-b border-slate-100 dark:border-gray-800 last:border-b-0"
                         >
-                          <td className="px-2 py-2 text-sm text-slate-900">
+                          <td className="px-2 py-2 text-sm text-slate-900 dark:text-gray-100">
                             {item.itemName}
                           </td>
-                          <td className="px-2 py-2 text-sm text-slate-900">
+                          <td className="px-2 py-2 text-sm text-slate-900 dark:text-gray-100">
                             {item.originalQty}
                           </td>
                           <td className="px-2 py-2">
@@ -464,7 +464,7 @@ function CreateReturn() {
                                 )
                               }
                               placeholder="0"
-                              className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
+                              className="w-24 rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951]"
                             />
                           </td>
                           <td className="px-2 py-2">
@@ -480,10 +480,10 @@ function CreateReturn() {
                                 )
                               }
                               placeholder={String(item.originalUnitPrice)}
-                              className="w-28 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-[#008951]"
+                              className="w-28 rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951]"
                             />
                           </td>
-                          <td className="px-2 py-2 text-sm font-medium text-slate-900">
+                          <td className="px-2 py-2 text-sm font-medium text-slate-900 dark:text-gray-100">
                             {returnAmount.toLocaleString()}
                           </td>
                         </tr>
@@ -499,21 +499,21 @@ function CreateReturn() {
         {/* Right Column (lg:col-span-1) */}
         <div className="lg:col-span-1 space-y-6">
           {/* Card 4: Adjustment Summary */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4">
               <h2 className="text-[16px] font-bold text-BLUE-dark">
                 Adjustment Summary
               </h2>
             </div>
             <div className="p-5 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Reason for Return <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Reason for Return <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <select
                   value={selectedReason}
                   onChange={(e) => setSelectedReason(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 >
                   <option value="">Select Reason</option>
                   {returnReasons.map((reason) => {
@@ -535,13 +535,13 @@ function CreateReturn() {
                 </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Payment Method <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Payment Method <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <select
                   value={selectedPaymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 >
                   <option value="">Select Payment Method</option>
                   {paymentMethods.map((method) => (
@@ -552,13 +552,13 @@ function CreateReturn() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Account <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Account <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <select
                   value={selectedAccountId}
                   onChange={(e) => setAccountId(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 >
                   <option value="">Select Account</option>
                   {accounts.map((account) => (
@@ -581,15 +581,15 @@ function CreateReturn() {
           </div>
 
           {/* Card 5: Quality Control Notes */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4">
               <h2 className="text-[16px] font-bold text-BLUE-dark">
                 Quality Control Notes
               </h2>
             </div>
             <div className="p-5 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Inspection Notes
                 </label>
                 <textarea
@@ -597,7 +597,7 @@ function CreateReturn() {
                   value={inspectionNotes}
                   onChange={(e) => setInspectionNotes(e.target.value)}
                   placeholder="Document quality control findings and inspection results..."
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
                 />
               </div>
             </div>
@@ -606,11 +606,11 @@ function CreateReturn() {
       </div>
 
       {/* Bottom Action Bar */}
-      <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm">
         <button
           type="button"
           onClick={() => navigate("/sales?tab=returns")}
-          className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-5 py-2 text-sm font-medium text-slate-700 dark:text-gray-300 transition hover:bg-slate-50 dark:hover:bg-gray-800"
         >
           Cancel
         </button>

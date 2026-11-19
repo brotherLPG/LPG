@@ -162,19 +162,19 @@ function UpdateMaintenanceRecord() {
 
   if (isLoading) {
     return (
-      <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8 flex items-center justify-center">
-        <p className="text-slate-500 text-sm">Loading maintenance record details...</p>
+      <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+        <p className="text-slate-500 dark:text-gray-400 text-sm">Loading maintenance record details...</p>
       </main>
     );
   }
 
   if (error || !record) {
     return (
-      <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
-        <p className="text-red-500 text-sm">Failed to load maintenance record details.</p>
+      <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
+        <p className="text-red-500 dark:text-red-400 text-sm">Failed to load maintenance record details.</p>
         <button
           onClick={() => navigate("/assets?tab=maintenance-records")}
-          className="mt-4 rounded-lg bg-slate-200 px-4 py-2 text-sm text-slate-700 hover:bg-slate-300"
+          className="mt-4 rounded-lg bg-slate-200 dark:bg-gray-700 px-4 py-2 text-sm text-slate-700 dark:text-gray-300 hover:bg-slate-300"
         >
           Back to Maintenance Records
         </button>
@@ -183,7 +183,7 @@ function UpdateMaintenanceRecord() {
   }
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
       <section className="max-w-5xl mx-auto">
         <div className="mb-6">
           <p className="text-xs mb-2">
@@ -193,15 +193,15 @@ function UpdateMaintenanceRecord() {
             >
               Dashboard
             </span>{" "}
-            <span className="px-1 text-slate-400">/</span>{" "}
+            <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
             <span
               onClick={() => navigate("/assets?tab=maintenance-records")}
               className="cursor-pointer font-medium text-4th-color transition-colors duration-200"
             >
               Maintenance Records
             </span>{" "}
-            <span className="px-1 text-slate-400">/</span>{" "}
-            <span className="font-semibold text-slate-700">Edit Record</span>
+            <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
+            <span className="font-semibold text-slate-700 dark:text-gray-300">Edit Record</span>
           </p>
           <h1 className="text-2xl font-bold tracking-tight text-BLUE-dark">
             Edit Maintenance Record ({form.maintenanceNumber})
@@ -211,50 +211,50 @@ function UpdateMaintenanceRecord() {
           </p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
           <form onSubmit={handleSubmit} className="p-6">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Maintenance Number
                 </label>
                 <input
                   type="text"
                   disabled
                   value={form.maintenanceNumber || "—"}
-                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-500 outline-none cursor-not-allowed"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-3 py-2.5 text-sm text-slate-500 dark:text-gray-400 outline-none cursor-not-allowed"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Maintenance Date <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Maintenance Date <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   type="date"
                   value={form.maintenanceDate}
                   onChange={updateField("maintenanceDate")}
                   required
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
 
               <div>
-                <label className='block text-sm font-medium text-slate-700 mb-1.5'>
+                <label className='block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5'>
                   Next Maintenance Date
                 </label>
                 <input
                   type='date'
                   value={form.nextMaintenanceDate}
                   onChange={updateField('nextMaintenanceDate')}
-                  className='w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100'
+                  className='w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100'
                 />
               </div>
 
 
               <div className="lg:col-span-3">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Select Asset <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Select Asset <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={assetOptions}
@@ -268,7 +268,7 @@ function UpdateMaintenanceRecord() {
                 />
 
                 {selectedAsset && (
-                  <div className="mt-2 rounded-md bg-blue-50 border border-blue-100 p-3 text-xs flex flex-wrap gap-4 text-slate-700">
+                  <div className="mt-2 rounded-md bg-blue-50 dark:bg-blue-950 border border-blue-100 dark:border-blue-900 p-3 text-xs flex flex-wrap gap-4 text-slate-700 dark:text-gray-300">
                     <span>
                       <strong className="font-semibold">Code:</strong> {selectedAsset.assetCode}
                     </span>
@@ -286,8 +286,8 @@ function UpdateMaintenanceRecord() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Maintenance Type <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Maintenance Type <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={maintenanceTypeOptions}
@@ -302,8 +302,8 @@ function UpdateMaintenanceRecord() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Performed By Employee <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Performed By Employee <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={employeeOptions}
@@ -318,8 +318,8 @@ function UpdateMaintenanceRecord() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Maintenance Cost (Rs.) <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Maintenance Cost (Rs.) <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   type="number"
@@ -328,13 +328,13 @@ function UpdateMaintenanceRecord() {
                   onChange={updateField("maintenanceCostAmount")}
                   placeholder="e.g. 18000"
                   required
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Payment Method <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Payment Method <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={paymentMethodOptions}
@@ -349,8 +349,8 @@ function UpdateMaintenanceRecord() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Account <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Account <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={accountOptions}
@@ -365,7 +365,7 @@ function UpdateMaintenanceRecord() {
               </div>
 
               <div className="lg:col-span-3">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Problem Description
                 </label>
                 <textarea
@@ -373,13 +373,13 @@ function UpdateMaintenanceRecord() {
                   onChange={updateField("problemDescription")}
                   rows={3}
                   placeholder="Describe the problem or reason for maintenance..."
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
                 />
               </div>
 
               <div className="lg:col-span-3">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Work Performed <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Work Performed <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <textarea
                   value={form.workPerformed}
@@ -387,7 +387,7 @@ function UpdateMaintenanceRecord() {
                   rows={3}
                   placeholder="Describe the service or repair work performed..."
                   required
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
                 />
               </div>
             </div>
@@ -396,7 +396,7 @@ function UpdateMaintenanceRecord() {
               <button
                 type="button"
                 onClick={() => navigate("/assets?tab=maintenance-records")}
-                className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+                className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-5 py-2 text-sm font-medium text-slate-700 dark:text-gray-300 shadow-sm transition hover:bg-slate-50 dark:hover:bg-gray-800"
               >
                 Cancel
               </button>

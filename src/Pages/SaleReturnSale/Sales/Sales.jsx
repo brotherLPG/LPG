@@ -41,6 +41,7 @@ function Sales() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
+  const [openViewMenuId, setOpenViewMenuId] = useState(null);
 
   const { data: formOptionsResponse } = useGetSaleFormOptions();
   const formOptions = formOptionsResponse?.data || {};
@@ -202,6 +203,55 @@ function Sales() {
     });
   };
 
+  const getSaleMenuData = (item) => {
+    const saleId = item.id || item._id;
+    const customerIdValue =
+      typeof item.customerId === "object" && item.customerId !== null
+        ? item.customerId._id
+        : item.customerId;
+    return { saleId, customerIdValue };
+  };
+
+  const renderViewMenu = (item, align = "right", menuKey = null) => {
+    const { saleId, customerIdValue } = getSaleMenuData(item);
+    const key = menuKey || saleId;
+    if (openViewMenuId !== key) return null;
+    return (
+      <>
+        <div
+          className="fixed inset-0 z-10"
+          onClick={() => setOpenViewMenuId(null)}
+        />
+        <div
+          className={`absolute ${align === "left" ? "left-0" : "right-0"} top-full z-20 mt-1 w-40 overflow-hidden rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-1 shadow-lg`}
+        >
+          <button
+            type="button"
+            onClick={() => {
+              setOpenViewMenuId(null);
+              navigate(`/sales/view/${saleId}`);
+            }}
+            className="block w-full px-4 py-2 text-left text-sm font-medium text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-800"
+          >
+            View Sale
+          </button>
+          {customerIdValue && (
+            <button
+              type="button"
+              onClick={() => {
+                setOpenViewMenuId(null);
+                navigate(`/customers/view/${customerIdValue}`);
+              }}
+              className="block w-full px-4 py-2 text-left text-sm font-medium text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-800"
+            >
+              View Customer
+            </button>
+          )}
+        </div>
+      </>
+    );
+  };
+
   // Column definitions for sales table
   const salesColumns = [
     {
@@ -209,10 +259,10 @@ function Sales() {
       label: "Sale Number",
       isRowHeader: true,
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
       cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
       renderCell: (item) => (
-        <span className="font-bold text-slate-800 text-[13px]">
+        <span className="font-bold text-slate-800 dark:text-slate-500 text-[13px]">
           {item.saleNumber}
         </span>
       ),
@@ -221,32 +271,49 @@ function Sales() {
       key: "invoiceNumber",
       label: "Invoice Number",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
       cellClassName:
-        "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap text-nowrap",
+        "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium whitespace-nowrap text-nowrap",
     },
     {
       key: "customerName",
       label: "Customer",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
       cellClassName:
-        "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap text-nowrap",
+        "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium whitespace-nowrap text-nowrap",
+      renderCell: (item) => {
+        const { saleId } = getSaleMenuData(item);
+        const menuKey = `name-${saleId}`;
+        const isMenuOpen = openViewMenuId === menuKey;
+        return (
+          <div className="relative inline-block">
+            <button
+              type="button"
+              onClick={() => setOpenViewMenuId(isMenuOpen ? null : menuKey)}
+              className="font-semibold text-[#1a56db] dark:text-blue-400 hover:underline text-[13px]"
+            >
+              {item.customerName}
+            </button>
+            {renderViewMenu(item, "left", menuKey)}
+          </div>
+        );
+      },
     },
     {
       key: "saleTypeLabel",
       label: "Type",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
       cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
       renderCell: (item) => {
         const typeStyles = {
-          Cash: "bg-emerald-50 text-emerald-600 border border-emerald-100",
-          Credit: "bg-blue-50 text-blue-600 border border-blue-100",
+          Cash: "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900",
+          Credit: "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900",
         };
         return (
           <span
-            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${typeStyles[item.saleTypeLabel] || "bg-slate-50 text-slate-600 border border-slate-100"}`}
+            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${typeStyles[item.saleTypeLabel] || "bg-slate-50 dark:bg-gray-800 text-slate-600 dark:text-gray-400 border border-slate-100 dark:border-gray-800"}`}
           >
             {item.saleTypeLabel}
           </span>
@@ -257,10 +324,10 @@ function Sales() {
       key: "totalAmount",
       label: "Amount",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
       cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
       renderCell: (item) => (
-        <span className="text-slate-900 font-semibold text-[13px] tabular-nums tracking-tight">
+        <span className="text-slate-900 dark:text-slate-500 font-semibold text-[13px] tabular-nums tracking-tight">
           {formatMoney(item.totalAmount)}
         </span>
       ),
@@ -269,18 +336,18 @@ function Sales() {
       key: "itemCount",
       label: "Items",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
       cellClassName:
-        "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap text-nowrap",
+        "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium whitespace-nowrap text-nowrap",
     },
     {
       key: "paidAmount",
       label: "Paid Amount",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
       cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
       renderCell: (item) => (
-        <span className="text-emerald-600 font-semibold text-[13px] tabular-nums tracking-tight">
+        <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-[13px] tabular-nums tracking-tight">
           {formatMoney(item.paidAmount)}
         </span>
       ),
@@ -289,10 +356,10 @@ function Sales() {
       key: "returnedAmount",
       label: "Returned Amount",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
       cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
       renderCell: (item) => (
-        <span className="text-orange-600 font-semibold text-[13px] tabular-nums tracking-tight">
+        <span className="text-orange-600 dark:text-orange-400 font-semibold text-[13px] tabular-nums tracking-tight">
           {formatMoney(item.returnedAmount)}
         </span>
       ),
@@ -301,9 +368,9 @@ function Sales() {
       key: "invoiceDate",
       label: "Date",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
       cellClassName:
-        "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap text-nowrap",
+        "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium whitespace-nowrap text-nowrap",
       renderCell: (item) => {
         const date = new Date(item.invoiceDate);
         return date.toLocaleDateString();
@@ -313,18 +380,18 @@ function Sales() {
       key: "paymentStatusLabel",
       label: "Payment Status",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
       cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
       renderCell: (item) => {
         const statusStyles = {
-          Paid: "bg-emerald-50 text-emerald-600 border border-emerald-100",
-          Partial: "bg-amber-50 text-amber-600 border border-amber-100",
-          Unpaid: "bg-red-50 text-red-600 border border-red-100",
-          "Refund Due": "bg-purple-50 text-purple-600 border border-purple-100",
+          Paid: "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900",
+          Partial: "bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900",
+          Unpaid: "bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900",
+          "Refund Due": "bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900",
         };
         return (
           <span
-            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusStyles[item.paymentStatusLabel] || "bg-slate-50 text-slate-600 border border-slate-100"}`}
+            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusStyles[item.paymentStatusLabel] || "bg-slate-50 dark:bg-gray-800 text-slate-600 dark:text-gray-400 border border-slate-100 dark:border-gray-800"}`}
           >
             {item.paymentStatusLabel}
           </span>
@@ -335,20 +402,20 @@ function Sales() {
       key: "saleStatusLabel",
       label: "Sale Status",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
       cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
       renderCell: (item) => {
         const statusStyles = {
-          Confirmed: "bg-emerald-50 text-emerald-600 border border-emerald-100",
-          Draft: "bg-slate-50 text-slate-600 border border-slate-100",
+          Confirmed: "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900",
+          Draft: "bg-slate-50 dark:bg-gray-800 text-slate-600 dark:text-gray-400 border border-slate-100 dark:border-gray-800",
           "Partially Returned":
-            "bg-amber-50 text-amber-600 border border-amber-100",
-          Returned: "bg-blue-50 text-blue-600 border border-blue-100",
-          Cancelled: "bg-red-50 text-red-600 border border-red-100",
+            "bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900",
+          Returned: "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900",
+          Cancelled: "bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900",
         };
         return (
           <span
-            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusStyles[item.saleStatusLabel] || "bg-slate-50 text-slate-600 border border-slate-100"}`}
+            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusStyles[item.saleStatusLabel] || "bg-slate-50 dark:bg-gray-800 text-slate-600 dark:text-gray-400 border border-slate-100 dark:border-gray-800"}`}
           >
             {item.saleStatusLabel}
           </span>
@@ -359,30 +426,36 @@ function Sales() {
       key: "actions",
       label: "Actions",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 text-right pr-6",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 text-right pr-6",
       cellClassName: "px-4 py-4 pr-6",
-      renderCell: (item) => (
+      renderCell: (item) => {
+        const { saleId } = getSaleMenuData(item);
+        const isMenuOpen = openViewMenuId === saleId;
+        return (
         <div className="flex items-center justify-end gap-3">
           {can("sales", "read") && (
-            <Tooltip delay={0}>
-              <Button
-                onClick={() => navigate(`/sales/view/${item._id}`)}
-                aria-label={`View ${item.saleNumber}`}
-                className="text-[#1a56db] hover:text-blue-800 transition-colors bg-transparent min-w-0 px-1"
-              >
-                <Eye className="h-4 w-4" strokeWidth={2.5} />
-              </Button>
-              <Tooltip.Content>
-                <p>View Sale</p>
-              </Tooltip.Content>
-            </Tooltip>
+            <div className="relative">
+              <Tooltip delay={0}>
+                <Button
+                  onClick={() => setOpenViewMenuId(isMenuOpen ? null : saleId)}
+                  aria-label={`View ${item.saleNumber}`}
+                  className="text-[#1a56db] dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors bg-transparent min-w-0 px-1"
+                >
+                  <Eye className="h-4 w-4" strokeWidth={2.5} />
+                </Button>
+                <Tooltip.Content>
+                  <p>View</p>
+                </Tooltip.Content>
+              </Tooltip>
+              {renderViewMenu(item)}
+            </div>
           )}
           {can("sales", "update") && (
             <Tooltip delay={0}>
               <Button
                 onClick={() => navigate(`/sales/edit/${item._id}`)}
                 aria-label={`Edit ${item.saleNumber}`}
-                className="text-[#008951] hover:text-emerald-800 transition-colors bg-transparent min-w-0 px-1"
+                className="text-[#008951] dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors bg-transparent min-w-0 px-1"
               >
                 <Edit3 className="h-4 w-4" strokeWidth={2.5} />
               </Button>
@@ -395,7 +468,7 @@ function Sales() {
             <Button
               onClick={() => handlePrintSale(item)}
               aria-label={`Print ${item.saleNumber}`}
-              className="text-slate-500 hover:text-slate-700 transition-colors bg-transparent min-w-0 px-1"
+              className="text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-300 transition-colors bg-transparent min-w-0 px-1"
             >
               <Printer className="h-4 w-4" strokeWidth={2.5} />
             </Button>
@@ -404,12 +477,13 @@ function Sales() {
             </Tooltip.Content>
           </Tooltip>
         </div>
-      ),
+        );
+      },
     },
   ];
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
       <section>
         {/* Header & Breadcrumbs */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -421,7 +495,7 @@ function Sales() {
               >
                 Dashboard
               </span>{" "}
-              <span className="px-1 text-slate-400">/</span>{" "}
+              <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
               <span className="font-semibold">
                 {activeTab === "sales" ? "Sales" : "Return Sales"}
               </span>
@@ -460,12 +534,12 @@ function Sales() {
         </div>
 
         {/* Tabs */}
-        <div className="mb-4 flex border-b border-slate-200">
+        <div className="mb-4 flex border-b border-slate-200 dark:border-gray-700">
           <button
             type="button"
             // onClick={() => setActiveTab("sales")}
             onClick={() => setSearchParams({ tab: "sales" })}
-            className={`border-b-2 px-4 py-2 text-sm font-semibold ${activeTab === "sales" ? "border-blue-600 text-blue-700" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+            className={`border-b-2 px-4 py-2 text-sm font-semibold ${activeTab === "sales" ? "border-blue-600 text-blue-700 dark:text-blue-300" : "border-transparent text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-300"}`}
           >
             Sales
           </button>
@@ -473,7 +547,7 @@ function Sales() {
             type="button"
             // onClick={() => setActiveTab("returns")}
             onClick={() => setSearchParams({ tab: "returns" })}
-            className={`border-b-2 px-4 py-2 text-sm font-semibold ${activeTab === "returns" ? "border-blue-600 text-blue-700" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+            className={`border-b-2 px-4 py-2 text-sm font-semibold ${activeTab === "returns" ? "border-blue-600 text-blue-700 dark:text-blue-300" : "border-transparent text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-300"}`}
           >
             Return Sales
           </button>
@@ -488,28 +562,28 @@ function Sales() {
                   label: "Total Sales",
                   amount: summaryStats.total,
                   hint: `${summaryStats.totalCount} sales`,
-                  card: "border-slate-200/80 bg-white",
-                  labelClass: "text-slate-500",
-                  valueClass: "text-slate-900",
-                  hintClass: "text-slate-400",
+                  card: "border-slate-200/80 dark:border-gray-700/80 bg-white dark:bg-gray-900",
+                  labelClass: "text-slate-500 dark:text-gray-400",
+                  valueClass: "text-slate-900 dark:text-gray-100",
+                  hintClass: "text-slate-400 dark:text-gray-500",
                 },
                 {
                   label: "Cash Sales",
                   amount: summaryStats.cash,
                   hint: `${summaryStats.cashCount} sales`,
-                  card: "border-emerald-100 bg-white",
+                  card: "border-emerald-100 dark:border-emerald-900 bg-white dark:bg-gray-900",
                   labelClass: "text-emerald-700/80",
-                  valueClass: "text-emerald-600",
-                  hintClass: "text-slate-400",
+                  valueClass: "text-emerald-600 dark:text-emerald-400",
+                  hintClass: "text-slate-400 dark:text-gray-500",
                 },
                 {
                   label: "Pending Credit",
                   amount: summaryStats.pendingCredit,
                   hint: "Outstanding",
-                  card: "border-violet-200 bg-violet-50/80",
-                  labelClass: "text-violet-700",
-                  valueClass: "text-violet-600",
-                  hintClass: "text-violet-400",
+                  card: "border-violet-200 dark:border-violet-800 bg-violet-50/80",
+                  labelClass: "text-violet-700 dark:text-violet-500",
+                  valueClass: "text-violet-600 dark:text-violet-500",
+                  hintClass: "text-violet-400 dark:text-violet-600",
                 },
               ].map((card) => (
                 <article
@@ -534,17 +608,17 @@ function Sales() {
             </div>
 
             {/* Filters */}
-            <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="mb-6 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:items-center">
                 <label className="relative flex-1 col-span-2">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500 h-4 w-4" />
                   <input
                     value={searchTerm}
                     onChange={(event) => {
                       setSearchTerm(event.target.value);
                       setPage(1);
                     }}
-                    className="w-full rounded-md border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-500 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50/50 dark:bg-gray-800/50 py-2.5 pl-10 pr-3 text-sm text-slate-700 dark:text-gray-300 outline-none transition placeholder:text-slate-500 dark:placeholder:text-gray-400 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
                     placeholder="Search by customer or invoice ID..."
                   />
                 </label>
@@ -564,7 +638,7 @@ function Sales() {
                       setSaleType(event.target.value);
                       setPage(1);
                     }}
-                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951]"
+                    className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951]"
                   >
                     <option value="">Type: All</option>
                     {saleTypes.map((option) => (
@@ -573,7 +647,7 @@ function Sales() {
                       </option>
                     ))}
                   </select>
-                  <ArrowLeft className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 rotate-180 pointer-events-none" />
+                  <ArrowLeft className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 dark:text-gray-400 rotate-180 pointer-events-none" />
                 </div>
                 <div className="relative">
                   <select
@@ -582,7 +656,7 @@ function Sales() {
                       setPaymentStatus(event.target.value);
                       setPage(1);
                     }}
-                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951]"
+                    className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951]"
                   >
                     <option value="">Payment Status: All</option>
                     {meta.paymentStatuses.map((status) => (
@@ -591,7 +665,7 @@ function Sales() {
                       </option>
                     ))}
                   </select>
-                  <ArrowLeft className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 rotate-180 pointer-events-none" />
+                  <ArrowLeft className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 dark:text-gray-400 rotate-180 pointer-events-none" />
                 </div>
                 <div>
                   <input
@@ -601,7 +675,7 @@ function Sales() {
                       setStartDate(event.target.value);
                       setPage(1);
                     }}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951]"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951]"
                   />
                 </div>
                 <div>
@@ -612,14 +686,14 @@ function Sales() {
                       setEndDate(event.target.value);
                       setPage(1);
                     }}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951]"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951]"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={clearFilters}
                   disabled={!hasFilters}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-400 disabled:hover:bg-white"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm font-semibold text-slate-700 dark:text-gray-300 transition hover:bg-slate-50 dark:hover:bg-gray-800 disabled:cursor-not-allowed disabled:text-slate-400 dark:disabled:text-gray-500 disabled:hover:bg-white dark:disabled:hover:bg-gray-900"
                 >
                   Clear Filter
                 </button>
@@ -627,7 +701,7 @@ function Sales() {
             </div>
 
             {/* Table */}
-            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
               <GlobalTable
                 columns={salesColumns}
                 data={sales}
@@ -635,13 +709,13 @@ function Sales() {
                 ariaLabel="Sales Table"
                 className=""
                 rowClassName={(item, index) =>
-                  `border-b border-slate-100 last:border-0 transition-colors whitespace-nowrap text-nowrap ${
+                  `border-b border-slate-100 dark:border-gray-800 last:border-0 transition-colors whitespace-nowrap text-nowrap ${
                     index === 0
-                      ? "bg-emerald-100 border-emerald-200"
-                      : "hover:bg-slate-50"
+                      ? "bg-emerald-100 dark:bg-emerald-900 border-emerald-200 dark:border-emerald-800"
+                      : "hover:bg-slate-50 dark:hover:bg-gray-800"
                   }`
                 }
-                // rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors whitespace-nowrap text-nowrap first:bg-emerald-50! first:border-emerald-100"
+                // rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors whitespace-nowrap text-nowrap first:bg-emerald-50 dark:first:bg-emerald-950! first:border-emerald-100 dark:first:border-emerald-900"
                 emptyContent={
                   isLoading ? "Loading sales..." : "No sales match your search."
                 }

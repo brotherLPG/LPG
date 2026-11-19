@@ -76,9 +76,9 @@ function Dashboard() {
       change: formatChange(kpis?.totalSales),
       trend: kpis?.totalSales?.trend || "flat",
       icon: ShoppingCart,
-      cardClass: "bg-[#EEF4FF]",
+      cardClass: "bg-[#EEF4FF] dark:bg-blue-950",
       iconClass: "bg-[#2563EB] text-white",
-      valueClass: "text-[#1E3A8A]",
+      valueClass: "text-[#1E3A8A] dark:text-blue-300",
     },
     {
       label: kpis?.totalReceivedPayment?.label || "Total Received Payment",
@@ -87,18 +87,18 @@ function Dashboard() {
       change: formatChange(kpis?.totalReceivedPayment),
       trend: kpis?.totalReceivedPayment?.trend || "flat",
       icon: Wallet,
-      cardClass: "bg-[#ECFDF5]",
+      cardClass: "bg-[#ECFDF5] dark:bg-emerald-950",
       iconClass: "bg-[#22C55E] text-white",
-      valueClass: "text-[#166534]",
+      valueClass: "text-[#166534] dark:text-green-300",
     },
     {
       label: kpis?.outstandingReceivable?.label || "Outstanding Receivable",
       value: kpis?.outstandingReceivable?.formattedAmount || "Rs. 0",
       hint: kpis?.outstandingReceivable?.description || "Sales minus received",
       icon: Receipt,
-      cardClass: "bg-[#FEF2F2]",
+      cardClass: "bg-[#FEF2F2] dark:bg-red-950",
       iconClass: "bg-[#EF4444] text-white",
-      valueClass: "text-[#991B1B]",
+      valueClass: "text-[#991B1B] dark:text-red-300",
     },
   ];
 
@@ -114,7 +114,7 @@ function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen w-full items-center justify-center bg-slate-50">
+      <div className="flex min-h-screen w-full items-center justify-center bg-slate-50 dark:bg-gray-800">
         <p className="text-tertiary">Loading operations overview...</p>
       </div>
     );
@@ -122,12 +122,9 @@ function Dashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen w-full bg-slate-50 px-4 py-6 md:px-6">
-        <SyncStatus />
-        <p className="text-sm text-slate-600">
-          Live dashboard totals need an internet connection. Customers, sales, and payments already saved on this computer are still available.
-        </p>
-        <p className="mt-2 text-xs text-slate-400">
+      <div className="flex min-h-screen w-full items-center justify-center bg-slate-50 dark:bg-gray-800">
+        <p className="text-error">
+          Error loading dashboard:{" "}
           {error?.response?.data?.message || error.message}
         </p>
       </div>
@@ -135,9 +132,9 @@ function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-slate-50">
+    <div className="min-h-screen w-full bg-slate-50 dark:bg-gray-800">
       <div className="w-full px-4 py-6 md:px-6 lg:px-8">
-        <div className="mb-1 text-sm text-slate-400">
+        <div className="mb-1 text-sm text-slate-400 dark:text-gray-500">
           <span
             onClick={() => navigate("/dashboard")}
             className="cursor-pointer transition-colors hover:text-primary-dark"
@@ -145,13 +142,13 @@ function Dashboard() {
             Brother LPG
           </span>
           <span className="mx-1">/</span>
-          <span className="font-medium text-slate-600">Dashboard</span>
+          <span className="font-medium text-slate-600 dark:text-gray-400">Dashboard</span>
         </div>
 
         <SyncStatus />
         <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="text-[28px] font-bold tracking-tight text-slate-800">
+            <h1 className="text-[28px] font-bold tracking-tight text-slate-800 dark:text-gray-100">
               {overview?.title || "Operations Overview"}
             </h1>
             <p className="mt-1 text-sm text-tertiary">
@@ -161,8 +158,8 @@ function Dashboard() {
           </div>
 
           <div className="mt-2 mb-2 flex flex-wrap items-center gap-2">
-            <span className="text-xs text-slate-400">{todayLabel}</span>
-            <div className="flex rounded-full bg-white p-1 shadow-sm ring-1 ring-slate-200">
+            <span className="text-xs text-slate-400 dark:text-gray-500">{todayLabel}</span>
+            <div className="flex rounded-full bg-white dark:bg-gray-900 p-1 shadow-sm ring-1 ring-slate-200">
               {TREND_RANGES.map((range) => {
                 const active = trendDays === range.days;
                 return (
@@ -173,7 +170,7 @@ function Dashboard() {
                     className={`rounded-full px-3 py-1 text-xs font-semibold ${
                       active
                         ? "bg-[#2563EB] text-white"
-                        : "text-slate-500 hover:text-slate-700"
+                        : "text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-300"
                     }`}
                   >
                     {range.label}
@@ -190,8 +187,8 @@ function Dashboard() {
             const isDown = card.trend === "down";
             const TrendIcon = isDown ? TrendingDown : TrendingUp;
             const trendClass = isDown
-              ? "text-[#DC2626]"
-              : "text-[#16A34A]";
+              ? "text-[#DC2626] dark:text-red-400"
+              : "text-[#16A34A] dark:text-green-400";
 
             return (
               <div
@@ -204,7 +201,7 @@ function Dashboard() {
                   <Icon className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-500">
+                  <p className="text-sm font-medium text-slate-500 dark:text-gray-400">
                     {card.label}
                   </p>
                   <p
@@ -212,7 +209,7 @@ function Dashboard() {
                   >
                     {card.value}
                   </p>
-                  <p className="mt-1 flex items-center gap-1 text-xs text-slate-400">
+                  <p className="mt-1 flex items-center gap-1 text-xs text-slate-400 dark:text-gray-500">
                     {card.change ? (
                       <>
                         <TrendIcon className={`h-3.5 w-3.5 ${trendClass}`} />
@@ -234,34 +231,34 @@ function Dashboard() {
             <SalesPaymentTrend trend={overview?.salesPaymentTrend} />
           </div>
 
-          <section className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <section className="flex h-full flex-col rounded-2xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-[16px] font-bold text-BLUE-dark">
                   {inventoryAlerts?.title || "Low-Stock Alerts"}
                 </h3>
-                <p className="mt-1 text-xs text-slate-400">
+                <p className="mt-1 text-xs text-slate-400 dark:text-gray-500">
                   Items below minimum threshold
                 </p>
               </div>
-              <span className="rounded-full bg-[#FEF2F2] px-2.5 py-1 text-xs font-semibold text-[#DC2626]">
+              <span className="rounded-full bg-[#FEF2F2] dark:bg-red-950 px-2.5 py-1 text-xs font-semibold text-[#DC2626] dark:text-red-400">
                 {inventoryAlerts?.alertCount ?? lowStockAlerts.length} alerts
               </span>
             </div>
 
             <div className="flex-1 space-y-3">
               {isAlertsLoading ? (
-                <div className="flex h-full min-h-40 items-center justify-center text-sm text-slate-400">
+                <div className="flex h-full min-h-40 items-center justify-center text-sm text-slate-400 dark:text-gray-500">
                   Loading alerts...
                 </div>
               ) : alertsError ? (
-                <div className="flex h-full min-h-40 items-center justify-center text-sm text-red-500">
+                <div className="flex h-full min-h-40 items-center justify-center text-sm text-red-500 dark:text-red-400">
                   {alertsError?.response?.data?.message ||
                     alertsError.message ||
                     "Failed to load alerts."}
                 </div>
               ) : lowStockAlerts.length === 0 ? (
-                <div className="flex h-full min-h-40 items-center justify-center text-sm text-slate-400">
+                <div className="flex h-full min-h-40 items-center justify-center text-sm text-slate-400 dark:text-gray-500">
                   No low-stock alerts.
                 </div>
               ) : (
@@ -282,21 +279,21 @@ function Dashboard() {
                       key={alert.id}
                       className={`rounded-xl border px-3 py-3 ${
                         isDanger
-                          ? "border-red-100 bg-red-50/70"
-                          : "border-amber-100 bg-amber-50/70"
+                          ? "border-red-100 dark:border-red-200 bg-red-50"
+                          : "border-amber-100 dark:border-amber-900 bg-amber-50/70"
                       }`}
                     >
                       <div className="mb-2 flex items-start gap-2">
                         <AlertTriangle
                           className={`mt-0.5 h-4 w-4 shrink-0 ${
-                            isDanger ? "text-red-500" : "text-amber-500"
+                            isDanger ? "text-red-500 dark:text-red-400" : "text-amber-500 dark:text-amber-400"
                           }`}
                         />
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-semibold text-BLUE-dark">
                             {alert.title}
                           </p>
-                          <p className="text-xs text-slate-500">
+                          <p className="text-xs text-slate-500 dark:text-gray-700">
                             {alert.remainingLabel ||
                               `${alert.remaining} remaining · Min ${alert.minimum}`}
                           </p>
@@ -305,7 +302,7 @@ function Dashboard() {
                       <div className="h-1.5 overflow-hidden rounded-full bg-white/80">
                         <div
                           className={`h-full rounded-full ${
-                            isDanger ? "bg-red-500" : "bg-amber-500"
+                            isDanger ? "bg-red-500 dark:bg-red-600" : "bg-amber-500 dark:bg-amber-600"
                           }`}
                           style={{ width: `${percent}%` }}
                         />

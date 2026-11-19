@@ -54,23 +54,23 @@ const ConfirmationDialog = ({ confirmation }) => {
 
   const typeStyles = {
     danger: {
-      icon: <AlertTriangle className="h-6 w-6 text-red-500" />,
-      iconBg: "bg-red-100",
+      icon: <AlertTriangle className="h-6 w-6 text-red-500 dark:text-red-400" />,
+      iconBg: "bg-red-100 dark:bg-red-900",
       confirmBtn: "bg-red-600 hover:bg-red-700 text-white",
     },
     warning: {
-      icon: <AlertTriangle className="h-6 w-6 text-yellow-500" />,
-      iconBg: "bg-yellow-100",
+      icon: <AlertTriangle className="h-6 w-6 text-yellow-500 dark:text-yellow-400" />,
+      iconBg: "bg-yellow-100 dark:bg-yellow-900",
       confirmBtn: "bg-yellow-600 hover:bg-yellow-700 text-white",
     },
     info: {
-      icon: <AlertTriangle className="h-6 w-6 text-blue-500" />,
-      iconBg: "bg-blue-100",
+      icon: <AlertTriangle className="h-6 w-6 text-blue-500 dark:text-blue-400" />,
+      iconBg: "bg-blue-100 dark:bg-blue-900",
       confirmBtn: "bg-blue-600 hover:bg-blue-700 text-white",
     },
     success: {
-      icon: <AlertTriangle className="h-6 w-6 text-green-500" />,
-      iconBg: "bg-green-100",
+      icon: <AlertTriangle className="h-6 w-6 text-green-500 dark:text-green-400" />,
+      iconBg: "bg-green-100 dark:bg-green-900",
       confirmBtn: "bg-green-600 hover:bg-green-700 text-white",
     },
   };
@@ -86,11 +86,11 @@ const ConfirmationDialog = ({ confirmation }) => {
       />
 
       {/* Dialog */}
-      <div className="relative bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 p-6 animate-in fade-in zoom-in duration-200">
+      <div className="relative bg-white dark:bg-gray-900 rounded-xl shadow-2xl max-w-md w-full mx-4 p-6 animate-in fade-in zoom-in duration-200">
         {/* Close button */}
         <button
           onClick={onCancel}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors"
+          className="absolute top-4 right-4 text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors"
         >
           <X className="h-5 w-5" />
         </button>
@@ -101,16 +101,16 @@ const ConfirmationDialog = ({ confirmation }) => {
         </div>
 
         {/* Title */}
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">{title}</h3>
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-gray-100 mb-2">{title}</h3>
 
         {/* Message */}
-        <p className="text-sm text-slate-600 mb-6">{message}</p>
+        <p className="text-sm text-slate-600 dark:text-gray-400 mb-6">{message}</p>
 
         {/* Actions */}
         <div className="flex gap-3 justify-end">
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-gray-300 bg-slate-100 dark:bg-gray-800 hover:bg-slate-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
           >
             {cancelText}
           </button>

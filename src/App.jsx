@@ -1,6 +1,7 @@
 import './App.css'
 import { Navigate, useLocation } from 'react-router-dom'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Menu, X } from 'lucide-react'
 import Sidebar from './components/Sidebar'
 import Header from './components/Header'
 import PageRouter from './routes/PageRouter';
@@ -17,7 +18,11 @@ function App() {
   const location = useLocation();
   const isPublicPage = PUBLIC_PATHS.includes(location.pathname);
   const isAuthenticated = hasAuthTokens();
-  const [isSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
 
   if (!isAuthenticated && !isPublicPage) {
     return <Navigate to="/" replace />;
@@ -25,10 +30,36 @@ function App() {
 
   return (
     <ToastProvider>
-      <div className="flex h-screen bg-gray-100 overflow-hidden">
-        {!isPublicPage && isSidebarOpen && <Sidebar />}
+      <div className="flex h-screen bg-gray-100 dark:bg-gray-950 overflow-hidden">
+        {!isPublicPage && (
+          <>
+            {isSidebarOpen && (
+              <div
+                className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+                onClick={() => setIsSidebarOpen(false)}
+              />
+            )}
+            <div
+              className={
+                isSidebarOpen
+                  ? 'fixed inset-y-0 left-0 z-50 lg:static lg:z-auto'
+                  : 'hidden lg:block'
+              }
+            >
+              <Sidebar />
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen((open) => !open)}
+              aria-label="Toggle sidebar"
+              className="fixed top-4 left-4 z-50 flex h-10 w-10 items-center justify-center -m-5 rounded-xl bg-gradient-primary text-white shadow-lg transition-colors hover:opacity-90 lg:hidden"
+            >
+              {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </>
+        )}
         <div className="flex-1 flex flex-col overflow-hidden ">
-              {/* {!isPublicPage && <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} isSidebarOpen={isSidebarOpen} />} */}
+          {/* {!isPublicPage && <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} isSidebarOpen={isSidebarOpen} />} */}
           <PageRouter/>
         </div>
       </div>

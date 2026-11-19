@@ -64,7 +64,7 @@ function Login() {
   };
 
   return (
-    <main className="flex min-h-screen w-full bg-white">
+    <main className="flex min-h-screen w-full bg-white dark:bg-gray-900">
       <section className="grid w-full lg:grid-cols-2">
         {/* Left Panel - Branding */}
         <div
@@ -101,7 +101,7 @@ function Login() {
         </div>
 
         {/* Right Panel - Form */}
-        <div className="flex items-center justify-center py-2 bg-white w-full">
+        <div className="flex items-center justify-center py-2 bg-white dark:bg-gray-900 w-full">
           <div>
             {/* Desktop Logo */}
             <div className="mb-6 hidden lg:flex items-center">
@@ -142,7 +142,7 @@ function Login() {
             <div className="bg-[white] shadow-2xl shadow-[#0F172A1A] rounded-lg p-6">
               <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <label className="block">
-                  <span className="block text-sm font-semibold mb-2 text-slate-900">
+                  <span className="block text-sm font-semibold mb-2 text-slate-900 dark:text-gray-100">
                     Email Address
                   </span>
                   <input
@@ -150,14 +150,14 @@ function Login() {
                     type="email"
                     name="emailAddress"
                     placeholder="ri.ahmad@overlandlpg.pk"
-                    className="w-full rounded-lg border border-slate-300 bg-white py-2.5 px-4 text-sm font-normal outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-900 py-2.5 px-4 text-sm font-normal outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     value={form.emailAddress}
                     onChange={handleChange}
                   />
                 </label>
 
                 <label className="block">
-                  <span className="block text-sm font-semibold mb-2 text-slate-900">
+                  <span className="block text-sm font-semibold mb-2 text-slate-900 dark:text-gray-100">
                     Password
                   </span>
                   <div className="relative">
@@ -166,14 +166,14 @@ function Login() {
                       type={showPassword ? "text" : "password"}
                       name="password"
                       placeholder="Enter your password"
-                      className="w-full rounded-lg border border-slate-300 bg-white py-2.5 px-4 pr-20 text-sm font-normal outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      className="w-full rounded-lg border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-900 py-2.5 px-4 pr-20 text-sm font-normal outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                       value={form.password}
                       onChange={handleChange}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors text-sm font-medium"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors text-sm font-medium"
                     >
                       {showPassword ? "Hide" : "Show"}
                     </button>
@@ -184,7 +184,7 @@ function Login() {
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
-                      className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      className="w-4 h-4 rounded border-slate-300 dark:border-gray-600 text-blue-600 dark:text-blue-400 focus:ring-blue-500"
                     />
                     <span className="text-BLUE-dark">Remember me</span>
                   </label>
@@ -213,9 +213,9 @@ function Login() {
               </form>
 
               <div className="mt-6 flex items-center gap-4">
-                <div className="flex-1 h-px bg-slate-200"></div>
-                <span className="text-sm text-slate-400">or</span>
-                <div className="flex-1 h-px bg-slate-200"></div>
+                <div className="flex-1 h-px bg-slate-200 dark:bg-gray-700"></div>
+                <span className="text-sm text-slate-400 dark:text-gray-500">or</span>
+                <div className="flex-1 h-px bg-slate-200 dark:bg-gray-700"></div>
               </div>
 
               <div className="mt-4 text-center">
@@ -239,7 +239,7 @@ function Login() {
             </div>
 
             <div className="mt-3 text-center">
-              <p className="text-sm text-[#6B7280]">
+              <p className="text-sm text-[#6B7280] dark:text-gray-400">
                 Authorized personnel only. Activities are recorded under
                 Pakistan Cybersecurity Law.
               </p>

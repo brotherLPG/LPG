@@ -7,16 +7,7 @@ import App from './App.jsx'
 import ToastProvider from './utils/GlobalToast';
 import ConfirmationProvider from './utils/GlobalConfirmation';
 import { PermissionProvider } from './contexts/PermissionContext';
-import api from './api/axios';
-import { installOffline } from './offline/httpOffline';
-
-installOffline(api);
-
-if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
-  });
-}
+import { ThemeProvider } from './contexts/ThemeContext';
 
 const queryClient = new QueryClient();
 
@@ -27,7 +18,9 @@ createRoot(document.getElementById("root")).render(
         <ToastProvider>
           <ConfirmationProvider>
             <PermissionProvider>
-              <App />
+              <ThemeProvider>
+                <App />
+              </ThemeProvider>
             </PermissionProvider>
           </ConfirmationProvider>
         </ToastProvider>

@@ -27,25 +27,25 @@ function RecentNotifications() {
 
   const typeStyles = {
     danger: {
-      wrap: "bg-red-50 text-red-500",
+      wrap: "bg-red-50 dark:bg-red-950 text-red-500 dark:text-red-400",
       Icon: AlertTriangle,
     },
     success: {
-      wrap: "bg-emerald-50 text-emerald-500",
+      wrap: "bg-emerald-50 dark:bg-emerald-950 text-emerald-500 dark:text-emerald-400",
       Icon: CheckCircle,
     },
     info: {
-      wrap: "bg-blue-50 text-blue-500",
+      wrap: "bg-blue-50 dark:bg-blue-950 text-blue-500 dark:text-blue-400",
       Icon: Info,
     },
   };
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <header className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+    <section className="overflow-hidden rounded-2xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
+      <header className="flex items-center justify-between border-b border-slate-100 dark:border-gray-800 px-5 py-4">
         <div>
           <h3 className="text-[16px] font-bold text-BLUE-dark">Recent Notifications</h3>
-          <p className="mt-0.5 text-xs text-slate-400">Plant alerts and operational updates</p>
+          <p className="mt-0.5 text-xs text-slate-400 dark:text-gray-500">Plant alerts and operational updates</p>
         </div>
         <button
           type="button"
@@ -64,7 +64,7 @@ function RecentNotifications() {
           return (
             <div
               key={notification.title}
-              className="flex items-start gap-3 border-b border-slate-100 px-5 py-4 last:border-0 hover:bg-slate-50"
+              className="flex items-start gap-3 border-b border-slate-100 dark:border-gray-800 px-5 py-4 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800"
             >
               <div
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${style.wrap}`}
@@ -76,12 +76,12 @@ function RecentNotifications() {
                 <p className="text-sm font-semibold text-BLUE-dark">
                   {notification.title}
                 </p>
-                <p className="mt-0.5 text-sm text-slate-500">
+                <p className="mt-0.5 text-sm text-slate-500 dark:text-gray-400">
                   {notification.message}
                 </p>
               </div>
 
-              <span className="shrink-0 rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-400">
+              <span className="shrink-0 rounded-full bg-slate-50 dark:bg-gray-800 px-2.5 py-1 text-[11px] font-medium text-slate-400 dark:text-gray-500">
                 {notification.time}
               </span>
             </div>

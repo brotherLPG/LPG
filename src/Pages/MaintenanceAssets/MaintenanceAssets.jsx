@@ -38,13 +38,13 @@ function MaintenanceAssets() {
   const getStatusColor = (status) => {
     switch (status) {
       case "Operational":
-        return "bg-emerald-50 text-emerald-600";
+        return "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400";
       case "Maintenance Required":
-        return "bg-amber-50 text-amber-600";
+        return "bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400";
       case "Under Maintenance":
-        return "bg-blue-50 text-blue-600";
+        return "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400";
       default:
-        return "bg-slate-50 text-slate-600";
+        return "bg-slate-50 dark:bg-gray-800 text-slate-600 dark:text-gray-400";
     }
   };
 
@@ -53,40 +53,40 @@ function MaintenanceAssets() {
       key: "assetCode",
       label: "Asset Code",
       isRowHeader: true,
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
-        <span className="font-bold text-slate-800 text-[13px]">{item.assetCode}</span>
+        <span className="font-bold text-slate-800 dark:text-gray-100 text-[13px]">{item.assetCode}</span>
       ),
     },
     {
       key: "assetName",
       label: "Asset Name",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-3 text-slate-600 text-[13px]",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
+      cellClassName: "px-4 py-3 text-slate-600 dark:text-gray-400 text-[13px]",
     },
     {
       key: "category",
       label: "Category",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-3 text-slate-600 text-[13px]",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
+      cellClassName: "px-4 py-3 text-slate-600 dark:text-gray-400 text-[13px]",
     },
     {
       key: "manufacturer",
       label: "Manufacturer",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-3 text-slate-600 text-[13px]",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
+      cellClassName: "px-4 py-3 text-slate-600 dark:text-gray-400 text-[13px]",
     },
     {
       key: "location",
       label: "Location",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-3 text-slate-600 text-[13px]",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
+      cellClassName: "px-4 py-3 text-slate-600 dark:text-gray-400 text-[13px]",
     },
     {
       key: "operationalStatus",
       label: "Operational Status",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
         <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${getStatusColor(item.operationalStatus)}`}>
@@ -97,27 +97,27 @@ function MaintenanceAssets() {
     {
       key: "nextMaintenance",
       label: "Next Maintenance",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-3 text-slate-600 text-[13px]",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
+      cellClassName: "px-4 py-3 text-slate-600 dark:text-gray-400 text-[13px]",
     },
     {
       key: "actions",
       label: "Actions",
-      className: "bg-slate-50/80 px-4 text-[13px] font-bold text-slate-700",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
         <div className="flex items-center gap-2">
           <button
             type="button"
             aria-label={`View ${item.assetCode}`}
-            className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+            className="flex items-center gap-1.5 rounded-full bg-blue-50 dark:bg-blue-950 px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors"
           >
             <Eye className="h-3.5 w-3.5" />
           </button>
           <button
             type="button"
             aria-label={`Edit ${item.assetCode}`}
-            className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
+            className="flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors"
           >
             <Edit3 className="h-3.5 w-3.5" /> Edit
           </button>
@@ -125,7 +125,7 @@ function MaintenanceAssets() {
             type="button"
             onClick={() => handleDeleteClick(item)}
             aria-label={`Delete ${item.assetCode}`}
-            className="flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition-colors"
+            className="flex items-center gap-1.5 rounded-full bg-rose-50 dark:bg-rose-950 px-3 py-1 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900 transition-colors"
           >
             <Trash2 className="h-3.5 w-3.5" /> Delete
           </button>
@@ -139,13 +139,13 @@ function MaintenanceAssets() {
       label: "Total Assets Listed",
       value: assets.length,
       subLabel: "Across 4 physical zones",
-      color: "text-[#9CA3AF]",
+      color: "text-[#9CA3AF] dark:text-gray-500",
     },
     {
       label: "Operational",
       value: assets.filter((a) => a.operationalStatus === "Operational").length,
       subLabel: "Fully functioning",
-      color: "text-emerald-500",
+      color: "text-emerald-500 dark:text-emerald-400",
     },
     {
       label: "Maintenance Required",
@@ -153,14 +153,14 @@ function MaintenanceAssets() {
         (a) => a.operationalStatus === "Maintenance Required",
       ).length,
       subLabel: "Active schedule logs",
-      color: "text-amber-500",
+      color: "text-amber-500 dark:text-amber-400",
     },
     {
       label: "Out of Service",
       value: assets.filter((a) => a.operationalStatus === "Out of Service")
         .length,
       subLabel: "Requires immediate replacement",
-      color: "text-red-500",
+      color: "text-red-500 dark:text-red-400",
     },
   ];
 
@@ -173,7 +173,7 @@ function MaintenanceAssets() {
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+              className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm"
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -189,14 +189,14 @@ function MaintenanceAssets() {
         </div>
 
         {/* Filters */}
-        <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="mb-6 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
             <label className="relative flex-1">
               <div className="absolute left-3 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full bg-slate-300"></div>
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                className="w-full rounded-md border border-slate-200 bg-slate-50/50 py-2.5 pl-8 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-500 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
+                className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50/50 dark:bg-gray-800/50 py-2.5 pl-8 pr-3 text-sm text-slate-700 dark:text-gray-300 outline-none transition placeholder:text-slate-500 dark:placeholder:text-gray-400 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
                 placeholder="Search by asset code, name, manufacturer, or location..."
               />
             </label>
@@ -205,7 +205,7 @@ function MaintenanceAssets() {
                 <select
                   value={category}
                   onChange={(event) => setCategory(event.target.value)}
-                  className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-40 lg:w-44"
+                  className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] sm:w-40 lg:w-44"
                 >
                   <option value="All">Category: All</option>
                   <option value="Equipment">Equipment</option>
@@ -213,13 +213,13 @@ function MaintenanceAssets() {
                   <option value="Safety">Safety</option>
                   <option value="Electrical">Electrical</option>
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 dark:text-gray-400 pointer-events-none" />
               </div>
               <div className="relative">
                 <select
                   value={status}
                   onChange={(event) => setStatus(event.target.value)}
-                  className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
+                  className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
                 >
                   <option value="All">Status: All</option>
                   <option value="Operational">Operational</option>
@@ -228,20 +228,20 @@ function MaintenanceAssets() {
                   </option>
                   <option value="Under Maintenance">Under Maintenance</option>
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 dark:text-gray-400 pointer-events-none" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Table */}
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
           <GlobalTable
             columns={assetColumns}
             data={filteredAssets}
             ariaLabel="Maintenance Assets Table"
             className=""
-            rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+            rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
             emptyContent="No assets match your search."
             pagination={true}
             rowsPerPage={5}

@@ -74,17 +74,17 @@ const Toast = ({ toast, onRemove }) => {
   }, [id, duration, onRemove]);
 
   const icons = {
-    success: <CheckCircle className="h-5 w-5 text-green-500" />,
-    error: <XCircle className="h-5 w-5 text-red-500" />,
-    warning: <AlertCircle className="h-5 w-5 text-yellow-500" />,
-    info: <Info className="h-5 w-5 text-blue-500" />,
+    success: <CheckCircle className="h-5 w-5 text-green-500 dark:text-green-400" />,
+    error: <XCircle className="h-5 w-5 text-red-500 dark:text-red-400" />,
+    warning: <AlertCircle className="h-5 w-5 text-yellow-500 dark:text-yellow-400" />,
+    info: <Info className="h-5 w-5 text-blue-500 dark:text-blue-400" />,
   };
 
   const bgColors = {
-    success: "bg-white border-green-200",
-    error: "bg-white border-red-200",
-    warning: "bg-white border-yellow-200",
-    info: "bg-white border-blue-200",
+    success: "bg-white dark:bg-gray-900 border-green-200 dark:border-green-800",
+    error: "bg-white dark:bg-gray-900 border-red-200 dark:border-red-800",
+    warning: "bg-white dark:bg-gray-900 border-yellow-200 dark:border-yellow-800",
+    info: "bg-white dark:bg-gray-900 border-blue-200 dark:border-blue-800",
   };
 
   return (
@@ -92,10 +92,10 @@ const Toast = ({ toast, onRemove }) => {
       className={`flex items-start gap-3 p-4 rounded-lg border shadow-lg animate-in fade-in duration-300 ${bgColors[type]}`}
     >
       {icons[type]}
-      <p className="flex-1 text-sm font-medium text-slate-800">{message}</p>
+      <p className="flex-1 text-sm font-medium text-slate-800 dark:text-gray-100">{message}</p>
       <button
         onClick={() => onRemove(id)}
-        className="text-slate-400 hover:text-slate-600 transition-colors"
+        className="text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors"
       >
         <X className="h-4 w-4" />
       </button>

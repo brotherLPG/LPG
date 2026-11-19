@@ -74,9 +74,9 @@ function Customers() {
   };
 
   const getStatusStyle = (customer) => {
-    if (customer.status === "Active") return "bg-emerald-50 text-emerald-600";
-    if (customer.status === "Inactive") return "bg-red-50 text-red-600";
-    return "bg-slate-50 text-slate-600";
+    if (customer.status === "Active") return "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400";
+    if (customer.status === "Inactive") return "bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400";
+    return "bg-slate-50 dark:bg-gray-800 text-slate-600 dark:text-gray-400";
   };
 
   const columns = [
@@ -84,56 +84,56 @@ function Customers() {
       key: "code",
       label: "Code",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
     },
     {
       key: "name",
       label: "Customer Name",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
       renderCell: (customer) =>
         can("customers", "read") ? (
           <button
             type="button"
             onClick={() => navigate(`/customers/view/${customer._id}`)}
-            className="font-semibold text-[#1a56db] hover:underline text-[13px]"
+            className="font-semibold text-[#1a56db] dark:text-blue-400 hover:underline text-[13px]"
           >
             {customer.name}
           </button>
         ) : (
-          <span className="font-semibold text-slate-800 text-[13px]">{customer.name}</span>
+          <span className="font-semibold text-slate-800 dark:text-gray-100 text-[13px]">{customer.name}</span>
         ),
     },
     {
       key: "contact",
       label: "Contact Person",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
     },
     {
       key: "phone",
       label: "Phone",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
     },
     {
       key: "limit",
       label: "Credit Limit (Rs.)",
       renderCell: (customer) => customer.limit?.toLocaleString() || 0,
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
     },
     {
       key: "outstanding",
       label: "Outstanding (Rs.)",
       renderCell: (customer) => customer.outstanding?.toLocaleString() || 0,
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
     },
     {
       key: "status",
       label: "Status",
-      className:"bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      className:"bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
       renderCell: (customer) => (
         <span
           className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${getStatusStyle(customer)}`}
@@ -145,7 +145,7 @@ function Customers() {
     {
       key: "actions",
       label: "Actions",
-       className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+       className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
       renderCell: (customer) => (
         <div className="flex items-center gap-2">
           {can("customers", "read") && (
@@ -153,7 +153,7 @@ function Customers() {
               <Button
                 onClick={() => navigate(`/customers/view/${customer._id}`)}
                 aria-label={`View ${customer.name}`}
-                className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+                className="flex items-center gap-1.5 rounded-full bg-blue-50 dark:bg-blue-950 px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors"
               >
                 <Eye className="h-3.5 w-3.5" />
               </Button>
@@ -167,7 +167,7 @@ function Customers() {
               <Button
                 onClick={() => navigate(`/customers/edit/${customer._id}`)}
                 aria-label={`Edit ${customer.name}`}
-                className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
+                className="flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors"
               >
                 <Edit3 className="h-3.5 w-3.5" />
               </Button>
@@ -181,7 +181,7 @@ function Customers() {
               <Button
                 onClick={() => handleDeleteClick(customer)}
                 aria-label={`Delete ${customer.name}`}
-                className="flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors"
+                className="flex items-center gap-1.5 rounded-full bg-red-50 dark:bg-red-950 px-3 py-1 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
@@ -196,7 +196,7 @@ function Customers() {
   ];
 
   return (
-    <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-slate-50 dark:bg-gray-800 p-4 sm:p-6 lg:p-8">
       <section>
         {/* Header & Breadcrumbs */}
         <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -204,17 +204,17 @@ function Customers() {
             <p className="text-xs">
               <span
                 onClick={() => navigate("/dashboard")}
-                className="cursor-pointer font-medium text-slate-400 hover:text-slate-600 transition-colors duration-200"
+                className="cursor-pointer font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors duration-200"
               >
                 Dashboard
               </span>{" "}
-              <span className="px-1 text-slate-400">/</span>{" "}
-              <span className="font-semibold text-slate-600">Customers</span>
+              <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
+              <span className="font-semibold text-slate-600 dark:text-gray-400">Customers</span>
             </p>
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-800">
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-800 dark:text-gray-100">
               Customers
             </h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">
               Manage customer credit terms, records, and outstanding debt
               statuses
             </p>
@@ -231,14 +231,14 @@ function Customers() {
         </div>
 
         {/* Filters */}
-        <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+        <div className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 shadow-sm">
           <div className="flex flex-col gap-3 lg:flex-row">
             <label className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500" />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                className="w-full rounded-md border border-slate-200 py-2 pl-9 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-md border border-slate-200 dark:border-gray-700 py-2 pl-9 pr-3 text-sm text-slate-700 dark:text-gray-300 outline-none transition placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 placeholder="Search by code or customer name..."
               />
             </label>
@@ -246,19 +246,19 @@ function Customers() {
               <select
                 value={status}
                 onChange={(event) => setStatus(event.target.value)}
-                className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-600 outline-none focus:border-[#008951] lg:w-48"
+                className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2 text-sm text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] lg:w-48"
               >
                 <option value="All">All Statuses</option>
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500 pointer-events-none" />
             </div>
             {/* <div className="relative">
               <select
                 value={paymentTerm}
                 onChange={(event) => setPaymentTerm(event.target.value)}
-                className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-600 outline-none focus:border-[#008951] lg:w-48"
+                className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2 text-sm text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] lg:w-48"
               >
                 <option value="All">All Payment Terms</option>
                 <option value="15">Net 15</option>
@@ -266,29 +266,29 @@ function Customers() {
                 <option value="Net 60">Net 60</option>
                 <option value="Cash">Cash</option>
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500 pointer-events-none" />
             </div> */}
           </div>
         </div>
 
         {/* Table */}
-        <div className="mt-5 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div className="mt-5 overflow-hidden rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
           {isLoading ? (
             <div className="flex items-center justify-center p-8">
-              <svg className="animate-spin h-6 w-6 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin h-6 w-6 text-slate-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             </div>
           ) : error ? (
             <div className="flex items-center justify-center p-8">
-              <div className="text-sm text-red-500">
+              <div className="text-sm text-red-500 dark:text-red-400">
                 Error loading customers. Please try again.
               </div>
             </div>
           ) : filteredCustomers.length === 0 ? (
             <div className="flex items-center justify-center p-8">
-              <div className="text-sm text-slate-500">
+              <div className="text-sm text-slate-500 dark:text-gray-400">
                 No customer data
               </div>
             </div>
