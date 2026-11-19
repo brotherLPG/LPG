@@ -277,7 +277,7 @@ function Dashboard() {
                       key={alert.id}
                       className={`rounded-xl border px-3 py-3 ${
                         isDanger
-                          ? "border-red-100 dark:border-red-900 bg-red-50/70"
+                          ? "border-red-100 dark:border-red-200 bg-red-50"
                           : "border-amber-100 dark:border-amber-900 bg-amber-50/70"
                       }`}
                     >
@@ -291,7 +291,7 @@ function Dashboard() {
                           <p className="text-sm font-semibold text-BLUE-dark">
                             {alert.title}
                           </p>
-                          <p className="text-xs text-slate-500 dark:text-gray-400">
+                          <p className="text-xs text-slate-500 dark:text-gray-700">
                             {alert.remainingLabel ||
                               `${alert.remaining} remaining · Min ${alert.minimum}`}
                           </p>
@@ -300,7 +300,7 @@ function Dashboard() {
                       <div className="h-1.5 overflow-hidden rounded-full bg-white/80">
                         <div
                           className={`h-full rounded-full ${
-                            isDanger ? "bg-red-500" : "bg-amber-500"
+                            isDanger ? "bg-red-500 dark:bg-red-600" : "bg-amber-500 dark:bg-amber-600"
                           }`}
                           style={{ width: `${percent}%` }}
                         />
