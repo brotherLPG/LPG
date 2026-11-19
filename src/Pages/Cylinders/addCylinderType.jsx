@@ -155,32 +155,32 @@ function AddCylinderType() {
 
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
       {/* Header & Breadcrumbs */}
       <div className="mb-6">
         <p className="text-xs mb-2">
           <span
             onClick={() => navigate("/dashboard")}
-            className="cursor-pointer font-medium text-slate-400 hover:text-slate-600 transition-colors duration-200"
+            className="cursor-pointer font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors duration-200"
           >
             Dashboard
           </span>{" "}
-          <span className="px-1 text-slate-400">/</span>{" "}
+          <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
           <span
             onClick={() => navigate("/cylinder-types")}
-            className="cursor-pointer font-medium text-slate-400 hover:text-slate-600 transition-colors duration-200"
+            className="cursor-pointer font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors duration-200"
           >
             Cylinder Types
           </span>{" "}
-          <span className="px-1 text-slate-400">/</span>{" "}
-          <span className="font-semibold text-slate-600">
+          <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
+          <span className="font-semibold text-slate-600 dark:text-gray-400">
             Add Cylinder Type
           </span>
         </p>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-gray-100">
           Add Cylinder Type
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">
           Define a new cylinder specification and set pricing
         </p>
       </div>
@@ -189,15 +189,15 @@ function AddCylinderType() {
         {/* Left Column (lg:col-span-2) */}
         <div className="lg:col-span-2 space-y-6">
           {/* Card 1: Cylinder Specification */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4">
-              <h2 className="text-sm font-semibold text-slate-800">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4">
+              <h2 className="text-sm font-semibold text-slate-800 dark:text-gray-100">
                 Cylinder Specification
               </h2>
             </div>
             <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Type Code
                 </label>
                 <input
@@ -210,13 +210,13 @@ function AddCylinderType() {
                         ? `${nextTypeCode} (Auto-generated)`
                         : "Auto-generated on save"
                   }
-                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-3 py-2 text-sm text-slate-500 dark:text-gray-400 outline-none cursor-not-allowed"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Type Name <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Type Name <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   ref={typeNameRef}
@@ -227,20 +227,20 @@ function AddCylinderType() {
                     setTypeName(e.target.value);
                     clearError(setTypeNameError);
                   }}
-                  className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                  className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-2 ${
                     typeNameError
                       ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
-                      : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                      : "border-slate-200 dark:border-gray-700 focus:border-[#008951] focus:ring-emerald-100"
                   }`}
                 />
                 {typeNameError && (
-                  <p className="mt-1.5 text-xs text-rose-500">{typeNameError}</p>
+                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{typeNameError}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Category <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Category <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={categoryOptions}
@@ -258,13 +258,13 @@ function AddCylinderType() {
                   emptyText="No category found"
                 />
                 {categoryError && (
-                  <p className="mt-1.5 text-xs text-rose-500">{categoryError}</p>
+                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{categoryError}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Capacity (KG) <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Capacity (KG) <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   ref={capacityKgRef}
@@ -275,20 +275,20 @@ function AddCylinderType() {
                     setCapacityKg(e.target.value);
                     clearError(setCapacityKgError);
                   }}
-                  className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                  className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-2 ${
                     capacityKgError
                       ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
-                      : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                      : "border-slate-200 dark:border-gray-700 focus:border-[#008951] focus:ring-emerald-100"
                   }`}
                 />
                 {capacityKgError && (
-                  <p className="mt-1.5 text-xs text-rose-500">{capacityKgError}</p>
+                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{capacityKgError}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Tare Weight (KG) <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Tare Weight (KG) <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   ref={tareWeightKgRef}
@@ -299,19 +299,19 @@ function AddCylinderType() {
                     setTareWeightKg(e.target.value);
                     clearError(setTareWeightKgError);
                   }}
-                  className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                  className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-2 ${
                     tareWeightKgError
                       ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
-                      : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                      : "border-slate-200 dark:border-gray-700 focus:border-[#008951] focus:ring-emerald-100"
                   }`}
                 />
                 {tareWeightKgError && (
-                  <p className="mt-1.5 text-xs text-rose-500">{tareWeightKgError}</p>
+                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{tareWeightKgError}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Color Code
                 </label>
                 <SearchableCustomerSelect
@@ -324,13 +324,13 @@ function AddCylinderType() {
                   getSearchText={(option) => option.label.toLowerCase()}
                   emptyText="No color code found"
                 />
-                <p className="mt-1.5 text-xs text-slate-400">
+                <p className="mt-1.5 text-xs text-slate-400 dark:text-gray-500">
                   Color identification for cylinder body status/brand
                 </p>
               </div>
 
               <div className="md:col-span-2 mt-2">
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                   Status
                 </label>
                 <div className="flex items-center gap-3">
@@ -338,24 +338,24 @@ function AddCylinderType() {
                     isSelected={isActive}
                     onValueChange={setIsActive}
                     classNames={{
-                      wrapper: isActive ? "bg-[#008951]" : "bg-slate-200",
+                      wrapper: isActive ? "bg-[#008951]" : "bg-slate-200 dark:bg-gray-700",
                     }}
                     size="sm"
                   /> */}
                   <button
                     type="button"
                     onClick={() => setIsActive(!isActive)}
-                    className={`relative inline-flex h-6 w-11 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isActive ? "bg-[#10b981]" : "bg-slate-200"}`}
+                    className={`relative inline-flex h-6 w-11 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isActive ? "bg-[#10b981]" : "bg-slate-200 dark:bg-gray-700"}`}
                     role="switch"
                     aria-checked={isActive}
                   >
                     <span
                       aria-hidden="true"
-                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isActive ? "translate-x-5" : "translate-x-0"}`}
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white dark:bg-gray-900 shadow ring-0 transition duration-200 ease-in-out ${isActive ? "translate-x-5" : "translate-x-0"}`}
                     />
                   </button>
                   <span
-                    className={`text-sm font-semibold ${isActive ? "text-[#008951]" : "text-error"}`}
+                    className={`text-sm font-semibold ${isActive ? "text-[#008951] dark:text-emerald-400" : "text-error"}`}
                   >
                     {isActive ? activeLabel : inactiveLabel}
                   </span>
@@ -368,16 +368,16 @@ function AddCylinderType() {
         {/* Right Column (lg:col-span-1) */}
         <div className="lg:col-span-1">
           {/* Card 2: Pricing & Rates */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden h-full">
-            <div className="border-b border-slate-200 p-4">
-              <h2 className="text-sm font-semibold text-slate-800">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden h-full">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4">
+              <h2 className="text-sm font-semibold text-slate-800 dark:text-gray-100">
                 Pricing & Rates
               </h2>
             </div>
             <div className="p-5 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Selling Price (Rs.) <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Selling Price (Rs.) <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   ref={sellingPriceRef}
@@ -388,19 +388,19 @@ function AddCylinderType() {
                     setSellingPrice(e.target.value);
                     clearError(setSellingPriceError);
                   }}
-                  className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                  className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-2 ${
                     sellingPriceError
                       ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
-                      : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                      : "border-slate-200 dark:border-gray-700 focus:border-[#008951] focus:ring-emerald-100"
                   }`}
                 />
                 {sellingPriceError && (
-                  <p className="mt-1.5 text-xs text-rose-500">{sellingPriceError}</p>
+                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{sellingPriceError}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Purchase Price (Rs.)
                 </label>
                 <input
@@ -408,12 +408,12 @@ function AddCylinderType() {
                   placeholder="0.00"
                   value={purchasePrice}
                   onChange={(e) => setPurchasePrice(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Refill Price (Rs.)
                 </label>
                 <input
@@ -421,12 +421,12 @@ function AddCylinderType() {
                   placeholder="0.00"
                   value={refillPrice}
                   onChange={(e) => setRefillPrice(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Security Deposit (Rs.)
                 </label>
                 <input
@@ -434,7 +434,7 @@ function AddCylinderType() {
                   placeholder="0.00"
                   value={securityDeposit}
                   onChange={(e) => setSecurityDeposit(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
             </div>
@@ -442,21 +442,21 @@ function AddCylinderType() {
         </div>
 
         {/* Card 3: Additional Details */}
-        <div className="lg:col-span-3 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <div className="border-b border-slate-200 p-4">
-            <h2 className="text-sm font-semibold text-slate-800">
+        <div className="lg:col-span-3 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+          <div className="border-b border-slate-200 dark:border-gray-700 p-4">
+            <h2 className="text-sm font-semibold text-slate-800 dark:text-gray-100">
               Additional Details
             </h2>
           </div>
           <div className="p-5 space-y-5">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                 Description / Notes
               </label>
               <textarea
                 rows="2"
                 placeholder="Enter cylinder maintenance rules, storage details, or descriptive notes here..."
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
+                className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
@@ -464,7 +464,7 @@ function AddCylinderType() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Valve Type
                 </label>
                 <SearchableCustomerSelect
@@ -479,7 +479,7 @@ function AddCylinderType() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Material
                 </label>
                 <SearchableCustomerSelect
@@ -494,7 +494,7 @@ function AddCylinderType() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Safety Certification Number
                 </label>
                 <input
@@ -502,7 +502,7 @@ function AddCylinderType() {
                   placeholder="e.g. ISO-9001 / DOT-4BA"
                   value={safetyCert}
                   onChange={(e) => setSafetyCert(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
             </div>
@@ -511,10 +511,10 @@ function AddCylinderType() {
       </div>
 
       {/* Bottom Action Bar */}
-      <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm">
         <button
           onClick={() => navigate("/cylinder-types")}
-          className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-5 py-2 text-sm font-medium text-slate-700 dark:text-gray-300 transition hover:bg-slate-50 dark:hover:bg-gray-800"
         >
           Cancel
         </button>

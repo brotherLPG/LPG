@@ -10,9 +10,9 @@ import Roles from "./Roles";
 import { usePermissions } from "../../contexts/PermissionContext";
 
 const statusStyles = {
-  Active: "bg-emerald-50 text-emerald-600",
-  Inactive: "bg-slate-100 text-slate-500",
-  Suspended: "bg-red-50 text-red-600",
+  Active: "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400",
+  Inactive: "bg-slate-100 dark:bg-gray-800 text-slate-500 dark:text-gray-400",
+  Suspended: "bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400",
 };
 
 function UsersRoles() {
@@ -93,19 +93,19 @@ function UsersRoles() {
       key: "emailAddress",
       label: "Email Address",
       className: "text-[13px] font-bold text-tertiary",
-      cellClassName: "px-4 py-3 text-slate-500 text-[13px] font-regular",
+      cellClassName: "px-4 py-3 text-slate-500 dark:text-gray-400 text-[13px] font-regular",
     },
     {
       key: "username",
       label: "Username",
       className: "text-[13px] font-bold text-tertiary",
-      cellClassName: "px-4 py-3 text-slate-500 text-[13px] font-regular",
+      cellClassName: "px-4 py-3 text-slate-500 dark:text-gray-400 text-[13px] font-regular",
     },
     {
       key: "role",
       label: "Role",
       className: "text-[13px] font-bold text-tertiary",
-      cellClassName: "px-4 py-3 text-slate-600 text-[13px] font-medium",
+      cellClassName: "px-4 py-3 text-slate-600 dark:text-gray-400 text-[13px] font-medium",
       renderCell: (item) => item.role?.roleName || "—",
     },
     {
@@ -152,7 +152,7 @@ function UsersRoles() {
               <Button
                 aria-label={`View ${item.fullName}`}
                 onClick={() => navigate(`/users-roles/view/${item._id}`)}
-                className="text-blue-500 hover:text-blue-700 bg-transparent min-w-0 px-1"
+                className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-transparent min-w-0 px-1"
               >
                 <Eye className="h-4 w-4" />
               </Button>
@@ -166,7 +166,7 @@ function UsersRoles() {
               <Button
                 aria-label={`Edit ${item.fullName}`}
                 onClick={() => navigate(`/users-roles/edit/${item._id}`)}
-                className="text-emerald-500 hover:text-emerald-700 bg-transparent min-w-0 px-1"
+                className="text-emerald-500 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 bg-transparent min-w-0 px-1"
               >
                 <Pencil className="h-4 w-4" />
               </Button>
@@ -179,7 +179,7 @@ function UsersRoles() {
             type="button"
             aria-label={`Delete ${item.fullName}`}
             onClick={() => setDeleteModal({ isOpen: true, item })}
-            className="text-red-500 hover:text-red-700"
+            className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
           >
             <Trash2 className="h-4 w-4" />
           </button> */}
@@ -189,7 +189,7 @@ function UsersRoles() {
   ];
 
   return (
-    <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-slate-50 dark:bg-gray-800 p-4 sm:p-6 lg:p-8">
       <section>
         <p className="text-xs">
           <span
@@ -229,39 +229,39 @@ function UsersRoles() {
           </div>
         </div>
 
-        <div className="mb-4 flex border-b border-slate-200">
+        <div className="mb-4 flex border-b border-slate-200 dark:border-gray-700">
           <button
             type="button"
             onClick={() => setActiveTab("users")}
-            className={`border-b-2 px-4 py-2 text-sm font-semibold ${activeTab === "users" ? "border-blue-600 text-blue-700" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+            className={`border-b-2 px-4 py-2 text-sm font-semibold ${activeTab === "users" ? "border-blue-600 text-blue-700 dark:text-blue-300" : "border-transparent text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-300"}`}
           >
             Users
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("roles")}
-            className={`border-b-2 px-4 py-2 text-sm font-semibold ${activeTab === "roles" ? "border-blue-600 text-blue-700" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+            className={`border-b-2 px-4 py-2 text-sm font-semibold ${activeTab === "roles" ? "border-blue-600 text-blue-700 dark:text-blue-300" : "border-transparent text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-300"}`}
           >
             Roles
           </button>
         </div>
 
         {activeTab === "users" && (
-          <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+          <div className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 shadow-sm">
             <div className="flex flex-col gap-3 lg:flex-row">
               <label className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500" />
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  className="w-full rounded-md border border-slate-200 py-2 pl-9 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 py-2 pl-9 pr-3 text-sm text-slate-700 dark:text-gray-300 outline-none transition placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                   placeholder="Search users by name or email..."
                 />
               </label>
               <select
                 value={role}
                 onChange={(event) => setRole(event.target.value)}
-                className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none focus:border-emerald-500"
+                className="rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-600 dark:text-gray-400 outline-none focus:border-emerald-500"
               >
                 <option value="All Roles">All Roles</option>
                 {availableRoles.map((r) => (
@@ -273,7 +273,7 @@ function UsersRoles() {
               <select
                 value={status}
                 onChange={(event) => setStatus(event.target.value)}
-                className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none focus:border-emerald-500"
+                className="rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-600 dark:text-gray-400 outline-none focus:border-emerald-500"
               >
                 <option value="All">All</option>
                 {availableStatuses.map((s) => (
@@ -287,11 +287,11 @@ function UsersRoles() {
         )}
 
         {activeTab === "users" && (
-          <div className="mt-5 overflow-hidden border border-slate-200 bg-white shadow-sm">
+          <div className="mt-5 overflow-hidden border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
             {isLoading ? (
               <div className="flex items-center justify-center p-8">
                 <svg
-                  className="animate-spin h-6 w-6 text-slate-400"
+                  className="animate-spin h-6 w-6 text-slate-400 dark:text-gray-500"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -313,13 +313,13 @@ function UsersRoles() {
               </div>
             ) : error ? (
               <div className="flex items-center justify-center p-8">
-                <div className="text-sm text-red-500">
+                <div className="text-sm text-red-500 dark:text-red-400">
                   Error loading users. Please try again.
                 </div>
               </div>
             ) : filteredUsers.length === 0 ? (
               <div className="flex items-center justify-center p-8">
-                <div className="text-sm text-slate-500">No user data</div>
+                <div className="text-sm text-slate-500 dark:text-gray-400">No user data</div>
               </div>
             ) : (
               <GlobalTable
@@ -327,7 +327,7 @@ function UsersRoles() {
                 data={filteredUsers}
                 ariaLabel="User management table"
                 className=""
-                rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+                rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
                 emptyContent="No users match your search."
               />
             )}
@@ -340,7 +340,7 @@ function UsersRoles() {
           <h2 className="mb-2 text-base font-bold text-BLUE-dark">
             Role Configuration Summary
           </h2>
-          <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+          <article className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h3 className="text-base font-bold text-BLUE-dark">Viewer</h3>
@@ -349,14 +349,14 @@ function UsersRoles() {
                   rules.
                 </p>
               </div>
-              <span className="rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-accent-blue">
+              <span className="rounded-full bg-blue-50 dark:bg-blue-950 px-2 py-1 text-xs font-medium text-accent-blue">
                 {filteredUsers?.length || "0"} Users
               </span>
             </div>
             <button
               type="button"
               onClick={() => navigate("/users-roles/Permissions")}
-              className="mt-4 text-sm font-semibold text-accent-blue hover:text-blue-800"
+              className="mt-4 text-sm font-semibold text-accent-blue hover:text-blue-800 dark:hover:text-blue-300"
             >
               Manage Permissions <span aria-hidden="true">›</span>
             </button>

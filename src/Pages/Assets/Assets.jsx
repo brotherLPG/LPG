@@ -118,13 +118,13 @@ function Assets() {
       key: "assetCode",
       label: "Asset Code",
       isRowHeader: true,
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
       cellClassName: "px-4 py-4 whitespace-nowrap",
       renderCell: (item) => (
         <div>
-          <span className="font-bold text-slate-800 text-[13px]">{item.assetCode}</span>
+          <span className="font-bold text-slate-800 dark:text-gray-100 text-[13px]">{item.assetCode}</span>
           {item.assetName !== "-" && (
-            <p className="text-xs text-slate-500 font-normal">{item.assetName}</p>
+            <p className="text-xs text-slate-500 dark:text-gray-400 font-normal">{item.assetName}</p>
           )}
         </div>
       ),
@@ -132,52 +132,52 @@ function Assets() {
     {
       key: "category",
       label: "Category",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+      cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium whitespace-nowrap",
       renderCell: (item) => item.category,
     },
     {
       key: "location",
       label: "Location",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+      cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium whitespace-nowrap",
       renderCell: (item) => item.location,
     },
     {
       key: "accountName",
       label: "Account",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+      cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium whitespace-nowrap",
       renderCell: (item) => item.accountName,
     },
     {
       key: "assignedEmployee",
       label: "Assigned To",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+      cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium whitespace-nowrap",
       renderCell: (item) => item.assignedEmployee,
     },
     {
       key: "date",
       label: "Purchase Date",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+      cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium whitespace-nowrap",
       renderCell: (item) => item.date,
     },
     {
       key: "purchaseCost",
       label: "Purchase Cost (Rs.)",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-      cellClassName: "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+      cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium whitespace-nowrap",
       renderCell: (item) => item.purchaseCost.toLocaleString(),
     },
     {
       key: "bookValue",
       label: "Book Value (Rs.)",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
       cellClassName: "px-4 py-4 whitespace-nowrap",
       renderCell: (item) => (
-        <span className="text-slate-900 font-bold text-[13px]">
+        <span className="text-slate-900 dark:text-gray-100 font-bold text-[13px]">
           Rs. {item.bookValue.toLocaleString()}
         </span>
       ),
@@ -185,19 +185,19 @@ function Assets() {
     {
       key: "status",
       label: "Status",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
       cellClassName: "px-4 py-4 whitespace-nowrap",
       renderCell: (item) => {
         const statusStyles = {
-          "in-use": "bg-emerald-50 text-emerald-600 border border-emerald-100",
-          idle: "bg-blue-50 text-blue-600 border border-blue-100",
-          "under-maintenance": "bg-amber-50 text-amber-600 border border-amber-100",
-          disposed: "bg-rose-50 text-rose-600 border border-rose-100",
+          "in-use": "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900",
+          idle: "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900",
+          "under-maintenance": "bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900",
+          disposed: "bg-rose-50 dark:bg-rose-950 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900",
         };
         return (
           <span
             className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-              statusStyles[item.status] || "bg-slate-50 text-slate-600 border border-slate-200"
+              statusStyles[item.status] || "bg-slate-50 dark:bg-gray-800 text-slate-600 dark:text-gray-400 border border-slate-200 dark:border-gray-700"
             }`}
           >
             {formatLabel(item.status)}
@@ -208,7 +208,7 @@ function Assets() {
     {
       key: "actions",
       label: "Actions",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 text-center pr-6",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 text-center pr-6",
       cellClassName: "px-4 py-4 pr-6",
       renderCell: (item) => (
         <div className="flex items-center justify-end gap-2">
@@ -217,7 +217,7 @@ function Assets() {
               <Button
                 aria-label={`View ${item.assetCode}`}
                 onClick={() => navigate(`/assets/view/${item._id}`)}
-                className="flex items-center gap-1 rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+                className="flex items-center gap-1 rounded-md bg-blue-50 dark:bg-blue-950 px-2.5 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors"
               >
                 <Eye className="h-3.5 w-3.5" strokeWidth={2.5} />
               </Button>
@@ -231,7 +231,7 @@ function Assets() {
               <Button
                 aria-label={`Edit ${item.assetCode}`}
                 onClick={() => navigate(`/assets/edit/${item._id}`)}
-                className="flex items-center gap-1 rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
+                className="flex items-center gap-1 rounded-md bg-emerald-50 dark:bg-emerald-950 px-2.5 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors"
               >
                 <Edit3 className="h-3.5 w-3.5" strokeWidth={2.5} />
               </Button>
@@ -245,7 +245,7 @@ function Assets() {
               <Button
                 aria-label={`Delete ${item.assetCode}`}
                 onClick={() => setDeleteModal({ isOpen: true, item })}
-                className="flex items-center gap-1 rounded-md bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors"
+                className="flex items-center gap-1 rounded-md bg-red-50 dark:bg-red-950 px-2.5 py-1 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
               >
                 <Trash2 className="h-3.5 w-3.5" strokeWidth={2.5} />
               </Button>
@@ -264,10 +264,10 @@ function Assets() {
       <section>
         {/* Summary Cards */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-slate-600">Total Asset Value</p>
+                <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Total Asset Value</p>
                 <p className="mt-2 text-2xl font-extrabold text-6th-color">
                   Rs. {summaryStats.totalAssetValue.toLocaleString()}
                 </p>
@@ -279,10 +279,10 @@ function Assets() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-slate-600">Total Depreciation</p>
+                <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Total Depreciation</p>
                 <p className="mt-2 text-2xl font-extrabold text-5th-color">
                   Rs. {summaryStats.totalDepreciation.toLocaleString()}
                 </p>
@@ -294,11 +294,11 @@ function Assets() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-slate-600">Net Book Value</p>
-                <p className="mt-2 text-2xl font-extrabold text-slate-900">
+                <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Net Book Value</p>
+                <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-gray-100">
                   Rs. {summaryStats.netBookValue.toLocaleString()}
                 </p>
                 <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary">
@@ -311,17 +311,17 @@ function Assets() {
         </div>
 
         {/* Filters */}
-        <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="mb-6 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
             <label className="relative flex-1">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full border-2 border-slate-300"></div>
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full border-2 border-slate-300 dark:border-gray-600"></div>
               <input
                 value={query}
                 onChange={(event) => {
                   setQuery(event.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full rounded-md border border-slate-200 bg-slate-50/50 py-2.5 pl-8 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-500 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
+                className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50/50 dark:bg-gray-800/50 py-2.5 pl-8 pr-3 text-sm text-slate-700 dark:text-gray-300 outline-none transition placeholder:text-slate-500 dark:placeholder:text-gray-400 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
                 placeholder="Search by asset code or name..."
               />
             </label>
@@ -334,7 +334,7 @@ function Assets() {
                     setCurrentPage(1);
                   }}
                   disabled={optionsLoading}
-                  className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-44 lg:w-48 disabled:opacity-50"
+                  className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] sm:w-44 lg:w-48 disabled:opacity-50"
                 >
                   {categoryOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -342,7 +342,7 @@ function Assets() {
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 dark:text-gray-400 pointer-events-none" />
               </div>
              
               <div className="relative">
@@ -353,7 +353,7 @@ function Assets() {
                     setCurrentPage(1);
                   }}
                   disabled={optionsLoading}
-                  className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-40 lg:w-44 disabled:opacity-50"
+                  className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] sm:w-40 lg:w-44 disabled:opacity-50"
                 >
                   {statusOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -361,18 +361,18 @@ function Assets() {
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 dark:text-gray-400 pointer-events-none" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Table */}
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
           {isLoading ? (
-            <div className="p-8 text-center text-sm text-slate-500">Loading assets...</div>
+            <div className="p-8 text-center text-sm text-slate-500 dark:text-gray-400">Loading assets...</div>
           ) : error ? (
-            <div className="p-8 text-center text-sm text-red-500">
+            <div className="p-8 text-center text-sm text-red-500 dark:text-red-400">
               Error loading assets. Please try again.
             </div>
           ) : (
@@ -381,7 +381,7 @@ function Assets() {
               data={mappedAssets}
               ariaLabel="Fixed Assets Table"
               className=""
-              rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+              rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
               emptyContent="No assets match your search."
               pagination={true}
               rowsPerPage={pagination.limit || 10}

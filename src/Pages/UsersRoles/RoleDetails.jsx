@@ -34,15 +34,15 @@ function formatDateTime(value) {
 function accessTone(label) {
   const text = String(label || "").toLowerCase();
   if (text.includes("full")) {
-    return "bg-emerald-50 text-emerald-700 border-emerald-100";
+    return "bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-900";
   }
   if (text.includes("view") || text.includes("read")) {
-    return "bg-blue-50 text-blue-700 border-blue-100";
+    return "bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border-blue-100 dark:border-blue-900";
   }
   if (text.includes("no access") || text.includes("none")) {
-    return "bg-slate-100 text-slate-500 border-slate-200";
+    return "bg-slate-100 dark:bg-gray-800 text-slate-500 dark:text-gray-400 border-slate-200 dark:border-gray-700";
   }
-  return "bg-amber-50 text-amber-700 border-amber-100";
+  return "bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border-amber-100 dark:border-amber-900";
 }
 
 function actionLabel(name) {
@@ -54,8 +54,8 @@ function actionLabel(name) {
 
 function DetailItem({ label, value, children }) {
   return (
-    <div className="rounded-lg bg-slate-50/80 px-3.5 py-3">
-      <dt className="text-xs font-medium text-slate-500">{label}</dt>
+    <div className="rounded-lg bg-slate-50/80 dark:bg-gray-800/80 px-3.5 py-3">
+      <dt className="text-xs font-medium text-slate-500 dark:text-gray-400">{label}</dt>
       <dd className="mt-1 text-sm font-semibold text-BLUE-dark wrap-break-word">
         {children || value || "—"}
       </dd>
@@ -65,20 +65,20 @@ function DetailItem({ label, value, children }) {
 
 function StatCard({ icon: Icon, label, value, tone = "slate" }) {
   const tones = {
-    slate: "bg-slate-100 text-slate-700",
-    emerald: "bg-emerald-100 text-emerald-700",
-    blue: "bg-blue-100 text-blue-700",
-    amber: "bg-amber-100 text-amber-700",
+    slate: "bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-gray-300",
+    emerald: "bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300",
+    blue: "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300",
+    amber: "bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300",
   };
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
       <div className="flex items-center gap-3">
         <div className={`rounded-lg p-2 ${tones[tone]}`}>
           <Icon className="h-5 w-5" />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-slate-500">{label}</p>
+          <p className="text-sm font-semibold text-slate-500 dark:text-gray-400">{label}</p>
           <p className="truncate text-lg font-bold text-BLUE-dark">{value}</p>
         </div>
       </div>
@@ -97,7 +97,7 @@ function RoleDetails() {
 
   if (isLoading) {
     return (
-      <main className="flex min-h-full items-center justify-center bg-[#F8FAFC] p-8 text-sm text-slate-500">
+      <main className="flex min-h-full items-center justify-center bg-[#F8FAFC] dark:bg-gray-950 p-8 text-sm text-slate-500 dark:text-gray-400">
         Loading role...
       </main>
     );
@@ -105,7 +105,7 @@ function RoleDetails() {
 
   if (error || !role) {
     return (
-      <main className="flex min-h-full items-center justify-center bg-[#F8FAFC] p-8 text-sm text-red-500">
+      <main className="flex min-h-full items-center justify-center bg-[#F8FAFC] dark:bg-gray-950 p-8 text-sm text-red-500 dark:text-red-400">
         Unable to load role.
       </main>
     );
@@ -143,7 +143,7 @@ function RoleDetails() {
     : ["create", "read", "update", "delete"];
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs mb-2">
@@ -153,15 +153,15 @@ function RoleDetails() {
             >
               Dashboard
             </span>
-            <span className="px-1 text-slate-400">/</span>
+            <span className="px-1 text-slate-400 dark:text-gray-500">/</span>
             <span
               onClick={() => navigate("/users-roles")}
               className="cursor-pointer font-medium text-4th-color transition-colors duration-200"
             >
               Users &amp; Roles
             </span>
-            <span className="px-1 text-slate-400">/</span>
-            <span className="font-semibold text-slate-600">Role Details</span>
+            <span className="px-1 text-slate-400 dark:text-gray-500">/</span>
+            <span className="font-semibold text-slate-600 dark:text-gray-400">Role Details</span>
           </p>
           <h1 className="text-2xl font-bold tracking-tight text-BLUE-dark">
             {roleName}
@@ -181,7 +181,7 @@ function RoleDetails() {
         )}
       </div>
 
-      <section className="mb-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <section className="mb-6 overflow-hidden rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
         <div className="bg-gradient-primary px-5 py-6 sm:px-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
@@ -248,8 +248,8 @@ function RoleDetails() {
       </div>
 
       <div className="mb-6 grid gap-6 lg:grid-cols-2">
-        <section className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <div className="border-b border-slate-200 px-5 py-4">
+        <section className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+          <div className="border-b border-slate-200 dark:border-gray-700 px-5 py-4">
             <h2 className="text-[16px] font-bold text-BLUE-dark">
               Role Information
             </h2>
@@ -262,8 +262,8 @@ function RoleDetails() {
               <span
                 className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                   isActive
-                    ? "bg-emerald-50 text-emerald-700"
-                    : "bg-slate-100 text-slate-500"
+                    ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300"
+                    : "bg-slate-100 dark:bg-gray-800 text-slate-500 dark:text-gray-400"
                 }`}
               >
                 {isActive ? "Active" : "Inactive"}
@@ -278,8 +278,8 @@ function RoleDetails() {
           </dl>
         </section>
 
-        <section className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <div className="border-b border-slate-200 px-5 py-4">
+        <section className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+          <div className="border-b border-slate-200 dark:border-gray-700 px-5 py-4">
             <h2 className="text-[16px] font-bold text-BLUE-dark">
               Permission Summary
             </h2>
@@ -312,23 +312,23 @@ function RoleDetails() {
         </section>
       </div>
 
-      <section className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <div className="border-b border-slate-200 px-5 py-4 flex items-center justify-between gap-3">
+      <section className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+        <div className="border-b border-slate-200 dark:border-gray-700 px-5 py-4 flex items-center justify-between gap-3">
           <div>
             <h2 className="text-[16px] font-bold text-BLUE-dark">
               Module Access
             </h2>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-gray-400">
               Access levels granted to the {roleName} role
             </p>
           </div>
-          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+          <span className="rounded-full bg-slate-100 dark:bg-gray-800 px-2.5 py-1 text-xs font-semibold text-slate-600 dark:text-gray-400">
             {permissionsPreview.length} modules
           </span>
         </div>
 
         {permissionsPreview.length === 0 ? (
-          <p className="px-5 py-8 text-center text-sm text-slate-500">
+          <p className="px-5 py-8 text-center text-sm text-slate-500 dark:text-gray-400">
             No permissions preview available for this role.
           </p>
         ) : (
@@ -346,7 +346,7 @@ function RoleDetails() {
                     permission.moduleName ||
                     permission.displayName
                   }
-                  className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50/60 px-3.5 py-3"
+                  className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 dark:border-gray-700 bg-slate-50/60 dark:bg-gray-800/60 px-3.5 py-3"
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-BLUE-dark">
@@ -354,7 +354,7 @@ function RoleDetails() {
                         permission.moduleName ||
                         "—"}
                     </p>
-                    <p className="mt-0.5 text-xs text-slate-500">Module access</p>
+                    <p className="mt-0.5 text-xs text-slate-500 dark:text-gray-400">Module access</p>
                   </div>
                   <span
                     className={`shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${accessTone(accessLabel)}`}
@@ -368,23 +368,23 @@ function RoleDetails() {
         )}
       </section>
 
-      <section className="mt-6 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <div className="border-b border-slate-200 px-5 py-4">
+      <section className="mt-6 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+        <div className="border-b border-slate-200 dark:border-gray-700 px-5 py-4">
           <h2 className="text-[16px] font-bold text-BLUE-dark">
             Permission Matrix
           </h2>
-          <p className="mt-0.5 text-xs text-slate-500">
+          <p className="mt-0.5 text-xs text-slate-500 dark:text-gray-400">
             Action-level access by module
           </p>
         </div>
         {permissionMatrix.length === 0 ? (
-          <p className="px-5 py-8 text-center text-sm text-slate-500">
+          <p className="px-5 py-8 text-center text-sm text-slate-500 dark:text-gray-400">
             No permission matrix available.
           </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full text-left text-sm">
-              <thead className="border-b border-slate-100 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <thead className="border-b border-slate-100 dark:border-gray-800 bg-slate-50 dark:bg-gray-800 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-gray-400">
                 <tr>
                   <th className="px-5 py-3">Module</th>
                   {actionColumns.map((actionName) => (
@@ -394,7 +394,7 @@ function RoleDetails() {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-gray-800">
                 {permissionMatrix.map((moduleEntry) => {
                   const actions = Object.fromEntries(
                     (moduleEntry.actions || []).map((action) => [
@@ -403,7 +403,7 @@ function RoleDetails() {
                     ])
                   );
                   return (
-                    <tr key={moduleEntry.moduleName} className="hover:bg-slate-50">
+                    <tr key={moduleEntry.moduleName} className="hover:bg-slate-50 dark:hover:bg-gray-800">
                       <td className="px-5 py-3 font-medium text-BLUE-dark">
                         {moduleEntry.displayName || moduleEntry.moduleName}
                       </td>
@@ -426,8 +426,8 @@ function RoleDetails() {
                             <span
                               className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                                 granted
-                                  ? "bg-emerald-50 text-emerald-700"
-                                  : "bg-slate-100 text-slate-500"
+                                  ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300"
+                                  : "bg-slate-100 dark:bg-gray-800 text-slate-500 dark:text-gray-400"
                               }`}
                             >
                               {granted ? "Yes" : "No"}

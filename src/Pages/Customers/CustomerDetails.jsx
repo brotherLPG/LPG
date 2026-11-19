@@ -35,18 +35,18 @@ const getSaleDueDate = (sale) => {
 };
 
 const paymentStatusStyles = {
-  Paid: "bg-emerald-50 text-emerald-600",
-  Partial: "bg-amber-50 text-amber-600",
-  Unpaid: "bg-red-50 text-red-600",
-  "Refund Due": "bg-purple-50 text-purple-600",
+  Paid: "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400",
+  Partial: "bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400",
+  Unpaid: "bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400",
+  "Refund Due": "bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400",
 };
 
 const saleStatusStyles = {
-  Confirmed: "bg-emerald-50 text-emerald-600",
-  Draft: "bg-slate-50 text-slate-600",
-  "Partially Returned": "bg-amber-50 text-amber-600",
-  Returned: "bg-blue-50 text-blue-600",
-  Cancelled: "bg-red-50 text-red-600",
+  Confirmed: "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400",
+  Draft: "bg-slate-50 dark:bg-gray-800 text-slate-600 dark:text-gray-400",
+  "Partially Returned": "bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400",
+  Returned: "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400",
+  Cancelled: "bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400",
 };
 
 const formatAmount = (value) => Number(value || 0).toLocaleString();
@@ -59,10 +59,10 @@ const formatAppliedInvoices = (payment) => {
 };
 
 const receiptStatusStyles = {
-  Recorded: "bg-blue-50 text-blue-600",
-  Cleared: "bg-emerald-50 text-emerald-600",
-  Pending: "bg-amber-50 text-amber-600",
-  Cancelled: "bg-red-50 text-red-600",
+  Recorded: "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400",
+  Cleared: "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400",
+  Pending: "bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400",
+  Cancelled: "bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400",
 };
 
 const getInitials = (name = "") =>
@@ -142,10 +142,10 @@ function CustomerDetails() {
         label: "Invoice ID",
         isRowHeader: true,
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
         cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
         renderCell: (sale) => (
-          <span className="font-semibold text-[#1a56db] text-[13px]">
+          <span className="font-semibold text-[#1a56db] dark:text-blue-400 text-[13px]">
             {sale.invoiceNumber}
           </span>
         ),
@@ -154,43 +154,43 @@ function CustomerDetails() {
         key: "invoiceDate",
         label: "Invoice Date",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-        cellClassName: "px-4 py-4 text-slate-600 text-[13px] whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap",
         renderCell: (sale) => formatReceivedDate(sale.invoiceDate) || "—",
       },
       {
         key: "dueDate",
         label: "Due Date",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap ",
-        cellClassName: "px-4 py-4 text-slate-600 text-[13px] whitespace-nowrap text-nowrap ",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap ",
+        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap text-nowrap ",
         renderCell: (sale) => formatReceivedDate(getSaleDueDate(sale)) || "—",
       },
       {
         key: "itemDetails",
         label: "Item Details",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 text-nowrap ",
-        cellClassName: "px-4 py-4 text-slate-600 text-[13px] text-nowrap ",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 text-nowrap ",
+        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] text-nowrap ",
         renderCell: (sale) => formatItemDetails(sale),
       },
       {
         key: "itemQuantity",
         label: "Qty",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-right",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-right",
         cellClassName:
-          "px-4 py-4 text-right text-[13px] text-slate-700 whitespace-nowrap",
+          "px-4 py-4 text-right text-[13px] text-slate-700 dark:text-gray-300 whitespace-nowrap",
         renderCell: (sale) => Number(sale.itemQuantity || sale.items || 0).toLocaleString(),
       },
       {
         key: "totalAmount",
         label: "Total Amount",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-right",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-right",
         cellClassName: "px-4 py-4 text-right whitespace-nowrap",
         renderCell: (sale) => (
-          <span className="text-[13px] font-semibold text-slate-800">
+          <span className="text-[13px] font-semibold text-slate-800 dark:text-gray-100">
             {formatAmount(sale.totalAmount ?? sale.amount)}
           </span>
         ),
@@ -199,10 +199,10 @@ function CustomerDetails() {
         key: "discountAmount",
         label: "Discount",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap ",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap ",
         cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap ",
         renderCell: (sale) => (
-          <span className="text-[13px] text-slate-700">
+          <span className="text-[13px] text-slate-700 dark:text-gray-300">
             {formatAmount(sale.discountAmount)}
           </span>
         ),
@@ -211,10 +211,10 @@ function CustomerDetails() {
         key: "paidAmount",
         label: "Paid Amount",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-right",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-right",
         cellClassName: "px-4 py-4 text-right whitespace-nowrap",
         renderCell: (sale) => (
-          <span className="text-[13px] font-semibold text-emerald-600">
+          <span className="text-[13px] font-semibold text-emerald-600 dark:text-emerald-400">
             {formatAmount(sale.paidAmount)}
           </span>
         ),
@@ -223,10 +223,10 @@ function CustomerDetails() {
         key: "returnedAmount",
         label: "Returned Amount",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-right",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-right",
         cellClassName: "px-4 py-4 text-right whitespace-nowrap",
         renderCell: (sale) => (
-          <span className="text-[13px] font-semibold text-orange-600">
+          <span className="text-[13px] font-semibold text-orange-600 dark:text-orange-400">
             {formatAmount(sale.returnedAmount)}
           </span>
         ),
@@ -235,19 +235,19 @@ function CustomerDetails() {
         key: "accountName",
         label: "Account Name",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-        cellClassName: "px-4 py-4 text-slate-600 text-[13px] whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap",
         renderCell: (sale) => sale.accountName || "—",
       },
       // {
       //   key: "accountType",
       //   label: "Account Type",
       //   className:
-      //     "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+      //     "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
       //   cellClassName: "px-4 py-4 whitespace-nowrap",
       //   renderCell: (sale) =>
       //     sale.accountType ? (
-      //       <span className="capitalize text-[13px] text-slate-700">
+      //       <span className="capitalize text-[13px] text-slate-700 dark:text-gray-300">
       //         {sale.accountType}
       //       </span>
       //     ) : (
@@ -258,14 +258,14 @@ function CustomerDetails() {
         key: "saleTypeLabel",
         label: "Type",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
         cellClassName: "px-4 py-4 whitespace-nowrap",
         renderCell: (sale) => (
           <span
             className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
               sale.saleTypeLabel === "Cash"
-                ? "bg-emerald-50 text-emerald-600"
-                : "bg-blue-50 text-blue-600"
+                ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400"
+                : "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400"
             }`}
           >
             {sale.saleTypeLabel || "—"}
@@ -276,13 +276,13 @@ function CustomerDetails() {
         key: "paymentStatusLabel",
         label: "Payment Status",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
         cellClassName: "px-4 py-4 whitespace-nowrap",
         renderCell: (sale) => (
           <span
             className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
               paymentStatusStyles[sale.paymentStatusLabel] ||
-              "bg-slate-50 text-slate-600"
+              "bg-slate-50 dark:bg-gray-800 text-slate-600 dark:text-gray-400"
             }`}
           >
             {sale.paymentStatusLabel || "—"}
@@ -293,13 +293,13 @@ function CustomerDetails() {
         key: "saleStatusLabel",
         label: "Sale Status",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
         cellClassName: "px-4 py-4 whitespace-nowrap",
         renderCell: (sale) => (
           <span
             className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
               saleStatusStyles[sale.saleStatusLabel] ||
-              "bg-slate-50 text-slate-600"
+              "bg-slate-50 dark:bg-gray-800 text-slate-600 dark:text-gray-400"
             }`}
           >
             {sale.saleStatusLabel || "—"}
@@ -344,10 +344,10 @@ function CustomerDetails() {
         label: "Receipt #",
         isRowHeader: true,
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
         cellClassName: "px-4 py-4 whitespace-nowrap",
         renderCell: (payment) => (
-          <span className="font-semibold text-slate-800 text-[13px]">
+          <span className="font-semibold text-slate-800 dark:text-gray-100 text-[13px]">
             {payment.receiptNumber || payment.paymentNumber || "—"}
           </span>
         ),
@@ -356,18 +356,18 @@ function CustomerDetails() {
         key: "paymentDate",
         label: "Date",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-        cellClassName: "px-4 py-4 text-slate-600 text-[13px] whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap",
         renderCell: (payment) => formatReceivedDate(payment.paymentDate) || "—",
       },
       {
         key: "paymentAmount",
         label: "Amount (Rs.)",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-right",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-right",
         cellClassName: "px-4 py-4 text-right whitespace-nowrap",
         renderCell: (payment) => (
-          <span className="text-[13px] font-semibold text-slate-800">
+          <span className="text-[13px] font-semibold text-slate-800 dark:text-gray-100">
             {formatAmount(payment.paymentAmount)}
           </span>
         ),
@@ -376,34 +376,34 @@ function CustomerDetails() {
         key: "paymentMethodLabel",
         label: "Payment Method",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-        cellClassName: "px-4 py-4 text-slate-600 text-[13px] whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap",
         renderCell: (payment) => payment.paymentMethodLabel || payment.paymentMethod || "—",
       },
       {
         key: "accountName",
         label: "Account Name",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-        cellClassName: "px-4 py-4 text-slate-600 text-[13px] whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap",
         renderCell: (payment) => payment.accountName || "—",
       },
       {
         key: "referenceNumber",
         label: "Reference No",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-        cellClassName: "px-4 py-4 text-slate-600 text-[13px] whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap",
         renderCell: (payment) => payment.referenceNumber || "—",
       },
       {
         key: "appliedToInvoice",
         label: "Applied to Invoice",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
         cellClassName: "px-4 py-4 whitespace-nowrap",
         renderCell: (payment) => (
-          <span className="text-[13px] font-semibold text-[#1a56db]">
+          <span className="text-[13px] font-semibold text-[#1a56db] dark:text-blue-400">
             {formatAppliedInvoices(payment)}
           </span>
         ),
@@ -412,10 +412,10 @@ function CustomerDetails() {
         key: "balanceAfter",
         label: "Balance After",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-right",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-right",
         cellClassName: "px-4 py-4 text-right whitespace-nowrap",
         renderCell: (payment) => (
-          <span className="text-[13px] text-slate-600">
+          <span className="text-[13px] text-slate-600 dark:text-gray-400">
             {formatAmount(payment.balanceAfter)}
           </span>
         ),
@@ -424,14 +424,14 @@ function CustomerDetails() {
         key: "directionLabel",
         label: "Direction",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
         cellClassName: "px-4 py-4 whitespace-nowrap",
         renderCell: (payment) => (
           <span
             className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
               payment.direction === "receive"
-                ? "bg-emerald-50 text-emerald-600"
-                : "bg-amber-50 text-amber-600"
+                ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400"
+                : "bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400"
             }`}
           >
             {payment.directionLabel || "—"}
@@ -442,13 +442,13 @@ function CustomerDetails() {
         key: "paymentStatusLabel",
         label: "Status",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
         cellClassName: "px-4 py-4 whitespace-nowrap",
         renderCell: (payment) => (
           <span
             className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
               receiptStatusStyles[payment.paymentStatusLabel] ||
-              "bg-slate-50 text-slate-600"
+              "bg-slate-50 dark:bg-gray-800 text-slate-600 dark:text-gray-400"
             }`}
           >
             {payment.paymentStatusLabel || "—"}
@@ -499,7 +499,7 @@ function CustomerDetails() {
 
   if (isLoading) {
     return (
-      <main className="flex min-h-full items-center justify-center bg-[#F8FAFC] p-8 text-sm text-slate-500">
+      <main className="flex min-h-full items-center justify-center bg-[#F8FAFC] dark:bg-gray-950 p-8 text-sm text-slate-500 dark:text-gray-400">
         Loading customer...
       </main>
     );
@@ -507,12 +507,12 @@ function CustomerDetails() {
 
   if (error || !customerFile) {
     return (
-      <main className="flex min-h-full flex-col items-center justify-center gap-4 bg-[#F8FAFC] p-8 text-sm text-red-500">
+      <main className="flex min-h-full flex-col items-center justify-center gap-4 bg-[#F8FAFC] dark:bg-gray-950 p-8 text-sm text-red-500 dark:text-red-400">
         <p>Unable to load customer.</p>
         <button
           type="button"
           onClick={() => navigate("/customers")}
-          className="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 font-semibold text-slate-600 shadow-sm"
+          className="inline-flex items-center gap-2 rounded-md bg-white dark:bg-gray-900 px-3 py-2 font-semibold text-slate-600 dark:text-gray-400 shadow-sm"
         >
           <ArrowLeft className="h-4 w-4" /> Back to Customers
         </button>
@@ -521,12 +521,12 @@ function CustomerDetails() {
   }
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
-      <p className="text-xs text-slate-400">
+    <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
+      <p className="text-xs text-slate-400 dark:text-gray-500">
         <button
           type="button"
           onClick={() => navigate("/dashboard")}
-          className="font-medium text-slate-400 hover:text-slate-600"
+          className="font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400"
         >
           Dashboard
         </button>
@@ -534,43 +534,43 @@ function CustomerDetails() {
         <button
           type="button"
           onClick={() => navigate("/customers")}
-          className="font-medium text-slate-400 hover:text-slate-600"
+          className="font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400"
         >
           Customers
         </button>
         <span className="px-1">/</span>
-        <span className="font-semibold text-slate-600">{customerFile.name}</span>
+        <span className="font-semibold text-slate-600 dark:text-gray-400">{customerFile.name}</span>
       </p>
 
-      <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
+      <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-gray-100">
         Account Ledger
       </h1>
-      <p className="mt-1 text-sm text-slate-500">
+      <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">
         Detailed financial ledger and purchase records for {customerFile.name}
       </p>
 
-      <section className="mt-5 rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+      <section className="mt-5 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-5 py-4 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-slate-100 text-base font-bold text-slate-600">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-gray-800 text-base font-bold text-slate-600 dark:text-gray-400">
               {customerFile.initials}
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-lg font-bold text-slate-900">
+                <h2 className="text-lg font-bold text-slate-900 dark:text-gray-100">
                   {customerFile.name}
                 </h2>
                 <span
                   className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
                     customerFile.isActive
-                      ? "bg-emerald-50 text-emerald-600"
-                      : "bg-red-50 text-red-600"
+                      ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400"
+                      : "bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400"
                   }`}
                 >
                   {customerFile.accountStatus}
                 </span>
               </div>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">
                 Code: {customerFile.code}
                 <span className="px-2 text-slate-300">|</span>
                 Contact: {customerFile.contact}
@@ -585,7 +585,7 @@ function CustomerDetails() {
               <button
                 type="button"
                 onClick={() => setIsDeleteOpen(true)}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm font-medium text-slate-700 dark:text-gray-300 transition hover:bg-slate-50 dark:hover:bg-gray-800"
               >
                 Delete Profile
               </button>
@@ -604,30 +604,30 @@ function CustomerDetails() {
       </section>
 
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Total Purchases</p>
-          <p className="mt-2 text-2xl font-bold text-slate-900">
+        <article className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm">
+          <p className="text-sm font-medium text-slate-500 dark:text-gray-400">Total Purchases</p>
+          <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-gray-100">
             {formatRs(customerFile.totalPurchases)}
           </p>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-slate-400 dark:text-gray-500">
             {customerFile.salesCount}{" "}
             {customerFile.salesCount === 1 ? "sale" : "sales"}
           </p>
         </article>
 
-        <article className="rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
-          <p className="text-sm font-medium text-amber-700">Remaining Balance</p>
-          <p className="mt-2 text-2xl font-bold text-amber-500">
+        <article className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 p-4 shadow-sm">
+          <p className="text-sm font-medium text-amber-700 dark:text-amber-300">Remaining Balance</p>
+          <p className="mt-2 text-2xl font-bold text-amber-500 dark:text-amber-400">
             {formatRs(customerFile.outstandingBalance)}
           </p>
         </article>
 
-        <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Last Payment</p>
-          <p className={`mt-2 text-2xl font-bold ${customerFile.lastPaymentType === "refund" ? "text-orange-600" : "text-emerald-600"}`}>
+        <article className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm">
+          <p className="text-sm font-medium text-slate-500 dark:text-gray-400">Last Payment</p>
+          <p className={`mt-2 text-2xl font-bold ${customerFile.lastPaymentType === "refund" ? "text-orange-600 dark:text-orange-400" : "text-emerald-600 dark:text-emerald-400"}`}>
             {formatRs(customerFile.lastPaymentAmount)}
           </p>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-slate-400 dark:text-gray-500">
             {customerFile.lastPaymentDate
               ? [
                   `${customerFile.lastPaymentType === "refund" ? "Refunded" : "Received"} on ${customerFile.lastPaymentDate}`,
@@ -640,23 +640,23 @@ function CustomerDetails() {
           </p>
         </article>
 
-        <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Credit Limit</p>
-          <p className="mt-2 text-2xl font-bold text-slate-900">
+        <article className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm">
+          <p className="text-sm font-medium text-slate-500 dark:text-gray-400">Credit Limit</p>
+          <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-gray-100">
             {formatRs(customerFile.creditLimit)}
           </p>
         </article>
       </div>
 
       <div className="mt-6">
-        <div className="flex items-center gap-6 border-b border-slate-200">
+        <div className="flex items-center gap-6 border-b border-slate-200 dark:border-gray-700">
           <button
             type="button"
             onClick={() => setActiveTab("sales")}
             className={`-mb-px border-b-2 px-1 pb-3 text-sm font-semibold ${
               activeTab === "sales"
-                ? "border-[#2563EB] text-[#2563EB]"
-                : "border-transparent text-slate-400 hover:text-slate-600"
+                ? "border-[#2563EB] text-[#2563EB] dark:text-blue-400"
+                : "border-transparent text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400"
             }`}
           >
             Sales History
@@ -666,31 +666,31 @@ function CustomerDetails() {
             onClick={() => setActiveTab("payments")}
             className={`-mb-px border-b-2 px-1 pb-3 text-sm font-semibold ${
               activeTab === "payments"
-                ? "border-[#2563EB] text-[#2563EB]"
-                : "border-transparent text-slate-400 hover:text-slate-600"
+                ? "border-[#2563EB] text-[#2563EB] dark:text-blue-400"
+                : "border-transparent text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400"
             }`}
           >
             Payment History
           </button>
         </div>
 
-        <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
           {activeTab === "sales" ? (
             <div>
-              <div className="flex flex-col gap-3 border-b border-slate-100 p-3 sm:flex-row sm:items-center">
+              <div className="flex flex-col gap-3 border-b border-slate-100 dark:border-gray-800 p-3 sm:flex-row sm:items-center">
                 <label className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500" />
                   <input
                     value={salesSearch}
                     onChange={(event) => {
                       setSalesSearch(event.target.value);
                       setSalesPage(1);
                     }}
-                    className="w-full rounded-md border border-slate-200 py-2 pl-9 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 py-2 pl-9 pr-3 text-sm text-slate-700 dark:text-gray-300 outline-none transition placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     placeholder="Search by invoice or sale number..."
                   />
                 </label>
-                <label className="flex items-center gap-2 text-sm text-slate-500">
+                <label className="flex items-center gap-2 text-sm text-slate-500 dark:text-gray-400">
                   <span className="whitespace-nowrap">From</span>
                   <input
                     type="date"
@@ -699,10 +699,10 @@ function CustomerDetails() {
                       setStartDate(event.target.value || null);
                       setSalesPage(1);
                     }}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none focus:border-[#008951] sm:w-44"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] sm:w-44"
                   />
                 </label>
-                <label className="flex items-center gap-2 text-sm text-slate-500">
+                <label className="flex items-center gap-2 text-sm text-slate-500 dark:text-gray-400">
                   <span className="whitespace-nowrap">To</span>
                   <input
                     type="date"
@@ -711,7 +711,7 @@ function CustomerDetails() {
                       setEndDate(event.target.value || null);
                       setSalesPage(1);
                     }}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none focus:border-[#008951] sm:w-44"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] sm:w-44"
                   />
                 </label>
               </div>

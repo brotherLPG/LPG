@@ -127,97 +127,97 @@ function UpdateEmployee() {
   };
 
   if (isLoading) {
-    return <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8"><div className="py-12 text-center text-sm text-slate-500">Loading employee data...</div></main>;
+    return <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8"><div className="py-12 text-center text-sm text-slate-500 dark:text-gray-400">Loading employee data...</div></main>;
   }
 
   if (error) {
-    return <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8"><div className="py-12 text-center text-sm text-red-500">Error loading employee data. Please try again.</div></main>;
+    return <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8"><div className="py-12 text-center text-sm text-red-500 dark:text-red-400">Error loading employee data. Please try again.</div></main>;
   }
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
         <p className="mb-2 text-xs">
-          <span onClick={() => navigate("/dashboard")} className="cursor-pointer font-medium text-slate-400 hover:text-slate-600">Dashboard</span>{" "}
-          <span className="px-1 text-slate-400">/</span>{" "}
-          <span onClick={() => navigate("/employees")} className="cursor-pointer font-medium text-slate-400 hover:text-slate-600">Employees</span>{" "}
-          <span className="px-1 text-slate-400">/</span>{" "}
-          <span className="font-semibold text-slate-600">Edit Employee</span>
+          <span onClick={() => navigate("/dashboard")} className="cursor-pointer font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400">Dashboard</span>{" "}
+          <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
+          <span onClick={() => navigate("/employees")} className="cursor-pointer font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400">Employees</span>{" "}
+          <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
+          <span className="font-semibold text-slate-600 dark:text-gray-400">Edit Employee</span>
         </p>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Edit Employee</h1>
-        <p className="mt-1 text-sm text-slate-500">Update employee profile and department details</p>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-gray-100">Edit Employee</h1>
+        <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">Update employee profile and department details</p>
       </div>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            <div className="border-b border-slate-200 p-4"><h2 className="text-sm font-semibold text-slate-800">Employee Information</h2></div>
+          <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4"><h2 className="text-sm font-semibold text-slate-800 dark:text-gray-100">Employee Information</h2></div>
             <div className="grid grid-cols-1 gap-5 p-5 md:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">Employee Code</label>
-                <input disabled value={data?.data?.employeeCode || ""} className="w-full cursor-not-allowed rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none" />
+                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-gray-300">Employee Code</label>
+                <input disabled value={data?.data?.employeeCode || ""} className="w-full cursor-not-allowed rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-3 py-2 text-sm text-slate-500 dark:text-gray-400 outline-none" />
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">Full Name <span className="text-rose-500">*</span></label>
-                <input ref={fullNameRef} value={formData.fullName} onChange={(event) => handleInputChange("fullName", event.target.value)} placeholder="Enter legal full name" className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-gray-300">Full Name <span className="text-rose-500 dark:text-rose-400">*</span></label>
+                <input ref={fullNameRef} value={formData.fullName} onChange={(event) => handleInputChange("fullName", event.target.value)} placeholder="Enter legal full name" className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-2 ${
                   fullNameError
                     ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
-                    : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                    : "border-slate-200 dark:border-gray-700 focus:border-[#008951] focus:ring-emerald-100"
                 }`} />
                 {fullNameError && (
-                  <p className="mt-1.5 text-xs text-rose-500">{fullNameError}</p>
+                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{fullNameError}</p>
                 )}
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">Father / Husband Name</label>
-                <input value={formData.fatherHusbandName} onChange={(event) => handleInputChange("fatherHusbandName", event.target.value)} placeholder="Enter relative full name" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
+                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-gray-300">Father / Husband Name</label>
+                <input value={formData.fatherHusbandName} onChange={(event) => handleInputChange("fatherHusbandName", event.target.value)} placeholder="Enter relative full name" className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">CNIC Number</label>
-                <input value={formData.cnicNumber} onChange={(event) => handleInputChange("cnicNumber", event.target.value)} placeholder="e.g. 37405-1234567-1" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
+                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-gray-300">CNIC Number</label>
+                <input value={formData.cnicNumber} onChange={(event) => handleInputChange("cnicNumber", event.target.value)} placeholder="e.g. 37405-1234567-1" className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
               </div>
               <div className="grid grid-cols-1 gap-5 md:col-span-2 md:grid-cols-3">
-                <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Date of Birth</label><input type="date" value={formData.dateOfBirth} onChange={(event) => handleInputChange("dateOfBirth", event.target.value)} className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
-                <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Gender</label><div className="relative"><select value={formData.gender} onChange={(event) => handleInputChange("gender", event.target.value)} className="w-full appearance-none rounded-md border border-slate-200 bg-white py-2 pl-3 pr-10 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"><option value="" disabled>Select gender</option>{data?.data?.form?.genders?.map((gender) => (<option key={gender.value} value={gender.value}>{gender.label}</option>))}</select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /></div></div>
-                <div><label className="mb-2 block text-sm font-medium text-slate-700">Status</label><div className="relative"><select value={isActive ? "active" : "inactive"} onChange={(event) => setIsActive(event.target.value === "active")} className="w-full appearance-none rounded-md border border-slate-200 bg-white py-2 pl-3 pr-10 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100">{data?.data?.form?.statuses?.map((status) => (<option key={status.value} value={status.value}>{status.label}</option>))}</select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /></div></div>
+                <div><label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-gray-300">Date of Birth</label><input type="date" value={formData.dateOfBirth} onChange={(event) => handleInputChange("dateOfBirth", event.target.value)} className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
+                <div><label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-gray-300">Gender</label><div className="relative"><select value={formData.gender} onChange={(event) => handleInputChange("gender", event.target.value)} className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-2 pl-3 pr-10 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"><option value="" disabled>Select gender</option>{data?.data?.form?.genders?.map((gender) => (<option key={gender.value} value={gender.value}>{gender.label}</option>))}</select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500" /></div></div>
+                <div><label className="mb-2 block text-sm font-medium text-slate-700 dark:text-gray-300">Status</label><div className="relative"><select value={isActive ? "active" : "inactive"} onChange={(event) => setIsActive(event.target.value === "active")} className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-2 pl-3 pr-10 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100">{data?.data?.form?.statuses?.map((status) => (<option key={status.value} value={status.value}>{status.label}</option>))}</select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500" /></div></div>
               </div>
             </div>
           </div>
         </div>
 
         <div className="lg:col-span-1">
-          <div className="h-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            <div className="border-b border-slate-200 p-4"><h2 className="text-sm font-semibold text-slate-800">Employment Details</h2></div>
+          <div className="h-full overflow-hidden rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4"><h2 className="text-sm font-semibold text-slate-800 dark:text-gray-100">Employment Details</h2></div>
             <div className="space-y-5 p-5">
-              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Department</label><div className="relative"><select value={formData.departmentName} onChange={(event) => handleInputChange("departmentName", event.target.value)} className="w-full appearance-none rounded-md border border-slate-200 bg-white py-2 pl-3 pr-10 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"><option value="">Select Department</option>{data?.data?.form?.departments?.map((dept) => (<option key={dept.value} value={dept.value}>{dept.label}</option>))}</select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /></div></div>
-              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Job Title / Designation</label><input value={formData.jobTitle} onChange={(event) => handleInputChange("jobTitle", event.target.value)} placeholder="e.g. Plant Operator" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
-              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Date of Joining</label><input type="date" value={formData.joiningDate} onChange={(event) => handleInputChange("joiningDate", event.target.value)} className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
-              <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Monthly Salary (Rs.)</label><input type="number" value={formData.monthlySalaryAmount} onChange={(event) => handleInputChange("monthlySalaryAmount", event.target.value)} placeholder="e.g. 45,000" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
+              <div><label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-gray-300">Department</label><div className="relative"><select value={formData.departmentName} onChange={(event) => handleInputChange("departmentName", event.target.value)} className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-2 pl-3 pr-10 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"><option value="">Select Department</option>{data?.data?.form?.departments?.map((dept) => (<option key={dept.value} value={dept.value}>{dept.label}</option>))}</select><ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500" /></div></div>
+              <div><label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-gray-300">Job Title / Designation</label><input value={formData.jobTitle} onChange={(event) => handleInputChange("jobTitle", event.target.value)} placeholder="e.g. Plant Operator" className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
+              <div><label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-gray-300">Date of Joining</label><input type="date" value={formData.joiningDate} onChange={(event) => handleInputChange("joiningDate", event.target.value)} className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
+              <div><label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-gray-300">Monthly Salary (Rs.)</label><input type="number" value={formData.monthlySalaryAmount} onChange={(event) => handleInputChange("monthlySalaryAmount", event.target.value)} placeholder="e.g. 45,000" className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
             </div>
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm lg:col-span-3">
-          <div className="border-b border-slate-200 p-4"><h2 className="text-sm font-semibold text-slate-800">Contact & Emergency Details</h2></div>
+        <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm lg:col-span-3">
+          <div className="border-b border-slate-200 dark:border-gray-700 p-4"><h2 className="text-sm font-semibold text-slate-800 dark:text-gray-100">Contact & Emergency Details</h2></div>
           <div className="grid grid-cols-1 gap-5 p-5 md:grid-cols-2">
-            <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Phone Number <span className="text-rose-500">*</span></label><input ref={phoneNumberRef} value={formData.phoneNumber} onChange={(event) => handleInputChange("phoneNumber", event.target.value)} placeholder="e.g. 0300-5550011" className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+            <div><label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-gray-300">Phone Number <span className="text-rose-500 dark:text-rose-400">*</span></label><input ref={phoneNumberRef} value={formData.phoneNumber} onChange={(event) => handleInputChange("phoneNumber", event.target.value)} placeholder="e.g. 0300-5550011" className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-2 ${
                   phoneNumberError
                     ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
-                    : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                    : "border-slate-200 dark:border-gray-700 focus:border-[#008951] focus:ring-emerald-100"
                 }`} />
                 {phoneNumberError && (
-                  <p className="mt-1.5 text-xs text-rose-500">{phoneNumberError}</p>
+                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{phoneNumberError}</p>
                 )}
             </div>
-            <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Email Address</label><input type="email" value={formData.emailAddress} onChange={(event) => handleInputChange("emailAddress", event.target.value)} placeholder="e.g. ahmad.h@brotherlpg.com" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
-            <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Emergency Contact Name</label><input value={formData.emergencyContactName} onChange={(event) => handleInputChange("emergencyContactName", event.target.value)} placeholder="e.g. Muhammad Hassan (Brother)" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
-            <div><label className="mb-1.5 block text-sm font-medium text-slate-700">Emergency Contact Phone</label><input value={formData.emergencyContactPhone} onChange={(event) => handleInputChange("emergencyContactPhone", event.target.value)} placeholder="e.g. 0301-9998877" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
-            <div className="md:col-span-2"><label className="mb-1.5 block text-sm font-medium text-slate-700">Home Address</label><input value={formData.homeAddress} onChange={(event) => handleInputChange("homeAddress", event.target.value)} placeholder="Street Address, Sector/Area, City" className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
+            <div><label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-gray-300">Email Address</label><input type="email" value={formData.emailAddress} onChange={(event) => handleInputChange("emailAddress", event.target.value)} placeholder="e.g. ahmad.h@brotherlpg.com" className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
+            <div><label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-gray-300">Emergency Contact Name</label><input value={formData.emergencyContactName} onChange={(event) => handleInputChange("emergencyContactName", event.target.value)} placeholder="e.g. Muhammad Hassan (Brother)" className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
+            <div><label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-gray-300">Emergency Contact Phone</label><input value={formData.emergencyContactPhone} onChange={(event) => handleInputChange("emergencyContactPhone", event.target.value)} placeholder="e.g. 0301-9998877" className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
+            <div className="md:col-span-2"><label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-gray-300">Home Address</label><input value={formData.homeAddress} onChange={(event) => handleInputChange("homeAddress", event.target.value)} placeholder="Street Address, Sector/Area, City" className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" /></div>
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:col-span-3">
-          <button type="button" onClick={() => navigate("/employees")} className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-700">Cancel</button>
+        <div className="flex justify-end gap-3 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm lg:col-span-3">
+          <button type="button" onClick={() => navigate("/employees")} className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-5 py-2 text-sm font-medium text-slate-700 dark:text-gray-300">Cancel</button>
           <button type="submit" disabled={updateMutation.isPending} className="rounded-lg bg-[#008951] px-6 py-2 text-sm font-medium text-white disabled:opacity-60">{updateMutation.isPending ? "Saving..." : "Update Profile"}</button>
         </div>
       </form>

@@ -104,15 +104,15 @@ function AuditLogs () {
   const getActionClass = action => {
     switch (action.toLowerCase()) {
       case 'create':
-        return 'text-emerald-500'
+        return 'text-emerald-500 dark:text-emerald-400'
       case 'update':
-        return 'text-blue-600'
+        return 'text-blue-600 dark:text-blue-400'
       case 'delete':
-        return 'text-red-500'
+        return 'text-red-500 dark:text-red-400'
       case 'login':
-        return 'text-slate-700'
+        return 'text-slate-700 dark:text-gray-300'
       default:
-        return 'text-slate-600'
+        return 'text-slate-600 dark:text-gray-400'
     }
   }
 
@@ -121,19 +121,19 @@ function AuditLogs () {
       key: 'timestamp',
       label: 'Timestamp',
       isRowHeader: true,
-      className: 'bg-slate-50/80 text-[13px] font-bold text-slate-700',
+      className: 'bg-slate-50/80 dark:bg-gray-800/80 text-[13px] font-bold text-slate-700 dark:text-gray-300',
       cellClassName: 'px-4 py-3',
       renderCell: item => (
-        <span className='text-slate-500 text-[13px]'>{item.timestamp}</span>
+        <span className='text-slate-500 dark:text-gray-400 text-[13px]'>{item.timestamp}</span>
       )
     },
     {
       key: 'user',
       label: 'User',
-      className: 'bg-slate-50/80 text-[13px] font-bold text-slate-700',
+      className: 'bg-slate-50/80 dark:bg-gray-800/80 text-[13px] font-bold text-slate-700 dark:text-gray-300',
       cellClassName: 'px-4 py-3',
       renderCell: item => (
-        <span className='font-medium text-slate-700 text-[13px]'>
+        <span className='font-medium text-slate-700 dark:text-gray-300 text-[13px]'>
           {item.user}
         </span>
       )
@@ -141,7 +141,7 @@ function AuditLogs () {
     {
       key: 'action',
       label: 'Action',
-      className: 'bg-slate-50/80 text-[13px] font-bold text-slate-700',
+      className: 'bg-slate-50/80 dark:bg-gray-800/80 text-[13px] font-bold text-slate-700 dark:text-gray-300',
       cellClassName: 'px-4 py-3',
       renderCell: item => (
         <span
@@ -154,25 +154,25 @@ function AuditLogs () {
     {
       key: 'module',
       label: 'Module',
-      className: 'bg-slate-50/80 text-[13px] font-bold text-slate-700',
-      cellClassName: 'px-4 py-3 text-slate-600 text-[13px]'
+      className: 'bg-slate-50/80 dark:bg-gray-800/80 text-[13px] font-bold text-slate-700 dark:text-gray-300',
+      cellClassName: 'px-4 py-3 text-slate-600 dark:text-gray-400 text-[13px]'
     },
     {
       key: 'entity',
       label: 'Entity Description',
-      className: 'bg-slate-50/80 text-[13px] font-bold text-slate-700',
-      cellClassName: 'px-4 py-3 text-slate-500 text-[13px]'
+      className: 'bg-slate-50/80 dark:bg-gray-800/80 text-[13px] font-bold text-slate-700 dark:text-gray-300',
+      cellClassName: 'px-4 py-3 text-slate-500 dark:text-gray-400 text-[13px]'
     },
     {
       key: 'entityId',
       label: 'Entity ID',
-      className: 'bg-slate-50/80 text-[13px] font-bold text-slate-700',
+      className: 'bg-slate-50/80 dark:bg-gray-800/80 text-[13px] font-bold text-slate-700 dark:text-gray-300',
       cellClassName: 'px-4 py-3',
       renderCell: item =>
         item.entityId === '—' ? (
-          <span className='text-slate-400 text-[13px]'>—</span>
+          <span className='text-slate-400 dark:text-gray-500 text-[13px]'>—</span>
         ) : (
-          <span className='font-medium text-blue-600 text-[13px]'>
+          <span className='font-medium text-blue-600 dark:text-blue-400 text-[13px]'>
             {item.entityId}
           </span>
         )
@@ -180,8 +180,8 @@ function AuditLogs () {
     {
       key: 'ip',
       label: 'IP Address',
-      className: 'bg-slate-50/80 text-[13px] font-bold text-slate-700',
-      cellClassName: 'px-4 py-3 text-slate-500 text-[13px]'
+      className: 'bg-slate-50/80 dark:bg-gray-800/80 text-[13px] font-bold text-slate-700 dark:text-gray-300',
+      cellClassName: 'px-4 py-3 text-slate-500 dark:text-gray-400 text-[13px]'
     }
   ]
 
@@ -189,7 +189,7 @@ function AuditLogs () {
     console.log(logs);
 
   return (
-    <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-slate-50 dark:bg-gray-800 p-4 sm:p-6 lg:p-8">
       <section>
         <div className="text-xs">
           <span
@@ -210,17 +210,17 @@ function AuditLogs () {
           </p>
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+        <div className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 shadow-sm">
           <div className="flex flex-col gap-3 lg:flex-row">
             <label className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500" />
               <input
                 value={search}
                 onChange={(event) =>
                   resetPageAndSet(setSearch)(event.target.value)
                 }
                 placeholder="Search by entity ID or user..."
-                className="w-full rounded-md border border-slate-200 py-2 pl-9 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-md border border-slate-200 dark:border-gray-700 py-2 pl-9 pr-3 text-sm text-slate-700 dark:text-gray-300 outline-none transition placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
               />
             </label>
             <div className="relative">
@@ -229,7 +229,7 @@ function AuditLogs () {
                 onChange={(event) =>
                   resetPageAndSet(setSelectedUser)(event.target.value)
                 }
-                className="w-full appearance-none rounded-md border border-slate-200 bg-white py-2 pl-3 pr-10 text-sm text-slate-600 outline-none focus:border-[#008951]"
+                className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-2 pl-3 pr-10 text-sm text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951]"
               >
                 <option value="All Users">All Users</option>
                 {users.map((user) => (
@@ -238,7 +238,7 @@ function AuditLogs () {
                   </option>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500" />
             </div>
             <div className="relative">
               <select
@@ -246,7 +246,7 @@ function AuditLogs () {
                 onChange={(event) =>
                   resetPageAndSet(setSelectedModule)(event.target.value)
                 }
-                className="w-full appearance-none rounded-md border border-slate-200 bg-white py-2 pl-3 pr-10 text-sm text-slate-600 outline-none focus:border-[#008951]"
+                className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-2 pl-3 pr-10 text-sm text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951]"
               >
                 <option value="All Modules">All Modules</option>
                 {modules.map((module) => (
@@ -255,7 +255,7 @@ function AuditLogs () {
                   </option>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500" />
             </div>
             <div className="relative">
               <select
@@ -263,7 +263,7 @@ function AuditLogs () {
                 onChange={(event) =>
                   resetPageAndSet(setSelectedAction)(event.target.value)
                 }
-                className="w-full appearance-none rounded-md border border-slate-200 bg-white py-2 pl-3 pr-10 text-sm text-slate-600 outline-none focus:border-[#008951]"
+                className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-2 pl-3 pr-10 text-sm text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951]"
               >
                 <option value="All Actions">All Actions</option>
                 {actions.map((action) => (
@@ -272,16 +272,16 @@ function AuditLogs () {
                   </option>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500" />
             </div>
            </div>
         </div>
 
-        <div className="mt-5 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div className="mt-5 overflow-hidden rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
           {isLoading ? (
             <div className="flex items-center justify-center p-8">
               <svg
-                className="h-6 w-6 animate-spin text-slate-400"
+                className="h-6 w-6 animate-spin text-slate-400 dark:text-gray-500"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -302,7 +302,7 @@ function AuditLogs () {
               </svg>
             </div>
           ) : error ? (
-            <div className="flex items-center justify-center p-8 text-sm text-red-500">
+            <div className="flex items-center justify-center p-8 text-sm text-red-500 dark:text-red-400">
               Error loading audit logs. Please try again.
             </div>
           ) : (
@@ -311,7 +311,7 @@ function AuditLogs () {
               data={filteredLogs}
               ariaLabel="Audit logs"
               className="w-full"
-              rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+              rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
               emptyContent="No audit logs found."
               pagination={true}
               rowsPerPage={pagination.limit || 10}

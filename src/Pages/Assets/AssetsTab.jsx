@@ -30,7 +30,7 @@ function AssetsTab() {
   const navigate = useNavigate();
   const { can } = usePermissions();
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
       <section>
         {activeTab === "assets" ? (
           <>
@@ -43,7 +43,7 @@ function AssetsTab() {
                   >
                     Dashboard
                   </span>{" "}
-                  <span className="px-1 text-slate-400">/</span>{" "}
+                  <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
                   <span className="font-semibold ">Fixed Assets</span>
                 </p>
                 <h1 className="text-2xl font-bold tracking-tight text-BLUE-dark">
@@ -77,7 +77,7 @@ function AssetsTab() {
           //           >
           //             Dashboard
           //           </span>{" "}
-          //           <span className="px-1 text-slate-400">/</span>{" "}
+          //           <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
           //           <span className="font-semibold">Maintenance Assets</span>
           //         </p>
 
@@ -112,7 +112,7 @@ function AssetsTab() {
                     >
                       Dashboard
                     </span>{" "}
-                    <span className="px-1 text-slate-400">/</span>{" "}
+                    <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
                     <span className="font-semibold">Maintenance Records</span>
                   </p>
 
@@ -139,7 +139,7 @@ function AssetsTab() {
             </>
           ) : null}
         {/* Tabs */}
-        <div className="mb-6 border-b border-slate-200 ">
+        <div className="mb-6 border-b border-slate-200 dark:border-gray-700 ">
           <div className="flex items-center gap-6 overflow-x-auto py-2">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.key;
@@ -153,8 +153,8 @@ function AssetsTab() {
             relative whitespace-nowrap pb-3 text-sm font-semibold
             transition-colors duration-200
             ${isActive
-                      ? "text-[#008951]"
-                      : "text-slate-500 hover:text-slate-800"
+                      ? "text-[#008951] dark:text-emerald-400"
+                      : "text-slate-500 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-100"
                     }
           `}
                 >

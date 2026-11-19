@@ -31,7 +31,7 @@ function App() {
 
   return (
     <ToastProvider>
-      <div className="flex h-screen bg-gray-100 overflow-hidden">
+      <div className="flex h-screen bg-gray-100 dark:bg-gray-950 overflow-hidden">
         {!isPublicPage && (
           <>
             {isSidebarOpen && (

@@ -146,7 +146,7 @@ function AddMaintenanceRecord() {
   };
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
       <section className="max-w-5xl mx-auto">
         {/* Header & Breadcrumbs */}
         <div className="mb-6">
@@ -157,15 +157,15 @@ function AddMaintenanceRecord() {
             >
               Dashboard
             </span>{" "}
-            <span className="px-1 text-slate-400">/</span>{" "}
+            <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
             <span
               onClick={() => navigate("/assets?tab=maintenance-records")}
               className="cursor-pointer font-medium text-4th-color transition-colors duration-200"
             >
               Maintenance Records
             </span>{" "}
-            <span className="px-1 text-slate-400">/</span>{" "}
-            <span className="font-semibold text-slate-700">Add Record</span>
+            <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
+            <span className="font-semibold text-slate-700 dark:text-gray-300">Add Record</span>
           </p>
           <h1 className="text-2xl font-bold tracking-tight text-BLUE-dark">
             Log Maintenance Record
@@ -176,12 +176,12 @@ function AddMaintenanceRecord() {
         </div>
 
         {/* Form Card */}
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
           <form onSubmit={handleSubmit} className="p-6">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               {/* Maintenance Number */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Maintenance Number
                 </label>
                 <input
@@ -194,21 +194,21 @@ function AddMaintenanceRecord() {
                         ? `${nextMaintenanceNumber} (Auto-generated)`
                         : "Auto-generated on save"
                   }
-                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-500 outline-none cursor-not-allowed"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-3 py-2.5 text-sm text-slate-500 dark:text-gray-400 outline-none cursor-not-allowed"
                 />
               </div>
 
               {/* Maintenance Date */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Maintenance Date <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Maintenance Date <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   type="date"
                   value={maintenanceDate}
                   onChange={(e) => setMaintenanceDate(e.target.value)}
                   required
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
 
@@ -216,22 +216,22 @@ function AddMaintenanceRecord() {
                 /* Next Maintenance Date */
               }
               <div>
-                <label className='block text-sm font-medium text-slate-700 mb-1.5'>
+                <label className='block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5'>
                   Next Maintenance Date
                 </label>
                 <input
                   type='date'
                   value={nextMaintenanceDate}
                   onChange={e => setNextMaintenanceDate(e.target.value)}
-                  className='w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100'
+                  className='w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100'
                 />
               </div>
 
 
               {/* Asset Selection */}
               <div className="lg:col-span-3">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Select Asset <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Select Asset <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={assetOptions}
@@ -245,7 +245,7 @@ function AddMaintenanceRecord() {
                 />
 
                 {selectedAsset && (
-                  <div className="mt-2 rounded-md bg-blue-50 border border-blue-100 p-3 text-xs flex flex-wrap gap-4 text-slate-700">
+                  <div className="mt-2 rounded-md bg-blue-50 dark:bg-blue-950 border border-blue-100 dark:border-blue-900 p-3 text-xs flex flex-wrap gap-4 text-slate-700 dark:text-gray-300">
                     <span>
                       <strong className="font-semibold">Code:</strong> {selectedAsset.assetCode}
                     </span>
@@ -264,8 +264,8 @@ function AddMaintenanceRecord() {
 
               {/* Maintenance Type */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Maintenance Type <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Maintenance Type <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={maintenanceTypeOptions}
@@ -281,8 +281,8 @@ function AddMaintenanceRecord() {
 
               {/* Performed By Employee */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Performed By Employee <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Performed By Employee <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={employeeOptions}
@@ -298,8 +298,8 @@ function AddMaintenanceRecord() {
 
               {/* Maintenance Cost Amount */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Maintenance Cost (Rs.) <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Maintenance Cost (Rs.) <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   type="number"
@@ -308,14 +308,14 @@ function AddMaintenanceRecord() {
                   onChange={(e) => setMaintenanceCostAmount(e.target.value)}
                   placeholder="e.g. 18000"
                   required
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
 
               {/* Payment Method */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Payment Method <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Payment Method <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={paymentMethodOptions}
@@ -331,8 +331,8 @@ function AddMaintenanceRecord() {
 
               {/* Account */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Account <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Account <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={accountOptions}
@@ -350,7 +350,7 @@ function AddMaintenanceRecord() {
                 /* Problem Description */
               }
               <div className='lg:col-span-3'>
-                <label className='block text-sm font-medium text-slate-700 mb-1.5'>
+                <label className='block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5'>
                   Problem Description
                 </label>
                 <textarea
@@ -358,7 +358,7 @@ function AddMaintenanceRecord() {
                   onChange={e => setProblemDescription(e.target.value)}
                   rows={3}
                   placeholder='Describe the problem or reason for maintenance...'
-                  className='w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none'
+                  className='w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none'
                 />
               </div>
 
@@ -366,8 +366,8 @@ function AddMaintenanceRecord() {
                 /* Work Performed */
               }
               <div className='lg:col-span-3'>
-                <label className='block text-sm font-medium text-slate-700 mb-1.5'>
-                  Work Performed <span className='text-rose-500'>*</span>
+                <label className='block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5'>
+                  Work Performed <span className='text-rose-500 dark:text-rose-400'>*</span>
                 </label>
                 <textarea
                   value={workPerformed}
@@ -375,7 +375,7 @@ function AddMaintenanceRecord() {
                   rows={3}
                   placeholder='Describe the service or repair work performed...'
                   required
-                  className='w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none'
+                  className='w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none'
                 />
               </div>
 
@@ -387,7 +387,7 @@ function AddMaintenanceRecord() {
               <button
                 type="button"
                 onClick={() => navigate("/assets?tab=maintenance-records")}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+                className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-gray-300 shadow-sm transition hover:bg-slate-50 dark:hover:bg-gray-800"
               >
                 Cancel
               </button>
@@ -395,7 +395,7 @@ function AddMaintenanceRecord() {
                 type="button"
                 disabled={createMutation.isPending || isLoadingOptions}
                 onClick={handleSaveAndAddAnother}
-                className="rounded-lg border border-[#1a56db] bg-white px-4 py-2.5 text-sm font-medium text-[#1a56db] shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
+                className="rounded-lg border border-[#1a56db] bg-white dark:bg-gray-900 px-4 py-2.5 text-sm font-medium text-[#1a56db] dark:text-blue-400 shadow-sm transition hover:bg-slate-50 dark:hover:bg-gray-800 disabled:opacity-50"
               >
                 Save & Add Another
               </button>

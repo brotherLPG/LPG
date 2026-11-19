@@ -7,6 +7,7 @@ import App from './App.jsx'
 import ToastProvider from './utils/GlobalToast';
 import ConfirmationProvider from './utils/GlobalConfirmation';
 import { PermissionProvider } from './contexts/PermissionContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 const queryClient = new QueryClient();
 
@@ -17,7 +18,9 @@ createRoot(document.getElementById("root")).render(
         <ToastProvider>
           <ConfirmationProvider>
             <PermissionProvider>
-              <App />
+              <ThemeProvider>
+                <App />
+              </ThemeProvider>
             </PermissionProvider>
           </ConfirmationProvider>
         </ToastProvider>

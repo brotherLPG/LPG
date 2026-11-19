@@ -157,25 +157,25 @@ function Payments() {
       key: "voucherNo",
       label: "Voucher No",
       isRowHeader: true,
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
-        <span className="font-bold text-slate-800 text-[13px]">{item.voucherNo}</span>
+        <span className="font-bold text-slate-800 dark:text-gray-100 text-[13px]">{item.voucherNo}</span>
       ),
     },
     {
       key: "date",
       label: "Date",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-3 text-slate-600 text-[13px]",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
+      cellClassName: "px-4 py-3 text-slate-600 dark:text-gray-400 text-[13px]",
     },
     {
       key: "party",
       label: "Party Name",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
-        <button className="font-semibold text-[#1a56db] hover:underline text-[13px]">
+        <button className="font-semibold text-[#1a56db] dark:text-blue-400 hover:underline text-[13px]">
           {item.party}
         </button>
       ),
@@ -183,31 +183,31 @@ function Payments() {
     {
       key: "amount",
       label: "Amount",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
-        <span className="text-slate-900 font-bold text-[13px]">{item.amount}</span>
+        <span className="text-slate-900 dark:text-gray-100 font-bold text-[13px]">{item.amount}</span>
       ),
     },
     {
       key: "method",
       label: "Payment Method",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
-      cellClassName: "px-4 py-3 text-slate-600 text-[13px]",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
+      cellClassName: "px-4 py-3 text-slate-600 dark:text-gray-400 text-[13px]",
     },
     {
       key: "direction",
       label: "Direction",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
         <span
           className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
             item.directionTone === "emerald"
-              ? "bg-emerald-50 text-emerald-600"
+              ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400"
               : item.directionTone === "purple"
-                ? "bg-purple-50 text-purple-600"
-                : "bg-amber-50 text-amber-600"
+                ? "bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400"
+                : "bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400"
           }`}
         >
           {item.directionLabel}
@@ -217,14 +217,14 @@ function Payments() {
     {
       key: "status",
       label: "Status",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
         <span
           className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
             item.status === "Recorded"
-              ? "bg-blue-50 text-blue-600"
-              : "bg-amber-50 text-amber-600"
+              ? "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400"
+              : "bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400"
           }`}
         >
           {item.status}
@@ -234,7 +234,7 @@ function Payments() {
     {
       key: "actions",
       label: "Actions",
-      className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700",
+      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
         <div className="flex items-center gap-2">
@@ -243,7 +243,7 @@ function Payments() {
               <Button
                 aria-label={`View ${item.voucherNo}`}
                 onClick={() => navigate(`/payments/view/${item.id}`)}
-                className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+                className="flex items-center gap-1.5 rounded-full bg-blue-50 dark:bg-blue-950 px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors"
               >
                 <Eye className="h-3.5 w-3.5" />
               </Button>
@@ -256,7 +256,7 @@ function Payments() {
             <Button
               aria-label={`Print ${item.voucherNo}`}
               onClick={() => handlePrintPayment(item)}
-              className="flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+              className="flex items-center gap-1.5 rounded-full bg-slate-50 dark:bg-gray-800 px-3 py-1 text-xs font-semibold text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors"
             >
               <Printer className="h-3.5 w-3.5" />
             </Button>
@@ -267,7 +267,7 @@ function Payments() {
           {/* <button
             type="button"
             aria-label={`Edit ${item.voucherNo}`}
-            className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
+            className="flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors"
           >
             <Edit3 className="h-3.5 w-3.5" /> Edit
           </button>
@@ -275,7 +275,7 @@ function Payments() {
             type="button"
             onClick={() => handleDeleteClick(item)}
             aria-label={`Delete ${item.voucherNo}`}
-            className="flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition-colors"
+            className="flex items-center gap-1.5 rounded-full bg-rose-50 dark:bg-rose-950 px-3 py-1 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900 transition-colors"
           >
             <Trash2 className="h-3.5 w-3.5" /> Delete
           </button> */}
@@ -285,7 +285,7 @@ function Payments() {
   ];
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
       <section>
         {/* Header & Breadcrumbs */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -297,8 +297,8 @@ function Payments() {
               >
                 Dashboard
               </span>{" "}
-              <span className="px-1 text-slate-400">/</span>{" "}
-              <span className="font-semibold text-slate-700">Payments</span>
+              <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
+              <span className="font-semibold text-slate-700 dark:text-gray-300">Payments</span>
             </p>
             <h1 className=" text-2xl font-bold tracking-tight text-BLUE-dark mt-2">
               Payments
@@ -319,7 +319,7 @@ function Payments() {
         </div>
 
         {/* Filters */}
-        <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="mb-6 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
             <label className="relative flex-1">
               <div className="absolute left-3 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full bg-slate-300"></div>
@@ -329,7 +329,7 @@ function Payments() {
                   setQuery(event.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full rounded-md border border-slate-200 bg-slate-50/50 py-2.5 pl-8 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-500 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
+                className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50/50 dark:bg-gray-800/50 py-2.5 pl-8 pr-3 text-sm text-slate-700 dark:text-gray-300 outline-none transition placeholder:text-slate-500 dark:placeholder:text-gray-400 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
                 placeholder="Search by voucher number or party name..."
               />
             </label>
@@ -341,7 +341,7 @@ function Payments() {
                     setStatus(event.target.value);
                     setCurrentPage(1);
                   }}
-                  className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-40 lg:w-44"
+                  className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] sm:w-40 lg:w-44"
                 >
                   <option value="All">Status: All</option>
                   {meta.statuses?.map((status) => (
@@ -350,7 +350,7 @@ function Payments() {
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 dark:text-gray-400 pointer-events-none" />
               </div>
               <div className="relative">
                 <select
@@ -359,7 +359,7 @@ function Payments() {
                     setDirection(event.target.value);
                     setCurrentPage(1);
                   }}
-                  className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
+                  className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
                 >
                   <option value="All">Direction: All</option>
                   {directionFilterOptions.map((dir) => (
@@ -368,28 +368,28 @@ function Payments() {
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 dark:text-gray-400 pointer-events-none" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Table */}
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
           {isLoading ? (
             <div className="flex items-center justify-center h-96">
               <div className="flex flex-col items-center gap-3">
-                <Loader className="h-8 w-8 animate-spin text-slate-400" />
-                <p className="text-sm text-slate-500">Loading payments...</p>
+                <Loader className="h-8 w-8 animate-spin text-slate-400 dark:text-gray-500" />
+                <p className="text-sm text-slate-500 dark:text-gray-400">Loading payments...</p>
               </div>
             </div>
           ) : isError ? (
             <div className="flex items-center justify-center h-96">
               <div className="text-center">
-                <p className="text-sm text-red-600 font-medium">
+                <p className="text-sm text-red-600 dark:text-red-400 font-medium">
                   Error loading payments
                 </p>
-                <p className="text-xs text-red-500 mt-1">{error?.message}</p>
+                <p className="text-xs text-red-500 dark:text-red-400 mt-1">{error?.message}</p>
               </div>
             </div>
           ) : (
@@ -398,7 +398,7 @@ function Payments() {
               data={filteredPayments}
               ariaLabel="Payments Table"
               className=""
-              rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+              rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
               emptyContent="No payments match your search."
               pagination={true}
               rowsPerPage={pagination.limit || 10}

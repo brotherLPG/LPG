@@ -6,8 +6,8 @@ import { usePermissions } from "../../contexts/PermissionContext";
 function DetailItem({ label, value }) {
     return (
         <div>
-            <dt className="text-xs font-semibold text-slate-400">{label}</dt>
-            <dd className="mt-1 text-sm text-slate-700">{value || "-"}</dd>
+            <dt className="text-xs font-semibold text-slate-400 dark:text-gray-500">{label}</dt>
+            <dd className="mt-1 text-sm text-slate-700 dark:text-gray-300">{value || "-"}</dd>
         </div>
     );
 }
@@ -20,14 +20,14 @@ function ViewInventoryItem() {
     const item = data?.data;
 
     if (isLoading) {
-        return <main className="flex min-h-full items-center justify-center bg-slate-50 p-8 text-sm text-slate-500">Loading inventory item...</main>;
+        return <main className="flex min-h-full items-center justify-center bg-slate-50 dark:bg-gray-800 p-8 text-sm text-slate-500 dark:text-gray-400">Loading inventory item...</main>;
     }
 
     if (error || !item) {
         return (
-            <main className="flex min-h-full flex-col items-center justify-center gap-4 bg-slate-50 p-8 text-sm text-red-500">
+            <main className="flex min-h-full flex-col items-center justify-center gap-4 bg-slate-50 dark:bg-gray-800 p-8 text-sm text-red-500 dark:text-red-400">
                 <p>Unable to load inventory item.</p>
-                <button type="button" onClick={() => navigate("/inventory")} className="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 font-semibold text-slate-600 shadow-sm">
+                <button type="button" onClick={() => navigate("/inventory")} className="inline-flex items-center gap-2 rounded-md bg-white dark:bg-gray-900 px-3 py-2 font-semibold text-slate-600 dark:text-gray-400 shadow-sm">
                     <ArrowLeft className="h-4 w-4" /> Back to Inventory
                 </button>
             </main>
@@ -35,18 +35,18 @@ function ViewInventoryItem() {
     }
 
     return (
-        <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
+        <main className="min-h-full bg-slate-50 dark:bg-gray-800 p-4 sm:p-6 lg:p-8">
             <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
                 <div>
                     <p className="text-xs">
-                        <button type="button" onClick={() => navigate("/dashboard")} className="font-medium text-slate-400 hover:text-slate-600">Dashboard</button>
-                        <span className="px-1 text-slate-400">/</span>
-                        <button type="button" onClick={() => navigate("/inventory")} className="font-medium text-slate-400 hover:text-slate-600">Inventory</button>
-                        <span className="px-1 text-slate-400">/</span>
-                        <span className="font-semibold text-slate-600">Inventory Item Details</span>
+                        <button type="button" onClick={() => navigate("/dashboard")} className="font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400">Dashboard</button>
+                        <span className="px-1 text-slate-400 dark:text-gray-500">/</span>
+                        <button type="button" onClick={() => navigate("/inventory")} className="font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400">Inventory</button>
+                        <span className="px-1 text-slate-400 dark:text-gray-500">/</span>
+                        <span className="font-semibold text-slate-600 dark:text-gray-400">Inventory Item Details</span>
                     </p>
-                    <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">{item.itemName}</h1>
-                    <p className="mt-1 text-sm text-slate-500">Inventory item details, stock levels, and supplier information</p>
+                    <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-gray-100">{item.itemName}</h1>
+                    <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">Inventory item details, stock levels, and supplier information</p>
                 </div>
                 <div className="flex gap-2">
                     {can("inventory-items", "update") && (
@@ -58,8 +58,8 @@ function ViewInventoryItem() {
             </div>
 
             <div className="grid gap-5 lg:grid-cols-2">
-                <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <h2 className="border-b border-slate-100 px-4 py-3 text-base font-bold text-slate-800">Item Information</h2>
+                <section className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
+                    <h2 className="border-b border-slate-100 dark:border-gray-800 px-4 py-3 text-base font-bold text-slate-800 dark:text-gray-100">Item Information</h2>
                     <dl className="grid gap-5 p-5 sm:grid-cols-2">
                         <DetailItem label="Item Code" value={item.itemCode} />
                         <DetailItem label="Item Name" value={item.itemName} />
@@ -71,8 +71,8 @@ function ViewInventoryItem() {
                     </dl>
                 </section>
 
-                <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <h2 className="border-b border-slate-100 px-4 py-3 text-base font-bold text-slate-800">Stock Levels</h2>
+                <section className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
+                    <h2 className="border-b border-slate-100 dark:border-gray-800 px-4 py-3 text-base font-bold text-slate-800 dark:text-gray-100">Stock Levels</h2>
                     <dl className="grid gap-5 p-5 sm:grid-cols-2">
                         <DetailItem label="Current Quantity" value={item.currentQuantity} />
                         <DetailItem label="Minimum Stock Level" value={item.minimumStockLevel} />
@@ -83,8 +83,8 @@ function ViewInventoryItem() {
                     </dl>
                 </section>
 
-                <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <h2 className="border-b border-slate-100 px-4 py-3 text-base font-bold text-slate-800">Pricing</h2>
+                <section className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
+                    <h2 className="border-b border-slate-100 dark:border-gray-800 px-4 py-3 text-base font-bold text-slate-800 dark:text-gray-100">Pricing</h2>
                     <dl className="grid gap-5 p-5 sm:grid-cols-2">
                         <DetailItem label="Unit Purchase Price" value={`Rs. ${item.unitPurchasePriceAmount}`} />
                         <DetailItem label="Unit Selling Price" value={`Rs. ${item.unitSellingPriceAmount}`} />
@@ -93,18 +93,18 @@ function ViewInventoryItem() {
                     </dl>
                 </section>
 
-                <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <h2 className="border-b border-slate-100 px-4 py-3 text-base font-bold text-slate-800">Storage Information</h2>
+                <section className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
+                    <h2 className="border-b border-slate-100 dark:border-gray-800 px-4 py-3 text-base font-bold text-slate-800 dark:text-gray-100">Storage Information</h2>
                     <dl className="grid gap-5 p-5 sm:grid-cols-2">
                         <DetailItem label="Rack / Bay Number" value={item.rackBayNumber} />
                         <DetailItem label="Storage Notes" value={item.storageNotes} />
                     </dl>
                 </section>
 
-                <section className="lg:col-span-2 rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <h2 className="border-b border-slate-100 px-4 py-3 text-base font-bold text-slate-800">Description</h2>
+                <section className="lg:col-span-2 rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
+                    <h2 className="border-b border-slate-100 dark:border-gray-800 px-4 py-3 text-base font-bold text-slate-800 dark:text-gray-100">Description</h2>
                     <div className="p-5">
-                        <p className="text-sm text-slate-700">{item.description || "No description provided."}</p>
+                        <p className="text-sm text-slate-700 dark:text-gray-300">{item.description || "No description provided."}</p>
                     </div>
                 </section>
             </div>

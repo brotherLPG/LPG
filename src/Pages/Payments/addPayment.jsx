@@ -470,7 +470,7 @@ function AddPayment() {
         : "No outstanding invoices found.";
 
   return (
-    <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-slate-50 dark:bg-gray-800 p-4 sm:p-6 lg:p-8">
       <form onSubmit={handleSubmit}>
         {/* Header & Breadcrumbs */}
         <div className="mb-6">
@@ -481,15 +481,15 @@ function AddPayment() {
             >
               Dashboard
             </span>{" "}
-            <span className="px-1 text-slate-400">/</span>{" "}
+            <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
             <span
               onClick={() => navigate("/payments")}
               className="cursor-pointer font-medium text-4th-color transition-colors duration-200"
             >
               Payments
             </span>{" "}
-            <span className="px-1 text-slate-400">/</span>{" "}
-            <span className="font-semibold text-slate-600">Add Payment</span>
+            <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
+            <span className="font-semibold text-slate-600 dark:text-gray-400">Add Payment</span>
           </p>
           <h1 className=" text-2xl font-bold tracking-tight text-BLUE-dark mt-2">
             Record Payment Voucher
@@ -503,9 +503,9 @@ function AddPayment() {
         <div className="space-y-6">
           <div className="gap-6">
             {/* Card 1: Voucher & Party Configuration */}
-            <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-              <div className="border-b border-slate-200 p-4">
-                <h2 className="border-b border-slate-100 text-[16px] font-bold text-BLUE-dark">
+            <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+              <div className="border-b border-slate-200 dark:border-gray-700 p-4">
+                <h2 className="border-b border-slate-100 dark:border-gray-800 text-[16px] font-bold text-BLUE-dark">
                   Voucher & Party Configuration
                 </h2>
               </div>
@@ -521,7 +521,7 @@ function AddPayment() {
                       value={
                         formOptions?.data?.nextPaymentNumber || "Loading..."
                       }
-                      className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed"
+                      className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-3 py-2 text-sm text-slate-500 dark:text-gray-400 outline-none cursor-not-allowed"
                     />
                   </div>
                   <div>
@@ -534,7 +534,7 @@ function AddPayment() {
                       onChange={(event) =>
                         handleInputChange("paymentDate", event.target.value)
                       }
-                      className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                      className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     />
                   </div>
                 </div>
@@ -543,7 +543,7 @@ function AddPayment() {
                   <label className="block text-sm font-semibold text-BLUE-dark mb-1.5">
                     Payment Direction
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full bg-[#F9FAFB] rounded-md py-3 px-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full bg-[#F9FAFB] dark:bg-gray-900 rounded-md py-3 px-3">
                     {directionOptions.map((direction) => (
                       <button
                         key={direction.value}
@@ -551,8 +551,8 @@ function AddPayment() {
                         onClick={() => handleDirectionChange(direction.value)}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                           paymentDirection === direction.value
-                            ? "bg-white text-accent-blue border border-[#1E40AF] rounded"
-                            : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
+                            ? "bg-white dark:bg-gray-900 text-accent-blue border border-[#1E40AF] rounded"
+                            : "bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-700 text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-800"
                         }`}
                       >
                         {direction.label}
@@ -566,7 +566,7 @@ function AddPayment() {
                       {isCustomerParty
                         ? "Select Customer"
                         : "Select Supplier"}{" "}
-                      <span className="text-rose-500">*</span>
+                      <span className="text-rose-500 dark:text-rose-400">*</span>
                     </label>
                     <SearchableCustomerSelect
                       customers={partyOptions}
@@ -589,7 +589,7 @@ function AddPayment() {
                       }
                     />
                     {customerIdError && (
-                      <p className="mt-1.5 text-xs text-rose-500">{customerIdError}</p>
+                      <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{customerIdError}</p>
                     )}
                   </div>
 
@@ -601,16 +601,16 @@ function AddPayment() {
                       type="text"
                       disabled
                       value={ledgerBalanceLabel}
-                      className="w-full rounded-md border font-bold border-slate-200 bg-[#FEF2F2] px-3 py-2 text-sm text-error outline-none cursor-not-allowed"
+                      className="w-full rounded-md border font-bold border-slate-200 dark:border-gray-700 bg-[#FEF2F2] dark:bg-red-950 px-3 py-2 text-sm text-error outline-none cursor-not-allowed"
                     />
                   </div>
                 </div>
               </div>
             </div>
             {/* Card 3: Financial Execution Details */}
-            <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden mt-3">
-              <div className="border-b border-slate-200 p-4">
-                <h2 className="border-b border-slate-100 text-[16px] font-bold text-BLUE-dark">
+            <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden mt-3">
+              <div className="border-b border-slate-200 dark:border-gray-700 p-4">
+                <h2 className="border-b border-slate-100 dark:border-gray-800 text-[16px] font-bold text-BLUE-dark">
                   Financial Execution Details
                 </h2>
               </div>
@@ -623,7 +623,7 @@ function AddPayment() {
                         : isCustomerReceipt
                           ? "Payment Amount Received (Rs.)"
                           : "Payment Amount Paid (Rs.)"}{" "}
-                      <span className="text-rose-500">*</span>
+                      <span className="text-rose-500 dark:text-rose-400">*</span>
                     </label>
                     <div className="relative">
                       <button
@@ -635,7 +635,7 @@ function AddPayment() {
                           setPaymentAmount(String(totalAllocatableAmount));
                           clearError(setPaymentAmountError);
                         }}
-                        className="absolute left-1 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-accent-blue transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent"
+                        className="absolute left-1 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-accent-blue transition hover:bg-blue-50 dark:hover:bg-blue-950 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent"
                       >
                         <Sparkles size={15} strokeWidth={1.75} />
                       </button>
@@ -648,21 +648,21 @@ function AddPayment() {
                           clearError(setPaymentAmountError);
                         }}
                         placeholder="50,000"
-                        className={`w-full rounded-md border bg-white py-2 pl-10 pr-3 text-sm text-slate-900 outline-none focus:ring-2 ${
+                        className={`w-full rounded-md border bg-white dark:bg-gray-900 py-2 pl-10 pr-3 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-2 ${
                           paymentAmountError
                             ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
-                            : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                            : "border-slate-200 dark:border-gray-700 focus:border-[#008951] focus:ring-emerald-100"
                         }`}
                       />
                     </div>
                     {paymentAmountError && (
-                      <p className="mt-1.5 text-xs text-rose-500">{paymentAmountError}</p>
+                      <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{paymentAmountError}</p>
                     )}
                   </div>
 
                   <div>
                     <label className="block text-sm font-semibold text-BLUE-dark mb-1.5">
-                      Payment Method <span className="text-rose-500">*</span>
+                      Payment Method <span className="text-rose-500 dark:text-rose-400">*</span>
                     </label>
                     <SearchableCustomerSelect
                       customers={paymentMethodOptions}
@@ -681,7 +681,7 @@ function AddPayment() {
                       emptyText="No payment method found"
                     />
                     {paymentMethodError && (
-                      <p className="mt-1.5 text-xs text-rose-500">{paymentMethodError}</p>
+                      <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{paymentMethodError}</p>
                     )}
                   </div>
 
@@ -690,7 +690,7 @@ function AddPayment() {
                       {isRefund
                         ? "Pay From Cash / Bank Account"
                         : "Target Plant Account"}{" "}
-                      <span className="text-rose-500">*</span>
+                      <span className="text-rose-500 dark:text-rose-400">*</span>
                     </label>
                     <SearchableCustomerSelect
                       customers={accountOptions}
@@ -717,7 +717,7 @@ function AddPayment() {
                       emptyText="No account found"
                     />
                     {accountIdError && (
-                      <p className="mt-1.5 text-xs text-rose-500">{accountIdError}</p>
+                      <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{accountIdError}</p>
                     )}
                   </div>
 
@@ -732,7 +732,7 @@ function AddPayment() {
                         handleInputChange("referenceNumber", event.target.value)
                       }
                       placeholder="e.g. TRF-88421"
-                      className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                      className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     />
                   </div>
                 </div>
@@ -740,8 +740,8 @@ function AddPayment() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <h2 className="text-[16px] font-bold text-BLUE-dark">
@@ -757,7 +757,7 @@ function AddPayment() {
                         : "Select invoices and enter the amount to apply to each."}
                   </p>
                 </div>
-                <div className="inline-flex shrink-0 rounded-lg bg-[#F9FAFB] p-1">
+                <div className="inline-flex shrink-0 rounded-lg bg-[#F9FAFB] dark:bg-gray-900 p-1">
                   {[
                     { value: "automatic", label: "Automatic" },
                     { value: "manual", label: "Manual" },
@@ -768,8 +768,8 @@ function AddPayment() {
                       onClick={() => handleAllocationModeChange(mode.value)}
                       className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
                         allocationMode === mode.value
-                          ? "bg-white text-accent-blue border border-[#1E40AF]"
-                          : "border border-transparent text-slate-600 hover:text-slate-800"
+                          ? "bg-white dark:bg-gray-900 text-accent-blue border border-[#1E40AF]"
+                          : "border border-transparent text-slate-600 dark:text-gray-400 hover:text-slate-800 dark:hover:text-gray-100"
                       }`}
                     >
                       {mode.label}
@@ -780,13 +780,13 @@ function AddPayment() {
             </div>
             <div className="overflow-x-auto">
               {invoices.length === 0 ? (
-                <p className="px-4 py-8 text-center text-sm text-slate-500">
+                <p className="px-4 py-8 text-center text-sm text-slate-500 dark:text-gray-400">
                   {invoiceEmptyMessage}
                 </p>
               ) : (
                 <table className="w-full min-w-180 text-sm">
                   <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50">
+                    <tr className="border-b border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800">
                       <th className="px-4 py-3 text-left">
                         <input
                           type="checkbox"
@@ -796,25 +796,25 @@ function AddPayment() {
                           }
                           onChange={handleSelectAll}
                           disabled={isAutomatic}
-                          className="h-4 w-4 rounded border-slate-300 text-[#008951] focus:ring-[#008951] disabled:cursor-default"
+                          className="h-4 w-4 rounded border-slate-300 dark:border-gray-600 text-[#008951] dark:text-emerald-400 focus:ring-[#008951] disabled:cursor-default"
                         />
                       </th>
-                      <th className="px-4 py-3 text-left font-semibold text-slate-700">
+                      <th className="px-4 py-3 text-left font-semibold text-slate-700 dark:text-gray-300">
                         Invoice #
                       </th>
-                      <th className="px-4 py-3 text-left font-semibold text-slate-700">
+                      <th className="px-4 py-3 text-left font-semibold text-slate-700 dark:text-gray-300">
                         Sale #
                       </th>
-                      <th className="px-4 py-3 text-left font-semibold text-slate-700">
+                      <th className="px-4 py-3 text-left font-semibold text-slate-700 dark:text-gray-300">
                         Date
                       </th>
-                      <th className="px-4 py-3 text-right font-semibold text-slate-700">
+                      <th className="px-4 py-3 text-right font-semibold text-slate-700 dark:text-gray-300">
                         Total (Rs.)
                       </th>
-                      <th className="px-4 py-3 text-right font-semibold text-slate-700">
+                      <th className="px-4 py-3 text-right font-semibold text-slate-700 dark:text-gray-300">
                         {isRefund ? "Refund Due (Rs.)" : "Outstanding (Rs.)"}
                       </th>
-                      <th className="px-4 py-3 text-right font-semibold text-slate-700">
+                      <th className="px-4 py-3 text-right font-semibold text-slate-700 dark:text-gray-300">
                         {isRefund ? "Amount to refund (Rs.)" : "Amount to apply (Rs.)"}
                       </th>
                     </tr>
@@ -827,8 +827,10 @@ function AddPayment() {
                       return (
                         <tr
                           key={invoiceId}
-                          className={`border-b border-slate-100 last:border-0 ${
-                            isSelected ? "bg-emerald-50/70" : "hover:bg-slate-50"
+                          className={`border-b border-slate-100 dark:border-gray-800 last:border-0 ${
+                            isSelected
+                              ? "bg-emerald-50/70"
+                              : "hover:bg-slate-50 dark:hover:bg-gray-800"
                           }`}
                         >
                           <td className="px-4 py-3">
@@ -837,23 +839,26 @@ function AddPayment() {
                               checked={isSelected}
                               onChange={() => handleInvoiceToggle(invoice)}
                               disabled={isAutomatic}
-                              className="h-4 w-4 rounded border-slate-300 text-[#008951] focus:ring-[#008951] disabled:cursor-default"
+                              className="h-4 w-4 rounded border-slate-300 dark:border-gray-600 text-[#008951] dark:text-emerald-400 focus:ring-[#008951] disabled:cursor-default"
                             />
                           </td>
-                          <td className="px-4 py-3 font-semibold text-[#1a56db]">
+                          <td className="px-4 py-3 font-semibold text-[#1a56db] dark:text-blue-600">
                             {invoice.invoiceNumber || getInvoiceLabel(invoice)}
                           </td>
-                          <td className="px-4 py-3 text-slate-600">
+                          <td className="px-4 py-3 text-slate-600 dark:text-slate-500">
                             {invoice.saleNumber || "—"}
                           </td>
-                          <td className="px-4 py-3 text-slate-600">
+                          <td className="px-4 py-3 text-slate-600 dark:text-slate-500">
                             {formatInvoiceDate(invoice.invoiceDate) || "—"}
                           </td>
-                          <td className="px-4 py-3 text-right text-slate-700">
+                          <td className="px-4 py-3 text-right text-slate-700 dark:text-slate-100">
                             {Number(invoice.totalAmount || 0).toLocaleString()}
                           </td>
-                          <td className="px-4 py-3 text-right font-semibold text-slate-800">
-                            {getAllocatableAmount(invoice, isRefund).toLocaleString()}
+                          <td className="px-4 py-3 text-right font-semibold text-slate-800 dark:text-gray-100">
+                            {getAllocatableAmount(
+                              invoice,
+                              isRefund,
+                            ).toLocaleString()}
                           </td>
                           <td className="px-4 py-3 text-right">
                             {isSelected ? (
@@ -864,17 +869,19 @@ function AddPayment() {
                                 onChange={(event) =>
                                   handleAllocationAmountChange(
                                     invoiceId,
-                                    event.target.value
+                                    event.target.value,
                                   )
                                 }
-                                className={`w-32 rounded-md border px-3 py-1.5 text-right text-sm text-slate-900 outline-none ${
+                                className={`w-32 rounded-md border px-3 py-1.5 text-right text-sm text-slate-900 dark:text-gray-100 outline-none ${
                                   isAutomatic
-                                    ? "cursor-default border-emerald-200 bg-emerald-50"
-                                    : "border-slate-200 bg-white focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                                    ? "cursor-default border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950"
+                                    : "border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                                 }`}
                               />
                             ) : (
-                              <span className="text-slate-400">—</span>
+                              <span className="text-slate-400 dark:text-gray-500">
+                                —
+                              </span>
                             )}
                           </td>
                         </tr>
@@ -884,11 +891,11 @@ function AddPayment() {
                 </table>
               )}
             </div>
-            <div className="border-t border-slate-100 p-4">
+            <div className="border-t border-slate-100 dark:border-gray-800 p-4">
               <label className="block text-sm font-normal text-tertiary mb-1.5">
                 Allocation Remarks
               </label>
-              <p className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
+              <p className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-3 py-2 text-sm text-slate-600 dark:text-gray-400">
                 {appliedAmountsLabel || "—"}
               </p>
             </div>
@@ -896,11 +903,11 @@ function AddPayment() {
         </div>
 
         {/* Bottom Action Bar */}
-        <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm">
           <button
             type="button"
             onClick={() => navigate("/payments")}
-            className="rounded-lg border border-slate-200 bg-white px-6 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-6 py-2 text-sm font-medium text-slate-700 dark:text-gray-300 transition hover:bg-slate-50 dark:hover:bg-gray-800"
           >
             Cancel
           </button>

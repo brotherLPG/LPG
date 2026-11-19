@@ -128,29 +128,29 @@ function AddExpenses() {
   };
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
       <section className="max-w-5xl mx-auto">
         {/* Header & Breadcrumbs */}
         <div className="mb-6">
           <p className="text-xs mb-2">
             <span
               onClick={() => navigate("/dashboard")}
-              className="cursor-pointer font-medium text-slate-400 hover:text-slate-600 transition-colors duration-200"
+              className="cursor-pointer font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors duration-200"
             >
               Dashboard
             </span>{" "}
-            <span className="px-1 text-slate-400">/</span>{" "}
+            <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
             <span
               onClick={() => navigate("/expenses")}
-              className="cursor-pointer font-medium text-slate-400 hover:text-slate-600 transition-colors duration-200"
+              className="cursor-pointer font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors duration-200"
             >
               Expenses
             </span>{" "}
-            <span className="px-1 text-slate-400">/</span>{" "}
-            <span className="font-semibold text-slate-600">Add Expense</span>
+            <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
+            <span className="font-semibold text-slate-600 dark:text-gray-400">Add Expense</span>
           </p>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Add Expense</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-gray-100">Add Expense</h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">
             Record a new expense and categorize for accounting
           </p>
         </div>
@@ -158,28 +158,28 @@ function AddExpenses() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column: Expense Details */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-              <div className="border-b border-slate-200 p-4">
-                <h2 className="text-sm font-semibold text-slate-800">Expense Details</h2>
+            <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+              <div className="border-b border-slate-200 dark:border-gray-700 p-4">
+                <h2 className="text-sm font-semibold text-slate-800 dark:text-gray-100">Expense Details</h2>
               </div>
               <div className="p-5 space-y-4">
                 {/* Expense Number */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                     Expense Number
                   </label>
                   <input
                     type="text"
                     disabled
                     value={isLoadingOptions ? "Loading..." : `${nextExpenseNumber} (Auto-generated)`}
-                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-3 py-2 text-sm text-slate-500 dark:text-gray-400 outline-none cursor-not-allowed"
                   />
                 </div>
 
                 {/* Category */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Category <span className="text-rose-500">*</span>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                    Category <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <SearchableCustomerSelect
                     customers={categoryOptions}
@@ -195,20 +195,20 @@ function AddExpenses() {
 
                 {/* Date */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Date <span className="text-rose-500">*</span>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                    Date <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <input
                     type="date"
                     value={expenseDate}
                     onChange={(e) => setExpenseDate(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
 
                 {/* Vendor / Payee Name */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                     Vendor / Payee Name
                   </label>
                   <input
@@ -216,13 +216,13 @@ function AddExpenses() {
                     value={vendorPayeeName}
                     onChange={(e) => setVendorPayeeName(e.target.value)}
                     placeholder="e.g. WAPDA Power Corporation"
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                     Description
                   </label>
                   <textarea
@@ -230,14 +230,14 @@ function AddExpenses() {
                     value={expenseDescription}
                     onChange={(e) => setExpenseDescription(e.target.value)}
                     placeholder="Electricity bill for Rawalpindi plant facility for the month of August 2026"
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
                   />
                 </div>
 
                 {/* Status */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Status <span className="text-rose-500">*</span>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                    Status <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <SearchableCustomerSelect
                     customers={statusOptions}
@@ -253,7 +253,7 @@ function AddExpenses() {
 
                 {/* Remarks */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                     Remarks
                   </label>
                   <textarea
@@ -261,29 +261,29 @@ function AddExpenses() {
                     value={remarks}
                     onChange={(e) => setRemarks(e.target.value)}
                     placeholder="Internal note or additional information..."
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
                   />
                 </div>
 
                 {/* Approved Toggle */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                     Approval Status
                   </label>
                   <div className="flex items-center gap-3">
                     <button
                       type="button"
                       onClick={() => setIsApproved(!isApproved)}
-                      className={`relative inline-flex h-6 w-11 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isApproved ? "bg-[#10b981]" : "bg-slate-200"}`}
+                      className={`relative inline-flex h-6 w-11 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isApproved ? "bg-[#10b981]" : "bg-slate-200 dark:bg-gray-700"}`}
                       role="switch"
                       aria-checked={isApproved}
                     >
                       <span
                         aria-hidden="true"
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isApproved ? "translate-x-5" : "translate-x-0"}`}
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white dark:bg-gray-900 shadow ring-0 transition duration-200 ease-in-out ${isApproved ? "translate-x-5" : "translate-x-0"}`}
                       />
                     </button>
-                    <span className={`text-sm font-semibold ${isApproved ? "text-[#008951]" : "text-slate-500"}`}>
+                    <span className={`text-sm font-semibold ${isApproved ? "text-[#008951] dark:text-emerald-400" : "text-slate-500 dark:text-gray-400"}`}>
                       {isApproved ? "Approved" : "Not Approved"}
                     </span>
                   </div>
@@ -294,15 +294,15 @@ function AddExpenses() {
 
           {/* Right Column: Payment Information */}
           <div className="lg:col-span-1">
-            <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-              <div className="border-b border-slate-200 p-4">
-                <h2 className="text-sm font-semibold text-slate-800">Payment Information</h2>
+            <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+              <div className="border-b border-slate-200 dark:border-gray-700 p-4">
+                <h2 className="text-sm font-semibold text-slate-800 dark:text-gray-100">Payment Information</h2>
               </div>
               <div className="p-5 space-y-4">
                 {/* Amount */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Amount (Rs.) <span className="text-rose-500">*</span>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                    Amount (Rs.) <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <input
                     type="number"
@@ -310,14 +310,14 @@ function AddExpenses() {
                     value={expenseAmount}
                     onChange={(e) => setExpenseAmount(e.target.value)}
                     placeholder="e.g. 65000"
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
 
                 {/* Payment Method */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Payment Method <span className="text-rose-500">*</span>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                    Payment Method <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <SearchableCustomerSelect
                     customers={paymentMethodOptions}
@@ -333,8 +333,8 @@ function AddExpenses() {
 
                 {/* Source Account */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Source Account <span className="text-rose-500">*</span>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                    Source Account <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <SearchableCustomerSelect
                     customers={accountOptions}
@@ -350,7 +350,7 @@ function AddExpenses() {
 
                 {/* Reference Number */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                     Reference / Receipt Number
                   </label>
                   <input
@@ -358,20 +358,20 @@ function AddExpenses() {
                     value={referenceNumber}
                     onChange={(e) => setReferenceNumber(e.target.value)}
                     placeholder="e.g. TXN-98230040"
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
 
                 {/* Payment Date */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                     Payment Date
                   </label>
                   <input
                     type="date"
                     value={paymentDate}
                     onChange={(e) => setPaymentDate(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
               </div>
@@ -380,11 +380,11 @@ function AddExpenses() {
         </div>
 
         {/* Bottom Action Bar */}
-        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end sm:gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end sm:gap-3 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm">
           <button
             type="button"
             onClick={() => navigate("/expenses")}
-            className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-5 py-2 text-sm font-medium text-slate-700 dark:text-gray-300 transition hover:bg-slate-50 dark:hover:bg-gray-800"
           >
             Cancel
           </button>
@@ -392,7 +392,7 @@ function AddExpenses() {
             type="button"
             disabled={createMutation.isPending}
             onClick={handleSaveAndAddAnother}
-            className="rounded-lg border border-[#1a56db] bg-white px-4 py-2 text-sm font-medium text-[#1a56db] shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
+            className="rounded-lg border border-[#1a56db] bg-white dark:bg-gray-900 px-4 py-2 text-sm font-medium text-[#1a56db] dark:text-blue-400 shadow-sm transition hover:bg-slate-50 dark:hover:bg-gray-800 disabled:opacity-50"
           >
             Save & Add Another
           </button>

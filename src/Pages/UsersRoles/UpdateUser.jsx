@@ -12,14 +12,14 @@ import { useToast } from "../../utils/GlobalToast";
 import SearchableCustomerSelect from "../../components/SearchableCustomerSelect";
 
 const badgeColors = {
-    emerald: "bg-emerald-50 text-emerald-600",
-    blue: "bg-blue-50 text-blue-600",
-    slate: "bg-slate-100 text-slate-500",
+    emerald: "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400",
+    blue: "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400",
+    slate: "bg-slate-100 dark:bg-gray-800 text-slate-500 dark:text-gray-400",
 };
 
 const statusStyles = {
-    Active: "bg-emerald-50 text-emerald-700",
-    Inactive: "bg-slate-100 text-slate-600",
+    Active: "bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300",
+    Inactive: "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-400",
 };
 
 const statusDotColors = {
@@ -31,7 +31,7 @@ function Field({ label, required, hint, children }) {
     return (
         <label className="block">
             <span className="mb-1 block text-BLUE-dark text-[13px] font-semibold">
-                {label} {required && <span className="text-red-500">*</span>}
+                {label} {required && <span className="text-red-500 dark:text-red-400">*</span>}
             </span>
             {children}
             {hint && <span className="mt-1 block text-[11px] text-4th-color">{hint}</span>}
@@ -123,8 +123,8 @@ function UpdateUser() {
         })
         : [];
 
-    const inputClass = "w-full rounded border border-[#E5E7EB] bg-white px-2.5 py-2 text-[13px] text-BLUE-dark outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
-    const selectClass = "w-full rounded border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 py-2 text-[13px] text-BLUE-dark outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
+    const inputClass = "w-full rounded border border-[#E5E7EB] dark:border-gray-700 bg-white dark:bg-gray-900 px-2.5 py-2 text-[13px] text-BLUE-dark outline-none transition placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
+    const selectClass = "w-full rounded border border-[#E5E7EB] dark:border-gray-700 bg-[#F9FAFB] dark:bg-gray-900 px-2.5 py-2 text-[13px] text-BLUE-dark outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
     const updateField = (key) => (event) => {
         setForm((current) => ({ ...current, [key]: event.target.value }));
 
@@ -208,15 +208,15 @@ function UpdateUser() {
     };
 
     if (isUserLoading) {
-        return <main className="flex min-h-full items-center justify-center bg-slate-50 p-8 text-sm text-slate-500">Loading user...</main>;
+        return <main className="flex min-h-full items-center justify-center bg-slate-50 dark:bg-gray-800 p-8 text-sm text-slate-500 dark:text-gray-400">Loading user...</main>;
     }
 
     if (userError || !user) {
-        return <main className="flex min-h-full items-center justify-center bg-slate-50 p-8 text-sm text-red-500">Unable to load user.</main>;
+        return <main className="flex min-h-full items-center justify-center bg-slate-50 dark:bg-gray-800 p-8 text-sm text-red-500 dark:text-red-400">Unable to load user.</main>;
     }
 
     return (
-      <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
+      <main className="min-h-full bg-slate-50 dark:bg-gray-800 p-4 sm:p-6 lg:p-8">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <p className="text-xs">
@@ -247,8 +247,8 @@ function UpdateUser() {
 
           <div className="grid gap-3 lg:grid-cols-[1.65fr_1fr]">
             <div className="space-y-3">
-              <section className="overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
-                <h2 className="border-b border-slate-100 px-3 py-2 text-[16px] font-bold text-BLUE-dark">
+              <section className="overflow-hidden rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
+                <h2 className="border-b border-slate-100 dark:border-gray-800 px-3 py-2 text-[16px] font-bold text-BLUE-dark">
                   User Information
                 </h2>
                 <div className="grid gap-x-2.5 gap-y-2.5 p-3 sm:grid-cols-2">
@@ -260,7 +260,7 @@ function UpdateUser() {
                       className={`${inputClass} ${fullNameError ? "border-red-400 focus:border-red-500 focus:ring-red-100" : ""}`}
                     />
                     {fullNameError && (
-                      <span className="mt-1 block text-[11px] text-red-500">{fullNameError}</span>
+                      <span className="mt-1 block text-[11px] text-red-500 dark:text-red-400">{fullNameError}</span>
                     )}
                   </Field>
                   <Field label="Email Address" required>
@@ -272,7 +272,7 @@ function UpdateUser() {
                       className={`${inputClass} ${emailError ? "border-red-400 focus:border-red-500 focus:ring-red-100" : ""}`}
                     />
                     {emailError && (
-                      <span className="mt-1 block text-[11px] text-red-500">{emailError}</span>
+                      <span className="mt-1 block text-[11px] text-red-500 dark:text-red-400">{emailError}</span>
                     )}
                   </Field>
                   <Field label="Phone Number">
@@ -295,8 +295,8 @@ function UpdateUser() {
                 </div>
               </section>
 
-              <section className="overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
-                <h2 className="border-b border-slate-100 px-3 py-2 text-[16px] font-bold text-BLUE-dark">
+              <section className="overflow-hidden rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
+                <h2 className="border-b border-slate-100 dark:border-gray-800 px-3 py-2 text-[16px] font-bold text-BLUE-dark">
                   Login Credentials
                 </h2>
                 <div className="grid gap-x-2.5 gap-y-2.5 p-3 sm:grid-cols-2">
@@ -323,7 +323,7 @@ function UpdateUser() {
                       <button
                         type="button"
                         onClick={() => setShowPassword((current) => !current)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500"
                       >
                         {showPassword ? (
                           <EyeOff size={13} />
@@ -333,7 +333,7 @@ function UpdateUser() {
                       </button>
                     </span>
                     {passwordError && (
-                      <span className="mt-1 block text-[11px] text-red-500">{passwordError}</span>
+                      <span className="mt-1 block text-[11px] text-red-500 dark:text-red-400">{passwordError}</span>
                     )}
                   </Field>
                   <Field label="Confirm Password">
@@ -350,7 +350,7 @@ function UpdateUser() {
                         onClick={() =>
                           setShowConfirmPassword((current) => !current)
                         }
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500"
                       >
                         {showConfirmPassword ? (
                           <EyeOff size={13} />
@@ -365,8 +365,8 @@ function UpdateUser() {
             </div>
 
             <div className="space-y-3">
-              <section className="overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
-                <h2 className="border-b border-slate-100 px-3 py-2 text-[16px] font-bold text-BLUE-dark">
+              <section className="overflow-hidden rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
+                <h2 className="border-b border-slate-100 dark:border-gray-800 px-3 py-2 text-[16px] font-bold text-BLUE-dark">
                   Role &amp; Security Config
                 </h2>
                 <div className="space-y-2.5 p-3">
@@ -393,7 +393,7 @@ function UpdateUser() {
                       emptyText="No employee found"
                     />
                   </Field>
-                  <p className="rounded bg-slate-50 px-2 py-2 text-[12px] leading-3">
+                  <p className="rounded bg-slate-50 dark:bg-gray-800 px-2 py-2 text-[12px] leading-3">
                     <span>Role Description:</span>
                     <span className="ms-2 text-4th-color">
                       {selectedRole?.roleDescription ||
@@ -423,13 +423,13 @@ function UpdateUser() {
                 </div>
               </section>
 
-              <section className="overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
-                <h2 className="border-b border-slate-100 px-3 py-2 text-[16px] font-bold text-BLUE-dark">
+              <section className="overflow-hidden rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
+                <h2 className="border-b border-slate-100 dark:border-gray-800 px-3 py-2 text-[16px] font-bold text-BLUE-dark">
                   Role Permissions Preview
                 </h2>
-                <div className="h-80 divide-y divide-slate-100 overflow-auto px-3">
+                <div className="h-80 divide-y divide-slate-100 dark:divide-gray-800 overflow-auto px-3">
                   {permissionRows.length === 0 ? (
-                    <p className="py-3 text-[13px] text-slate-500">
+                    <p className="py-3 text-[13px] text-slate-500 dark:text-gray-400">
                       No permissions preview available.
                     </p>
                   ) : (
@@ -456,7 +456,7 @@ function UpdateUser() {
             <button
               type="button"
               onClick={() => navigate("/users-roles")}
-              className="rounded border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+              className="rounded border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-gray-800"
             >
               Cancel
             </button>

@@ -98,17 +98,17 @@ function SalesPaymentTrend({ trend }) {
         );
 
   return (
-    <div className="h-full rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="h-full rounded-2xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 className="text-[16px] font-bold text-BLUE-dark">
             {trend?.title || "Sales & Receiving Payment Trend"}
           </h3>
           {trend?.periodLabel ? (
-            <p className="mt-0.5 text-xs text-slate-400">{trend.periodLabel}</p>
+            <p className="mt-0.5 text-xs text-slate-400 dark:text-gray-500">{trend.periodLabel}</p>
           ) : null}
         </div>
-        <div className="flex items-center gap-4 text-sm text-slate-500">
+        <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-gray-400">
           <span className="flex items-center gap-2">
             <span className="h-2.5 w-2.5 rounded-full bg-[#2563EB]" />
             Sales
@@ -121,7 +121,7 @@ function SalesPaymentTrend({ trend }) {
       </div>
 
       {empty ? (
-        <div className="flex h-72 items-center justify-center text-sm text-slate-400">
+        <div className="flex h-72 items-center justify-center text-sm text-slate-400 dark:text-gray-500">
           No trend data for this period.
         </div>
       ) : (
@@ -298,7 +298,7 @@ function SalesPaymentTrend({ trend }) {
 
           {hoveredItem && (
             <div
-              className="pointer-events-none absolute z-10 w-48 -translate-x-1/2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-lg"
+              className="pointer-events-none absolute z-10 w-48 -translate-x-1/2 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 shadow-lg"
               style={{
                 left: `${tooltipLeft}%`,
                 top: "12px",
@@ -309,16 +309,16 @@ function SalesPaymentTrend({ trend }) {
               </p>
               <div className="space-y-1.5 text-xs">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="flex items-center gap-1.5 text-slate-500">
+                  <span className="flex items-center gap-1.5 text-slate-500 dark:text-gray-400">
                     <span className="h-2 w-2 rounded-full bg-[#2563EB]" />
                     Sales
                   </span>
-                  <span className="font-semibold text-[#2563EB]">
+                  <span className="font-semibold text-[#2563EB] dark:text-blue-400">
                     {formatRupees(hoveredItem.sales)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <span className="flex items-center gap-1.5 text-slate-500">
+                  <span className="flex items-center gap-1.5 text-slate-500 dark:text-gray-400">
                     <span className="h-2 w-2 rounded-full bg-[#22C55E]" />
                     Received Payment
                   </span>
@@ -332,55 +332,55 @@ function SalesPaymentTrend({ trend }) {
         </div>
       )}
 
-      <div className="mt-2 grid grid-cols-1 gap-4 border-t border-slate-100 pt-4 sm:grid-cols-3">
+      <div className="mt-2 grid grid-cols-1 gap-4 border-t border-slate-100 dark:border-gray-800 pt-4 sm:grid-cols-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#EEF4FF] text-[#2563EB]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#EEF4FF] dark:bg-blue-950 text-[#2563EB] dark:text-blue-400">
             <TrendingUp className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-400 dark:text-gray-500">
               {highestSalesHighlight?.label || "Highest Sales"}
             </p>
             <p className="text-sm font-bold text-BLUE-dark">
               {highestSalesHighlight?.formattedAmount ||
                 formatRupees(highestSales.sales)}
             </p>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-400 dark:text-gray-500">
               {highestSalesHighlight?.dateLabel || highestSales.date}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#ECFDF5] text-[#22C55E]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#ECFDF5] dark:bg-emerald-950 text-[#22C55E]">
             <Wallet className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-400 dark:text-gray-500">
               {highestPaymentHighlight?.label || "Highest Received Payment"}
             </p>
             <p className="text-sm font-bold text-BLUE-dark">
               {highestPaymentHighlight?.formattedAmount ||
                 formatRupees(highestPayment.payment)}
             </p>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-400 dark:text-gray-500">
               {highestPaymentHighlight?.dateLabel || highestPayment.date}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F5F3FF] text-[#7C3AED]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F5F3FF] dark:bg-violet-950 text-[#7C3AED] dark:text-violet-400">
             <ArrowLeftRight className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-400 dark:text-gray-500">
               {averageDifferenceHighlight?.label || "Average Difference"}
             </p>
             <p className="text-sm font-bold text-BLUE-dark">
               {averageDifferenceHighlight?.formattedAmount || formatRupees(0)}
             </p>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-400 dark:text-gray-500">
               {averageDifferenceHighlight?.description || "per day"}
             </p>
           </div>

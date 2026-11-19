@@ -404,36 +404,36 @@ function CreateBatch({ mode = "create" }) {
 
   if ((isUpdateMode && isFetching) || isLoadingOptions) {
     return (
-      <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
-        <div className="flex items-center justify-center py-12 text-slate-500">Loading filling batch data...</div>
+      <main className="min-h-full bg-slate-50 dark:bg-gray-800 p-4 sm:p-6 lg:p-8">
+        <div className="flex items-center justify-center py-12 text-slate-500 dark:text-gray-400">Loading filling batch data...</div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-slate-50 dark:bg-gray-800 p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
         <p className="text-xs mb-2">
           <span
             onClick={() => navigate("/dashboard")}
-            className="cursor-pointer font-medium text-slate-400 hover:text-slate-600 transition-colors duration-200"
+            className="cursor-pointer font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors duration-200"
           >
             Dashboard
           </span>{" "}
-          <span className="px-1 text-slate-400">/</span>{" "}
+          <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
           <span
             onClick={() => navigate("/filling-batches")}
-            className="cursor-pointer font-medium text-slate-400 hover:text-slate-600 transition-colors duration-200"
+            className="cursor-pointer font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors duration-200"
           >
             Filling Batches
           </span>{" "}
-          <span className="px-1 text-slate-400">/</span>{" "}
-          <span className="font-semibold text-slate-600">{isUpdateMode ? "Edit Batch" : "Create Batch"}</span>
+          <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
+          <span className="font-semibold text-slate-600 dark:text-gray-400">{isUpdateMode ? "Edit Batch" : "Create Batch"}</span>
         </p>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-gray-100">
           {isUpdateMode ? "Edit Filling Batch" : "Create Filling Batch"}
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">
           {isUpdateMode
             ? "Update the batch. One run can include several cylinder types, such as 11.8 KG and 15 KG."
             : "One filling run can include several cylinder types, such as 11.8 KG and 15 KG."}
@@ -442,39 +442,39 @@ function CreateBatch({ mode = "create" }) {
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-6">
-            <div className="bg-slate-100 font-bold text-slate-800 text-sm px-3 py-1.5 rounded-md inline-block mb-4">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm p-6">
+            <div className="bg-slate-100 dark:bg-gray-800 font-bold text-slate-800 dark:text-gray-100 text-sm px-3 py-1.5 rounded-md inline-block mb-4">
               Batch Identification & Tank Sourcing
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Batch Number (Auto)
                 </label>
                 <input
                   type="text"
                   disabled
                   value={isUpdateMode ? batchData?.data?.batchNumber || "-" : "Auto generated on save"}
-                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-500 outline-none cursor-not-allowed"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-3 py-2.5 text-sm text-slate-500 dark:text-gray-400 outline-none cursor-not-allowed"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Filling Date <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Filling Date <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   type="date"
                   value={formData.fillingDate}
                   onChange={(e) => handleFieldChange("fillingDate", e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Source Storage Tank <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Source Storage Tank <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={tankOptions}
@@ -493,22 +493,22 @@ function CreateBatch({ mode = "create" }) {
                   emptyText="No storage tank found"
                 />
                 {storageTankIdError && (
-                  <p className="mt-1.5 text-xs text-rose-500">{storageTankIdError}</p>
+                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{storageTankIdError}</p>
                 )}
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-6">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm p-6">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <div className="bg-slate-100 font-bold text-slate-800 text-sm px-3 py-1.5 rounded-md inline-block">
+              <div className="bg-slate-100 dark:bg-gray-800 font-bold text-slate-800 dark:text-gray-100 text-sm px-3 py-1.5 rounded-md inline-block">
                 Cylinder Configuration
               </div>
               <button
                 type="button"
                 onClick={addLine}
                 disabled={!canAddLine}
-                className="inline-flex items-center gap-1.5 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-md border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950 px-3 py-1.5 text-sm font-semibold text-emerald-700 dark:text-emerald-300 transition-colors hover:bg-emerald-100 dark:hover:bg-emerald-900 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Plus className="h-4 w-4" />
                 Add cylinder type
@@ -525,9 +525,9 @@ function CreateBatch({ mode = "create" }) {
                 );
                 const calc = lineCalcs[index];
                 return (
-                  <div key={line.key} className="rounded-lg border border-slate-200 bg-slate-50/60 p-4">
+                  <div key={line.key} className="rounded-lg border border-slate-200 dark:border-gray-700 bg-slate-50/60 dark:bg-gray-800/60 p-4">
                     <div className="mb-4 flex items-center justify-between gap-3">
-                      <p className="text-sm font-semibold text-slate-800">
+                      <p className="text-sm font-semibold text-slate-800 dark:text-gray-100">
                         Cylinder type {index + 1}
                         {calc?.typeName && calc.typeName !== "Cylinder" ? ` — ${calc.typeName}` : ""}
                       </p>
@@ -535,7 +535,7 @@ function CreateBatch({ mode = "create" }) {
                         <button
                           type="button"
                           onClick={() => removeLine(line.key)}
-                          className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600 hover:text-rose-700"
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                           Remove
@@ -545,8 +545,8 @@ function CreateBatch({ mode = "create" }) {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                          Target Cylinder Type <span className="text-rose-500">*</span>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                          Target Cylinder Type <span className="text-rose-500 dark:text-rose-400">*</span>
                         </label>
                         <SearchableCustomerSelect
                           customers={cylinderTypes.filter(
@@ -574,13 +574,13 @@ function CreateBatch({ mode = "create" }) {
                           emptyText="No cylinder type found"
                         />
                         {errors.cylinderTypeId && (
-                          <p className="mt-1.5 text-xs text-rose-500">{errors.cylinderTypeId}</p>
+                          <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{errors.cylinderTypeId}</p>
                         )}
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                          Cylinder Target Run Count <span className="text-rose-500">*</span>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                          Cylinder Target Run Count <span className="text-rose-500 dark:text-rose-400">*</span>
                         </label>
                         <input
                           type="number"
@@ -593,20 +593,20 @@ function CreateBatch({ mode = "create" }) {
                               [line.key]: { ...prev[line.key], cylinderCount: "" },
                             }));
                           }}
-                          className={`w-full rounded-md border bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:ring-1 ${
+                          className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-1 ${
                             errors.cylinderCount
                               ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500"
-                              : "border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
+                              : "border-slate-200 dark:border-gray-700 focus:border-emerald-500 focus:ring-emerald-500"
                           }`}
                         />
                         {errors.cylinderCount && (
-                          <p className="mt-1.5 text-xs text-rose-500">{errors.cylinderCount}</p>
+                          <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{errors.cylinderCount}</p>
                         )}
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                          Target Fill Weight per Cylinder <span className="text-rose-500">*</span>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                          Target Fill Weight per Cylinder <span className="text-rose-500 dark:text-rose-400">*</span>
                         </label>
                         <input
                           type="number"
@@ -620,19 +620,19 @@ function CreateBatch({ mode = "create" }) {
                               [line.key]: { ...prev[line.key], targetFillWeightKg: "" },
                             }));
                           }}
-                          className={`w-full rounded-md border bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:ring-1 ${
+                          className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-1 ${
                             errors.targetFillWeightKg
                               ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500"
-                              : "border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
+                              : "border-slate-200 dark:border-gray-700 focus:border-emerald-500 focus:ring-emerald-500"
                           }`}
                         />
                         {errors.targetFillWeightKg && (
-                          <p className="mt-1.5 text-xs text-rose-500">{errors.targetFillWeightKg}</p>
+                          <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{errors.targetFillWeightKg}</p>
                         )}
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                           Residual Recovered (leftover)
                         </label>
                         <input
@@ -642,12 +642,12 @@ function CreateBatch({ mode = "create" }) {
                           value={line.residualRecoveredKg}
                           onChange={(e) => handleLineChange(line.key, "residualRecoveredKg", e.target.value)}
                           placeholder="Leave empty for first fill"
-                          className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                          className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                           Actual LPG Used from Tank
                         </label>
                         <input
@@ -657,12 +657,12 @@ function CreateBatch({ mode = "create" }) {
                           value={line.actualLpgUsedKg}
                           onChange={(e) => handleLineChange(line.key, "actualLpgUsedKg", e.target.value)}
                           placeholder="Auto from residual, or enter tank usage"
-                          className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                          className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                         />
                       </div>
                     </div>
 
-                    <p className="mt-3 text-xs text-slate-500">
+                    <p className="mt-3 text-xs text-slate-500 dark:text-gray-400">
                       Expected for this type: {calc?.count?.toLocaleString() || 0} × {calc?.weight?.toLocaleString() || 0} KG = {calc?.expected?.toLocaleString() || 0} KG.
                       Tank usage for this type: {calc?.deducted?.toLocaleString() || 0} KG.
                       {" "}Leave both boxes empty when there is no leftover. The cylinder size is not copied into them.
@@ -672,14 +672,14 @@ function CreateBatch({ mode = "create" }) {
               })}
             </div>
 
-            <p className="mt-3 text-xs text-slate-500">
+            <p className="mt-3 text-xs text-slate-500 dark:text-gray-400">
               Add another row for a different size, for example 11.8 KG and 15 KG in the same batch. Each type is filled and stocked separately. The tank is reduced by the total LPG used.
             </p>
 
             <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Assigned Batch Operator (Employee) <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Assigned Batch Operator (Employee) <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={operatorOptions}
@@ -699,37 +699,37 @@ function CreateBatch({ mode = "create" }) {
                   emptyText="No employee found"
                 />
                 {operatorEmployeeIdError && (
-                  <p className="mt-1.5 text-xs text-rose-500">{operatorEmployeeIdError}</p>
+                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{operatorEmployeeIdError}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Batch Status
                 </label>
                 <div className="relative">
                   <select
                     value={formData.batchStatus}
                     onChange={(e) => handleFieldChange("batchStatus", e.target.value)}
-                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm text-slate-700 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2.5 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                   >
                     {statuses.map((status) => (
                       <option key={status.value} value={status.value}>{status.label}</option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500 pointer-events-none" />
                 </div>
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Batch Execution Notes / Safety Checks
                 </label>
                 <textarea
                   rows="2"
                   value={formData.remarks}
                   onChange={(e) => handleFieldChange("remarks", e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 resize-none"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 resize-none"
                 />
               </div>
             </div>
@@ -737,55 +737,55 @@ function CreateBatch({ mode = "create" }) {
         </div>
 
         <div className="lg:col-span-1 space-y-6">
-          <div className="rounded-xl border border-emerald-400 bg-white shadow-sm p-6">
-            <h2 className="text-base font-bold text-emerald-600 mb-5">
+          <div className="rounded-xl border border-emerald-400 bg-white dark:bg-gray-900 shadow-sm p-6">
+            <h2 className="text-base font-bold text-emerald-600 dark:text-emerald-400 mb-5">
               Filling Batch Calculations
             </h2>
 
             <div className="space-y-3.5">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-500 font-medium">Expected Fill</span>
-                <span className="font-bold text-slate-900">{expectedConsumption.toLocaleString()} KG</span>
+                <span className="text-slate-500 dark:text-gray-400 font-medium">Expected Fill</span>
+                <span className="font-bold text-slate-900 dark:text-gray-100">{expectedConsumption.toLocaleString()} KG</span>
               </div>
               <div className="-mt-1 space-y-1">
                 {lineCalcs.map((calc, index) => (
-                  <p key={formData.lines[index].key} className="text-[11px] text-slate-400">
+                  <p key={formData.lines[index].key} className="text-[11px] text-slate-400 dark:text-gray-500">
                     {calc.typeName}: {calc.count.toLocaleString()} × {calc.weight.toLocaleString()} KG
                   </p>
                 ))}
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-500 font-medium">Residual Recovered</span>
-                <span className="font-bold text-slate-900">{recoveredResidual.toLocaleString()} KG</span>
+                <span className="text-slate-500 dark:text-gray-400 font-medium">Residual Recovered</span>
+                <span className="font-bold text-slate-900 dark:text-gray-100">{recoveredResidual.toLocaleString()} KG</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-500 font-medium">Deducted from Tank</span>
-                <span className="font-bold text-slate-900">{deductedFromTank.toLocaleString()} KG</span>
+                <span className="text-slate-500 dark:text-gray-400 font-medium">Deducted from Tank</span>
+                <span className="font-bold text-slate-900 dark:text-gray-100">{deductedFromTank.toLocaleString()} KG</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-500 font-medium">Current Sourced Tank Level</span>
-                <span className="font-bold text-slate-900">{currentTankLevel.toLocaleString()} KG</span>
+                <span className="text-slate-500 dark:text-gray-400 font-medium">Current Sourced Tank Level</span>
+                <span className="font-bold text-slate-900 dark:text-gray-100">{currentTankLevel.toLocaleString()} KG</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-500 font-medium">Tank Level After Filling</span>
-                <span className="font-bold text-slate-900">{levelAfterFilling.toLocaleString()} KG</span>
+                <span className="text-slate-500 dark:text-gray-400 font-medium">Tank Level After Filling</span>
+                <span className="font-bold text-slate-900 dark:text-gray-100">{levelAfterFilling.toLocaleString()} KG</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-500 font-medium">Remaining Tank Capacity</span>
-                <span className="font-bold text-slate-900">{remainingCapacity.toLocaleString()} KG</span>
+                <span className="text-slate-500 dark:text-gray-400 font-medium">Remaining Tank Capacity</span>
+                <span className="font-bold text-slate-900 dark:text-gray-100">{remainingCapacity.toLocaleString()} KG</span>
               </div>
             </div>
 
             {usageMismatch ? (
-              <div className="mt-5 rounded-lg border border-rose-100 bg-rose-50 p-3">
-                <p className="text-xs leading-relaxed text-rose-700">
+              <div className="mt-5 rounded-lg border border-rose-100 dark:border-rose-900 bg-rose-50 dark:bg-rose-950 p-3">
+                <p className="text-xs leading-relaxed text-rose-700 dark:text-rose-600">
                   For each cylinder type, residual + tank usage must equal that type&apos;s expected fill.
                 </p>
               </div>
             ) : (
-              <div className="mt-5 flex items-start gap-2.5 rounded-lg border border-emerald-100 bg-emerald-50/60 p-3">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                <p className="text-xs leading-relaxed text-slate-700">
+              <div className="mt-5 flex items-start gap-2.5 rounded-lg border border-emerald-100 dark:border-emerald-900 bg-emerald-50 p-3">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-500">
                   {recoveredResidual > 0
                     ? `Tank will be deducted ${deductedFromTank.toLocaleString()} KG across ${formData.lines.length} cylinder type${formData.lines.length > 1 ? "s" : ""}.`
                     : "First fill: no leftover. Tank decreases by the full expected fill of every cylinder type."}
@@ -794,7 +794,7 @@ function CreateBatch({ mode = "create" }) {
             )}
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm space-y-3">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm space-y-3">
             <button
               type="submit"
               className="w-full rounded-lg bg-[#059669] py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-emerald-700"
@@ -805,7 +805,7 @@ function CreateBatch({ mode = "create" }) {
             <button
               type="button"
               onClick={() => navigate("/filling-batches")}
-              className="w-full rounded-lg border border-slate-200 bg-white py-2.5 text-sm font-medium text-slate-700 transition-all hover:bg-slate-50"
+              className="w-full rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-2.5 text-sm font-medium text-slate-700 dark:text-gray-300 transition-all hover:bg-slate-50 dark:hover:bg-gray-800"
             >
               Cancel
             </button>

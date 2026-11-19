@@ -20,11 +20,11 @@ import { useGetPaymentById } from "../../queries/payments/payments.queries";
 function DetailItem({ label, value, icon: Icon }) {
   return (
     <div>
-      <dt className="text-xs font-semibold text-slate-400 flex items-center gap-1.5 mb-1">
-        {Icon && <Icon className="h-3.5 w-3.5 text-slate-400" />}
+      <dt className="text-xs font-semibold text-slate-400 dark:text-gray-500 flex items-center gap-1.5 mb-1">
+        {Icon && <Icon className="h-3.5 w-3.5 text-slate-400 dark:text-gray-500" />}
         {label}
       </dt>
-      <dd className="text-sm text-slate-800 font-medium wrap-break-word">
+      <dd className="text-sm text-slate-800 dark:text-gray-100 font-medium wrap-break-word">
         {value || "-"}
       </dd>
     </div>
@@ -71,23 +71,23 @@ function directionIcon(payment) {
 
 function directionBadgeStyle(payment) {
   if (payment.paymentType === "receive")
-    return "bg-emerald-50 text-emerald-700 border border-emerald-200";
+    return "bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800";
   if (payment.paymentType === "refund")
-    return "bg-purple-50 text-purple-700 border border-purple-200";
+    return "bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800";
   if (payment.paymentType === "pay")
-    return "bg-blue-50 text-blue-700 border border-blue-200";
-  return "bg-slate-50 text-slate-600 border border-slate-200";
+    return "bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800";
+  return "bg-slate-50 dark:bg-gray-800 text-slate-600 dark:text-gray-400 border border-slate-200 dark:border-gray-700";
 }
 
 function statusBadgeStyle(status) {
   const value = String(status || "").toLowerCase();
   if (value.includes("paid") || value.includes("completed"))
-    return "bg-emerald-50 text-emerald-700 border border-emerald-200";
+    return "bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800";
   if (value.includes("pending") || value.includes("partial"))
-    return "bg-amber-50 text-amber-700 border border-amber-200";
+    return "bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800";
   if (value.includes("cancel") || value.includes("fail"))
-    return "bg-red-50 text-red-700 border border-red-200";
-  return "bg-slate-50 text-slate-600 border border-slate-200";
+    return "bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800";
+  return "bg-slate-50 dark:bg-gray-800 text-slate-600 dark:text-gray-400 border border-slate-200 dark:border-gray-700";
 }
 
 function isPaidStatus(status) {
@@ -103,7 +103,7 @@ function PaymentDetails() {
 
   if (isLoading) {
     return (
-      <main className="flex min-h-full items-center justify-center bg-slate-50 p-8 text-sm text-slate-500">
+      <main className="flex min-h-full items-center justify-center bg-slate-50 dark:bg-gray-800 p-8 text-sm text-slate-500 dark:text-gray-400">
         Loading payment...
       </main>
     );
@@ -111,12 +111,12 @@ function PaymentDetails() {
 
   if (error || !payment) {
     return (
-      <main className="flex min-h-full flex-col items-center justify-center gap-4 bg-slate-50 p-8 text-sm text-red-500">
+      <main className="flex min-h-full flex-col items-center justify-center gap-4 bg-slate-50 dark:bg-gray-800 p-8 text-sm text-red-500 dark:text-red-400">
         <p>Unable to load payment.</p>
         <button
           type="button"
           onClick={() => navigate("/payments")}
-          className="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 font-semibold text-slate-600 shadow-sm"
+          className="inline-flex items-center gap-2 rounded-md bg-white dark:bg-gray-900 px-3 py-2 font-semibold text-slate-600 dark:text-gray-400 shadow-sm"
         >
           <ArrowLeft className="h-4 w-4" /> Back to Payments
         </button>
@@ -132,7 +132,7 @@ function PaymentDetails() {
   );
 
   return (
-    <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-slate-50 dark:bg-gray-800 p-4 sm:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto">
         {/* Header & Breadcrumbs */}
         <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
@@ -141,20 +141,20 @@ function PaymentDetails() {
               <button
                 type="button"
                 onClick={() => navigate("/dashboard")}
-                className="font-medium text-slate-400 hover:text-slate-600 transition-colors"
+                className="font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors"
               >
                 Dashboard
               </button>
-              <span className="px-1 text-slate-400">/</span>
+              <span className="px-1 text-slate-400 dark:text-gray-500">/</span>
               <button
                 type="button"
                 onClick={() => navigate("/payments")}
-                className="font-medium text-slate-400 hover:text-slate-600 transition-colors"
+                className="font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors"
               >
                 Payments
               </button>
-              <span className="px-1 text-slate-400">/</span>
-              <span className="font-semibold text-slate-600">Payment Details</span>
+              <span className="px-1 text-slate-400 dark:text-gray-500">/</span>
+              <span className="font-semibold text-slate-600 dark:text-gray-400">Payment Details</span>
             </p>
             <h1 className="text-2xl font-bold tracking-tight text-BLUE-dark">
               {payment.paymentNumber || "Payment Voucher"}
@@ -167,10 +167,10 @@ function PaymentDetails() {
         </div>
 
         {/* Status & Amount Banner */}
-        <div className="mb-5 rounded-xl border border-slate-200 bg-white shadow-sm p-5 flex flex-wrap items-center justify-between gap-4">
+        <div className="mb-5 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm p-5 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div>
-              <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">
+              <p className="text-xs text-slate-400 dark:text-gray-500 font-semibold uppercase tracking-wider mb-1">
                 Direction
               </p>
               <span
@@ -180,9 +180,9 @@ function PaymentDetails() {
                 {paymentTypeLabel(payment)}
               </span>
             </div>
-            <div className="h-10 w-px bg-slate-200 hidden sm:block" />
+            <div className="h-10 w-px bg-slate-200 dark:bg-gray-700 hidden sm:block" />
             <div>
-              <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">
+              <p className="text-xs text-slate-400 dark:text-gray-500 font-semibold uppercase tracking-wider mb-1">
                 Status
               </p>
               <span
@@ -198,10 +198,10 @@ function PaymentDetails() {
             </div>
           </div>
           <div className="text-right">
-            <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">
+            <p className="text-xs text-slate-400 dark:text-gray-500 font-semibold uppercase tracking-wider mb-1">
               Payment Amount
             </p>
-            <p className="text-3xl font-extrabold text-slate-900">
+            <p className="text-3xl font-extrabold text-slate-900 dark:text-gray-100">
               Rs. {(payment.paymentAmount || 0).toLocaleString()}
             </p>
           </div>
@@ -210,9 +210,9 @@ function PaymentDetails() {
         {/* Details Grid */}
         <div className="grid gap-5 lg:grid-cols-2">
           {/* Card 1: Payment Information */}
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <h2 className="border-b border-slate-100 px-4 py-3 text-base font-bold text-slate-800 flex items-center gap-2">
-              <Receipt className="h-4 w-4 text-[#008951]" /> Payment Information
+          <section className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <h2 className="border-b border-slate-100 dark:border-gray-800 px-4 py-3 text-base font-bold text-slate-800 dark:text-gray-100 flex items-center gap-2">
+              <Receipt className="h-4 w-4 text-[#008951] dark:text-emerald-400" /> Payment Information
             </h2>
             <dl className="grid gap-5 p-5 sm:grid-cols-2">
               <DetailItem
@@ -249,9 +249,9 @@ function PaymentDetails() {
           </section>
 
           {/* Card 2: Party Information */}
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <h2 className="border-b border-slate-100 px-4 py-3 text-base font-bold text-slate-800 flex items-center gap-2">
-              <User className="h-4 w-4 text-[#008951]" /> Party Information
+          <section className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <h2 className="border-b border-slate-100 dark:border-gray-800 px-4 py-3 text-base font-bold text-slate-800 dark:text-gray-100 flex items-center gap-2">
+              <User className="h-4 w-4 text-[#008951] dark:text-emerald-400" /> Party Information
             </h2>
             <dl className="grid gap-5 p-5 sm:grid-cols-2">
               <DetailItem
@@ -277,9 +277,9 @@ function PaymentDetails() {
           </section>
 
           {/* Card 3: Transaction Details */}
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <h2 className="border-b border-slate-100 px-4 py-3 text-base font-bold text-slate-800 flex items-center gap-2">
-              <FileText className="h-4 w-4 text-[#008951]" /> Transaction Details
+          <section className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <h2 className="border-b border-slate-100 dark:border-gray-800 px-4 py-3 text-base font-bold text-slate-800 dark:text-gray-100 flex items-center gap-2">
+              <FileText className="h-4 w-4 text-[#008951] dark:text-emerald-400" /> Transaction Details
             </h2>
             <dl className="grid gap-5 p-5 sm:grid-cols-2">
               <DetailItem
@@ -294,11 +294,11 @@ function PaymentDetails() {
               />
               {payment.remarks && (
                 <div className="sm:col-span-2">
-                  <dt className="text-xs font-semibold text-slate-400 flex items-center gap-1.5 mb-1">
-                    <FileText className="h-3.5 w-3.5 text-slate-400" />
+                  <dt className="text-xs font-semibold text-slate-400 dark:text-gray-500 flex items-center gap-1.5 mb-1">
+                    <FileText className="h-3.5 w-3.5 text-slate-400 dark:text-gray-500" />
                     Remarks
                   </dt>
-                  <dd className="text-sm text-slate-800 font-medium bg-slate-50 rounded-md p-3 border border-slate-100">
+                  <dd className="text-sm text-slate-800 dark:text-gray-100 font-medium bg-slate-50 dark:bg-gray-800 rounded-md p-3 border border-slate-100 dark:border-gray-800">
                     {payment.remarks}
                   </dd>
                 </div>
@@ -307,22 +307,22 @@ function PaymentDetails() {
           </section>
 
           {/* Card 4: Invoice Allocations */}
-          <section className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <h2 className="border-b border-slate-100 px-4 py-3 text-base font-bold text-slate-800 flex items-center gap-2">
-              <Wallet className="h-4 w-4 text-[#008951]" /> Invoice Allocations
+          <section className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <h2 className="border-b border-slate-100 dark:border-gray-800 px-4 py-3 text-base font-bold text-slate-800 dark:text-gray-100 flex items-center gap-2">
+              <Wallet className="h-4 w-4 text-[#008951] dark:text-emerald-400" /> Invoice Allocations
             </h2>
             {allocations.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50">
-                      <th className="px-4 py-3 text-left text-[13px] font-bold text-slate-700">
+                    <tr className="border-b border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800">
+                      <th className="px-4 py-3 text-left text-[13px] font-bold text-slate-700 dark:text-gray-300">
                         Invoice #
                       </th>
-                      <th className="px-4 py-3 text-right text-[13px] font-bold text-slate-700">
+                      <th className="px-4 py-3 text-right text-[13px] font-bold text-slate-700 dark:text-gray-300">
                         Amount Applied
                       </th>
-                      <th className="px-4 py-3 text-right text-[13px] font-bold text-slate-700">
+                      <th className="px-4 py-3 text-right text-[13px] font-bold text-slate-700 dark:text-gray-300">
                         Remaining
                       </th>
                     </tr>
@@ -331,29 +331,29 @@ function PaymentDetails() {
                     {allocations.map((allocation, index) => (
                       <tr
                         key={allocation?._id || index}
-                        className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+                        className="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
                       >
-                        <td className="px-4 py-3 font-semibold text-[#1a56db]">
+                        <td className="px-4 py-3 font-semibold text-[#1a56db] dark:text-blue-400">
                           {allocation?.invoiceNumber ||
                             allocation?.receiptNumber ||
                             allocation?.saleNumber ||
                             "-"}
                         </td>
-                        <td className="px-4 py-3 text-right text-emerald-600 font-semibold tabular-nums">
+                        <td className="px-4 py-3 text-right text-emerald-600 dark:text-emerald-400 font-semibold tabular-nums">
                           Rs. {(allocation?.amountApplied || 0).toLocaleString()}
                         </td>
-                        <td className="px-4 py-3 text-right text-slate-600 tabular-nums">
+                        <td className="px-4 py-3 text-right text-slate-600 dark:text-gray-400 tabular-nums">
                           Rs. {(allocation?.outstandingAmount || 0).toLocaleString()}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t border-slate-200 bg-slate-50/60">
-                      <td className="px-4 py-3 text-sm font-bold text-slate-700">
+                    <tr className="border-t border-slate-200 dark:border-gray-700 bg-slate-50/60 dark:bg-gray-800/60">
+                      <td className="px-4 py-3 text-sm font-bold text-slate-700 dark:text-gray-300">
                         Total
                       </td>
-                      <td className="px-4 py-3 text-right text-sm font-bold text-emerald-600 tabular-nums">
+                      <td className="px-4 py-3 text-right text-sm font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
                         Rs. {allocatedTotal.toLocaleString()}
                       </td>
                       <td className="px-4 py-3" />
@@ -362,7 +362,7 @@ function PaymentDetails() {
                 </table>
               </div>
             ) : (
-              <div className="p-5 text-sm text-slate-500">
+              <div className="p-5 text-sm text-slate-500 dark:text-gray-400">
                 No allocations found for this payment.
               </div>
             )}

@@ -30,17 +30,17 @@ const kindStyles = {
   empty: {
     row: "bg-yellow-200 text-yellow-950",
     active: "bg-yellow-300 text-yellow-950",
-    button: "border-yellow-300 bg-yellow-100 text-yellow-950",
+    button: "border-yellow-300 dark:border-yellow-700 bg-yellow-100 dark:bg-yellow-900 text-yellow-950",
   },
   filled: {
-    row: "bg-green-100 text-green-950",
+    row: "bg-green-100 dark:bg-green-900 text-green-950",
     active: "bg-green-200 text-green-950",
-    button: "border-green-300 bg-green-50 text-green-950",
+    button: "border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950 text-green-950",
   },
   other: {
-    row: "bg-white text-slate-800",
-    active: "bg-slate-100 text-slate-900",
-    button: "border-slate-200 bg-white text-slate-700",
+    row: "bg-white dark:bg-gray-900 text-slate-800 dark:text-gray-100",
+    active: "bg-slate-100 dark:bg-gray-800 text-slate-900 dark:text-gray-100",
+    button: "border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-slate-700 dark:text-gray-300",
   },
 };
 
@@ -179,11 +179,11 @@ function SearchableItemSelect({
           <div
             ref={panelRef}
             style={menuStyle}
-            className="flex flex-col overflow-hidden rounded-md border border-slate-200 bg-white shadow-lg"
+            className="flex flex-col overflow-hidden rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg"
           >
-            <div className="shrink-0 border-b border-slate-100 bg-white p-2">
+            <div className="shrink-0 border-b border-slate-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-2">
               <div className="relative">
-                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 dark:text-gray-500" />
                 <input
                   ref={inputRef}
                   value={query}
@@ -193,7 +193,7 @@ function SearchableItemSelect({
                   }}
                   onKeyDown={onSearchKeyDown}
                   placeholder="Search item name"
-                  className="w-full rounded-md border border-slate-200 bg-white py-1.5 pl-8 pr-2 text-sm text-slate-800 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-1.5 pl-8 pr-2 text-sm text-slate-800 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
             </div>
@@ -207,14 +207,14 @@ function SearchableItemSelect({
                   <button
                     type="button"
                     onClick={() => choose(null)}
-                    className="w-full bg-white px-3 py-2 text-left text-sm text-slate-500 hover:bg-slate-50"
+                    className="w-full bg-white dark:bg-gray-900 px-3 py-2 text-left text-sm text-slate-500 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-gray-800"
                   >
                     {placeholder}
                   </button>
                 </li>
               )}
               {filtered.length === 0 ? (
-                <li className="bg-white px-3 py-2 text-sm text-slate-500">No item found</li>
+                <li className="bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-500 dark:text-gray-400">No item found</li>
               ) : (
                 filtered.map((item, index) => {
                   const kind = itemKind(item);
@@ -246,7 +246,7 @@ function SearchableItemSelect({
         )
       : null;
 
-  const buttonTone = selected ? kindStyles[selectedKind].button : "border-slate-200 bg-white text-slate-500";
+  const buttonTone = selected ? kindStyles[selectedKind].button : "border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-slate-500 dark:text-gray-400";
 
   return (
     <div className="relative w-80 max-w-full">
@@ -266,11 +266,11 @@ function SearchableItemSelect({
         }}
         className={`flex w-full items-center justify-between rounded-md border px-2 py-1.5 text-left text-sm outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:opacity-60 ${buttonTone}`}
       >
-        <span className="truncate">
+        <span className="truncate text-slate-500 dark:text-gray-400">
           {selected ? itemLabel(selected) : placeholder}
         </span>
         <ChevronDown
-          className={`ml-2 h-4 w-4 shrink-0 text-slate-400 transition ${open ? "rotate-180" : ""}`}
+          className={`ml-2 h-4 w-4 shrink-0 text-slate-400 dark:text-gray-500 transition ${open ? "rotate-180" : ""}`}
         />
       </button>
       {menu}

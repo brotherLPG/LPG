@@ -35,10 +35,10 @@ function Returnsales() {
       label: "Return Number",
       isRowHeader: true,
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
       cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
       renderCell: (item) => (
-        <span className="font-bold text-slate-800 text-[13px]">
+        <span className="font-bold text-slate-800 dark:text-gray-100 text-[13px]">
           {item.returnNumber}
         </span>
       ),
@@ -47,26 +47,26 @@ function Returnsales() {
       key: "originalInvoiceNumber",
       label: "Original Invoice",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
       cellClassName:
-        "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap text-nowrap",
+        "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium whitespace-nowrap text-nowrap",
     },
     {
       key: "customerName",
       label: "Customer",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
       cellClassName:
-        "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap text-nowrap",
+        "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium whitespace-nowrap text-nowrap",
     },
     {
       key: "totalReturnAmount",
       label: "Return Amount",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
       cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
       renderCell: (item) => (
-        <span className="text-orange-600 font-bold text-[13px]">
+        <span className="text-orange-600 dark:text-orange-400 font-bold text-[13px]">
           PKR {item.totalReturnAmount?.toLocaleString() || 0}
         </span>
       ),
@@ -75,25 +75,25 @@ function Returnsales() {
       key: "itemCount",
       label: "Items Returned",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
       cellClassName:
-        "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap text-nowrap",
+        "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium whitespace-nowrap text-nowrap",
     },
     {
       key: "returnReasonLabel",
       label: "Reason",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
       cellClassName:
-        "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap text-nowrap",
+        "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium whitespace-nowrap text-nowrap",
     },
     {
       key: "returnDate",
       label: "Return Date",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
       cellClassName:
-        "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap text-nowrap",
+        "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium whitespace-nowrap text-nowrap",
       renderCell: (item) => {
         const date = new Date(item.returnDate);
         return date.toLocaleDateString();
@@ -103,9 +103,9 @@ function Returnsales() {
       key: "adjustmentTypeLabel",
       label: "Adjustment Type",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
       cellClassName:
-        "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap text-nowrap",
+        "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium whitespace-nowrap text-nowrap",
     },
   
   ];
@@ -113,14 +113,14 @@ function Returnsales() {
   return (
     <>
       {/* Filters */}
-      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mb-6 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:items-center">
           <label className="relative flex-1 col-span-2">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500 h-4 w-4" />
             <input
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              className="w-full rounded-md border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-500 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
+              className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50/50 dark:bg-gray-800/50 py-2.5 pl-10 pr-3 text-sm text-slate-700 dark:text-gray-300 outline-none transition placeholder:text-slate-500 dark:placeholder:text-gray-400 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
               placeholder="Search by customer or return number..."
             />
           </label>
@@ -129,7 +129,7 @@ function Returnsales() {
               type="date"
               value={startDate}
               onChange={(event) => setStartDate(event.target.value)}
-              className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
+              className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
             />
           </div>
           <div>
@@ -137,20 +137,20 @@ function Returnsales() {
               type="date"
               value={endDate}
               onChange={(event) => setEndDate(event.target.value)}
-              className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
+              className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
             />
           </div>
         </div>
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
         <GlobalTable
           columns={returnSalesColumns}
           data={returnSales}
           ariaLabel="Return Sales Table"
           className=""
-          rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors whitespace-nowrap text-nowrap"
+          rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors whitespace-nowrap text-nowrap"
           emptyContent={
             isLoading ? "Loading return sales..." : "No return sales match your search."
           }

@@ -117,10 +117,10 @@ function Inventory() {
       label: "Item Code",
       isRowHeader: true,
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100 whitespace-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 border-x border-slate-100 dark:border-gray-800 whitespace-nowrap",
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
-        <span className="font-semibold text-slate-800 text-[13px] whitespace-nowrap text-nowrap">
+        <span className="font-semibold text-slate-800 dark:text-gray-100 text-[13px] whitespace-nowrap text-nowrap">
           {item.itemCode}
         </span>
       ),
@@ -129,10 +129,10 @@ function Inventory() {
       key: "name",
       label: "Item Name",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100 whitespace-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 border-x border-slate-100 dark:border-gray-800 whitespace-nowrap",
       cellClassName: "px-4 py-3",
       renderCell: (item) => (
-        <button className="font-semibold text-[#1a56db] hover:underline text-[13px] whitespace-nowrap">
+        <button className="font-semibold text-[#1a56db] dark:text-blue-400 hover:underline text-[13px] whitespace-nowrap">
           {item.itemName}
         </button>
       ),
@@ -141,29 +141,29 @@ function Inventory() {
       key: "category",
       label: "Category",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100 whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 border-x border-slate-100 dark:border-gray-800 whitespace-nowrap text-nowrap",
       cellClassName:
-        "px-4 py-3 text-slate-600 text-sm whitespace-nowrap text-nowrap",
+        "px-4 py-3 text-slate-600 dark:text-gray-400 text-sm whitespace-nowrap text-nowrap",
       renderCell: (item) => item.categoryLabel,
     },
     {
       key: "volume",
       label: "Cyl. Volume",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100 whitespace-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 border-x border-slate-100 dark:border-gray-800 whitespace-nowrap",
       cellClassName:
-        "px-4 py-3 text-slate-600 text-sm whitespace-nowrap text-nowrap",
+        "px-4 py-3 text-slate-600 dark:text-gray-400 text-sm whitespace-nowrap text-nowrap",
       renderCell: (item) => item.cylinderVolume,
     },
     {
       key: "current",
       label: "Current Qty",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100  whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 border-x border-slate-100 dark:border-gray-800  whitespace-nowrap text-nowrap",
       cellClassName: "px-4 py-3 whitespace-nowrap text-nowrap",
       renderCell: (item) => (
         <span
-          className={`text-[13px] font-bold ${item.stockStatusLabel === "Low Stock" ? "text-amber-600" : "text-slate-900"}`}
+          className={`text-[13px] font-bold ${item.stockStatusLabel === "Low Stock" ? "text-amber-600 dark:text-amber-400" : "text-slate-900 dark:text-gray-100"}`}
         >
           {item.currentQuantity}
         </span>
@@ -173,34 +173,34 @@ function Inventory() {
       key: "min",
       label: "Min Stock",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100  whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 border-x border-slate-100 dark:border-gray-800  whitespace-nowrap text-nowrap",
       cellClassName:
-        "px-4 py-3 text-slate-600 text-sm whitespace-nowrap text-nowrap  whitespace-nowrap text-nowrap",
+        "px-4 py-3 text-slate-600 dark:text-gray-400 text-sm whitespace-nowrap text-nowrap  whitespace-nowrap text-nowrap",
       renderCell: (item) => item.minimumStockLevel,
     },
     {
       key: "max",
       label: "Max Stock",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100  whitespace-nowrap text-nowrap",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 border-x border-slate-100 dark:border-gray-800  whitespace-nowrap text-nowrap",
       cellClassName:
-        "px-4 py-3 text-slate-600 text-sm whitespace-nowrap text-nowrap",
+        "px-4 py-3 text-slate-600 dark:text-gray-400 text-sm whitespace-nowrap text-nowrap",
       renderCell: (item) => item.maximumStockLevel,
     },
     {
       key: "status",
       label: "Status",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100 ",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 border-x border-slate-100 dark:border-gray-800 ",
       cellClassName: "px-4 py-3 whitespace-nowrap text-nowrap",
       renderCell: (item) => (
         <span
           className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
             item.stockStatusLabel === "In Stock"
-              ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+              ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900"
               : item.stockStatusLabel === "Low Stock"
-                ? "bg-amber-100 text-amber-800 border border-amber-200"
-                : "bg-red-50 text-red-600 border border-red-100"
+                ? "bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
+                : "bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900"
           }`}
         >
           {item.stockStatusLabel}
@@ -211,7 +211,7 @@ function Inventory() {
       key: "actions",
       label: "Actions",
       className:
-        "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 border-x border-slate-100",
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 border-x border-slate-100 dark:border-gray-800",
       cellClassName: "px-4 py-3 whitespace-nowrap text-nowrap",
       renderCell: (item) => (
         <div className="flex items-center gap-2">
@@ -220,7 +220,7 @@ function Inventory() {
               <Button
                 onClick={() => navigate(`/inventory/view/${item._id}`)}
                 aria-label={`View ${item.itemName}`}
-                className="flex items-center gap-1.5 rounded-full bg-blue-50/70 border border-blue-200/60 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-100 transition-colors"
+                className="flex items-center gap-1.5 rounded-full bg-blue-50 dark:bg-blue-950 px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors"
               >
                 <Eye className="h-3.5 w-3.5" />
               </Button>
@@ -234,7 +234,7 @@ function Inventory() {
               <Button
                 onClick={() => navigate(`/inventory/edit/${item._id}`)}
                 aria-label={`Edit ${item.itemName}`}
-                className="flex items-center gap-1.5 rounded-full bg-emerald-50/70 border border-emerald-200/60 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors"
+                className="flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900 transition-colors"
               >
                 <Edit3 className="h-3.5 w-3.5" />
               </Button>
@@ -247,7 +247,7 @@ function Inventory() {
             <Button
               aria-label={`Print ${item.itemName}`}
               onClick={() => handlePrintInventoryItem(item)}
-              className="flex items-center gap-1.5 rounded-full bg-slate-50/70 border border-slate-200/60 px-3 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+              className="flex items-center gap-1.5 rounded-full bg-slate-50/70 dark:bg-gray-800/70 border border-slate-200/60 dark:border-gray-700/60 px-3 py-1 text-xs font-semibold text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors"
             >
               <Printer className="h-3.5 w-3.5" />
             </Button>
@@ -259,7 +259,7 @@ function Inventory() {
             type="button"
             onClick={() => handleDeleteClick(item)}
             aria-label={`Delete ${item.itemName}`}
-            className="flex items-center gap-1.5 rounded-full bg-rose-50/70 border border-rose-200/60 px-3 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-100 transition-colors"
+            className="flex items-center gap-1.5 rounded-full bg-rose-50/70 border border-rose-200/60 px-3 py-1 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900 transition-colors"
           >
             <Trash2 className="h-3.5 w-3.5" /> Delete
           </button> */}
@@ -269,24 +269,24 @@ function Inventory() {
   ];
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs mb-2">
             <span
               onClick={() => navigate("/dashboard")}
-              className="cursor-pointer font-medium text-slate-400 hover:text-slate-600 transition-colors duration-200"
+              className="cursor-pointer font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors duration-200"
             >
               Dashboard
             </span>{" "}
-            <span className="px-1 text-slate-400">/</span>{" "}
-            <span className="font-semibold text-slate-700">Inventory</span>
+            <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
+            <span className="font-semibold text-slate-700 dark:text-gray-300">Inventory</span>
           </p>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-gray-100">
             Inventory Management
           </h1>
-          <p className="mt-0.5 text-sm text-slate-500">
+          <p className="mt-0.5 text-sm text-slate-500 dark:text-gray-400">
             Track cylinder stock levels, spare parts, and system accessories
           </p>
         </div>
@@ -305,19 +305,19 @@ function Inventory() {
         {cylinderCards.map((card) => (
           <div
             key={card.itemId}
-            className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+            className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm"
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-semibold text-slate-600">
+              <h3 className="text-xs font-semibold text-slate-600 dark:text-gray-400">
                 {card.title}
               </h3>
               {card.stockStatusLabel === "Low Stock" && (
-                <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                <span className="bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-300 text-[10px] font-bold px-1.5 py-0.5 rounded">
                   Low Stock
                 </span>
               )}
               {card.stockStatusLabel === "Out of Stock" && (
-                <span className="bg-red-100 text-red-800 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                <span className="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300 text-[10px] font-bold px-1.5 py-0.5 rounded">
                   Out of Stock
                 </span>
               )}
@@ -325,15 +325,15 @@ function Inventory() {
             <p
               className={`mt-2 text-2xl font-bold ${
                 card.stockStatusLabel === "In Stock"
-                  ? "text-emerald-600"
+                  ? "text-emerald-600 dark:text-emerald-400"
                   : card.stockStatusLabel === "Low Stock"
-                    ? "text-amber-500"
-                    : "text-red-500"
+                    ? "text-amber-500 dark:text-amber-400"
+                    : "text-red-500 dark:text-red-400"
               }`}
             >
               {card.currentQuantity} Units
             </p>
-            <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
+            <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500 dark:text-gray-400">
               <span
                 className={`h-2 w-2 rounded-full ${
                   card.stockStatusLabel === "In Stock"
@@ -350,13 +350,13 @@ function Inventory() {
       </div>
 
       {/* Filter Bar */}
-      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="mb-6 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
         <label className="relative flex-1 w-full md:w-auto">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-gray-500" />
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            className="w-full rounded-md border border-slate-200 bg-slate-50/50 py-2.5 pl-9 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-500 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
+            className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50/50 dark:bg-gray-800/50 py-2.5 pl-9 pr-3 text-sm text-slate-700 dark:text-gray-300 outline-none transition placeholder:text-slate-500 dark:placeholder:text-gray-400 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
             placeholder="Search by item code or description..."
           />
         </label>
@@ -366,7 +366,7 @@ function Inventory() {
             <select
               value={category}
               onChange={(event) => setCategory(event.target.value)}
-              className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48"
+              className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] sm:w-48"
             >
               <option value="All">All Category</option>
               {categories.map((cat) => (
@@ -375,14 +375,14 @@ function Inventory() {
                 </option>
               ))}
             </select>
-            <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
+            <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 dark:text-gray-400 pointer-events-none" />
           </div>
 
           <div className="relative">
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value)}
-              className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 outline-none focus:border-[#008951] sm:w-48"
+              className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] sm:w-48"
             >
               <option value="All">All Status</option>
               {stockStatuses.map((status) => (
@@ -391,19 +391,19 @@ function Inventory() {
                 </option>
               ))}
             </select>
-            <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 pointer-events-none" />
+            <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 dark:text-gray-400 pointer-events-none" />
           </div>
         </div>
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
         <GlobalTable
           columns={columns}
           data={filteredData}
           ariaLabel="Inventory Table"
           className=""
-          rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors whitespace-nowrap text-nowrap"
+          rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors whitespace-nowrap text-nowrap"
           emptyContent="No inventory items match your search."
           pagination={true}
           rowsPerPage={10}

@@ -66,17 +66,17 @@ function ViewAccount() {
         key: "transactionDate",
         label: "Date",
         isRowHeader: true,
-        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-        cellClassName: "px-4 py-4 text-slate-600 text-[13px] whitespace-nowrap",
+        className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap",
         renderCell: (item) => formatDate(item.transactionDate),
       },
       {
         key: "transactionNumber",
         label: "Transaction #",
-        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+        className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
         cellClassName: "px-4 py-4 whitespace-nowrap",
         renderCell: (item) => (
-          <span className="font-semibold text-slate-800 text-[13px]">
+          <span className="font-semibold text-slate-800 dark:text-gray-100 text-[13px]">
             {item.transactionNumber || "—"}
           </span>
         ),
@@ -84,13 +84,13 @@ function ViewAccount() {
       {
         key: "partyName",
         label: "Party",
-        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-        cellClassName: "px-4 py-4 text-slate-600 text-[13px]",
+        className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px]",
         renderCell: (item) => (
           <div className="flex flex-col">
-            <span className="font-semibold text-slate-800">{item.partyName || "—"}</span>
+            <span className="font-semibold text-slate-800 dark:text-gray-100">{item.partyName || "—"}</span>
             {item.partyCode && (
-              <span className="text-[11px] text-slate-400">{item.partyCode}</span>
+              <span className="text-[11px] text-slate-400 dark:text-gray-500">{item.partyCode}</span>
             )}
           </div>
         ),
@@ -98,10 +98,10 @@ function ViewAccount() {
       {
         key: "directionLabel",
         label: "Type",
-        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+        className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
         cellClassName: "px-4 py-4 whitespace-nowrap",
         renderCell: (item) => (
-          <span className="text-[13px] text-slate-600">
+          <span className="text-[13px] text-slate-600 dark:text-gray-400">
             {item.directionLabel || item.paymentTypeLabel || "—"}
           </span>
         ),
@@ -109,10 +109,10 @@ function ViewAccount() {
       {
         key: "inwardAmount",
         label: "Inward (Rs.)",
-        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap ",
+        className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap ",
         cellClassName: "px-4 py-4 text-center whitespace-nowrap",
         renderCell: (item) => (
-          <span className="text-[13px] font-medium text-emerald-600">
+          <span className="text-[13px] font-medium text-emerald-600 dark:text-emerald-400">
             {formatAmount(item.inwardAmount)}
           </span>
         ),
@@ -120,10 +120,10 @@ function ViewAccount() {
       {
         key: "outwardAmount",
         label: "Outward (Rs.)",
-        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap ",
+        className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap ",
         cellClassName: "px-4 py-4 text-center whitespace-nowrap",
         renderCell: (item) => (
-          <span className="text-[13px] font-medium text-red-600">
+          <span className="text-[13px] font-medium text-red-600 dark:text-red-400">
             {formatAmount(item.outwardAmount)}
           </span>
         ),
@@ -131,7 +131,7 @@ function ViewAccount() {
       {
         key: "remainingBalance",
         label: "Remaining Balance (Rs.)",
-        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+        className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
         cellClassName: "px-4 py-4 text-center whitespace-nowrap",
         renderCell: (item) => {
           const remaining = Number(
@@ -140,7 +140,7 @@ function ViewAccount() {
           return (
             <span
               className={`text-[13px] font-semibold ${
-                remaining < 0 ? "text-red-600" : "text-slate-800"
+                remaining < 0 ? "text-red-600 dark:text-red-400" : "text-slate-800 dark:text-gray-100"
               }`}
             >
               {remaining.toLocaleString()}
@@ -151,10 +151,10 @@ function ViewAccount() {
       {
         key: "statusLabel",
         label: "Status",
-        className: "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+        className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
         cellClassName: "px-4 py-4 whitespace-nowrap",
         renderCell: (item) => (
-          <span className="inline-flex rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-600">
+          <span className="inline-flex rounded-full bg-blue-50 dark:bg-blue-950 px-2 py-0.5 text-[11px] font-semibold text-blue-600 dark:text-blue-400">
             {item.statusLabel || item.status || "—"}
           </span>
         ),
@@ -165,9 +165,9 @@ function ViewAccount() {
 
   if (isLoading) {
     return (
-      <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+      <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
         <div className="flex items-center justify-center h-96">
-          <div className="text-slate-500">Loading account details...</div>
+          <div className="text-slate-500 dark:text-gray-400">Loading account details...</div>
         </div>
       </main>
     );
@@ -175,38 +175,38 @@ function ViewAccount() {
 
   if (isError || !account) {
     return (
-      <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+      <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
         <div className="flex items-center justify-center h-96">
-          <div className="text-red-500">Error loading account details</div>
+          <div className="text-red-500 dark:text-red-400">Error loading account details</div>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
         <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs mb-2">
               <span
                 onClick={() => navigate("/dashboard")}
-                className="cursor-pointer font-medium text-slate-400 hover:text-slate-600 transition-colors duration-200"
+                className="cursor-pointer font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors duration-200"
               >
                 Dashboard
               </span>{" "}
-              <span className="px-1 text-slate-400">/</span>{" "}
+              <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
               <span
                 onClick={() => navigate("/accounting")}
-                className="cursor-pointer font-medium text-slate-400 hover:text-slate-600 transition-colors duration-200"
+                className="cursor-pointer font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors duration-200"
               >
                 Accounts
               </span>{" "}
-              <span className="px-1 text-slate-400">/</span>{" "}
-              <span className="font-semibold text-slate-600">View Account</span>
+              <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
+              <span className="font-semibold text-slate-600 dark:text-gray-400">View Account</span>
             </p>
 
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-gray-100">
               {account.accountName}
             </h1>
           </div>
@@ -226,19 +226,19 @@ function ViewAccount() {
       </div>
 
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4 xl:grid-cols-4">
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
           <div className="flex items-start gap-3">
-            <div className="rounded-lg bg-slate-100 p-2">
-              <Wallet className="h-5 w-5 text-slate-700" />
+            <div className="rounded-lg bg-slate-100 dark:bg-gray-800 p-2">
+              <Wallet className="h-5 w-5 text-slate-700 dark:text-gray-300" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-600">Account Code</p>
-              <p className="text-xl font-bold tracking-tight text-slate-900">
+              <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Account Code</p>
+              <p className="text-xl font-bold tracking-tight text-slate-900 dark:text-gray-100">
                 {account.accountCode || "—"}
               </p>
               <div className="mt-1.5 flex items-center gap-1.5">
-                  <span className="text-[11px] font-medium text-slate-400">Account Type</span>
-                <span className="inline-flex max-w-full truncate rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                  <span className="text-[11px] font-medium text-slate-400 dark:text-gray-500">Account Type</span>
+                <span className="inline-flex max-w-full truncate rounded-full bg-slate-100 dark:bg-gray-800 px-2 py-0.5 text-[11px] font-semibold text-slate-700 dark:text-gray-300">
                   {account.accountTypeLabel || account.accountType || "—"}
                 </span>
               </div>
@@ -246,17 +246,17 @@ function ViewAccount() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-emerald-100 p-2">
-              <Landmark className="h-5 w-5 text-emerald-600" />
+            <div className="rounded-lg bg-emerald-100 dark:bg-emerald-900 p-2">
+              <Landmark className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-600">Opening Balance</p>
-              <p className="text-xl font-bold text-slate-900">
+              <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Opening Balance</p>
+              <p className="text-xl font-bold text-slate-900 dark:text-gray-100">
                 {formatRs(summary.openingBalanceAmount ?? account.openingBalanceAmount)}
               </p>
-              <p className="mt-1 text-[11px] text-slate-400">
+              <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">
                 {summary.transactionCount || 0}{" "}
                 {summary.transactionCount === 1 ? "transaction" : "transactions"}
               </p>
@@ -264,35 +264,35 @@ function ViewAccount() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-blue-100 p-2">
-              <Building2 className="h-5 w-5 text-blue-600" />
+            <div className="rounded-lg bg-blue-100 dark:bg-blue-900 p-2">
+              <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-600">Current Balance</p>
-              <p className="text-xl font-bold text-emerald-600">
+              <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Current Balance</p>
+              <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
                 {formatRs(summary.currentBalanceAmount ?? account.currentBalanceAmount)}
               </p>
-              <p className="mt-1 text-[11px] text-slate-400">
+              <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">
                 Net {formatRs(summary.netMovement)}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className={`rounded-lg p-2 ${account.isActive ? 'bg-emerald-100' : 'bg-red-100'}`}>
+            <div className={`rounded-lg p-2 ${account.isActive ? 'bg-emerald-100 dark:bg-emerald-900' : 'bg-red-100 dark:bg-red-900'}`}>
               {account.isActive ? (
-                <CheckCircle className="h-5 w-5 text-emerald-600" />
+                <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
               ) : (
-                <XCircle className="h-5 w-5 text-red-600" />
+                <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
               )}
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-600">Status</p>
-              <p className="text-xl font-bold text-slate-900">
+              <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Status</p>
+              <p className="text-xl font-bold text-slate-900 dark:text-gray-100">
                 {account.accountStatus || account.statusLabel || account.status || (account.isActive ? 'Active' : 'Inactive')}
               </p>
             </div>
@@ -301,15 +301,15 @@ function ViewAccount() {
       </div>
 
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
           <div className="flex items-start gap-3">
-            <div className="rounded-lg bg-emerald-100 p-2">
-              <ArrowDownLeft className="h-5 w-5 text-emerald-600" />
+            <div className="rounded-lg bg-emerald-100 dark:bg-emerald-900 p-2">
+              <ArrowDownLeft className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-600">Total Inward</p>
-              <p className="text-xl font-bold text-emerald-600">{formatRs(summary.totalInward)}</p>
-              <p className="mt-1 text-[11px] text-slate-400">
+              <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Total Inward</p>
+              <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{formatRs(summary.totalInward)}</p>
+              <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">
                 {summary.inwardCount || 0}{" "}
                 {summary.inwardCount === 1 ? "inward entry" : "inward entries"}
               </p>
@@ -317,15 +317,15 @@ function ViewAccount() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
           <div className="flex items-start gap-3">
-            <div className="rounded-lg bg-red-100 p-2">
-              <ArrowUpRight className="h-5 w-5 text-red-600" />
+            <div className="rounded-lg bg-red-100 dark:bg-red-900 p-2">
+              <ArrowUpRight className="h-5 w-5 text-red-600 dark:text-red-400" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-600">Total Outward</p>
-              <p className="text-xl font-bold text-red-600">{formatRs(summary.totalOutward)}</p>
-              <p className="mt-1 text-[11px] text-slate-400">
+              <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Total Outward</p>
+              <p className="text-xl font-bold text-red-600 dark:text-red-400">{formatRs(summary.totalOutward)}</p>
+              <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">
                 {summary.outwardCount || 0}{" "}
                 {summary.outwardCount === 1 ? "outward entry" : "outward entries"}
               </p>
@@ -333,15 +333,15 @@ function ViewAccount() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
           <div className="flex items-start gap-3">
-            <div className="rounded-lg bg-blue-100 p-2">
-              <TrendingUp className="h-5 w-5 text-blue-600" />
+            <div className="rounded-lg bg-blue-100 dark:bg-blue-900 p-2">
+              <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-600">Net Movement</p>
-              <p className="text-xl font-bold text-slate-900">{formatRs(summary.netMovement)}</p>
-              <p className="mt-1 text-[11px] text-slate-400">
+              <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Net Movement</p>
+              <p className="text-xl font-bold text-slate-900 dark:text-gray-100">{formatRs(summary.netMovement)}</p>
+              <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">
                 {summary.transactionCount || 0}{" "}
                 {summary.transactionCount === 1 ? "transaction" : "transactions"}
               </p>
@@ -349,19 +349,19 @@ function ViewAccount() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
           <div className="flex items-start gap-3">
-            <div className="rounded-lg bg-slate-100 p-2">
-              <Receipt className="h-5 w-5 text-slate-700" />
+            <div className="rounded-lg bg-slate-100 dark:bg-gray-800 p-2">
+              <Receipt className="h-5 w-5 text-slate-700 dark:text-gray-300" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-600">Last Transaction</p>
-              <p className="text-xl font-bold text-slate-900">
+              <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Last Transaction</p>
+              <p className="text-xl font-bold text-slate-900 dark:text-gray-100">
                 {summary.lastTransactionNumber
                   ? formatRs(summary.lastTransactionAmount)
                   : "—"}
               </p>
-              <p className="mt-1 text-[11px] text-slate-400">
+              <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">
                 {summary.lastTransactionNumber
                   ? [
                       summary.lastTransactionNumber,
@@ -377,79 +377,79 @@ function ViewAccount() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <div className="border-b border-slate-200 px-6 py-4">
-          <h2 className="text-lg font-semibold text-slate-800">Account Information</h2>
+      <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+        <div className="border-b border-slate-200 dark:border-gray-700 px-6 py-4">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-gray-100">Account Information</h2>
         </div>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
             <div>
-              <label className="block text-sm font-medium text-slate-500 mb-1">Account Name</label>
-              <p className="text-sm font-semibold text-slate-900">{account.accountName || "—"}</p>
+              <label className="block text-sm font-medium text-slate-500 dark:text-gray-400 mb-1">Account Name</label>
+              <p className="text-sm font-semibold text-slate-900 dark:text-gray-100">{account.accountName || "—"}</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-500 mb-1">Account Category</label>
-              <p className="text-sm font-semibold text-slate-900">{account.accountCategoryLabel || account.accountCategory || "—"}</p>
+              <label className="block text-sm font-medium text-slate-500 dark:text-gray-400 mb-1">Account Category</label>
+              <p className="text-sm font-semibold text-slate-900 dark:text-gray-100">{account.accountCategoryLabel || account.accountCategory || "—"}</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-500 mb-1">Parent Account</label>
-              <p className="text-sm font-semibold text-slate-900">{account.parentAccountName || "—"}</p>
+              <label className="block text-sm font-medium text-slate-500 dark:text-gray-400 mb-1">Parent Account</label>
+              <p className="text-sm font-semibold text-slate-900 dark:text-gray-100">{account.parentAccountName || "—"}</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-500 mb-1">Bank Name</label>
-              <p className="text-sm font-semibold text-slate-900">{account.bankName || "—"}</p>
+              <label className="block text-sm font-medium text-slate-500 dark:text-gray-400 mb-1">Bank Name</label>
+              <p className="text-sm font-semibold text-slate-900 dark:text-gray-100">{account.bankName || "—"}</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-500 mb-1">Branch Name</label>
-              <p className="text-sm font-semibold text-slate-900">{account.branchName || "—"}</p>
+              <label className="block text-sm font-medium text-slate-500 dark:text-gray-400 mb-1">Branch Name</label>
+              <p className="text-sm font-semibold text-slate-900 dark:text-gray-100">{account.branchName || "—"}</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-500 mb-1">Account Number</label>
-              <p className="text-sm font-semibold text-slate-900">{account.accountNumber || "—"}</p>
+              <label className="block text-sm font-medium text-slate-500 dark:text-gray-400 mb-1">Account Number</label>
+              <p className="text-sm font-semibold text-slate-900 dark:text-gray-100">{account.accountNumber || "—"}</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-500 mb-1">IBAN / Swift Code</label>
-              <p className="text-sm font-semibold text-slate-900">{account.ibanOrSwift || "—"}</p>
+              <label className="block text-sm font-medium text-slate-500 dark:text-gray-400 mb-1">IBAN / Swift Code</label>
+              <p className="text-sm font-semibold text-slate-900 dark:text-gray-100">{account.ibanOrSwift || "—"}</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-500 mb-1">Date Opened</label>
-              <p className="text-sm font-semibold text-slate-900">
+              <label className="block text-sm font-medium text-slate-500 dark:text-gray-400 mb-1">Date Opened</label>
+              <p className="text-sm font-semibold text-slate-900 dark:text-gray-100">
                 {account.openedAt ? new Date(account.openedAt).toLocaleDateString() : "—"}
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-500 mb-1">Allow Manual Entries</label>
-              <p className="text-sm font-semibold text-slate-900">
+              <label className="block text-sm font-medium text-slate-500 dark:text-gray-400 mb-1">Allow Manual Entries</label>
+              <p className="text-sm font-semibold text-slate-900 dark:text-gray-100">
                 {account.allowManualEntries ? "Yes" : "No"}
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-500 mb-1">Primary Account</label>
-              <p className="text-sm font-semibold text-slate-900">
+              <label className="block text-sm font-medium text-slate-500 dark:text-gray-400 mb-1">Primary Account</label>
+              <p className="text-sm font-semibold text-slate-900 dark:text-gray-100">
                 {account.isPrimary ? "Yes" : "No"}
               </p>
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-slate-500 mb-1">Description</label>
-              <p className="text-sm font-semibold text-slate-900">{account.description || "—"}</p>
+              <label className="block text-sm font-medium text-slate-500 dark:text-gray-400 mb-1">Description</label>
+              <p className="text-sm font-semibold text-slate-900 dark:text-gray-100">{account.description || "—"}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-200 px-6 py-4">
-          <h2 className="text-lg font-semibold text-slate-800">Account Transactions</h2>
+      <div className="mt-6 overflow-hidden rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
+        <div className="border-b border-slate-200 dark:border-gray-700 px-6 py-4">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-gray-100">Account Transactions</h2>
         </div>
         <GlobalTable
           columns={transactionColumns}

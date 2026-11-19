@@ -51,7 +51,7 @@ function Roles() {
           <button
             type="button"
             onClick={() => navigate(`/users-roles/view-role/${role._id}`)}
-            className="font-semibold text-[#1a56db] hover:underline text-[13px]"
+            className="font-semibold text-[#1a56db] dark:text-blue-400 hover:underline text-[13px]"
           >
             {role.roleName || role.name || role.title || "—"}
           </button>
@@ -66,7 +66,7 @@ function Roles() {
       key: "roleDescription",
       label: "Description",
       className: "text-[13px] font-bold text-tertiary",
-      cellClassName: "px-4 py-3 text-slate-500 text-[13px]",
+      cellClassName: "px-4 py-3 text-slate-500 dark:text-gray-400 text-[13px]",
       renderCell: (role) =>
         role.roleDescription || role.description || "No description",
     },
@@ -74,7 +74,7 @@ function Roles() {
       key: "permissions",
       label: "Permissions",
       className: "text-[13px] font-bold text-tertiary",
-      cellClassName: "px-4 py-3 text-slate-600 text-[13px]",
+      cellClassName: "px-4 py-3 text-slate-600 dark:text-gray-400 text-[13px]",
       renderCell: (role) =>
         role.permissionIds?.length || role.permissions?.length || 0,
     },
@@ -85,7 +85,7 @@ function Roles() {
       cellClassName: "px-4 py-3",
       renderCell: (role) => (
         <span
-          className={`rounded-full px-2 py-1 text-xs font-medium ${role.isActive ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-500"}`}
+          className={`rounded-full px-2 py-1 text-xs font-medium ${role.isActive ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400" : "bg-slate-100 dark:bg-gray-800 text-slate-500 dark:text-gray-400"}`}
         >
           {role.isActive ? "Active" : "Inactive"}
         </span>
@@ -95,7 +95,7 @@ function Roles() {
       key: "createdAt",
       label: "Created",
       className: "text-[13px] font-bold text-tertiary",
-      cellClassName: "px-4 py-3 text-slate-500 text-[13px]",
+      cellClassName: "px-4 py-3 text-slate-500 dark:text-gray-400 text-[13px]",
       renderCell: (role) =>
         role.createdAt ? new Date(role.createdAt).toLocaleDateString() : "—",
     },
@@ -111,7 +111,7 @@ function Roles() {
               <Button
                 onClick={() => navigate(`/users-roles/view-role/${role._id}`)}
                 aria-label={`View ${role.roleName || role.name || "role"}`}
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-800 bg-transparent min-w-0 px-1"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 bg-transparent min-w-0 px-1"
               >
                 <Eye className="h-4 w-4" />
               </Button>
@@ -125,7 +125,7 @@ function Roles() {
               <Button
                 onClick={() => navigate(`/users-roles/edit-role/${role._id}`)}
                 aria-label={`Edit ${role.roleName || role.name || "role"}`}
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-600 hover:text-emerald-800 bg-transparent min-w-0 px-1"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 bg-transparent min-w-0 px-1"
               >
                 <Pencil className="h-4 w-4" />
               </Button>
@@ -139,7 +139,7 @@ function Roles() {
               <Button
                 onClick={() => setDeleteModal({ isOpen: true, role })}
                 aria-label={`Delete ${role.roleName || role.name || "role"}`}
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-600 hover:text-red-800 bg-transparent min-w-0 px-1"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 bg-transparent min-w-0 px-1"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -155,21 +155,21 @@ function Roles() {
 
   return (
     <div>
-      <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+      <div className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 shadow-sm">
         <div className="flex flex-col gap-3 lg:flex-row">
           <label className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500" />
             <input
               value={roleQuery}
               onChange={(event) => setRoleQuery(event.target.value)}
-              className="w-full rounded-md border border-slate-200 py-2 pl-9 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+              className="w-full rounded-md border border-slate-200 dark:border-gray-700 py-2 pl-9 pr-3 text-sm text-slate-700 dark:text-gray-300 outline-none transition placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
               placeholder="Search roles by name or description..."
             />
           </label>
           <select
             value={roleFilter}
             onChange={(event) => setRoleFilter(event.target.value)}
-            className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none focus:border-emerald-500"
+            className="rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-600 dark:text-gray-400 outline-none focus:border-emerald-500"
           >
             <option value="All Roles">All Roles</option>
             {roles.map((role) => {
@@ -180,19 +180,19 @@ function Roles() {
         </div>
       </div>
 
-      <div className="mt-5 overflow-hidden border border-slate-200 bg-white shadow-sm">
+      <div className="mt-5 overflow-hidden border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
         {isLoading ? (
-          <div className="p-8 text-center text-sm text-slate-500">Loading roles...</div>
+          <div className="p-8 text-center text-sm text-slate-500 dark:text-gray-400">Loading roles...</div>
         ) : error ? (
-          <div className="p-8 text-center text-sm text-red-500">Error loading roles. Please try again.</div>
+          <div className="p-8 text-center text-sm text-red-500 dark:text-red-400">Error loading roles. Please try again.</div>
         ) : filteredRoles.length === 0 ? (
-          <div className="p-8 text-center text-sm text-slate-500">No roles match your search.</div>
+          <div className="p-8 text-center text-sm text-slate-500 dark:text-gray-400">No roles match your search.</div>
         ) : (
           <GlobalTable
             columns={roleColumns}
             data={filteredRoles.map((role) => ({ ...role, id: role._id }))}
             ariaLabel="Roles table"
-            rowClassName="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors"
+            rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
             emptyContent="No roles available."
           />
         )}

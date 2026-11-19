@@ -9,7 +9,7 @@ const GlobalTable = ({
   rowsPerPage = 5,
   ariaLabel = "Table",
   className = "",
-  rowClassName = "border-b border-slate-100 last:border-b-0 hover:bg-slate-50",
+  rowClassName = "border-b border-slate-100 dark:border-gray-800 last:border-b-0 hover:bg-slate-50 dark:hover:bg-gray-800",
   emptyContent = "No data available",
   // Server-side pagination props (optional)
   totalCount = undefined,
@@ -100,12 +100,12 @@ const GlobalTable = ({
   return (
     <Table
       aria-label={ariaLabel}
-      className={`px-3 pb-3 pt-2 bg-white ${className} w-full  h-88 max-h-88 overflow-auto `}
+      className={`px-3 pb-3 pt-2 bg-white dark:bg-gray-900 ${className} w-full  h-88 max-h-88 overflow-auto `}
     >
       <Table.ScrollContainer className="overflow-x-auto">
         <Table.Content className="min-w-300">
           {/* Header */}
-          <Table.Header className="bg-white">
+          <Table.Header className="bg-white dark:bg-gray-900">
             {columns.map((column) => (
               <Table.Column
                 key={column.key}
@@ -128,7 +128,7 @@ const GlobalTable = ({
           <Table.Body
             items={paginatedData}
             renderEmptyState={() => (
-              <div className="flex min-h-50 w-full items-center justify-center text-center text-sm text-slate-500">
+              <div className="flex min-h-50 w-full items-center justify-center text-center text-sm text-slate-500 dark:text-gray-400">
                 {emptyContent}
               </div>
             )}
@@ -197,7 +197,7 @@ const GlobalTable = ({
                 if (page === "ellipsis-start" || page === "ellipsis-end") {
                   return (
                     <Pagination.Item key={`${page}-${index}`}>
-                      <span className="px-2 text-sm text-slate-400">...</span>
+                      <span className="px-2 text-sm text-slate-400 dark:text-gray-500">...</span>
                     </Pagination.Item>
                   );
                 }

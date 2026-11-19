@@ -237,7 +237,7 @@ function AddSales() {
   };
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
       {/* Header & Breadcrumbs */}
       <div className="mb-6">
         <p className="text-xs mb-2">
@@ -247,14 +247,14 @@ function AddSales() {
           >
             Dashboard
           </span>{" "}
-          <span className="px-1 text-slate-400">/</span>{" "}
+          <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
           <span
             onClick={() => navigate("/sales")}
             className="cursor-pointer font-medium text-4th-color transition-colors duration-200"
           >
             Sales
           </span>{" "}
-          <span className="px-1 text-slate-400">/</span>{" "}
+          <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
           <span className="font-semibold">Create Sales Invoice</span>
         </p>
         <h1 className="text-2xl font-bold tracking-tight text-BLUE-dark">
@@ -269,8 +269,8 @@ function AddSales() {
         {/* Left Column (lg:col-span-2) */}
         <div className="lg:col-span-2 space-y-6">
           {/* Card 1: Invoice General Information */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4">
               <h2 className="text-[16px] font-bold text-BLUE-dark">
                 Invoice General Information
               </h2>
@@ -278,7 +278,7 @@ function AddSales() {
             <div className="p-5 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                     Invoice Number
                   </label>
                   <input
@@ -289,18 +289,18 @@ function AddSales() {
                         ? `${formOptions.nextInvoiceNumber} (Auto-generated)`
                         : "Loading..."
                     }
-                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-3 py-2 text-sm text-slate-500 dark:text-gray-400 outline-none cursor-not-allowed"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Invoice Date <span className="text-rose-500">*</span>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                    Invoice Date <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <input
                     type="date"
                     value={invoiceDate}
                     onChange={(e) => setInvoiceDate(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
               </div>
@@ -308,8 +308,8 @@ function AddSales() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
                 <div>
-                  <label className='block text-sm font-medium text-slate-700 mb-1.5'>
-                    Customer <span className='text-rose-500'>*</span>
+                  <label className='block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5'>
+                    Customer <span className='text-rose-500 dark:text-rose-400'>*</span>
                   </label>
                   <SearchableCustomerSelect
                     customers={customers}
@@ -325,25 +325,25 @@ function AddSales() {
                     }}
                   />
                   {customerIdError && (
-                    <p className="mt-1.5 text-xs text-rose-500">{customerIdError}</p>
+                    <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{customerIdError}</p>
                   )}
                   {selectedCustomer && (
-                    <div className="mt-2 grid grid-cols-2 gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+                    <div className="mt-2 grid grid-cols-2 gap-2 rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-3 py-2">
                       <div>
-                        <p className="text-xs text-slate-500">Credit Limit</p>
-                        <p className="text-sm font-semibold text-slate-900">
+                        <p className="text-xs text-slate-500 dark:text-gray-400">Credit Limit</p>
+                        <p className="text-sm font-semibold text-slate-900 dark:text-gray-100">
                           {formatCurrency(selectedCustomer.creditLimitAmount)}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-slate-500">Outstanding</p>
+                        <p className="text-xs text-slate-500 dark:text-gray-400">Outstanding</p>
                         <p
                           className={`text-sm font-semibold ${
                             Number(selectedCustomer.outstanding) < 0
-                              ? "text-emerald-600"
+                              ? "text-emerald-600 dark:text-emerald-400"
                               : Number(selectedCustomer.outstanding) > 0
-                                ? "text-amber-600"
-                                : "text-slate-900"
+                                ? "text-amber-600 dark:text-amber-400"
+                                : "text-slate-900 dark:text-gray-100"
                           }`}
                         >
                           {formatCurrency(selectedCustomer.outstanding)}
@@ -355,15 +355,15 @@ function AddSales() {
 
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Payment Terms (Days) <span className="text-rose-500">*</span>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                    Payment Terms (Days) <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <div className="relative">
                     <select
                       value={paymentTermDays}
                       onChange={(e) => setPaymentTermDays(Number(e.target.value))}
                       disabled={optionsLoading}
-                      className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                      className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     >
                       <option value="">Select payment terms</option>
                       {paymentTerms.map((term) => (
@@ -372,21 +372,21 @@ function AddSales() {
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500 pointer-events-none" />
                   </div>
                 </div>
 
               </div>
 
               <div>
-                <label className='block text-sm font-medium text-slate-700 mb-1.5'>
+                <label className='block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5'>
                   Payment Method
                 </label>
                 <div className='relative'>
                   <select
                     value={paymentMethod}
                     onChange={e => setPaymentMethod(e.target.value)}
-                    className='w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100'
+                    className='w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100'
                   >
                     <option value=''>Select sale type</option>
                     {saleTypesOptions.map(type => (
@@ -395,7 +395,7 @@ function AddSales() {
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className='absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none' />
+                  <ChevronDown className='absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500 pointer-events-none' />
                 </div>
               </div>
 
@@ -403,8 +403,8 @@ function AddSales() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 ">
                 <div className='flex flex-col gap-2'>
-                  <label className="block text-sm font-medium text-slate-700 ">
-                    Payment Account <span className="text-rose-500">*</span>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 ">
+                    Payment Account <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <div className="relative">
                     <select
@@ -414,10 +414,10 @@ function AddSales() {
                         setAccountIdError("");
                       }}
                       disabled={optionsLoading}
-                      className={`w-full appearance-none rounded-md border bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:ring-2 ${
+                      className={`w-full appearance-none rounded-md border bg-white dark:bg-gray-900 pl-3 pr-10 py-2 text-sm text-slate-700 dark:text-gray-300 outline-none focus:ring-2 ${
                         accountIdError
                           ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
-                          : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                          : "border-slate-200 dark:border-gray-700 focus:border-[#008951] focus:ring-emerald-100"
                       }`}
                     >
                       <option value="">Select Account</option>
@@ -427,15 +427,15 @@ function AddSales() {
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500 pointer-events-none" />
                   </div>
                   {accountIdError && (
-                    <p className="mt-1.5 text-xs text-rose-500">{accountIdError}</p>
+                    <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{accountIdError}</p>
                   )}
 
                 </div>
                 <div className='flex flex-col gap-2'>
-                  <label className='block text-sm font-medium text-slate-700'>
+                  <label className='block text-sm font-medium text-slate-700 dark:text-gray-300'>
                     Reference Number
                   </label>
                   <input
@@ -443,7 +443,7 @@ function AddSales() {
                     value={referenceNumber}
                     onChange={e => setReferenceNumber(e.target.value)}
                     placeholder='Enter reference number'
-                    className='w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951]'
+                    className='w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951]'
                   />
                 </div>
 
@@ -453,13 +453,13 @@ function AddSales() {
           </div>
 
           {/* Card 2: Line Items & Inventory Allocation */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4 flex justify-between items-center">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4 flex justify-between items-center">
               <h2 className="text-[16px] font-bold text-BLUE-dark">
                 Line Items & Inventory Allocation
               </h2>
               {lineItemsError && (
-                <p className="text-xs text-rose-500">{lineItemsError}</p>
+                <p className="text-xs text-rose-500 dark:text-rose-400">{lineItemsError}</p>
               )}
               <button
                 onClick={addLineItem}
@@ -471,12 +471,12 @@ function AddSales() {
             <div className="p-5 overflow-x-auto">
               <table className="w-full min-w-180 border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-200">
-                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">Item Name</th>
-                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">Qty</th>
-                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">Unit Price (Rs.)</th>
-                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">Discount (Rs.)</th>
-                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600">Total (Rs.)</th>
+                  <tr className="border-b border-slate-200 dark:border-gray-700">
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600 dark:text-gray-400">Item Name</th>
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600 dark:text-gray-400">Qty</th>
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600 dark:text-gray-400">Unit Price (Rs.)</th>
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600 dark:text-gray-400">Discount (Rs.)</th>
+                    <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600 dark:text-gray-400">Total (Rs.)</th>
                     <th className="px-2 py-2"></th>
                   </tr>
                 </thead>
@@ -499,7 +499,7 @@ function AddSales() {
 
                     return (
                       <Fragment key={item.id}>
-                      <tr className={suggestion ? "" : "border-b border-slate-100"}>
+                      <tr className={suggestion ? "" : "border-b border-slate-100 dark:border-gray-800"}>
                         <td className="px-2 py-2">
                           <SearchableItemSelect
                             items={inventoryItems}
@@ -540,7 +540,7 @@ function AddSales() {
                             value={item.quantity}
                             onChange={(e) => updateLineItem(item.id, "quantity", e.target.value)}
                             placeholder="0"
-                            className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#008951]"
+                            className="w-24 rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-slate-900 dark:text-gray-100 outline-none placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-[#008951]"
                           />
                         </td>
                         <td className="px-2 py-2">
@@ -549,7 +549,7 @@ function AddSales() {
                             value={item.unitPrice === 0 || item.unitPrice === "0" ? "" : item.unitPrice}
                             onChange={(e) => updateLineItem(item.id, "unitPrice", e.target.value)}
                             placeholder="0"
-                            className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#008951]"
+                            className="w-24 rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-slate-900 dark:text-gray-100 outline-none placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-[#008951]"
                           />
                         </td>
                         <td className="px-2 py-2">
@@ -558,7 +558,7 @@ function AddSales() {
                             value={item.discount}
                             onChange={(e) => updateLineItem(item.id, "discount", e.target.value)}
                             placeholder="0"
-                            className="w-24 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#008951]"
+                            className="w-24 rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-slate-900 dark:text-gray-100 outline-none placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-[#008951]"
                           />
                         </td>
                         <td className="px-2 py-2">
@@ -566,7 +566,7 @@ function AddSales() {
                             type="text"
                             value={row.total ? row.total.toFixed(2) : "0.00"}
                             disabled
-                            className="w-28 rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-sm text-slate-500 outline-none cursor-not-allowed"
+                            className="w-28 rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-2 py-1.5 text-sm text-slate-500 dark:text-gray-400 outline-none cursor-not-allowed"
                           />
                         </td>
                         <td className="px-2 py-2">
@@ -574,7 +574,7 @@ function AddSales() {
                             <button
                               type="button"
                               onClick={() => removeLineItem(item.id)}
-                              className="text-rose-500 hover:text-rose-700 transition"
+                              className="text-rose-500 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -582,7 +582,7 @@ function AddSales() {
                         </td>
                       </tr>
                       {suggestion ? (
-                        <tr className="border-b border-slate-100 bg-slate-50/80">
+                        <tr className="border-b border-slate-100 dark:border-gray-800 bg-slate-50/80 dark:bg-gray-800/80">
                           <td colSpan={6} className="px-2 py-2">
                             <SaleRateHint
                               suggestion={suggestion}
@@ -605,26 +605,26 @@ function AddSales() {
         {/* Right Column (lg:col-span-1) */}
         <div className="lg:col-span-1 space-y-6">
           {/* Card 3: Invoice Financial Summary */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4">
               <h2 className="text-[16px] font-bold text-BLUE-dark">
                 Invoice Financial Summary
               </h2>
             </div>
             <div className="p-5 space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-600">Subtotal</span>
-                <span className="text-sm font-medium text-slate-900">
+                <span className="text-sm text-slate-600 dark:text-gray-400">Subtotal</span>
+                <span className="text-sm font-medium text-slate-900 dark:text-gray-100">
                   Rs. {totals.subtotal.toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-600">Trade Discount</span>
-                <span className="text-sm font-medium text-slate-900">
+                <span className="text-sm text-slate-600 dark:text-gray-400">Trade Discount</span>
+                <span className="text-sm font-medium text-slate-900 dark:text-gray-100">
                   Rs. {totals.discount.toFixed(2)}
                 </span>
               </div>
-              <div className="border-t border-slate-200 pt-4 flex justify-between items-center">
+              <div className="border-t border-slate-200 dark:border-gray-700 pt-4 flex justify-between items-center">
                 <span className="text-sm font-bold text-BLUE-dark">
                   Grand Total
                 </span>
@@ -633,7 +633,7 @@ function AddSales() {
                 </span>
               </div>
               <div className="flex justify-between items-center gap-3">
-                <span className="text-sm text-slate-600">Amount Paid</span>
+                <span className="text-sm text-slate-600 dark:text-gray-400">Amount Paid</span>
                 <div className="relative w-40 shrink-0">
                   <button
                     type="button"
@@ -641,7 +641,7 @@ function AddSales() {
                     aria-label="Fill full amount"
                     disabled={totals.grandTotal <= 0}
                     onClick={() => setAmountPaid(roundMoney(totals.grandTotal))}
-                    className="absolute left-1 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-accent-blue transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent"
+                    className="absolute left-1 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-accent-blue transition hover:bg-blue-50 dark:hover:bg-blue-950 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent"
                   >
                     <Sparkles size={15} strokeWidth={1.75} />
                   </button>
@@ -659,48 +659,48 @@ function AddSales() {
                       setAmountPaid(Number.isFinite(value) ? Math.max(0, value) : 0);
                     }}
                     placeholder="0"
-                    className="w-full rounded-md border border-slate-200 bg-white py-1.5 pl-8 pr-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#008951] text-right"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-1.5 pl-8 pr-3 text-sm text-slate-900 dark:text-gray-100 outline-none placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-[#008951] text-right"
                   />
                 </div>
               </div>
               {selectedCustomer && totals.grandTotal > 0 && invoiceCredit <= 0 && (
-                <div className="rounded-md border border-blue-100 bg-blue-50 px-3 py-2">
-                  <p className="text-xs text-slate-500">Expected Received Amount</p>
+                <div className="rounded-md border border-blue-100 dark:border-blue-900 bg-blue-50 dark:bg-blue-950 px-3 py-2">
+                  <p className="text-xs text-slate-500 dark:text-gray-400">Expected Received Amount</p>
                   <p className="text-sm font-semibold text-accent-blue">
                     {formatCurrency(expectedReceivedAmount)}
                   </p>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-slate-500 dark:text-gray-400">
                     You can receive more than this. Extra cash is saved as customer credit on this invoice.
                   </p>
                 </div>
               )}
               {invoiceCredit > 0 && (
-                <div className="rounded-md border border-emerald-100 bg-emerald-50 px-3 py-2">
-                  <p className="text-xs text-slate-500">Customer Credit</p>
-                  <p className="text-sm font-semibold text-emerald-700">
+                <div className="rounded-md border border-emerald-100 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950 px-3 py-2">
+                  <p className="text-xs text-slate-500 dark:text-gray-400">Customer Credit</p>
+                  <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
                     {formatCurrency(invoiceCredit)}
                   </p>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-slate-500 dark:text-gray-400">
                     This extra stays on this invoice. Refund it from Payments, or it applies on the next sale.
                   </p>
                 </div>
               )}
               <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-600">Remaining Amount</span>
+                <span className="text-sm text-slate-600 dark:text-gray-400">Remaining Amount</span>
                 <span className="text-sm font-medium text-orange">
                   Rs. {amountStillDue.toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-600">Payment Status</span>
+                <span className="text-sm text-slate-600 dark:text-gray-400">Payment Status</span>
                 <span
                   className={`text-sm font-medium px-3 py-1 rounded-full ${paymentStatus === "Paid"
-                    ? "bg-green-100 text-green-700"
+                    ? "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300"
                     : paymentStatus === "Refund Due"
-                      ? "bg-purple-100 text-purple-700"
+                      ? "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300"
                       : paymentStatus === "Partially Paid"
-                        ? "bg-amber-100 text-amber-700"
-                        : "bg-rose-100 text-rose-700"
+                        ? "bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300"
+                        : "bg-rose-100 dark:bg-rose-900 text-rose-700 dark:text-rose-300"
                     }`}
                 >
                   {paymentStatus}
@@ -710,15 +710,15 @@ function AddSales() {
           </div>
 
           {/* Card 4: Terms & Internal Remarks */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4">
               <h2 className="text-[16px] font-bold text-BLUE-dark">
                 Terms & Internal Remarks
               </h2>
             </div>
             <div className="p-5 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Internal Remarks
                 </label>
                 <textarea
@@ -726,7 +726,7 @@ function AddSales() {
                   value={remarks}
                   onChange={(e) => setRemarks(e.target.value)}
                   placeholder="Add internal notes for reference..."
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
                 />
               </div>
             </div>
@@ -735,17 +735,17 @@ function AddSales() {
       </div>
 
       {/* Bottom Action Bar */}
-      <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm">
         <button
           onClick={() => navigate("/sales")}
-          className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-5 py-2 text-sm font-medium text-slate-700 dark:text-gray-300 transition hover:bg-slate-50 dark:hover:bg-gray-800"
         >
           Cancel
         </button>
         <button
           onClick={() => handleSubmit(true)}
           disabled={createSaleMutation.isPending}
-          className="rounded-lg border border-[#1E40AF] bg-white px-5 py-2 text-sm font-medium text-accent-blue transition hover:bg-slate-50 disabled:opacity-50"
+          className="rounded-lg border border-[#1E40AF] bg-white dark:bg-gray-900 px-5 py-2 text-sm font-medium text-accent-blue transition hover:bg-slate-50 dark:hover:bg-gray-800 disabled:opacity-50"
         >
           {createSaleMutation.isPending ? "Saving..." : "Save as Draft"}
         </button>

@@ -82,39 +82,39 @@ function UpdateCustomer() {
 
   if (isLoading) {
     return (
-      <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
+      <main className="min-h-full bg-slate-50 dark:bg-gray-800 p-4 sm:p-6 lg:p-8">
         <div className="text-center py-12">
-          <p className="text-slate-500">Loading customer data...</p>
+          <p className="text-slate-500 dark:text-gray-400">Loading customer data...</p>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-full bg-slate-50 p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-slate-50 dark:bg-gray-800 p-4 sm:p-6 lg:p-8">
       {/* Header & Breadcrumbs */}
       <div className="mb-6">
         <p className="text-xs">
           <span
             onClick={() => navigate("/dashboard")}
-            className="cursor-pointer font-medium text-slate-400 hover:text-slate-600 transition-colors duration-200"
+            className="cursor-pointer font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors duration-200"
           >
             Dashboard
           </span>{" "}
-          <span className="px-1 text-slate-400">/</span>{" "}
+          <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
           <span
             onClick={() => navigate("/customers")}
-            className="cursor-pointer font-medium text-slate-400 hover:text-slate-600 transition-colors duration-200"
+            className="cursor-pointer font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors duration-200"
           >
             Customers
           </span>{" "}
-          <span className="px-1 text-slate-400">/</span>{" "}
-          <span className="font-semibold text-slate-600">Edit Customer</span>
+          <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
+          <span className="font-semibold text-slate-600 dark:text-gray-400">Edit Customer</span>
         </p>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-gray-100">
           Edit Customer
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">
           Update customer profile and credit parameters
         </p>
       </div>
@@ -125,71 +125,71 @@ function UpdateCustomer() {
         <div className="lg:col-span-2 space-y-6">
           
           {/* Card 1: Customer Information */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4">
-              <h2 className="text-sm font-semibold text-slate-800">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4">
+              <h2 className="text-sm font-semibold text-slate-800 dark:text-gray-100">
                 Customer Information
               </h2>
             </div>
             <div className="p-5 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Customer Code
                 </label>
                 <input
                   type="text"
                   disabled
                   value={customer.customerCode || "N/A"}
-                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-3 py-2 text-sm text-slate-500 dark:text-gray-400 outline-none cursor-not-allowed"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Customer Name <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Customer Name <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.customerName}
                   onChange={(e) => handleInputChange("customerName", e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   placeholder="Enter customer name"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Contact Person <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Contact Person <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.contactPersonName}
                   onChange={(e) => handleInputChange("contactPersonName", e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   placeholder="Enter contact person name"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                   Status Toggle
                 </label>
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={() => setIsActive(!isActive)}
-                    className={`relative inline-flex h-6 w-11 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isActive ? 'bg-[#10b981]' : 'bg-slate-200'}`}
+                    className={`relative inline-flex h-6 w-11 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isActive ? 'bg-[#10b981]' : 'bg-slate-200 dark:bg-gray-700'}`}
                     role="switch"
                     aria-checked={isActive}
                   >
                     <span
                       aria-hidden="true"
-                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isActive ? 'translate-x-5' : 'translate-x-0'}`}
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white dark:bg-gray-900 shadow ring-0 transition duration-200 ease-in-out ${isActive ? 'translate-x-5' : 'translate-x-0'}`}
                     />
                   </button>
-                  <span className={`text-sm font-semibold ${isActive ? "text-[#10b981]" : "text-slate-500"}`}>
+                  <span className={`text-sm font-semibold ${isActive ? "text-[#10b981]" : "text-slate-500 dark:text-gray-400"}`}>
                     Active Account
                   </span>
                 </div>
@@ -198,35 +198,35 @@ function UpdateCustomer() {
           </div>
 
           {/* Card 2: Contact Details */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4">
-              <h2 className="text-sm font-semibold text-slate-800">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4">
+              <h2 className="text-sm font-semibold text-slate-800 dark:text-gray-100">
                 Contact Details
               </h2>
             </div>
             <div className="p-5 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Phone Number <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Phone Number <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.phoneNumber}
                   onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   placeholder="Enter phone number"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Email Address
                 </label>
                 <input
                   type="email"
                   value={formData.emailAddress}
                   onChange={(e) => handleInputChange("emailAddress", e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-500 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-500 dark:text-gray-400 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   placeholder="Enter email address"
                 />
               </div>
@@ -234,34 +234,34 @@ function UpdateCustomer() {
           </div>
 
           {/* Card 3: Billing & Tax */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4">
-              <h2 className="text-sm font-semibold text-slate-800">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4">
+              <h2 className="text-sm font-semibold text-slate-800 dark:text-gray-100">
                 Billing & Tax
               </h2>
             </div>
             <div className="p-5 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Billing Address
                 </label>
                 <textarea
                   rows="3"
                   value={formData.billingAddress}
                   onChange={(e) => handleInputChange("billingAddress", e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-500 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-500 dark:text-gray-400 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
                   placeholder="Enter billing address"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Tax Registration Number (NTN/STRN)
                 </label>
                 <input
                   type="text"
                   value={formData.taxRegistrationNumber}
                   onChange={(e) => handleInputChange("taxRegistrationNumber", e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-500 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-500 dark:text-gray-400 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   placeholder="Enter tax registration number"
                 />
               </div>
@@ -272,28 +272,28 @@ function UpdateCustomer() {
         {/* Right Column (lg:col-span-1) */}
         <div className="lg:col-span-1">
           {/* Card 4: Credit & Payment Terms */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4">
-              <h2 className="text-sm font-semibold text-slate-800">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4">
+              <h2 className="text-sm font-semibold text-slate-800 dark:text-gray-100">
                 Credit & Payment Terms
               </h2>
             </div>
             <div className="p-5 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Credit Limit (Rs.)
                 </label>
                 <input
                   type="number"
                   value={formData.creditLimitAmount}
                   onChange={(e) => handleInputChange("creditLimitAmount", e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   placeholder="Enter credit limit"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Payment Terms
                 </label>
                 <SearchableCustomerSelect
@@ -310,14 +310,14 @@ function UpdateCustomer() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Opening Balance (Rs.)
                 </label>
                 <input
                   type="number"
                   value={formData.openingBalanceAmount}
                   onChange={(e) => handleInputChange("openingBalanceAmount", e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   placeholder="Enter opening balance"
                 />
               </div>
@@ -327,11 +327,11 @@ function UpdateCustomer() {
       </div>
 
       {/* Bottom Action Bar */}
-      <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mt-6 flex justify-end gap-3 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm">
         <button
           type="button"
           onClick={() => navigate("/customers")}
-          className="rounded-lg border border-slate-200 bg-white px-6 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-6 py-2 text-sm font-medium text-slate-700 dark:text-gray-300 transition hover:bg-slate-50 dark:hover:bg-gray-800"
         >
           Cancel
         </button>

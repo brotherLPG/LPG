@@ -90,8 +90,8 @@ function getNotificationMeta(type) {
 
 function DetailRow({ label, value }) {
   return (
-    <div className="grid grid-cols-[120px_1fr] gap-3 py-2 border-b border-slate-100 last:border-0">
-      <dt className="text-[11px] font-semibold text-slate-400">{label}</dt>
+    <div className="grid grid-cols-[120px_1fr] gap-3 py-2 border-b border-slate-100 dark:border-gray-800 last:border-0">
+      <dt className="text-[11px] font-semibold text-slate-400 dark:text-gray-500">{label}</dt>
       <dd className="text-[12px] text-BLUE-dark break-all">{value || "—"}</dd>
     </div>
   );
@@ -123,19 +123,19 @@ function NotificationDetailsModal({ notification, onClose }) {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
           transition={{ duration: 0.2 }}
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
+          className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
           onClick={(event) => event.stopPropagation()}
         >
-          <div className="px-6 py-4 border-b border-slate-100 flex items-start justify-between gap-3">
+          <div className="px-6 py-4 border-b border-slate-100 dark:border-gray-800 flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                <Icon className="w-5 h-5 text-blue-600" />
+              <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-950 flex items-center justify-center shrink-0">
+                <Icon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-gray-800 leading-tight">
+                <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 leading-tight">
                   {notification.notificationTitle}
                 </h2>
-                <p className="text-xs text-slate-500 mt-1 capitalize">
+                <p className="text-xs text-slate-500 dark:text-gray-400 mt-1 capitalize">
                   {notification.notificationType || "notification"}
                 </p>
               </div>
@@ -143,14 +143,14 @@ function NotificationDetailsModal({ notification, onClose }) {
             <button
               type="button"
               onClick={onClose}
-              className="p-1 hover:bg-slate-100 rounded-full transition-colors"
+              className="p-1 hover:bg-slate-100 dark:hover:bg-gray-800 rounded-full transition-colors"
             >
-              <X className="w-5 h-5 text-gray-500" />
+              <X className="w-5 h-5 text-gray-500 dark:text-gray-400 dark:text-gray-500" />
             </button>
           </div>
 
           <div className="px-6 py-4">
-            <p className="text-sm text-slate-600 leading-relaxed mb-4">
+            <p className="text-sm text-slate-600 dark:text-gray-400 leading-relaxed mb-4">
               {notification.notificationMessage}
             </p>
             <dl>
@@ -166,7 +166,7 @@ function NotificationDetailsModal({ notification, onClose }) {
             </dl>
           </div>
 
-          <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+          <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex justify-end">
             <button
               type="button"
               onClick={onClose}
@@ -228,37 +228,37 @@ function Notifications() {
         return {
           border: "border-l-orange-500",
           dot: "bg-orange-500",
-          iconBg: "bg-orange-50",
-          iconColor: "text-orange-600",
+          iconBg: "bg-orange-50 dark:bg-orange-950",
+          iconColor: "text-orange-600 dark:text-orange-400",
         };
       case "success":
         return {
           border: "border-l-emerald-500",
           dot: "bg-emerald-500",
-          iconBg: "bg-emerald-50",
-          iconColor: "text-emerald-600",
+          iconBg: "bg-emerald-50 dark:bg-emerald-950",
+          iconColor: "text-emerald-600 dark:text-emerald-400",
         };
       case "maintenance":
         return {
           border: "border-l-red-500",
           dot: "bg-red-500",
-          iconBg: "bg-red-50",
-          iconColor: "text-red-600",
+          iconBg: "bg-red-50 dark:bg-red-950",
+          iconColor: "text-red-600 dark:text-red-400",
         };
       case "info":
         return {
           border: "border-l-blue-500",
           dot: "bg-blue-500",
-          iconBg: "bg-blue-50",
-          iconColor: "text-blue-600",
+          iconBg: "bg-blue-50 dark:bg-blue-950",
+          iconColor: "text-blue-600 dark:text-blue-400",
         };
       case "system":
       default:
         return {
           border: "border-l-slate-400",
           dot: "bg-slate-400",
-          iconBg: "bg-slate-100",
-          iconColor: "text-slate-600",
+          iconBg: "bg-slate-100 dark:bg-gray-800",
+          iconColor: "text-slate-600 dark:text-gray-400",
         };
     }
   };
@@ -308,9 +308,9 @@ function Notifications() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-white">
+    <div className="min-h-screen w-full bg-white dark:bg-gray-900">
       <div className="w-full px-5 py-4 md:px-7 lg:px-8">
-        <div className="mb-1 text-[11px] text-slate-400">
+        <div className="mb-1 text-[11px] text-slate-400 dark:text-gray-500">
           <span
             onClick={() => navigate("/dashboard")}
             className="cursor-pointer font-medium transition-colors duration-200"
@@ -321,11 +321,11 @@ function Notifications() {
         </div>
         <div className="flex items-center justify-between gap-4 mb-4">
           <div>
-            <h1 className="text-[18px] md:text-[20px] font-bold text-slate-800">
+            <h1 className="text-[18px] md:text-[20px] font-bold text-slate-800 dark:text-gray-100">
               Notification Center
             </h1>
 
-            <p className="text-[11px] md:text-xs text-slate-500 mt-0.5">
+            <p className="text-[11px] md:text-xs text-slate-500 dark:text-gray-400 mt-0.5">
               Critical storage warnings, transaction logs, and inventory
               triggers
             </p>
@@ -338,11 +338,11 @@ function Notifications() {
             className="
               px-3 py-1.5
               text-[10px] font-medium
-              text-slate-600
-              bg-white
-              border border-slate-200
+              text-slate-600 dark:text-gray-400
+              bg-white dark:bg-gray-900
+              border border-slate-200 dark:border-gray-700
               rounded
-              hover:bg-slate-50
+              hover:bg-slate-50 dark:hover:bg-gray-800
               transition
               disabled:cursor-not-allowed
               disabled:opacity-50
@@ -372,7 +372,7 @@ function Notifications() {
                   ${
                     active
                       ? "bg-blue-600 text-white shadow-sm"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-400 hover:bg-slate-200 dark:hover:bg-gray-700"
                   }
                 `}
               >
@@ -392,7 +392,7 @@ function Notifications() {
                       font-bold
                       ${
                         active
-                          ? "bg-white text-blue-600"
+                          ? "bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400"
                           : "bg-red-500 text-white"
                       }
                     `}
@@ -406,13 +406,13 @@ function Notifications() {
         </div>
 
         {isLoading && (
-          <p className="py-12 text-center text-xs text-slate-500">
+          <p className="py-12 text-center text-xs text-slate-500 dark:text-gray-400">
             Loading notifications...
           </p>
         )}
 
         {isError && !isLoading && (
-          <p className="py-12 text-center text-xs text-red-500">
+          <p className="py-12 text-center text-xs text-red-500 dark:text-red-400">
             Unable to load notifications.
           </p>
         )}
@@ -442,15 +442,15 @@ function Notifications() {
                     onClick={() => handleNotificationClick(notification)}
                     className={`
                       relative
-                      bg-white
+                      bg-white dark:bg-gray-900
                       border
-                      border-slate-200
+                      border-slate-200 dark:border-gray-700
                       border-l-4
                       ${styles.border}
                       rounded
                       px-4
                       py-3
-                      hover:bg-slate-50
+                      hover:bg-slate-50 dark:hover:bg-gray-800
                       transition
                       shadow-sm
                       cursor-pointer
@@ -491,7 +491,7 @@ function Notifications() {
                               {notification.notificationTitle}
                             </h3>
 
-                            <p className="text-[10px] md:text-[11px] text-slate-500 leading-relaxed mt-1">
+                            <p className="text-[10px] md:text-[11px] text-slate-500 dark:text-gray-400 leading-relaxed mt-1">
                               {notification.notificationMessage}
                             </p>
                           </div>
@@ -500,7 +500,7 @@ function Notifications() {
                             className="
                               shrink-0
                               text-[10px]
-                              text-slate-400
+                              text-slate-400 dark:text-gray-500
                               whitespace-nowrap
                               pt-0.5
                             "
@@ -516,10 +516,10 @@ function Notifications() {
             </motion.div>
 
             {filteredNotifications.length === 0 && (
-              <div className="border border-slate-200 rounded-sm py-12 text-center">
+              <div className="border border-slate-200 dark:border-gray-700 rounded-sm py-12 text-center">
                 <Info className="w-7 h-7 text-slate-300 mx-auto mb-2" />
 
-                <p className="text-xs font-medium text-slate-500">
+                <p className="text-xs font-medium text-slate-500 dark:text-gray-400">
                   No notifications found
                 </p>
               </div>
@@ -527,7 +527,7 @@ function Notifications() {
 
             {pagination.totalPages > 1 && selectedTab === "all" && (
               <div className="mt-4 flex items-center justify-between">
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-slate-400 dark:text-gray-500">
                   Page {pagination.page} of {pagination.totalPages}
                 </p>
                 <div className="flex items-center gap-2">
@@ -535,7 +535,7 @@ function Notifications() {
                     type="button"
                     disabled={page <= 1}
                     onClick={() => setPage((current) => Math.max(1, current - 1))}
-                    className="px-3 py-1.5 text-[10px] font-medium text-slate-600 bg-white border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50"
+                    className="px-3 py-1.5 text-[10px] font-medium text-slate-600 dark:text-gray-400 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-700 rounded hover:bg-slate-50 dark:hover:bg-gray-800 disabled:opacity-50"
                   >
                     Previous
                   </button>
@@ -543,7 +543,7 @@ function Notifications() {
                     type="button"
                     disabled={page >= pagination.totalPages}
                     onClick={() => setPage((current) => current + 1)}
-                    className="px-3 py-1.5 text-[10px] font-medium text-slate-600 bg-white border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50"
+                    className="px-3 py-1.5 text-[10px] font-medium text-slate-600 dark:text-gray-400 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-700 rounded hover:bg-slate-50 dark:hover:bg-gray-800 disabled:opacity-50"
                   >
                     Next
                   </button>

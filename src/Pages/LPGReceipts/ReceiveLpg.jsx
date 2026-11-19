@@ -130,30 +130,30 @@ function ReceiveLpg() {
    };
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
+    <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
       {/* Header & Breadcrumbs */}
       <div className="mb-6">
         <p className="text-xs mb-2">
           <span
             onClick={() => navigate("/dashboard")}
-            className="cursor-pointer font-medium text-slate-400 hover:text-slate-600 transition-colors duration-200"
+            className="cursor-pointer font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors duration-200"
           >
             Dashboard
           </span>{" "}
-          <span className="px-1 text-slate-400">/</span>{" "}
+          <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
           <span
             onClick={() => navigate("/lpg-receipts")}
-            className="cursor-pointer font-medium text-slate-400 hover:text-slate-600 transition-colors duration-200"
+            className="cursor-pointer font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400 transition-colors duration-200"
           >
             LPG Receipts
           </span>{" "}
-          <span className="px-1 text-slate-400">/</span>{" "}
-          <span className="font-semibold text-slate-600">Receive LPG</span>
+          <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
+          <span className="font-semibold text-slate-600 dark:text-gray-400">Receive LPG</span>
         </p>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-gray-100">
           Receive LPG Shipment
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">
           Record newly arrived bulk LPG tanker deliveries and update inventory ledgers
         </p>
       </div>
@@ -163,28 +163,28 @@ function ReceiveLpg() {
         <div className="lg:col-span-2 space-y-6">
           
           {/* Card 1: Shipment & Logistics Information */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4">
-              <h2 className="text-sm font-semibold text-slate-800">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4">
+              <h2 className="text-sm font-semibold text-slate-800 dark:text-gray-100">
                 Shipment & Logistics Information
               </h2>
             </div>
             <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Receipt Number (Auto)
                 </label>
                 <input
                   type="text"
                   disabled
                   value="REC-2026-0089"
-                  className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none cursor-not-allowed"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-3 py-2 text-sm text-slate-500 dark:text-gray-400 outline-none cursor-not-allowed"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Supplier Dropdown <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Supplier Dropdown <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={suppliers}
@@ -203,13 +203,13 @@ function ReceiveLpg() {
                   emptyText="No supplier found"
                 />
                 {supplierIdError && (
-                  <p className="mt-1.5 text-xs text-rose-500">{supplierIdError}</p>
+                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{supplierIdError}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Truck Registration Number <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Truck Registration Number <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   ref={truckRegRef}
@@ -221,20 +221,20 @@ function ReceiveLpg() {
                     clearError(setTruckRegError);
                   }}
                   placeholder="LEA-4521"
-                  className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                  className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-2 ${
                     truckRegError
                       ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
-                      : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                      : "border-slate-200 dark:border-gray-700 focus:border-[#008951] focus:ring-emerald-100"
                   }`}
                 />
                 {truckRegError && (
-                  <p className="mt-1.5 text-xs text-rose-500">{truckRegError}</p>
+                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{truckRegError}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Supplier Invoice Number <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Supplier Invoice Number <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   ref={supplierInvoiceRef}
@@ -246,49 +246,49 @@ function ReceiveLpg() {
                     setSupplierInvoice(e.target.value);
                     clearError(setSupplierInvoiceError);
                   }}
-                  className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                  className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-2 ${
                     supplierInvoiceError
                       ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
-                      : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                      : "border-slate-200 dark:border-gray-700 focus:border-[#008951] focus:ring-emerald-100"
                   }`}
                 />
                 {supplierInvoiceError && (
-                  <p className="mt-1.5 text-xs text-rose-500">{supplierInvoiceError}</p>
+                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{supplierInvoiceError}</p>
                 )}
               </div>
             </div>
           </div>
 
           {/* Card 2: Receiving Details & Storage Tank Routing */}
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="border-b border-slate-200 p-4">
-              <h2 className="text-sm font-semibold text-slate-800">
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="border-b border-slate-200 dark:border-gray-700 p-4">
+              <h2 className="text-sm font-semibold text-slate-800 dark:text-gray-100">
                 Receiving Details & Storage Tank Routing
               </h2>
             </div>
             <div className="p-5 space-y-5">
               {/* <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Route to Storage Tank <span className="text-rose-500">*</span>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                  Route to Storage Tank <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <div className="relative">
                   <select
                     value={storageTankId}
                     onChange={(e) => setStorageTankId(e.target.value)}
-                    className="w-full appearance-none rounded-md border border-slate-200 bg-white pl-3 pr-10 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   >
                     <option value="">Select Tank</option>
                     <option value="6a93dee2f8dc7b4205bdcb5f">TNK-001 — Main Bulk (12,500 / 50,000 KG)</option>
                     <option value="6a93dee2f8dc7b4205bdcb60">TNK-002 — Secondary Bulk (0 / 50,000 KG)</option>
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500 pointer-events-none" />
                 </div>
               </div> */}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Received Quantity (KG) <span className="text-rose-500">*</span>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+                    Received Quantity (KG) <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <input
                     ref={quantityRef}
@@ -298,31 +298,31 @@ function ReceiveLpg() {
                       setQuantity(e.target.value);
                       clearError(setQuantityError);
                     }}
-                    className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 ${
+                    className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-2 ${
                       quantityError
                         ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
-                        : "border-slate-200 focus:border-[#008951] focus:ring-emerald-100"
+                        : "border-slate-200 dark:border-gray-700 focus:border-[#008951] focus:ring-emerald-100"
                     }`}
                   />
                   {quantityError && (
-                    <p className="mt-1.5 text-xs text-rose-500">{quantityError}</p>
+                    <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{quantityError}</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                     Purchase Rate per KG (Rs.)
                   </label>
                   <input
                     type="number"
                     value={rate}
                     onChange={(e) => setRate(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                     Received By (Employee)
                   </label>
                   <SearchableCustomerSelect
@@ -339,27 +339,27 @@ function ReceiveLpg() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                     Received At (Date & Time)
                   </label>
                   <input
                     type="datetime-local"
                     value={receivedAt}
                     onChange={(e) => setReceivedAt(e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Remarks / Quality Inspection Notes
                 </label>
                 <textarea
                   rows="2"
                   value={remarks}
                   onChange={(e) => setRemarks(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
+                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
                 />
               </div>
             </div>
@@ -370,37 +370,37 @@ function ReceiveLpg() {
         <div className="lg:col-span-1 space-y-6">
           
           {/* Card 3: LPG Transaction Summary Card */}
-          <div className="rounded-2xl border-2 border-[#1a56db]/80 bg-white p-5 shadow-sm">
-            <h2 className="text-base font-bold text-[#1a56db] mb-4">
+          <div className="rounded-2xl border-2 border-[#1a56db]/80 bg-white dark:bg-gray-900 p-5 shadow-sm">
+            <h2 className="text-base font-bold text-[#1a56db] dark:text-blue-400 mb-4">
               LPG Transaction Summary
             </h2>
             
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-600">Received Quantity</span>
-                <span className="font-bold text-slate-900">{formattedQuantity} KG</span>
+                <span className="text-sm text-slate-600 dark:text-gray-400">Received Quantity</span>
+                <span className="font-bold text-slate-900 dark:text-gray-100">{formattedQuantity} KG</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-600">Decanting Rate / KG</span>
-                <span className="font-bold text-slate-900">Rs. {parseFloat(rate || 0).toFixed(2)}</span>
+                <span className="text-sm text-slate-600 dark:text-gray-400">Decanting Rate / KG</span>
+                <span className="font-bold text-slate-900 dark:text-gray-100">Rs. {parseFloat(rate || 0).toFixed(2)}</span>
               </div>
             </div>
 
-            <div className="mt-4 pt-4 border-t border-slate-200 flex items-center justify-between">
-              <span className="text-sm font-semibold text-slate-700">Total Purchase Cost</span>
-              <span className="text-2xl font-extrabold text-[#1a56db]">Rs. {totalCost}</span>
+            <div className="mt-4 pt-4 border-t border-slate-200 dark:border-gray-700 flex items-center justify-between">
+              <span className="text-sm font-semibold text-slate-700 dark:text-gray-300">Total Purchase Cost</span>
+              <span className="text-2xl font-extrabold text-[#1a56db] dark:text-blue-400">Rs. {totalCost}</span>
             </div>
 
-            <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50/80 p-3">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-              <p className="text-xs font-medium leading-relaxed text-emerald-900">
+            <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/80 p-3">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+              <p className="text-xs font-medium leading-relaxed text-emerald-900 dark:text-emerald-700">
                 Routing will instantly update TNK-001 bulk storage from 12,500 KG to {Number(12500) + Number(quantity || 0)} KG (75% Full).
               </p>
             </div>
           </div>
 
           {/* Card 4: Actions Card */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
+          <div className="rounded-2xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm space-y-3">
             <button
               onClick={handleSubmit}
               isloading={createMutation.isPending}
@@ -410,14 +410,14 @@ function ReceiveLpg() {
             </button>
             {/* <button
               onClick={() => navigate("/lpg-receipts")}
-              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50"
+              className="w-full rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-2.5 text-sm font-semibold text-slate-700 dark:text-gray-300 transition-all hover:bg-slate-50 dark:hover:bg-gray-800"
             >
               Save as Draft
             </button> */}
             <div className="pt-1 text-center">
               <span
                 onClick={() => navigate("/lpg-receipts")}
-                className="cursor-pointer text-sm font-medium text-rose-500 hover:text-rose-700"
+                className="cursor-pointer text-sm font-medium text-rose-500 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300"
               >
                 Cancel
               </span>

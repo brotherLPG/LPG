@@ -8,27 +8,27 @@ function stockLevelTone(percent) {
   if (percent >= 70) {
     return {
       bar: "from-emerald-400 via-green-500 to-emerald-600",
-      badge: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      alert: "bg-emerald-50 border-emerald-200",
-      alertText: "text-emerald-800",
-      icon: "text-emerald-600",
+      badge: "bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
+      alert: "bg-emerald-50 dark:bg-emerald-950 border-emerald-200 dark:border-emerald-800",
+      alertText: "text-emerald-800 dark:text-emerald-300",
+      icon: "text-emerald-600 dark:text-emerald-400",
     };
   }
   if (percent >= 35) {
     return {
       bar: "from-amber-300 via-yellow-400 to-amber-500",
-      badge: "bg-amber-50 text-amber-800 border-amber-200",
-      alert: "bg-amber-50 border-amber-200",
-      alertText: "text-amber-800",
-      icon: "text-amber-500",
+      badge: "bg-amber-50 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800",
+      alert: "bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800",
+      alertText: "text-amber-800 dark:text-amber-300",
+      icon: "text-amber-500 dark:text-amber-400",
     };
   }
   return {
     bar: "from-red-400 via-rose-500 to-red-600",
-    badge: "bg-red-50 text-red-700 border-red-200",
-    alert: "bg-red-50 border-red-200",
-    alertText: "text-red-800",
-    icon: "text-red-500",
+    badge: "bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800",
+    alert: "bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800",
+    alertText: "text-red-800 dark:text-red-300",
+    icon: "text-red-500 dark:text-red-400",
   };
 }
 
@@ -48,7 +48,7 @@ function StorageTanks() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen w-full bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen w-full bg-slate-50 dark:bg-gray-800 flex items-center justify-center">
         <p className="text-tertiary">Loading tank data...</p>
       </div>
     );
@@ -56,7 +56,7 @@ function StorageTanks() {
 
   if (error) {
     return (
-      <div className="min-h-screen w-full bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen w-full bg-slate-50 dark:bg-gray-800 flex items-center justify-center">
         <p className="text-error">Error loading tank data: {error.message}</p>
       </div>
     );
@@ -160,7 +160,7 @@ function StorageTanks() {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-slate-50">
+    <div className="min-h-screen w-full bg-slate-50 dark:bg-gray-800">
       <div className="w-full px-4 md:px-6 lg:px-8 py-3">
         {/* =========================================
             BREADCRUMB
@@ -213,7 +213,7 @@ function StorageTanks() {
         {/* =========================================
             IMAGE BANNER
         ========================================= */}
-        <div className="relative bg-white border border-slate-200 rounded-md mb-2 overflow-hidden">
+        <div className="relative bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-700 rounded-md mb-2 overflow-hidden">
           <img
             src={StorageTanksimage}
             alt="Storage Tank"
@@ -226,8 +226,8 @@ function StorageTanks() {
               </h5>
               <p className={`px-3 py-1 text-xs font-semibold rounded-full border ${
                 tankData?.data?.tankStatus === 'operational'
-                  ? 'bg-green-100 text-green-700 border-green-300'
-                  : 'bg-red-100 text-red-700 border-red-300'
+                  ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700'
+                  : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 border-red-300 dark:border-red-700'
               }`}>
                 {tankData?.data?.tankStatusLabel || 'Unknown'}
               </p>
@@ -240,8 +240,8 @@ function StorageTanks() {
         ========================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 mb-2">
           {/* Tank Parameters */}
-          <div className="bg-white border border-slate-200 rounded-md px-4 py-3">
-            <h3 className="border-b border-slate-100 py-2 text-[16px] font-bold text-BLUE-dark">
+          <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-700 rounded-md px-4 py-3">
+            <h3 className="border-b border-slate-100 dark:border-gray-800 py-2 text-[16px] font-bold text-BLUE-dark">
               Tank Parameters
             </h3>
 
@@ -301,11 +301,11 @@ function StorageTanks() {
             </div>
 
             {/* <div className="flex gap-2 mt-4">
-              <button className="flex items-center gap-1 text-[13px] font-semibold text-tertiary px-3 py-2 border border-accent-blue rounded hover:bg-blue-50 transition">
+              <button className="flex items-center gap-1 text-[13px] font-semibold text-tertiary px-3 py-2 border border-accent-blue rounded hover:bg-blue-50 dark:hover:bg-blue-950 transition">
                 <Edit className="w-4 h-4" />
                 Edit Tank Specs
               </button>
-              <button className="flex items-center gap-1 text-[13px] font-semibold text-tertiary px-3 py-2 border border-accent-blue rounded hover:bg-blue-50 transition">
+              <button className="flex items-center gap-1 text-[13px] font-semibold text-tertiary px-3 py-2 border border-accent-blue rounded hover:bg-blue-50 dark:hover:bg-blue-950 transition">
                 <History className="w-4 h-4" />
                 View Maintenance History
               </button>
@@ -313,8 +313,8 @@ function StorageTanks() {
           </div>
 
           {/* Capacity Level Gauge */}
-          <div className="bg-white border border-slate-200 rounded-md px-4 py-3">
-            <h3 className="border-b border-slate-100 py-2 text-[16px] font-bold text-BLUE-dark">
+          <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-700 rounded-md px-4 py-3">
+            <h3 className="border-b border-slate-100 dark:border-gray-800 py-2 text-[16px] font-bold text-BLUE-dark">
               Capacity Level Gauge
             </h3>
 
@@ -323,12 +323,12 @@ function StorageTanks() {
                 <span className="text-[12px] text-tertiary font-semibold">
                   Current Bulk Stock
                 </span>
-                <span className="text-[12px] font-bold text-slate-700">
+                <span className="text-[12px] font-bold text-slate-700 dark:text-gray-300">
                   {currentStock.amount}
                 </span>
               </div>
 
-              <div className="h-3.5 w-full overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200">
+              <div className="h-3.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-gray-800 ring-1 ring-slate-200">
                 <div
                   className={`h-full rounded-full bg-linear-to-r shadow-sm transition-all duration-500 ${stockTone.bar}`}
                   style={{ width: `${fillPercent}%` }}
@@ -358,9 +358,9 @@ function StorageTanks() {
         ========================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 mb-2">
           {/* Recent Bulk LPG Receipts */}
-          <section className="min-w-0 overflow-hidden rounded-md border border-slate-200 bg-white [&_.overflow-x-auto]:overflow-x-hidden! [&_.min-w-300]:min-w-0! [&_.min-w-300]:w-full! [&_table]:w-full! [&_table]:table-fixed">
-            <header className="flex items-center justify-between border-b border-slate-100 px-3 py-2">
-              <h3 className="border-b border-slate-100 py-2 text-[16px] font-bold text-BLUE-dark">
+          <section className="min-w-0 overflow-hidden rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 [&_.overflow-x-auto]:overflow-x-hidden! [&_.min-w-300]:min-w-0! [&_.min-w-300]:w-full! [&_table]:w-full! [&_table]:table-fixed">
+            <header className="flex items-center justify-between border-b border-slate-100 dark:border-gray-800 px-3 py-2">
+              <h3 className="border-b border-slate-100 dark:border-gray-800 py-2 text-[16px] font-bold text-BLUE-dark">
                 Recent Bulk LPG Receipts
               </h3>
             </header>
@@ -373,9 +373,9 @@ function StorageTanks() {
           </section>
 
           {/* Recent Cylinder Filling Batches */}
-         <section className="min-w-0 overflow-hidden rounded-md border border-slate-200 bg-white [&_.overflow-x-auto]:overflow-x-hidden! [&_.min-w-300]:min-w-0! [&_.min-w-300]:w-full! [&_table]:w-full! [&_table]:table-fixed">
-             <header className="flex items-center justify-between border-b border-slate-100 px-3 py-2">
-              <h3 className="border-b border-slate-100 py-2 text-[16px] font-bold text-BLUE-dark">
+         <section className="min-w-0 overflow-hidden rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 [&_.overflow-x-auto]:overflow-x-hidden! [&_.min-w-300]:min-w-0! [&_.min-w-300]:w-full! [&_table]:w-full! [&_table]:table-fixed">
+             <header className="flex items-center justify-between border-b border-slate-100 dark:border-gray-800 px-3 py-2">
+              <h3 className="border-b border-slate-100 dark:border-gray-800 py-2 text-[16px] font-bold text-BLUE-dark">
                 Recent Cylinder Filling Batches
               </h3>
             </header>

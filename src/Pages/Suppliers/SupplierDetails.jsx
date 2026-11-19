@@ -30,21 +30,21 @@ const formatAppliedInvoices = (payment) => {
 };
 
 const receiptStatusStyles = {
-  confirmed: "bg-emerald-50 text-emerald-600",
-  Confirmed: "bg-emerald-50 text-emerald-600",
-  draft: "bg-slate-50 text-slate-600",
-  Draft: "bg-slate-50 text-slate-600",
-  pending: "bg-amber-50 text-amber-600",
-  Pending: "bg-amber-50 text-amber-600",
-  cancelled: "bg-red-50 text-red-600",
-  Cancelled: "bg-red-50 text-red-600",
+  confirmed: "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400",
+  Confirmed: "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400",
+  draft: "bg-slate-50 dark:bg-gray-800 text-slate-600 dark:text-gray-400",
+  Draft: "bg-slate-50 dark:bg-gray-800 text-slate-600 dark:text-gray-400",
+  pending: "bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400",
+  Pending: "bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400",
+  cancelled: "bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400",
+  Cancelled: "bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400",
 };
 
 const paymentStatusStyles = {
-  Recorded: "bg-blue-50 text-blue-600",
-  Cleared: "bg-emerald-50 text-emerald-600",
-  Pending: "bg-amber-50 text-amber-600",
-  Cancelled: "bg-red-50 text-red-600",
+  Recorded: "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400",
+  Cleared: "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400",
+  Pending: "bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400",
+  Cancelled: "bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400",
 };
 
 const formatStatusLabel = (value) => {
@@ -131,10 +131,10 @@ function SupplierDetails() {
         label: "Receipt #",
         isRowHeader: true,
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
         cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap",
         renderCell: (purchase) => (
-          <span className="font-semibold text-[#1a56db] text-[13px]">
+          <span className="font-semibold text-[#1a56db] dark:text-blue-400 text-[13px]">
             {purchase.receiptNumber || "—"}
           </span>
         ),
@@ -143,34 +143,34 @@ function SupplierDetails() {
         key: "supplierInvoiceNumber",
         label: "Supplier Invoice",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-        cellClassName: "px-4 py-4 text-slate-600 text-[13px] whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap",
         renderCell: (purchase) => purchase.supplierInvoiceNumber || "—",
       },
       {
         key: "receivedAt",
         label: "Received At",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap",
         cellClassName:
-          "px-4 py-4 text-slate-600 text-[13px] whitespace-nowrap text-nowrap",
+          "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap text-nowrap",
         renderCell: (purchase) => formatReceivedDate(purchase.receivedAt) || "—",
       },
       {
         key: "truckRegistrationNumber",
         label: "Truck Reg #",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-        cellClassName: "px-4 py-4 text-slate-600 text-[13px] whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap",
         renderCell: (purchase) => purchase.truckRegistrationNumber || "—",
       },
       {
         key: "receivedQuantityKg",
         label: "Qty (KG)",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-right",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-right",
         cellClassName:
-          "px-4 py-4 text-right text-[13px] text-slate-700 whitespace-nowrap",
+          "px-4 py-4 text-right text-[13px] text-slate-700 dark:text-gray-300 whitespace-nowrap",
         renderCell: (purchase) =>
           Number(purchase.receivedQuantityKg || 0).toLocaleString(),
       },
@@ -178,10 +178,10 @@ function SupplierDetails() {
         key: "purchaseRatePerKg",
         label: "Rate/KG",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-right",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-right",
         cellClassName: "px-4 py-4 text-right whitespace-nowrap",
         renderCell: (purchase) => (
-          <span className="text-[13px] text-slate-700">
+          <span className="text-[13px] text-slate-700 dark:text-gray-300">
             {formatAmount(purchase.purchaseRatePerKg)}
           </span>
         ),
@@ -190,10 +190,10 @@ function SupplierDetails() {
         key: "totalPurchaseAmount",
         label: "Total Amount",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-right",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-right",
         cellClassName: "px-4 py-4 text-right whitespace-nowrap",
         renderCell: (purchase) => (
-          <span className="text-[13px] font-semibold text-slate-800">
+          <span className="text-[13px] font-semibold text-slate-800 dark:text-gray-100">
             {formatAmount(purchase.totalPurchaseAmount)}
           </span>
         ),
@@ -202,8 +202,8 @@ function SupplierDetails() {
         key: "tankName",
         label: "Storage Tank",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-        cellClassName: "px-4 py-4 text-slate-600 text-[13px] whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap",
         renderCell: (purchase) =>
           purchase.tankName || purchase.tankCode
             ? `${purchase.tankCode || ""}${
@@ -215,21 +215,21 @@ function SupplierDetails() {
         key: "remarks",
         label: "Remarks",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-        cellClassName: "px-4 py-4 text-slate-600 text-[13px] whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap",
         renderCell: (purchase) => purchase.remarks || "—",
       },
       {
         key: "receiptStatus",
         label: "Status",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
         cellClassName: "px-4 py-4 whitespace-nowrap",
         renderCell: (purchase) => (
           <span
             className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
               receiptStatusStyles[purchase.receiptStatus] ||
-              "bg-slate-50 text-slate-600"
+              "bg-slate-50 dark:bg-gray-800 text-slate-600 dark:text-gray-400"
             }`}
           >
             {formatStatusLabel(purchase.receiptStatus)}
@@ -274,10 +274,10 @@ function SupplierDetails() {
         label: "Receipt #",
         isRowHeader: true,
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
         cellClassName: "px-4 py-4 whitespace-nowrap",
         renderCell: (payment) => (
-          <span className="font-semibold text-slate-800 text-[13px]">
+          <span className="font-semibold text-slate-800 dark:text-gray-100 text-[13px]">
             {payment.receiptNumber || payment.paymentNumber || "—"}
           </span>
         ),
@@ -286,8 +286,8 @@ function SupplierDetails() {
         key: "paymentDate",
         label: "Date",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-        cellClassName: "px-4 py-4 text-slate-600 text-[13px] whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap",
         renderCell: (payment) =>
           formatReceivedDate(payment.paymentDate) || "—",
       },
@@ -295,10 +295,10 @@ function SupplierDetails() {
         key: "paymentAmount",
         label: "Amount (Rs.)",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-right",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-right",
         cellClassName: "px-4 py-4 text-right whitespace-nowrap",
         renderCell: (payment) => (
-          <span className="text-[13px] font-semibold text-slate-800">
+          <span className="text-[13px] font-semibold text-slate-800 dark:text-gray-100">
             {formatAmount(payment.paymentAmount)}
           </span>
         ),
@@ -307,8 +307,8 @@ function SupplierDetails() {
         key: "paymentMethodLabel",
         label: "Payment Method",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-        cellClassName: "px-4 py-4 text-slate-600 text-[13px] whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap",
         renderCell: (payment) =>
           payment.paymentMethodLabel || payment.paymentMethod || "—",
       },
@@ -316,26 +316,26 @@ function SupplierDetails() {
         key: "accountName",
         label: "Account Name",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-        cellClassName: "px-4 py-4 text-slate-600 text-[13px] whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap",
         renderCell: (payment) => payment.accountName || "—",
       },
       {
         key: "referenceNumber",
         label: "Reference No",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
-        cellClassName: "px-4 py-4 text-slate-600 text-[13px] whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
+        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap",
         renderCell: (payment) => payment.referenceNumber || "—",
       },
       {
         key: "appliedToInvoice",
         label: "Applied to Invoice",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
         cellClassName: "px-4 py-4 whitespace-nowrap",
         renderCell: (payment) => (
-          <span className="text-[13px] font-semibold text-[#1a56db]">
+          <span className="text-[13px] font-semibold text-[#1a56db] dark:text-blue-400">
             {formatAppliedInvoices(payment)}
           </span>
         ),
@@ -344,10 +344,10 @@ function SupplierDetails() {
         key: "balanceAfter",
         label: "Balance After",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-right",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-right",
         cellClassName: "px-4 py-4 text-right whitespace-nowrap",
         renderCell: (payment) => (
-          <span className="text-[13px] text-slate-600">
+          <span className="text-[13px] text-slate-600 dark:text-gray-400">
             {formatAmount(payment.balanceAfter)}
           </span>
         ),
@@ -356,14 +356,14 @@ function SupplierDetails() {
         key: "directionLabel",
         label: "Direction",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
         cellClassName: "px-4 py-4 whitespace-nowrap",
         renderCell: (payment) => (
           <span
             className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
               payment.direction === "receive"
-                ? "bg-emerald-50 text-emerald-600"
-                : "bg-amber-50 text-amber-600"
+                ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400"
+                : "bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400"
             }`}
           >
             {payment.directionLabel || "—"}
@@ -374,13 +374,13 @@ function SupplierDetails() {
         key: "paymentStatusLabel",
         label: "Status",
         className:
-          "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap",
+          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
         cellClassName: "px-4 py-4 whitespace-nowrap",
         renderCell: (payment) => (
           <span
             className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
               paymentStatusStyles[payment.paymentStatusLabel] ||
-              "bg-slate-50 text-slate-600"
+              "bg-slate-50 dark:bg-gray-800 text-slate-600 dark:text-gray-400"
             }`}
           >
             {payment.paymentStatusLabel || "—"}
@@ -433,7 +433,7 @@ function SupplierDetails() {
 
   if (isLoading) {
     return (
-      <main className="flex min-h-full items-center justify-center bg-[#F8FAFC] p-8 text-sm text-slate-500">
+      <main className="flex min-h-full items-center justify-center bg-[#F8FAFC] dark:bg-gray-950 p-8 text-sm text-slate-500 dark:text-gray-400">
         Loading supplier...
       </main>
     );
@@ -441,12 +441,12 @@ function SupplierDetails() {
 
   if (error || !supplierFile) {
     return (
-      <main className="flex min-h-full flex-col items-center justify-center gap-4 bg-[#F8FAFC] p-8 text-sm text-red-500">
+      <main className="flex min-h-full flex-col items-center justify-center gap-4 bg-[#F8FAFC] dark:bg-gray-950 p-8 text-sm text-red-500 dark:text-red-400">
         <p>Unable to load supplier.</p>
         <button
           type="button"
           onClick={() => navigate("/suppliers")}
-          className="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 font-semibold text-slate-600 shadow-sm"
+          className="inline-flex items-center gap-2 rounded-md bg-white dark:bg-gray-900 px-3 py-2 font-semibold text-slate-600 dark:text-gray-400 shadow-sm"
         >
           <ArrowLeft className="h-4 w-4" /> Back to Suppliers
         </button>
@@ -455,12 +455,12 @@ function SupplierDetails() {
   }
 
   return (
-    <main className="min-h-full bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
-      <p className="text-xs text-slate-400">
+    <main className="min-h-full bg-[#F8FAFC] dark:bg-gray-950 p-4 sm:p-6 lg:p-8">
+      <p className="text-xs text-slate-400 dark:text-gray-500">
         <button
           type="button"
           onClick={() => navigate("/dashboard")}
-          className="font-medium text-slate-400 hover:text-slate-600"
+          className="font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400"
         >
           Dashboard
         </button>
@@ -468,43 +468,43 @@ function SupplierDetails() {
         <button
           type="button"
           onClick={() => navigate("/suppliers")}
-          className="font-medium text-slate-400 hover:text-slate-600"
+          className="font-medium text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400"
         >
           Suppliers
         </button>
         <span className="px-1">/</span>
-        <span className="font-semibold text-slate-600">{supplierFile.name}</span>
+        <span className="font-semibold text-slate-600 dark:text-gray-400">{supplierFile.name}</span>
       </p>
 
-      <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
+      <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-gray-100">
         Account Ledger
       </h1>
-      <p className="mt-1 text-sm text-slate-500">
+      <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">
         Detailed financial ledger and purchase records for {supplierFile.name}
       </p>
 
-      <section className="mt-5 rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+      <section className="mt-5 rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-5 py-4 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-slate-100 text-base font-bold text-slate-600">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-gray-800 text-base font-bold text-slate-600 dark:text-gray-400">
               {supplierFile.initials}
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-lg font-bold text-slate-900">
+                <h2 className="text-lg font-bold text-slate-900 dark:text-gray-100">
                   {supplierFile.name}
                 </h2>
                 <span
                   className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
                     supplierFile.isActive
-                      ? "bg-emerald-50 text-emerald-600"
-                      : "bg-red-50 text-red-600"
+                      ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400"
+                      : "bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400"
                   }`}
                 >
                   {supplierFile.accountStatus}
                 </span>
               </div>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">
                 Code: {supplierFile.code}
                 <span className="px-2 text-slate-300">|</span>
                 Contact: {supplierFile.contact}
@@ -519,7 +519,7 @@ function SupplierDetails() {
               <button
                 type="button"
                 onClick={() => setIsDeleteOpen(true)}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                className="rounded-lg border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm font-medium text-slate-700 dark:text-gray-300 transition hover:bg-slate-50 dark:hover:bg-gray-800"
               >
                 Delete Profile
               </button>
@@ -538,12 +538,12 @@ function SupplierDetails() {
       </section>
 
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Total Purchases</p>
-          <p className="mt-2 text-2xl font-bold text-slate-900">
+        <article className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm">
+          <p className="text-sm font-medium text-slate-500 dark:text-gray-400">Total Purchases</p>
+          <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-gray-100">
             {formatRs(supplierFile.totalPurchases)}
           </p>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-slate-400 dark:text-gray-500">
             {supplierFile.purchaseCount}{" "}
             {supplierFile.purchaseCount === 1 ? "receipt" : "receipts"}
             {supplierFile.totalQuantityKg
@@ -552,19 +552,19 @@ function SupplierDetails() {
           </p>
         </article>
 
-        <article className="rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
-          <p className="text-sm font-medium text-amber-700">Remaining Payable</p>
-          <p className="mt-2 text-2xl font-bold text-amber-500">
+        <article className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 p-4 shadow-sm">
+          <p className="text-sm font-medium text-amber-700 dark:text-amber-300">Remaining Payable</p>
+          <p className="mt-2 text-2xl font-bold text-amber-500 dark:text-amber-400">
             {formatRs(supplierFile.outstandingBalance)}
           </p>
         </article>
 
-        <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Last Payment</p>
-          <p className="mt-2 text-2xl font-bold text-emerald-600">
+        <article className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm">
+          <p className="text-sm font-medium text-slate-500 dark:text-gray-400">Last Payment</p>
+          <p className="mt-2 text-2xl font-bold text-emerald-600 dark:text-emerald-400">
             {formatRs(supplierFile.lastPaymentAmount)}
           </p>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-slate-400 dark:text-gray-500">
             {supplierFile.lastPaymentDate
               ? [
                   `Paid on ${supplierFile.lastPaymentDate}`,
@@ -577,23 +577,23 @@ function SupplierDetails() {
           </p>
         </article>
 
-        <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Credit Limit</p>
-          <p className="mt-2 text-2xl font-bold text-slate-900">
+        <article className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-sm">
+          <p className="text-sm font-medium text-slate-500 dark:text-gray-400">Credit Limit</p>
+          <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-gray-100">
             {formatRs(supplierFile.creditLimit)}
           </p>
         </article>
       </div>
 
       <div className="mt-6">
-        <div className="flex items-center gap-6 border-b border-slate-200">
+        <div className="flex items-center gap-6 border-b border-slate-200 dark:border-gray-700">
           <button
             type="button"
             onClick={() => setActiveTab("purchases")}
             className={`-mb-px border-b-2 px-1 pb-3 text-sm font-semibold ${
               activeTab === "purchases"
-                ? "border-[#2563EB] text-[#2563EB]"
-                : "border-transparent text-slate-400 hover:text-slate-600"
+                ? "border-[#2563EB] text-[#2563EB] dark:text-blue-400"
+                : "border-transparent text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400"
             }`}
           >
             Purchase History
@@ -603,31 +603,31 @@ function SupplierDetails() {
             onClick={() => setActiveTab("payments")}
             className={`-mb-px border-b-2 px-1 pb-3 text-sm font-semibold ${
               activeTab === "payments"
-                ? "border-[#2563EB] text-[#2563EB]"
-                : "border-transparent text-slate-400 hover:text-slate-600"
+                ? "border-[#2563EB] text-[#2563EB] dark:text-blue-400"
+                : "border-transparent text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-400"
             }`}
           >
             Payment History
           </button>
         </div>
 
-        <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
           {activeTab === "purchases" ? (
             <div>
-              <div className="flex flex-col gap-3 border-b border-slate-100 p-3 sm:flex-row sm:items-center">
+              <div className="flex flex-col gap-3 border-b border-slate-100 dark:border-gray-800 p-3 sm:flex-row sm:items-center">
                 <label className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-gray-500" />
                   <input
                     value={purchaseSearch}
                     onChange={(event) => {
                       setPurchaseSearch(event.target.value);
                       setPurchasesPage(1);
                     }}
-                    className="w-full rounded-md border border-slate-200 py-2 pl-9 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 py-2 pl-9 pr-3 text-sm text-slate-700 dark:text-gray-300 outline-none transition placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     placeholder="Search by receipt or invoice number..."
                   />
                 </label>
-                <label className="flex items-center gap-2 text-sm text-slate-500">
+                <label className="flex items-center gap-2 text-sm text-slate-500 dark:text-gray-400">
                   <span className="whitespace-nowrap">From</span>
                   <input
                     type="date"
@@ -636,10 +636,10 @@ function SupplierDetails() {
                       setStartDate(event.target.value || null);
                       setPurchasesPage(1);
                     }}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none focus:border-[#008951] sm:w-44"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] sm:w-44"
                   />
                 </label>
-                <label className="flex items-center gap-2 text-sm text-slate-500">
+                <label className="flex items-center gap-2 text-sm text-slate-500 dark:text-gray-400">
                   <span className="whitespace-nowrap">To</span>
                   <input
                     type="date"
@@ -648,7 +648,7 @@ function SupplierDetails() {
                       setEndDate(event.target.value || null);
                       setPurchasesPage(1);
                     }}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none focus:border-[#008951] sm:w-44"
+                    className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] sm:w-44"
                   />
                 </label>
               </div>
