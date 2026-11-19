@@ -41,6 +41,7 @@ function Sales() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
+  const [openViewMenuId, setOpenViewMenuId] = useState(null);
 
   const { data: formOptionsResponse } = useGetSaleFormOptions();
   const formOptions = formOptionsResponse?.data || {};
@@ -202,6 +203,55 @@ function Sales() {
     });
   };
 
+  const getSaleMenuData = (item) => {
+    const saleId = item.id || item._id;
+    const customerIdValue =
+      typeof item.customerId === "object" && item.customerId !== null
+        ? item.customerId._id
+        : item.customerId;
+    return { saleId, customerIdValue };
+  };
+
+  const renderViewMenu = (item, align = "right", menuKey = null) => {
+    const { saleId, customerIdValue } = getSaleMenuData(item);
+    const key = menuKey || saleId;
+    if (openViewMenuId !== key) return null;
+    return (
+      <>
+        <div
+          className="fixed inset-0 z-10"
+          onClick={() => setOpenViewMenuId(null)}
+        />
+        <div
+          className={`absolute ${align === "left" ? "left-0" : "right-0"} top-full z-20 mt-1 w-40 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg`}
+        >
+          <button
+            type="button"
+            onClick={() => {
+              setOpenViewMenuId(null);
+              navigate(`/sales/view/${saleId}`);
+            }}
+            className="block w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            View Sale
+          </button>
+          {customerIdValue && (
+            <button
+              type="button"
+              onClick={() => {
+                setOpenViewMenuId(null);
+                navigate(`/customers/view/${customerIdValue}`);
+              }}
+              className="block w-full px-4 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              View Customer
+            </button>
+          )}
+        </div>
+      </>
+    );
+  };
+
   // Column definitions for sales table
   const salesColumns = [
     {
@@ -232,6 +282,23 @@ function Sales() {
         "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 whitespace-nowrap text-nowrap",
       cellClassName:
         "px-4 py-4 text-slate-600 text-[13px] font-medium whitespace-nowrap text-nowrap",
+      renderCell: (item) => {
+        const { saleId } = getSaleMenuData(item);
+        const menuKey = `name-${saleId}`;
+        const isMenuOpen = openViewMenuId === menuKey;
+        return (
+          <div className="relative inline-block">
+            <button
+              type="button"
+              onClick={() => setOpenViewMenuId(isMenuOpen ? null : menuKey)}
+              className="font-semibold text-[#1a56db] hover:underline text-[13px]"
+            >
+              {item.customerName}
+            </button>
+            {renderViewMenu(item, "left", menuKey)}
+          </div>
+        );
+      },
     },
     {
       key: "saleTypeLabel",
@@ -361,21 +428,27 @@ function Sales() {
       className:
         "bg-slate-50/80 px-4 py-4 text-[13px] font-bold text-slate-700 text-right pr-6",
       cellClassName: "px-4 py-4 pr-6",
-      renderCell: (item) => (
+      renderCell: (item) => {
+        const { saleId } = getSaleMenuData(item);
+        const isMenuOpen = openViewMenuId === saleId;
+        return (
         <div className="flex items-center justify-end gap-3">
           {can("sales", "read") && (
-            <Tooltip delay={0}>
-              <Button
-                onClick={() => navigate(`/sales/view/${item._id}`)}
-                aria-label={`View ${item.saleNumber}`}
-                className="text-[#1a56db] hover:text-blue-800 transition-colors bg-transparent min-w-0 px-1"
-              >
-                <Eye className="h-4 w-4" strokeWidth={2.5} />
-              </Button>
-              <Tooltip.Content>
-                <p>View Sale</p>
-              </Tooltip.Content>
-            </Tooltip>
+            <div className="relative">
+              <Tooltip delay={0}>
+                <Button
+                  onClick={() => setOpenViewMenuId(isMenuOpen ? null : saleId)}
+                  aria-label={`View ${item.saleNumber}`}
+                  className="text-[#1a56db] hover:text-blue-800 transition-colors bg-transparent min-w-0 px-1"
+                >
+                  <Eye className="h-4 w-4" strokeWidth={2.5} />
+                </Button>
+                <Tooltip.Content>
+                  <p>View</p>
+                </Tooltip.Content>
+              </Tooltip>
+              {renderViewMenu(item)}
+            </div>
           )}
           {can("sales", "update") && (
             <Tooltip delay={0}>
@@ -404,7 +477,8 @@ function Sales() {
             </Tooltip.Content>
           </Tooltip>
         </div>
-      ),
+        );
+      },
     },
   ];
 
