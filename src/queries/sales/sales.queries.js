@@ -30,7 +30,19 @@ function invoiceNumberParts(invoiceNumber) {
   return String(invoiceNumber || "").match(/\d+/g)?.map((part) => Number(part)) || [];
 }
 
+function isOfflineSale(sale) {
+  return sale?.provisional === true
+    || sale?.syncStatus === "pending"
+    || sale?.syncStatus === "failed"
+    || String(sale?.invoiceNumber || "").startsWith("OFF-")
+    || String(sale?._id || sale?.id || "").startsWith("local_");
+}
+
 function compareLatestInvoice(left, right) {
+  const leftOffline = isOfflineSale(left);
+  const rightOffline = isOfflineSale(right);
+  if (leftOffline !== rightOffline) return leftOffline ? -1 : 1;
+
   const leftParts = invoiceNumberParts(left?.invoiceNumber);
   const rightParts = invoiceNumberParts(right?.invoiceNumber);
   const length = Math.max(leftParts.length, rightParts.length);
@@ -54,10 +66,19 @@ async function fetchSalesLatestFirst(filters) {
         )
       )
     : [];
-  const items = [
+  const combined = [
     ...(first?.data?.items || []),
     ...rest.flatMap((page) => page?.data?.items || []),
-  ].sort(compareLatestInvoice);
+  ];
+  const byId = new Map();
+  for (const item of combined) {
+    const id = String(item?._id || item?.id || "");
+    const current = byId.get(id);
+    if (!current || (isOfflineSale(item) && !isOfflineSale(current))) {
+      byId.set(id, item);
+    }
+  }
+  const items = [...byId.values()].sort(compareLatestInvoice);
   const total = Number(first?.data?.pagination?.total);
 
   return {

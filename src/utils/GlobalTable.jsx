@@ -144,9 +144,11 @@ const GlobalTable = ({
                   key={item.id || item.key}
                   // className={resolvedRowClassName}
                   className={
-                    highlightFirstRow && rowIndex === 0
-                      ? "sales-highlight-row"
-                      : resolvedRowClassName
+                    String(resolvedRowClassName || "").includes("sales-offline-row")
+                      ? resolvedRowClassName
+                      : highlightFirstRow && rowIndex === 0
+                        ? "sales-highlight-row"
+                        : resolvedRowClassName
                   }
                 >
                   {columns.map((column) => (

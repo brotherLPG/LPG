@@ -8,6 +8,10 @@ import ToastProvider from './utils/GlobalToast';
 import ConfirmationProvider from './utils/GlobalConfirmation';
 import { PermissionProvider } from './contexts/PermissionContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import api from './api/axios';
+import { installOffline } from './offline/httpOffline';
+
+installOffline(api);
 
 const queryClient = new QueryClient();
 

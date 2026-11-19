@@ -145,6 +145,20 @@ button:disabled {
   background-color: #D0FAE5 !important;
 }
 
+.sales-offline-row,
+.sales-offline-row:hover,
+.sales-offline-row td,
+.sales-offline-row:hover td {
+  background-color: #ffe4e6 !important;
+}
+
+.dark .sales-offline-row,
+.dark .sales-offline-row:hover,
+.dark .sales-offline-row td,
+.dark .sales-offline-row:hover td {
+  background-color: #4c1d24 !important;
+}
+
 .text-tertiary {
   color: var(--color-tertiary);
 }

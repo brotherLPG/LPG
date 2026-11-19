@@ -78,6 +78,64 @@ function paginate(items, params) {
   };
 }
 
+function isOfflineSaleRecord(record) {
+  return record?.provisional === true
+    || record?.syncStatus === 'pending'
+    || record?.syncStatus === 'failed'
+    || String(record?.invoiceNumber || '').startsWith('OFF-')
+    || String(record?._id || '').startsWith('local_');
+}
+
+function sortSaleRecords(records) {
+  return [...records].sort((left, right) => {
+    const leftOffline = isOfflineSaleRecord(left);
+    const rightOffline = isOfflineSaleRecord(right);
+    if (leftOffline !== rightOffline) return leftOffline ? -1 : 1;
+    return new Date(right.createdAt || right.invoiceDate || 0).getTime()
+      - new Date(left.createdAt || left.invoiceDate || 0).getTime();
+  });
+}
+
+function salesListSummary(records) {
+  const totals = {
+    totalSalesAmount: 0,
+    totalSalesCount: 0,
+    todaySalesAmount: 0,
+    todaySalesCount: 0,
+    cashSalesAmount: 0,
+    cashSalesCount: 0,
+    creditSalesAmount: 0,
+    creditSalesCount: 0,
+    pendingCreditAmount: 0,
+  };
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  for (const sale of records) {
+    if (sale.saleStatus === 'cancelled' || sale.saleStatus === 'draft') continue;
+    const amount = Number(sale.totalAmount) || 0;
+    const credit = sale.saleType === 'credit' || sale.type === 'credit';
+    totals.totalSalesAmount += amount;
+    totals.totalSalesCount += 1;
+    if (credit) {
+      totals.creditSalesAmount += amount;
+      totals.creditSalesCount += 1;
+    } else {
+      totals.cashSalesAmount += amount;
+      totals.cashSalesCount += 1;
+    }
+    totals.pendingCreditAmount += Number(sale.outstandingAmount) || 0;
+    const when = new Date(sale.invoiceDate || sale.createdAt || 0);
+    if (when >= start) {
+      totals.todaySalesAmount += amount;
+      totals.todaySalesCount += 1;
+    }
+  }
+  for (const key of Object.keys(totals)) {
+    if (key.endsWith('Amount')) totals[key] = roundMoney(totals[key]);
+  }
+  return totals;
+}
+
 function includesText(value, query) {
   return String(value || '').toLowerCase().includes(String(query || '').trim().toLowerCase());
 }
@@ -1422,7 +1480,11 @@ export async function serveGet(config) {
   }
   if (path === '/sales' && (await allSales()).length) {
     const rows = filterSales(await allSales(), params);
-    return envelope('Sales fetched', paginate(rows.map(rowRecord), params));
+    const records = sortSaleRecords(rows.map(rowRecord));
+    return envelope('Sales fetched', {
+      ...paginate(records, params),
+      summary: salesListSummary(records),
+    });
   }
   if (path === '/payments' && (await allPayments()).length) {
     const source = await allPayments();
@@ -1523,8 +1585,31 @@ export async function mergePendingIntoResponse(config, payload) {
   if (!pending.length || Number(params.page || 1) !== 1) return payload;
   const seen = new Set(payload.data.items.map((item) => String(item._id)));
   const extras = pending.filter((item) => !seen.has(String(item._id)));
+  const replaced = payload.data.items.map((item) => (
+    pending.find((row) => String(row._id) === String(item._id)) || item
+  ));
   const summary = payload.data.summary;
-  const nextSummary = path === '/accounts' && summary ? {
+  const freshSales = path === '/sales'
+    ? extras.filter((sale) => String(sale._id || '').startsWith('local_') || String(sale.invoiceNumber || '').startsWith('OFF-'))
+    : [];
+  const countedSales = freshSales.filter((sale) => sale.saleStatus !== 'cancelled' && sale.saleStatus !== 'draft');
+  const saleAmount = (sale) => Number(sale.totalAmount) || 0;
+  const isCreditSale = (sale) => sale.saleType === 'credit' || sale.type === 'credit';
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todaySales = countedSales.filter((sale) => new Date(sale.invoiceDate || sale.createdAt || 0) >= todayStart);
+  const nextSummary = path === '/sales' && summary ? {
+    ...summary,
+    totalSalesAmount: roundMoney((summary.totalSalesAmount || 0) + countedSales.reduce((sum, sale) => sum + saleAmount(sale), 0)),
+    totalSalesCount: (summary.totalSalesCount || 0) + countedSales.length,
+    todaySalesAmount: roundMoney((summary.todaySalesAmount || 0) + todaySales.reduce((sum, sale) => sum + saleAmount(sale), 0)),
+    todaySalesCount: (summary.todaySalesCount || 0) + todaySales.length,
+    cashSalesAmount: roundMoney((summary.cashSalesAmount || 0) + countedSales.filter((sale) => !isCreditSale(sale)).reduce((sum, sale) => sum + saleAmount(sale), 0)),
+    cashSalesCount: (summary.cashSalesCount || 0) + countedSales.filter((sale) => !isCreditSale(sale)).length,
+    creditSalesAmount: roundMoney((summary.creditSalesAmount || 0) + countedSales.filter(isCreditSale).reduce((sum, sale) => sum + saleAmount(sale), 0)),
+    creditSalesCount: (summary.creditSalesCount || 0) + countedSales.filter(isCreditSale).length,
+    pendingCreditAmount: roundMoney((summary.pendingCreditAmount || 0) + countedSales.reduce((sum, sale) => sum + (Number(sale.outstandingAmount) || 0), 0)),
+  } : path === '/accounts' && summary ? {
     ...summary,
     totalAccounts: (summary.totalAccounts || 0) + extras.length,
     activeAccounts: (summary.activeAccounts || 0) + extras.filter((account) => account.isActive !== false && !account.needsReview).length,
@@ -1536,11 +1621,11 @@ export async function mergePendingIntoResponse(config, payload) {
     ...payload,
     data: {
       ...payload.data,
-      items: [...extras, ...payload.data.items],
+      items: [...extras, ...replaced],
       ...(nextSummary ? { summary: nextSummary } : {}),
       pagination: {
         ...payload.data.pagination,
-        total: (payload.data.pagination?.total || payload.data.items.length) + extras.length,
+        total: (payload.data.pagination?.total || payload.data.items.length) + (path === '/sales' ? freshSales.length : extras.length),
       },
     },
   };
@@ -1604,6 +1689,23 @@ export async function retryOperation(operationId) {
     updatedAt: new Date().toISOString(),
   });
   emitSync();
+}
+
+export async function discardPendingSale(localId) {
+  const sale = await db.sales.get(localId);
+  if (!sale || sale.serverId) return false;
+  const queue = await db.queue.toArray();
+  const related = queue.filter((item) => (
+    item.localId === localId
+    || item.saleLocalId === localId
+    || (item.dependsOn || []).includes(localId)
+  ));
+  if (related.length) await db.queue.bulkDelete(related.map((item) => item.operationId));
+  const payments = await db.payments.filter((payment) => payment.saleLocalId === localId).toArray();
+  if (payments.length) await db.payments.bulkDelete(payments.map((payment) => payment.localId));
+  await db.sales.delete(localId);
+  emitSync();
+  return true;
 }
 
 export async function discardFailedOperation(operationId) {

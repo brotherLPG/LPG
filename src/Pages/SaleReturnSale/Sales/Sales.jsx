@@ -1,13 +1,25 @@
 import { useState } from "react";
-import { Search, CirclePlus, ArrowLeft, Eye, Edit3, Printer } from "lucide-react";
+import { Search, CirclePlus, ArrowLeft, Eye, Edit3, Printer, Trash2 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button, Tooltip } from "@heroui/react";
 import GlobalTable from "../../../utils/GlobalTable";
 import SearchableCustomerSelect from "../../../components/SearchableCustomerSelect";
 import { useGetSaleFormOptions, useSales, useSalesLatestFirst } from "../../../queries/sales/sales.queries";
+import { queryKeys } from "../../../queries/queryKeys";
+import { discardPendingSale } from "../../../offline/repository";
 import Returnsales from "../ReturnSales/Returnsales";
 import { usePermissions } from "../../../contexts/PermissionContext";
 import { usePrint } from "../../../utils/usePrint";
+import { useToast } from "../../../utils/GlobalToast";
+import { useConfirmation } from "../../../utils/GlobalConfirmation";
+
+const isOfflineSale = (item) =>
+  item?.provisional === true
+  || item?.syncStatus === "pending"
+  || item?.syncStatus === "failed"
+  || String(item?.invoiceNumber || "").startsWith("OFF-")
+  || String(item?._id || item?.id || "").startsWith("local_");
 
 const formatMoney = (value) =>
   Number(value || 0).toLocaleString("en-PK", {
@@ -28,6 +40,9 @@ const saleOutstanding = (sale) => {
 
 function Sales() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  const { confirm } = useConfirmation();
   const { can } = usePermissions();
   const { printContent, getQRCodeImg } = usePrint();
   // const [activeTab, setActiveTab] = useState("sales");
@@ -201,6 +216,26 @@ function Sales() {
       title: `Sale - ${item.saleNumber}`,
       content,
     });
+  };
+
+  const handleDeleteOfflineSale = async (item) => {
+    const saleId = item._id || item.id;
+    if (!String(saleId || "").startsWith("local_")) return;
+    const approved = await confirm({
+      title: "Delete offline sale",
+      message: `Remove ${item.invoiceNumber || item.saleNumber || "this sale"} from this computer? It has not been saved on the server.`,
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      type: "danger",
+    });
+    if (!approved) return;
+    const removed = await discardPendingSale(saleId);
+    if (!removed) {
+      toast.error("This sale is already on the server and cannot be deleted.");
+      return;
+    }
+    await queryClient.invalidateQueries({ queryKey: queryKeys.sales.all });
+    toast.success("Offline sale removed.");
   };
 
   const getSaleMenuData = (item) => {
@@ -476,6 +511,20 @@ function Sales() {
               <p>Print Sale</p>
             </Tooltip.Content>
           </Tooltip>
+          {String(item._id || item.id || "").startsWith("local_") && (
+            <Tooltip delay={0}>
+              <Button
+                onClick={() => handleDeleteOfflineSale(item)}
+                aria-label={`Delete ${item.saleNumber}`}
+                className="text-rose-600 dark:text-rose-400 hover:text-rose-800 dark:hover:text-rose-300 transition-colors bg-transparent min-w-0 px-1"
+              >
+                <Trash2 className="h-4 w-4" strokeWidth={2.5} />
+              </Button>
+              <Tooltip.Content>
+                <p>Delete offline sale</p>
+              </Tooltip.Content>
+            </Tooltip>
+          )}
         </div>
         );
       },
@@ -705,15 +754,13 @@ function Sales() {
               <GlobalTable
                 columns={salesColumns}
                 data={sales}
-                highlightFirstRow={true}
+                highlightFirstRow={!isOfflineSale(sales[0])}
                 ariaLabel="Sales Table"
                 className=""
-                rowClassName={(item, index) =>
-                  `border-b border-slate-100 dark:border-gray-800 last:border-0 transition-colors whitespace-nowrap text-nowrap ${
-                    index === 0
-                      ? "bg-emerald-100 dark:bg-emerald-900 border-emerald-200 dark:border-emerald-800"
-                      : "hover:bg-slate-50 dark:hover:bg-gray-800"
-                  }`
+                rowClassName={(item) =>
+                  isOfflineSale(item)
+                    ? "sales-offline-row border-b border-rose-100 last:border-0 whitespace-nowrap text-nowrap"
+                    : "border-b border-slate-100 dark:border-gray-800 last:border-0 transition-colors whitespace-nowrap text-nowrap hover:bg-slate-50 dark:hover:bg-gray-800"
                 }
                 // rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors whitespace-nowrap text-nowrap first:bg-emerald-50 dark:first:bg-emerald-950! first:border-emerald-100 dark:first:border-emerald-900"
                 emptyContent={
