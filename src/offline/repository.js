@@ -163,6 +163,9 @@ async function rememberSnapshot(config, payload) {
 }
 
 async function absorbServerEnvelope(path, payload) {
+  if (/^\/filling-batches\/[^/]+$/.test(path) && !path.endsWith('/form-options') && payload?.data?._id) {
+    await upsertServerRow(db.fillingBatches, payload.data);
+  }
   const items = payload?.data?.items;
   if (!Array.isArray(items)) return;
   if (path === '/customers') {
@@ -176,6 +179,9 @@ async function absorbServerEnvelope(path, payload) {
   }
   if (path === '/accounts') {
     for (const item of items) await upsertServerRow(db.accounts, item);
+  }
+  if (path === '/filling-batches') {
+    for (const item of items) await upsertServerRow(db.fillingBatches, item);
   }
   if (path === '/payments') {
     for (const item of items) {
@@ -239,6 +245,10 @@ async function allSales() {
 
 async function allPayments() {
   return db.payments.toArray();
+}
+
+async function allFillingBatches() {
+  return db.fillingBatches.toArray();
 }
 
 function customerMatches(row, id) {
@@ -321,6 +331,11 @@ function assertSupplierPayload(payload) {
   if (!SUPPLIER_TERMS.has(Number(payload.paymentTermDays))) {
     throw offlineReject('Invalid payment terms.');
   }
+}
+
+async function findFilling(id) {
+  const rows = await allFillingBatches();
+  return rows.find((row) => sameParty(row.localId, id) || sameParty(row.serverId, id) || sameParty(rowRecord(row)._id, id)) || null;
 }
 
 async function findSale(id) {
@@ -910,6 +925,52 @@ export async function queueAccountUpdate(id, payload) {
   return envelope('Account updated on this computer', record);
 }
 
+export async function queueFillingCreate(payload) {
+  assertFillingPayload(payload);
+  const localId = newLocalId();
+  const record = await buildFillingRecord(payload, localId);
+  await assertFillingTank(record, localId);
+  const serverPayload = { ...payload };
+  delete serverPayload.batchNumber;
+  await db.fillingBatches.put({
+    localId,
+    serverId: '',
+    syncStatus: 'pending',
+    origin: 'local',
+    record,
+    updatedAt: record.updatedAt,
+  });
+  await enqueue({ entity: 'fillingBatch', action: 'create', localId, payload: serverPayload });
+  return envelope('Filling batch saved on this computer', record);
+}
+
+export async function queueFillingUpdate(id, payload) {
+  const existing = await findFilling(id);
+  if (!existing) throw offlineReject('This filling batch is not on this computer yet.');
+  assertFillingPayload({ ...rowRecord(existing), ...payload, lines: payload.lines || rowRecord(existing).lines });
+  const record = await buildFillingRecord(payload, existing.localId, rowRecord(existing));
+  await assertFillingTank(record, existing.localId);
+  await db.fillingBatches.put({ ...existing, syncStatus: 'pending', record, updatedAt: record.updatedAt });
+  const createOp = await pendingCreate('fillingBatch', existing.localId);
+  if (createOp) {
+    createOp.payload = { ...createOp.payload, ...payload };
+    delete createOp.payload.batchNumber;
+    createOp.status = 'pending';
+    createOp.updatedAt = new Date().toISOString();
+    await db.queue.put(createOp);
+  } else if (existing.serverId) {
+    const serverPayload = { ...payload };
+    delete serverPayload.batchNumber;
+    await enqueue({ entity: 'fillingBatch', action: 'update', localId: existing.localId, payload: serverPayload });
+  } else {
+    const serverPayload = { ...payload };
+    delete serverPayload.batchNumber;
+    await enqueue({ entity: 'fillingBatch', action: 'create', localId: existing.localId, payload: serverPayload });
+  }
+  emitSync();
+  return envelope('Filling batch updated on this computer', record);
+}
+
 export async function queueSaleCreate(payload) {
   const customer = await findCustomer(payload.customerId);
   if (!customer && isLocalId(payload.customerId)) {
@@ -1130,6 +1191,208 @@ function accountFormOptionsData(parentRecords) {
     ],
     parentAccounts: parentRecords.filter((account) => account.isActive !== false).map(accountOption),
   };
+}
+
+function fillingLineTotals(line) {
+  const count = Number(line.cylinderCount) || 0;
+  const weight = Number(line.targetFillWeightKg) || 0;
+  const expected = roundMoney(count * weight);
+  const hasResidual = line.residualRecoveredKg != null && line.residualRecoveredKg !== '';
+  const hasActual = line.actualLpgUsedKg != null && line.actualLpgUsedKg !== '';
+  let residual = hasResidual ? Number(line.residualRecoveredKg) : null;
+  let actual = hasActual ? Number(line.actualLpgUsedKg) : null;
+  if (actual == null && residual == null) {
+    actual = expected;
+    residual = 0;
+  } else if (actual == null) {
+    actual = roundMoney(expected - residual);
+  } else if (residual == null) {
+    residual = roundMoney(Math.max(0, expected - actual));
+  }
+  return {
+    cylinderCount: count,
+    targetFillWeightKg: weight,
+    expectedFillKg: expected,
+    residualRecoveredKg: roundMoney(residual),
+    actualLpgUsedKg: roundMoney(actual),
+  };
+}
+
+function calendarDay(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const local = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  const utc = date.toISOString().slice(0, 10);
+  return { local, utc };
+}
+
+function matchesFillingDay(value, day) {
+  if (!day) return true;
+  const wanted = String(day).slice(0, 10);
+  const parts = calendarDay(value);
+  return parts.local === wanted || parts.utc === wanted;
+}
+
+function filterFillingBatches(rows, params) {
+  const search = String(params.search || '').trim().toLowerCase();
+  return rows.filter((row) => {
+    const record = rowRecord(row);
+    if (params.batchStatus && params.batchStatus !== 'all' && record.batchStatus !== params.batchStatus) return false;
+    if (params.storageTankId && !sameParty(record.storageTankId, params.storageTankId) && !sameParty(record.tank?._id, params.storageTankId)) return false;
+    const day = params.date || (params.startDate && params.startDate === params.endDate ? params.startDate : '');
+    if (day && !matchesFillingDay(record.fillingDate, day)) return false;
+    if (params.startDate && params.startDate !== params.endDate) {
+      const start = new Date(params.startDate);
+      if (!Number.isNaN(start.getTime()) && new Date(record.fillingDate) < start) return false;
+    }
+    if (params.endDate && params.startDate !== params.endDate) {
+      const end = new Date(params.endDate);
+      end.setDate(end.getDate() + 1);
+      if (!Number.isNaN(end.getTime()) && new Date(record.fillingDate) >= end) return false;
+    }
+    if (!search) return true;
+    return [record.batchNumber, record.sourceTankName, record.tank?.tankName, record.tank?.tankCode, record.cylinderTypeName, record.operatorName, record.remarks]
+      .some((value) => includesText(value, search));
+  });
+}
+
+function sortFillingRecords(records) {
+  return [...records].sort((left, right) => {
+    const leftOffline = left?.provisional === true || left?.syncStatus === 'pending' || left?.syncStatus === 'failed' || String(left?.batchNumber || '').startsWith('OFF-') || String(left?._id || '').startsWith('local_');
+    const rightOffline = right?.provisional === true || right?.syncStatus === 'pending' || right?.syncStatus === 'failed' || String(right?.batchNumber || '').startsWith('OFF-') || String(right?._id || '').startsWith('local_');
+    if (leftOffline !== rightOffline) return leftOffline ? -1 : 1;
+    return new Date(right.fillingDate || right.createdAt || 0).getTime() - new Date(left.fillingDate || left.createdAt || 0).getTime();
+  });
+}
+
+function fillingListSummary(records) {
+  const completed = records.filter((batch) => batch.batchStatus !== 'pending');
+  return {
+    totalBatches: records.length,
+    totalQuantityKg: roundMoney(completed.reduce((sum, batch) => sum + (Number(batch.actualLpgUsedKg) || 0), 0)),
+    totalResidualRecoveredKg: roundMoney(completed.reduce((sum, batch) => sum + (Number(batch.residualRecoveredKg) || 0), 0)),
+    completed: completed.length,
+    pending: records.filter((batch) => batch.batchStatus === 'pending').length,
+  };
+}
+
+const FILLING_STATUSES = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'completed', label: 'Completed' },
+];
+
+async function withTankReservation(data) {
+  if (!data?.tank || data.tank.currentQuantityKg == null) return data;
+  const reserved = (await allFillingBatches()).reduce((sum, row) => {
+    if (row.syncStatus === 'synced') return sum;
+    const record = rowRecord(row);
+    if (record.batchStatus === 'pending') return sum;
+    return sum + (Number(record.actualLpgUsedKg) || 0);
+  }, 0);
+  if (!reserved) return data;
+  const current = roundMoney(Math.max(0, (Number(data.tank.currentQuantityKg) || 0) - reserved));
+  const capacity = Number(data.tank.capacityKg) || 0;
+  return {
+    ...data,
+    tank: {
+      ...data.tank,
+      currentQuantityKg: current,
+      availableCapacityKg: roundMoney(capacity - current),
+      displayName: `${data.tank.tankCode} — ${data.tank.tankName} (${current.toLocaleString('en-US')} / ${capacity.toLocaleString('en-US')} KG)`,
+    },
+  };
+}
+
+async function fillingCatalog() {
+  const snaps = await db.snapshots.toArray();
+  const form = snaps.find((snap) => snap.path === '/filling-batches/form-options')?.envelope?.data || {};
+  return form;
+}
+
+async function buildFillingRecord(payload, localId, previous = {}) {
+  const catalog = await fillingCatalog();
+  const tank = catalog.tank || {};
+  const lines = (payload.lines || previous.lines || []).map((line) => {
+    const type = (catalog.cylinderTypes || []).find((item) => sameParty(item._id, line.cylinderTypeId)) || {};
+    const totals = fillingLineTotals(line);
+    return {
+      ...totals,
+      cylinderTypeId: line.cylinderTypeId,
+      cylinderTypeName: type.typeName || line.cylinderTypeName || '',
+      cylinderType: type._id ? { _id: type._id, typeCode: type.typeCode, typeName: type.typeName, capacityKg: type.capacityKg } : line.cylinderType || null,
+    };
+  });
+  const operator = (catalog.employees || []).find((item) => sameParty(item._id, payload.operatorEmployeeId || previous.operatorEmployeeId)) || {};
+  const status = payload.batchStatus || previous.batchStatus || 'completed';
+  const now = new Date().toISOString();
+  const cylinderTypeName = lines.length > 1
+    ? lines.filter((line) => line.cylinderTypeName).map((line) => `${line.cylinderTypeName} × ${line.cylinderCount}`).join(', ')
+    : (lines[0]?.cylinderTypeName || previous.cylinderTypeName || '');
+  return {
+    _id: previous._id || localId,
+    batchNumber: previous.batchNumber || `OFF-${String(localId).slice(-6).toUpperCase()}`,
+    fillingDate: payload.fillingDate || previous.fillingDate || now,
+    storageTankId: payload.storageTankId || previous.storageTankId || tank._id || null,
+    sourceTankName: tank.tankName || previous.sourceTankName || '',
+    tank: tank._id ? {
+      _id: tank._id,
+      tankCode: tank.tankCode,
+      tankName: tank.tankName,
+      currentQuantityKg: tank.currentQuantityKg,
+      capacityKg: tank.capacityKg,
+      displayName: tank.displayName,
+    } : previous.tank || null,
+    lines,
+    cylinderCount: lines.reduce((sum, line) => sum + line.cylinderCount, 0),
+    targetFillWeightKg: lines[0]?.targetFillWeightKg || 0,
+    expectedFillKg: roundMoney(lines.reduce((sum, line) => sum + line.expectedFillKg, 0)),
+    residualRecoveredKg: roundMoney(lines.reduce((sum, line) => sum + line.residualRecoveredKg, 0)),
+    actualLpgUsedKg: roundMoney(lines.reduce((sum, line) => sum + line.actualLpgUsedKg, 0)),
+    cylinderTypeId: lines[0]?.cylinderTypeId || previous.cylinderTypeId || null,
+    cylinderTypeName,
+    operatorEmployeeId: payload.operatorEmployeeId || previous.operatorEmployeeId || null,
+    operatorName: operator.displayName || operator.fullName || previous.operatorName || '',
+    operator: operator._id ? {
+      _id: operator._id,
+      employeeCode: operator.employeeCode,
+      fullName: operator.fullName,
+      jobTitle: operator.jobTitle || '',
+    } : previous.operator || null,
+    remarks: payload.remarks ?? previous.remarks ?? '',
+    batchStatus: status,
+    batchStatusLabel: status === 'pending' ? 'Pending' : 'Completed',
+    syncStatus: 'pending',
+    provisional: true,
+    createdAt: previous.createdAt || now,
+    updatedAt: now,
+  };
+}
+
+function assertFillingPayload(payload) {
+  if (!payload.fillingDate) throw offlineReject('Choose a filling date.');
+  if (!payload.operatorEmployeeId) throw offlineReject('Choose the operator.');
+  if (!Array.isArray(payload.lines) || !payload.lines.length) throw offlineReject('Add at least one cylinder type.');
+  payload.lines.forEach((line, index) => {
+    if (!line.cylinderTypeId) throw offlineReject(`Cylinder type ${index + 1} is required.`);
+    if (!(Number(line.cylinderCount) >= 1)) throw offlineReject('Cylinder count must be at least 1.');
+    if (!(Number(line.targetFillWeightKg) > 0)) throw offlineReject('Target fill weight must be greater than 0.');
+  });
+}
+
+async function assertFillingTank(record, ignoreLocalId) {
+  if (record.batchStatus === 'pending') return;
+  const catalog = await fillingCatalog();
+  if (catalog.tank?.currentQuantityKg == null) return;
+  const reserved = (await allFillingBatches()).reduce((sum, row) => {
+    if (row.localId === ignoreLocalId || row.syncStatus === 'synced') return sum;
+    const saved = rowRecord(row);
+    if (saved.batchStatus === 'pending') return sum;
+    return sum + (Number(saved.actualLpgUsedKg) || 0);
+  }, 0);
+  const available = roundMoney((Number(catalog.tank.currentQuantityKg) || 0) - reserved);
+  if ((Number(record.actualLpgUsedKg) || 0) > available + 0.001) {
+    throw offlineReject('The storage tank does not have enough gas for this batch.');
+  }
 }
 
 function filterSales(rows, params) {
@@ -1381,12 +1644,13 @@ async function outstandingForCustomer(customerId) {
 export async function serveGet(config) {
   const path = requestPath(config);
   const params = paramsOf(config);
-  const idMatch = path.match(/^\/(customers|suppliers|accounts|sales|payments)\/([^/]+)$/);
+  const idMatch = path.match(/^\/(customers|suppliers|accounts|sales|payments|filling-batches)\/([^/]+)$/);
   if (idMatch && idMatch[2] !== 'form-options') {
     const table = idMatch[1] === 'customers' ? await findCustomer(idMatch[2])
       : idMatch[1] === 'suppliers' ? await findSupplier(idMatch[2])
         : idMatch[1] === 'accounts' ? await findAccount(idMatch[2])
           : idMatch[1] === 'sales' ? await findSale(idMatch[2])
+            : idMatch[1] === 'filling-batches' ? await findFilling(idMatch[2])
             : (await allPayments()).find((row) => sameParty(row.localId, idMatch[2]) || sameParty(row.serverId, idMatch[2]));
     if (table) return envelope('Saved on this computer', rowRecord(table));
   }
@@ -1493,6 +1757,31 @@ export async function serveGet(config) {
       summary: salesListSummary(records),
     });
   }
+  if (path === '/filling-batches') {
+    const localRows = await allFillingBatches();
+    const snaps = await db.snapshots.toArray();
+    const cached = [];
+    const covered = new Set();
+    for (const row of localRows) {
+      if (row.serverId) covered.add(String(row.serverId));
+      const recordId = rowRecord(row)._id;
+      if (recordId) covered.add(String(recordId));
+    }
+    for (const snap of snaps) {
+      if (snap.path !== '/filling-batches') continue;
+      for (const item of snap.envelope?.data?.items || []) {
+        if (!item?._id || covered.has(String(item._id))) continue;
+        covered.add(String(item._id));
+        cached.push({ record: item, syncStatus: 'synced' });
+      }
+    }
+    const records = sortFillingRecords(filterFillingBatches([...localRows, ...cached], params).map(rowRecord));
+    return envelope('Filling batches fetched', {
+      ...paginate(records, params),
+      summary: fillingListSummary(records),
+      meta: { statuses: FILLING_STATUSES },
+    });
+  }
   if (path === '/payments' && (await allPayments()).length) {
     const source = await allPayments();
     const rows = filterPayments(source, params).filter((row) => keepPaymentRow(row, source));
@@ -1529,6 +1818,10 @@ export async function serveGet(config) {
     data.outstandingInvoices = await outstandingForCustomer(params.customerId);
     data.customers = (await withPendingParties({ customers: data.customers || [] })).customers;
   }
+  if (path === '/filling-batches/form-options') {
+    const adjusted = await withTankReservation(data);
+    Object.assign(data, adjusted);
+  }
   if (path === '/sales/form-options') {
     const pending = (await allCustomers()).filter((row) => row.syncStatus !== 'synced');
     const extras = pending.map((row) => {
@@ -1557,6 +1850,10 @@ export async function serveWrite(config) {
   if (method === 'patch' && /^\/accounts\/[^/]+$/.test(path)) {
     return queueAccountUpdate(path.split('/')[2], payload);
   }
+  if (method === 'post' && path === '/filling-batches') return queueFillingCreate(payload);
+  if (method === 'patch' && /^\/filling-batches\/[^/]+$/.test(path)) {
+    return queueFillingUpdate(path.split('/')[2], payload);
+  }
   if (method === 'post' && path === '/sales') return queueSaleCreate(payload);
   if (method === 'patch' && /^\/sales\/[^/]+$/.test(path)) {
     return queueSaleUpdate(path.split('/')[2], payload);
@@ -1577,15 +1874,19 @@ export async function mergePendingIntoResponse(config, payload) {
   if (requestMethod(config) !== 'get' || !payload?.data) return payload;
   const path = requestPath(config);
   const params = paramsOf(config);
-  if (!['/customers', '/suppliers', '/accounts', '/sales', '/payments'].includes(path) || !Array.isArray(payload.data.items)) {
+  if (!['/customers', '/suppliers', '/accounts', '/sales', '/payments', '/filling-batches'].includes(path) || !Array.isArray(payload.data.items)) {
     const data = await withPendingParties(payload.data);
+    if (path === '/filling-batches/form-options') {
+      return { ...payload, data: await withTankReservation(data) };
+    }
     return { ...payload, data };
   }
   const table = path === '/customers' ? filterCustomers(await allCustomers(), params)
     : path === '/suppliers' ? filterSuppliers(await allSuppliers(), params)
       : path === '/accounts' ? filterAccounts(await allAccounts(), params)
         : path === '/sales' ? filterSales(await allSales(), params)
-          : filterPayments(await allPayments(), params);
+          : path === '/filling-batches' ? filterFillingBatches(await allFillingBatches(), params)
+            : filterPayments(await allPayments(), params);
   const pending = table
     .filter((row) => row.syncStatus !== 'synced' && row.origin !== 'sale-receipt')
     .map(rowRecord);
@@ -1596,6 +1897,10 @@ export async function mergePendingIntoResponse(config, payload) {
     pending.find((row) => String(row._id) === String(item._id)) || item
   ));
   const summary = payload.data.summary;
+  const freshFills = path === '/filling-batches'
+    ? extras.filter((batch) => String(batch._id || '').startsWith('local_') || String(batch.batchNumber || '').startsWith('OFF-'))
+    : [];
+  const completedFills = freshFills.filter((batch) => batch.batchStatus !== 'pending');
   const freshSales = path === '/sales'
     ? extras.filter((sale) => String(sale._id || '').startsWith('local_') || String(sale.invoiceNumber || '').startsWith('OFF-'))
     : [];
@@ -1605,7 +1910,14 @@ export async function mergePendingIntoResponse(config, payload) {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   const todaySales = countedSales.filter((sale) => new Date(sale.invoiceDate || sale.createdAt || 0) >= todayStart);
-  const nextSummary = path === '/sales' && summary ? {
+  const nextSummary = path === '/filling-batches' && summary ? {
+    ...summary,
+    totalBatches: (summary.totalBatches || 0) + freshFills.length,
+    totalQuantityKg: roundMoney((summary.totalQuantityKg || 0) + completedFills.reduce((sum, batch) => sum + (Number(batch.actualLpgUsedKg) || 0), 0)),
+    totalResidualRecoveredKg: roundMoney((summary.totalResidualRecoveredKg || 0) + completedFills.reduce((sum, batch) => sum + (Number(batch.residualRecoveredKg) || 0), 0)),
+    completed: (summary.completed || 0) + completedFills.length,
+    pending: (summary.pending || 0) + freshFills.filter((batch) => batch.batchStatus === 'pending').length,
+  } : path === '/sales' && summary ? {
     ...summary,
     totalSalesAmount: roundMoney((summary.totalSalesAmount || 0) + countedSales.reduce((sum, sale) => sum + saleAmount(sale), 0)),
     totalSalesCount: (summary.totalSalesCount || 0) + countedSales.length,
@@ -1632,7 +1944,7 @@ export async function mergePendingIntoResponse(config, payload) {
       ...(nextSummary ? { summary: nextSummary } : {}),
       pagination: {
         ...payload.data.pagination,
-        total: (payload.data.pagination?.total || payload.data.items.length) + (path === '/sales' ? freshSales.length : extras.length),
+        total: (payload.data.pagination?.total || payload.data.items.length) + (path === '/sales' ? freshSales.length : path === '/filling-batches' ? freshFills.length : extras.length),
       },
     },
   };
@@ -1643,7 +1955,8 @@ export async function applyServerResult(localId, entity, serverRecord) {
     : entity === 'supplier' ? db.suppliers
       : entity === 'account' ? db.accounts
         : entity === 'sale' ? db.sales
-          : db.payments;
+          : entity === 'fillingBatch' ? db.fillingBatches
+            : db.payments;
   const existing = await table.get(localId);
   if (!existing || !serverRecord?._id) return;
   await table.put({
@@ -1722,7 +2035,8 @@ export async function discardFailedOperation(operationId) {
     : row.entity === 'supplier' ? db.suppliers
       : row.entity === 'account' ? db.accounts
         : row.entity === 'sale' ? db.sales
-          : db.payments;
+          : row.entity === 'fillingBatch' ? db.fillingBatches
+            : db.payments;
   const record = await table.get(row.localId);
   if (row.action === 'create' && record && !record.serverId) {
     await table.delete(row.localId);
@@ -1745,6 +2059,7 @@ export async function exportOfflineBackup() {
     accounts: await db.accounts.toArray(),
     sales: await db.sales.toArray(),
     payments: await db.payments.toArray(),
+    fillingBatches: await db.fillingBatches.toArray(),
     queue: await db.queue.toArray(),
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
@@ -1769,8 +2084,8 @@ export async function markSyncMeta(patch) {
 export function canQueueWrite(config) {
   const path = requestPath(config);
   const method = requestMethod(config);
-  if (method === 'post' && ['/customers', '/suppliers', '/accounts', '/sales', '/payments'].includes(path)) return true;
-  if (method === 'patch' && /^\/(customers|suppliers|accounts|sales)\/[^/]+$/.test(path)) return true;
+  if (method === 'post' && ['/customers', '/suppliers', '/accounts', '/sales', '/payments', '/filling-batches'].includes(path)) return true;
+  if (method === 'patch' && /^\/(customers|suppliers|accounts|sales|filling-batches)\/[^/]+$/.test(path)) return true;
   return false;
 }
 

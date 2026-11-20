@@ -85,6 +85,7 @@ async function readyPayload(operation) {
   delete payload.supplierCode;
   delete payload.accountCode;
   delete payload.currentBalanceAmount;
+  delete payload.batchNumber;
   return payload;
 }
 
@@ -116,6 +117,12 @@ function requestFor(operation, serverId) {
   if (operation.entity === 'payment' && operation.action === 'create') {
     return { method: 'post', url: '/payments' };
   }
+  if (operation.entity === 'fillingBatch' && operation.action === 'create') {
+    return { method: 'post', url: '/filling-batches' };
+  }
+  if (operation.entity === 'fillingBatch' && operation.action === 'update') {
+    return { method: 'patch', url: `/filling-batches/${serverId}` };
+  }
   return null;
 }
 
@@ -136,7 +143,9 @@ async function sendOperation(operation) {
         ? await db.accounts.get(operation.localId)
         : operation.entity === 'sale'
         ? await db.sales.get(operation.localId)
-        : await db.payments.get(operation.localId);
+        : operation.entity === 'fillingBatch'
+          ? await db.fillingBatches.get(operation.localId)
+          : await db.payments.get(operation.localId);
   const target = requestFor(operation, row?.serverId);
   if (!target || (operation.action === 'update' && !row?.serverId)) {
     throw new Error('This offline change is missing its server record.');

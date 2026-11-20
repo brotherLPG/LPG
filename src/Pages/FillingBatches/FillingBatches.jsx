@@ -23,9 +23,9 @@ function FillingBatches() {
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, item: null });
 
   const { data: batchesData, isLoading, error } = useFillingBatches({
-    search: query,
-    startDate: selectedDate || undefined,
-    endDate: selectedDate || undefined,
+    search: query || undefined,
+    date: selectedDate || undefined,
+    batchStatus: status !== "All" ? status : undefined,
     page: currentPage,
     limit: 10,
   });
@@ -60,21 +60,11 @@ function FillingBatches() {
           receivedDate: parsedDate ? parsedDate.toISOString().slice(0, 10) : "",
           status: batch.batchStatus || "pending",
           statusLabel: batch.batchStatusLabel || batch.batchStatus || "Pending",
+          provisional: batch.provisional === true || batch.syncStatus === "pending" || batch.syncStatus === "failed" || String(batch.batchNumber || "").startsWith("OFF-") || String(batch._id || "").startsWith("local_"),
         };
       }),
     [apiBatches]
   );
-
-  const filteredBatches = useMemo(() => {
-    return mappedBatches.filter((batch) => {
-      const matchesQuery = `${batch.batchNo} ${batch.tank} ${batch.cylinderType} ${batch.operator}`
-        .toLowerCase()
-        .includes(query.toLowerCase());
-      const matchesStatus = status === "All" || batch.status === status;
-      const matchesDate = !selectedDate || batch.receivedDate === selectedDate;
-      return matchesQuery && matchesStatus && matchesDate;
-    });
-  }, [mappedBatches, query, status, selectedDate]);
 
   const summaryStats = useMemo(() => {
     const totalQuantity = responseSummary?.totalQuantityKg ?? mappedBatches.reduce((sum, item) => sum + (Number(item.actualLpgUsedKg) || 0), 0);
@@ -285,7 +275,10 @@ function FillingBatches() {
               <div className="absolute left-3 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full border-2 border-slate-300 dark:border-gray-600"></div>
               <input
                 value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setCurrentPage(1);
+                }}
                 className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50/50 dark:bg-gray-800/50 py-2.5 pl-8 pr-3 text-sm text-slate-700 dark:text-gray-300 outline-none transition placeholder:text-slate-500 dark:placeholder:text-gray-400 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
                 placeholder="Search by batch number, tank, cylinder, or operator..."
               />
@@ -295,14 +288,20 @@ function FillingBatches() {
                 <input
                   type="date"
                   value={selectedDate}
-                  onChange={(event) => setSelectedDate(event.target.value)}
+                  onChange={(event) => {
+                    setSelectedDate(event.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none transition focus:border-[#008951] focus:ring-1 focus:ring-[#008951] sm:w-40 lg:w-44"
                 />
               </div>
               <div className="relative">
                 <select
                   value={status}
-                  onChange={(event) => setStatus(event.target.value)}
+                  onChange={(event) => {
+                    setStatus(event.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] sm:w-40 lg:w-44"
                 >
                   <option value="All">Status: All</option>
@@ -331,10 +330,14 @@ function FillingBatches() {
           ) : (
             <GlobalTable
               columns={batchColumns}
-              data={filteredBatches}
+              data={mappedBatches}
               ariaLabel="Filling Batches Table"
               className=""
-              rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
+              rowClassName={(item) =>
+                item.provisional
+                  ? "sales-offline-row border-b border-rose-100 last:border-0 whitespace-nowrap"
+                  : "border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
+              }
               emptyContent="No batches match your search."
               pagination={true}
               rowsPerPage={pagination.limit || 10}
