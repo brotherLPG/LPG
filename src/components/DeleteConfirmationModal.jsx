@@ -27,31 +27,31 @@ function DeleteConfirmationModal({ isOpen, onClose, onConfirm, title = "Confirm 
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="bg-linear-to-r from-red-50 to-orange-50 px-6 py-4 border-b border-red-100 dark:border-red-900">
+              <div className="bg-linear-to-r dark:from-red-100 dark:to-orange-100 from-red-50 to-orange-50 px-6 py-4 border-b border-red-100 dark:border-red-500">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
                       <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
                     </div>
-                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">{title}</h2>
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-600">{title}</h2>
                   </div>
                   <button
                     onClick={onClose}
                     className="p-1 hover:bg-red-100 dark:hover:bg-red-900 rounded-full transition-colors"
                   >
-                    <X className="w-5 h-5 text-gray-500 dark:text-gray-400 dark:text-gray-500" />
+                    <X className="w-5 h-5 text-gray-500 dark:text-gray-400 " />
                   </button>
                 </div>
               </div>
 
               {/* Body */}
               <div className="px-6 py-5">
-                <p className="text-gray-600 dark:text-gray-400 dark:text-gray-500 text-sm leading-relaxed">
+                <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
                   {message}
                 </p>
                 {itemName && (
                   <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                    <p className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500 mb-1">Item to delete:</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Item to delete:</p>
                     <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">{itemName}</p>
                   </div>
                 )}

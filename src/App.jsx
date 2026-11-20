@@ -5,6 +5,7 @@ import { Menu, X } from 'lucide-react'
 import Sidebar from './components/Sidebar'
 import Header from './components/Header'
 import PageRouter from './routes/PageRouter';
+import CalculatorWidget from './components/CalculatorWidget';
 import { ToastProvider } from './utils/GlobalToast';
 
 const PUBLIC_PATHS = ['/', '/registration', '/public/logs'];
@@ -62,6 +63,7 @@ function App() {
           {/* {!isPublicPage && <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} isSidebarOpen={isSidebarOpen} />} */}
           <PageRouter/>
         </div>
+        {!isPublicPage && <CalculatorWidget />}
       </div>
     </ToastProvider>
   );

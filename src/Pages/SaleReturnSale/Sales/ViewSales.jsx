@@ -32,7 +32,7 @@ function ViewSales() {
   const sale = saleData?.data;
 
   const formatCurrency = (amount) => {
-    return `PKR ${Number(amount || 0).toLocaleString()}`;
+    return `${Number(amount || 0).toLocaleString()}`;
   };
 
   const formatDate = (value) => {
@@ -109,7 +109,9 @@ function ViewSales() {
               Sales
             </span>
             <span className="mx-2 text-slate-400 dark:text-gray-500">/</span>
-            <span className="font-medium text-slate-600 dark:text-gray-400">View Sale</span>
+            <span className="font-medium text-slate-600 dark:text-gray-400">
+              View Sale
+            </span>
           </p>
           <h1 className="text-2xl font-bold tracking-tight text-BLUE-dark">
             Sale {sale?.saleNumber}
@@ -118,7 +120,6 @@ function ViewSales() {
             Invoice details, items and payment summary
           </p>
         </div>
-       
       </div>
 
       {/* Summary Cards */}
@@ -311,7 +312,7 @@ function ViewSales() {
                             </Table.Cell>
                             <Table.Cell>
                               <span className="block text-right text-sm font-semibold text-slate-900 dark:text-gray-100 tabular-nums">
-                                {formatCurrency(item.totalAmount)}
+                                {formatCurrency(item.lineTotalAmount)}
                               </span>
                             </Table.Cell>
                           </Table.Row>
@@ -355,13 +356,32 @@ function ViewSales() {
             </div>
             <div className="space-y-3 px-6 py-5">
               {[
-                { label: "Subtotal", value: sale?.subtotalAmount, className: "text-slate-700 dark:text-gray-300" },
-                { label: "Trade Discount", value: sale?.tradeDiscountAmount, className: "text-slate-700 dark:text-gray-300" },
-                { label: "Tax Amount", value: sale?.taxAmount, className: "text-slate-700 dark:text-gray-300" },
+                {
+                  label: "Subtotal",
+                  value: sale?.subtotalAmount,
+                  className: "text-slate-700 dark:text-gray-300",
+                },
+                {
+                  label: "Trade Discount",
+                  value: sale?.tradeDiscountAmount,
+                  className: "text-slate-700 dark:text-gray-300",
+                },
+                {
+                  label: "Tax Amount",
+                  value: sale?.taxAmount,
+                  className: "text-slate-700 dark:text-gray-300",
+                },
               ].map((row) => (
-                <div key={row.label} className="flex items-center justify-between">
-                  <span className="text-sm text-slate-500 dark:text-gray-400">{row.label}</span>
-                  <span className={`text-sm font-medium tabular-nums ${row.className}`}>
+                <div
+                  key={row.label}
+                  className="flex items-center justify-between"
+                >
+                  <span className="text-sm text-slate-500 dark:text-gray-400">
+                    {row.label}
+                  </span>
+                  <span
+                    className={`text-sm font-medium tabular-nums ${row.className}`}
+                  >
                     {formatCurrency(row.value)}
                   </span>
                 </div>
@@ -370,7 +390,9 @@ function ViewSales() {
               <div className="my-3 border-t border-dashed border-slate-200 dark:border-gray-700" />
 
               <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-slate-800 dark:text-gray-100">Total Amount</span>
+                <span className="text-sm font-bold text-slate-800 dark:text-gray-100">
+                  Total Amount
+                </span>
                 <span className="text-base font-bold text-slate-900 dark:text-gray-100 tabular-nums">
                   {formatCurrency(sale?.totalAmount)}
                 </span>
@@ -379,27 +401,35 @@ function ViewSales() {
               <div className="my-3 border-t border-slate-100 dark:border-gray-800" />
 
               <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-500 dark:text-gray-400">Paid Amount</span>
+                <span className="text-sm text-slate-500 dark:text-gray-400">
+                  Paid Amount
+                </span>
                 <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
                   {formatCurrency(sale?.paidAmount)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-500 dark:text-gray-400">Returned Amount</span>
+                <span className="text-sm text-slate-500 dark:text-gray-400">
+                  Returned Amount
+                </span>
                 <span className="text-sm font-semibold text-orange-600 dark:text-orange-400 tabular-nums">
                   {formatCurrency(sale?.returnedAmount)}
                 </span>
               </div>
               {invoiceCredit > 0 && (
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-500 dark:text-gray-400">Customer Credit</span>
+                  <span className="text-sm text-slate-500 dark:text-gray-400">
+                    Customer Credit
+                  </span>
                   <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
                     {formatCurrency(invoiceCredit)}
                   </span>
                 </div>
               )}
               <div className="flex items-center justify-between">
-                <span className="text-sm text-slate-500 dark:text-gray-400">Remaining Amount</span>
+                <span className="text-sm text-slate-500 dark:text-gray-400">
+                  Remaining Amount
+                </span>
                 <span className="text-sm font-semibold text-violet-600 dark:text-violet-400 tabular-nums">
                   {formatCurrency(amountStillDue)}
                 </span>

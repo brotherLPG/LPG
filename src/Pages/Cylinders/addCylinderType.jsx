@@ -216,13 +216,15 @@ function AddCylinderType() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
-                  Type Name <span className="text-rose-500 dark:text-rose-400">*</span>
+                  Type Name{" "}
+                  <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   ref={typeNameRef}
                   type="text"
                   placeholder="e.g. Commercial LPG 11KG"
                   value={typeName}
+                  autoFocus
                   onChange={(e) => {
                     setTypeName(e.target.value);
                     clearError(setTypeNameError);
@@ -234,13 +236,16 @@ function AddCylinderType() {
                   }`}
                 />
                 {typeNameError && (
-                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{typeNameError}</p>
+                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">
+                    {typeNameError}
+                  </p>
                 )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
-                  Category <span className="text-rose-500 dark:text-rose-400">*</span>
+                  Category{" "}
+                  <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={categoryOptions}
@@ -252,19 +257,24 @@ function AddCylinderType() {
                   triggerRef={categoryRef}
                   disabled={optionsLoading}
                   error={!!categoryError}
-                  placeholder={optionsLoading ? "Loading..." : "Select Category"}
+                  placeholder={
+                    optionsLoading ? "Loading..." : "Select Category"
+                  }
                   getLabel={(option) => option.label}
                   getSearchText={(option) => option.label.toLowerCase()}
                   emptyText="No category found"
                 />
                 {categoryError && (
-                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{categoryError}</p>
+                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">
+                    {categoryError}
+                  </p>
                 )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
-                  Capacity (KG) <span className="text-rose-500 dark:text-rose-400">*</span>
+                  Capacity (KG){" "}
+                  <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   ref={capacityKgRef}
@@ -282,13 +292,16 @@ function AddCylinderType() {
                   }`}
                 />
                 {capacityKgError && (
-                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{capacityKgError}</p>
+                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">
+                    {capacityKgError}
+                  </p>
                 )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
-                  Tare Weight (KG) <span className="text-rose-500 dark:text-rose-400">*</span>
+                  Tare Weight (KG){" "}
+                  <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   ref={tareWeightKgRef}
@@ -306,7 +319,9 @@ function AddCylinderType() {
                   }`}
                 />
                 {tareWeightKgError && (
-                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{tareWeightKgError}</p>
+                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">
+                    {tareWeightKgError}
+                  </p>
                 )}
               </div>
 
@@ -319,7 +334,11 @@ function AddCylinderType() {
                   value={colorCode}
                   onChange={(option) => setColorCode(option?._id || "")}
                   disabled={optionsLoading}
-                  placeholder={optionsLoading ? "Loading..." : "Select Color Identification"}
+                  placeholder={
+                    optionsLoading
+                      ? "Loading..."
+                      : "Select Color Identification"
+                  }
                   getLabel={(option) => option.label}
                   getSearchText={(option) => option.label.toLowerCase()}
                   emptyText="No color code found"
@@ -377,7 +396,8 @@ function AddCylinderType() {
             <div className="p-5 space-y-5">
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
-                  Selling Price (Rs.) <span className="text-rose-500 dark:text-rose-400">*</span>
+                  Selling Price (Rs.){" "}
+                  <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   ref={sellingPriceRef}
@@ -395,7 +415,9 @@ function AddCylinderType() {
                   }`}
                 />
                 {sellingPriceError && (
-                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{sellingPriceError}</p>
+                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">
+                    {sellingPriceError}
+                  </p>
                 )}
               </div>
 
@@ -472,7 +494,9 @@ function AddCylinderType() {
                   value={valveType}
                   onChange={(option) => setValveType(option?._id || "")}
                   disabled={optionsLoading}
-                  placeholder={optionsLoading ? "Loading..." : "Select Valve Type"}
+                  placeholder={
+                    optionsLoading ? "Loading..." : "Select Valve Type"
+                  }
                   getLabel={(option) => option.label}
                   getSearchText={(option) => option.label.toLowerCase()}
                   emptyText="No valve type found"
@@ -487,7 +511,9 @@ function AddCylinderType() {
                   value={material}
                   onChange={(option) => setMaterial(option?._id || "")}
                   disabled={optionsLoading}
-                  placeholder={optionsLoading ? "Loading..." : "Select Material"}
+                  placeholder={
+                    optionsLoading ? "Loading..." : "Select Material"
+                  }
                   getLabel={(option) => option.label}
                   getSearchText={(option) => option.label.toLowerCase()}
                   emptyText="No material found"
