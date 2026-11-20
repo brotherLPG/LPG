@@ -140,8 +140,15 @@ function includesText(value, query) {
   return String(value || '').toLowerCase().includes(String(query || '').trim().toLowerCase());
 }
 
+function partyId(value) {
+  if (value && typeof value === 'object') return String(value._id || value.id || '');
+  return String(value || '');
+}
+
 function sameParty(left, right) {
-  return String(left || '') !== '' && String(left) === String(right);
+  const leftId = partyId(left);
+  const rightId = partyId(right);
+  return leftId !== '' && leftId === rightId;
 }
 
 async function rememberSnapshot(config, payload) {

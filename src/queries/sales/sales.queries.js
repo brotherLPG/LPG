@@ -30,6 +30,59 @@ function invoiceNumberParts(invoiceNumber) {
   return String(invoiceNumber || "").match(/\d+/g)?.map((part) => Number(part)) || [];
 }
 
+function customerIdOf(sale) {
+  const value = sale?.customerId;
+  if (value && typeof value === "object") return String(value._id || value.id || "");
+  return String(value || "");
+}
+
+function belongsToCustomer(sale, customerId) {
+  if (!customerId) return true;
+  return customerIdOf(sale) === String(customerId);
+}
+
+function summaryFromSales(items) {
+  const totals = {
+    totalSalesAmount: 0,
+    totalSalesCount: 0,
+    todaySalesAmount: 0,
+    todaySalesCount: 0,
+    cashSalesAmount: 0,
+    cashSalesCount: 0,
+    creditSalesAmount: 0,
+    creditSalesCount: 0,
+    pendingCreditAmount: 0,
+  };
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  for (const sale of items) {
+    if (sale.saleStatus === "cancelled" || sale.saleStatus === "draft") continue;
+    const amount = Number(sale.totalAmount) || 0;
+    const credit = sale.saleType === "credit" || sale.type === "credit";
+    totals.totalSalesAmount += amount;
+    totals.totalSalesCount += 1;
+    if (credit) {
+      totals.creditSalesAmount += amount;
+      totals.creditSalesCount += 1;
+    } else {
+      totals.cashSalesAmount += amount;
+      totals.cashSalesCount += 1;
+    }
+    totals.pendingCreditAmount += Number(sale.outstandingAmount) || 0;
+    const when = new Date(sale.invoiceDate || sale.createdAt || 0);
+    if (when >= start) {
+      totals.todaySalesAmount += amount;
+      totals.todaySalesCount += 1;
+    }
+  }
+  for (const key of Object.keys(totals)) {
+    if (key.endsWith("Amount")) {
+      totals[key] = Math.round((totals[key] + Number.EPSILON) * 100) / 100;
+    }
+  }
+  return totals;
+}
+
 function isOfflineSale(sale) {
   return sale?.provisional === true
     || sale?.syncStatus === "pending"
@@ -78,13 +131,16 @@ async function fetchSalesLatestFirst(filters) {
       byId.set(id, item);
     }
   }
-  const items = [...byId.values()].sort(compareLatestInvoice);
+  const sorted = [...byId.values()].sort(compareLatestInvoice);
+  const items = filters.customerId
+    ? sorted.filter((sale) => belongsToCustomer(sale, filters.customerId))
+    : sorted;
   const total = Number(first?.data?.pagination?.total);
 
   return {
     items,
-    total: Number.isFinite(total) ? total : items.length,
-    summary: first?.data?.summary,
+    total: filters.customerId ? items.length : (Number.isFinite(total) ? total : items.length),
+    summary: filters.customerId ? summaryFromSales(items) : first?.data?.summary,
     meta: first?.data?.meta,
   };
 }
@@ -103,8 +159,14 @@ export const useSalesLatestFirst = (params = {}, options = {}) => {
     placeholderData: keepPreviousData,
   });
 
-  const allItems = query.data?.items || [];
-  const total = query.data?.total ?? allItems.length;
+  const loadedItems = query.data?.items || [];
+  const allItems = filters.customerId
+    ? loadedItems.filter((sale) => belongsToCustomer(sale, filters.customerId))
+    : loadedItems;
+  const total = filters.customerId
+    ? allItems.length
+    : (query.data?.total ?? allItems.length);
+  const summary = filters.customerId ? summaryFromSales(allItems) : query.data?.summary;
   const start = (page - 1) * limit;
 
   return {
@@ -119,7 +181,7 @@ export const useSalesLatestFirst = (params = {}, options = {}) => {
               limit,
               totalPages: Math.max(1, Math.ceil(total / limit)),
             },
-            summary: query.data.summary,
+            summary,
             meta: query.data.meta,
           },
         }

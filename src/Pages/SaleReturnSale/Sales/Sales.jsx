@@ -87,7 +87,9 @@ function Sales() {
     id: sale.id || sale._id,
   }));
   const pagination = salesData?.data?.pagination || { total: 0, totalPages: 0, page: 1, limit: 10 };
-  const summary = cardSalesData?.data?.summary || salesData?.data?.summary || {};
+  const summary = customerId
+    ? (salesData?.data?.summary || {})
+    : (cardSalesData?.data?.summary || salesData?.data?.summary || {});
   const meta = salesData?.data?.meta || {
     saleTypes: [],
     paymentStatuses: [],
