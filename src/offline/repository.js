@@ -166,6 +166,9 @@ async function absorbServerEnvelope(path, payload) {
   if (/^\/filling-batches\/[^/]+$/.test(path) && !path.endsWith('/form-options') && payload?.data?._id) {
     await upsertServerRow(db.fillingBatches, payload.data);
   }
+  if (/^\/lpg-receipts\/[^/]+$/.test(path) && !path.endsWith('/form-options') && payload?.data?._id) {
+    await upsertServerRow(db.lpgReceipts, payload.data);
+  }
   const items = payload?.data?.items;
   if (!Array.isArray(items)) return;
   if (path === '/customers') {
@@ -182,6 +185,9 @@ async function absorbServerEnvelope(path, payload) {
   }
   if (path === '/filling-batches') {
     for (const item of items) await upsertServerRow(db.fillingBatches, item);
+  }
+  if (path === '/lpg-receipts') {
+    for (const item of items) await upsertServerRow(db.lpgReceipts, item);
   }
   if (path === '/payments') {
     for (const item of items) {
@@ -249,6 +255,10 @@ async function allPayments() {
 
 async function allFillingBatches() {
   return db.fillingBatches.toArray();
+}
+
+async function allLpgReceipts() {
+  return db.lpgReceipts.toArray();
 }
 
 function customerMatches(row, id) {
@@ -335,6 +345,11 @@ function assertSupplierPayload(payload) {
 
 async function findFilling(id) {
   const rows = await allFillingBatches();
+  return rows.find((row) => sameParty(row.localId, id) || sameParty(row.serverId, id) || sameParty(rowRecord(row)._id, id)) || null;
+}
+
+async function findReceipt(id) {
+  const rows = await allLpgReceipts();
   return rows.find((row) => sameParty(row.localId, id) || sameParty(row.serverId, id) || sameParty(rowRecord(row)._id, id)) || null;
 }
 
@@ -981,6 +996,178 @@ export async function queueFillingUpdate(id, payload) {
   return envelope('Filling batch updated on this computer', record);
 }
 
+function receiptGasKg(record) {
+  if (!record || record.receiptStatus === 'pending') return 0;
+  return Number(record.receivedQuantityKg) || 0;
+}
+
+async function pendingReceiptKg() {
+  let kg = 0;
+  for (const row of await allLpgReceipts()) {
+    const current = receiptGasKg(rowRecord(row));
+    const baseline = row.syncStatus === 'synced' ? current : receiptGasKg(row.stockBaseline);
+    kg += current - baseline;
+  }
+  return roundMoney(kg);
+}
+
+async function tankSnapshot() {
+  const snaps = await db.snapshots.toArray();
+  for (const path of ['/filling-batches/form-options', '/lpg-receipts/form-options']) {
+    const tank = snaps.find((snap) => snap.path === path)?.envelope?.data?.tank;
+    if (tank?.capacityKg != null) return tank;
+  }
+  const dashboard = snaps.find((snap) => snap.path === '/storage-tanks/dashboard')?.envelope?.data;
+  if (dashboard?.capacityKg != null) return dashboard;
+  return null;
+}
+
+async function employeeNameFor(employeeId) {
+  if (!employeeId) return '';
+  const snaps = await db.snapshots.toArray();
+  for (const snap of snaps) {
+    if (snap.path !== '/employees') continue;
+    const match = (snap.envelope?.data?.items || []).find((item) => sameParty(item._id, employeeId));
+    if (match?.fullName) return match.fullName;
+  }
+  return '';
+}
+
+function assertReceiptPayload(payload) {
+  if (!payload.supplierId) throw offlineReject('Supplier is required.');
+  if (!(Number(payload.receivedQuantityKg) > 0)) throw offlineReject('Received quantity must be greater than 0.');
+  if (String(payload.truckRegistrationNumber || '').trim().length < 3) {
+    throw offlineReject('Truck registration must contain at least 3 characters.');
+  }
+  if (String(payload.supplierInvoiceNumber || '').trim().length < 2) {
+    throw offlineReject('Supplier invoice must contain at least 2 characters.');
+  }
+  if (!payload.receivedByEmployeeId) throw offlineReject('Select the employee who received this shipment.');
+}
+
+async function assertReceiptTank(record, ignoreLocalId) {
+  if (record.receiptStatus === 'pending') return;
+  const tank = await tankSnapshot();
+  if (tank?.capacityKg == null || tank.currentQuantityKg == null) return;
+  const reservedFill = (await allFillingBatches()).reduce((sum, row) => {
+    if (row.syncStatus === 'synced') return sum;
+    const saved = rowRecord(row);
+    if (saved.batchStatus === 'pending') return sum;
+    return sum + (Number(saved.actualLpgUsedKg) || 0);
+  }, 0);
+  const reservedReceipt = (await allLpgReceipts()).reduce((sum, row) => {
+    if (row.localId === ignoreLocalId || row.syncStatus === 'synced') return sum;
+    return sum + receiptGasKg(rowRecord(row));
+  }, 0);
+  const current = (Number(tank.currentQuantityKg) || 0) - reservedFill + reservedReceipt;
+  const next = current + (Number(record.receivedQuantityKg) || 0);
+  if (next > Number(tank.capacityKg) + 0.001) {
+    throw offlineReject('The storage tank does not have room for this delivery.');
+  }
+}
+
+async function buildReceiptRecord(payload, localId, previous = {}) {
+  const supplier = await findSupplier(payload.supplierId || previous.supplierId);
+  const supplierRecord = supplier ? rowRecord(supplier) : {};
+  const qty = Number(payload.receivedQuantityKg ?? previous.receivedQuantityKg) || 0;
+  const rate = Number(payload.purchaseRatePerKg ?? previous.purchaseRatePerKg) || 0;
+  const total = roundMoney(qty * rate);
+  const status = payload.saveAsDraft ? 'pending' : (payload.receiptStatus || previous.receiptStatus || 'confirmed');
+  const paid = Number(payload.amountPaid ?? previous.paidAmount) || 0;
+  const now = new Date().toISOString();
+  const employeeId = payload.receivedByEmployeeId || previous.receivedByEmployeeId || null;
+  const employeeName = previous.receivedByEmployeeName || await employeeNameFor(employeeId);
+  const label = status === 'pending' ? 'Pending' : 'Confirmed';
+  return {
+    _id: previous._id || localId,
+    receiptNumber: previous.receiptNumber || `OFF-${String(localId).slice(-6).toUpperCase()}`,
+    supplierId: payload.supplierId || previous.supplierId,
+    supplierName: supplierRecord.supplierName || previous.supplierName || '',
+    supplierCode: supplierRecord.supplierCode || previous.supplierCode || '',
+    receivedAt: payload.receivedAt || previous.receivedAt || now,
+    truckRegistrationNumber: payload.truckRegistrationNumber ?? previous.truckRegistrationNumber ?? '',
+    receivedQuantityKg: qty,
+    purchaseRatePerKg: rate,
+    totalPurchaseAmount: total,
+    paidAmount: roundMoney(paid),
+    outstandingAmount: roundMoney(Math.max(0, total - paid)),
+    paymentStatus: paid <= 0 ? 'unpaid' : (paid + 0.001 >= total ? 'paid' : 'partial'),
+    receiptStatus: status,
+    receiptStatusLabel: label,
+    status: label,
+    supplierInvoiceNumber: payload.supplierInvoiceNumber ?? previous.supplierInvoiceNumber ?? '',
+    receivedByEmployeeId: employeeId,
+    receivedByEmployeeName: employeeName,
+    storageTankId: payload.storageTankId || previous.storageTankId || null,
+    remarks: payload.remarks ?? previous.remarks ?? '',
+    provisional: true,
+    syncStatus: 'pending',
+    createdAt: previous.createdAt || now,
+    updatedAt: now,
+  };
+}
+
+export async function queueReceiptCreate(payload) {
+  assertReceiptPayload(payload);
+  const localId = newLocalId();
+  const record = await buildReceiptRecord(payload, localId);
+  await assertReceiptTank(record, localId);
+  const serverPayload = { ...payload };
+  delete serverPayload.receiptNumber;
+  const dependsOn = [];
+  if (isLocalId(payload.supplierId)) {
+    const supplier = await findSupplier(payload.supplierId);
+    if (!supplier) throw offlineReject('Select a supplier saved on this computer.');
+    const createOp = await pendingCreate('supplier', payload.supplierId);
+    if (createOp) dependsOn.push(createOp.operationId);
+  }
+  await db.lpgReceipts.put({
+    localId,
+    serverId: '',
+    syncStatus: 'pending',
+    origin: 'local',
+    record,
+    updatedAt: record.updatedAt,
+  });
+  await enqueue({ entity: 'lpgReceipt', action: 'create', localId, payload: serverPayload, dependsOn });
+  return envelope('LPG receipt saved on this computer', record);
+}
+
+export async function queueReceiptUpdate(id, payload) {
+  const existing = await findReceipt(id);
+  if (!existing) throw offlineReject('This LPG receipt is not on this computer yet.');
+  const merged = { ...rowRecord(existing), ...payload };
+  assertReceiptPayload(merged);
+  const record = await buildReceiptRecord(payload, existing.localId, rowRecord(existing));
+  await assertReceiptTank(record, existing.localId);
+  const stockBaseline = existing.syncStatus === 'synced' && !existing.stockBaseline
+    ? rowRecord(existing)
+    : existing.stockBaseline || null;
+  await db.lpgReceipts.put({
+    ...existing,
+    stockBaseline,
+    syncStatus: 'pending',
+    record,
+    updatedAt: record.updatedAt,
+  });
+  const serverPayload = { ...payload };
+  delete serverPayload.receiptNumber;
+  const createOp = await pendingCreate('lpgReceipt', existing.localId);
+  if (createOp) {
+    createOp.payload = { ...createOp.payload, ...serverPayload };
+    delete createOp.payload.receiptNumber;
+    createOp.status = 'pending';
+    createOp.updatedAt = new Date().toISOString();
+    await db.queue.put(createOp);
+  } else if (existing.serverId) {
+    await enqueue({ entity: 'lpgReceipt', action: 'update', localId: existing.localId, payload: serverPayload });
+  } else {
+    await enqueue({ entity: 'lpgReceipt', action: 'create', localId: existing.localId, payload: serverPayload });
+  }
+  emitSync();
+  return envelope('LPG receipt updated on this computer', record);
+}
+
 export async function queueSaleCreate(payload) {
   const customer = await findCustomer(payload.customerId);
   if (!customer && isLocalId(payload.customerId)) {
@@ -1108,6 +1295,12 @@ export async function queuePaymentCreate(payload) {
   for (const line of payload.allocations || []) {
     if (isLocalId(line.saleId)) {
       const createOp = await pendingCreate('sale', line.saleId);
+      if (createOp) dependsOn.push(createOp.operationId);
+    }
+    if (isLocalId(line.lpgReceiptId)) {
+      const receipt = await findReceipt(line.lpgReceiptId);
+      if (!receipt) throw offlineReject('That LPG receipt is not on this computer.');
+      const createOp = await pendingCreate('lpgReceipt', line.lpgReceiptId);
       if (createOp) dependsOn.push(createOp.operationId);
     }
   }
@@ -1291,6 +1484,67 @@ const FILLING_STATUSES = [
   { value: 'completed', label: 'Completed' },
 ];
 
+const RECEIPT_STATUSES = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'confirmed', label: 'Confirmed' },
+];
+
+function filterReceipts(rows, params) {
+  const search = String(params.search || '').trim().toLowerCase();
+  return rows.filter((row) => {
+    const record = rowRecord(row);
+    if (params.supplierId && !sameParty(record.supplierId, params.supplierId)) return false;
+    if (params.receiptStatus === 'pending' && record.receiptStatus !== 'pending') return false;
+    if (params.receiptStatus === 'confirmed' && record.receiptStatus === 'pending') return false;
+    if (params.paymentStatus && record.paymentStatus !== params.paymentStatus) return false;
+    const day = params.date || (params.startDate && params.startDate === params.endDate ? params.startDate : '');
+    if (day && !matchesFillingDay(record.receivedAt, day)) return false;
+    if (!search) return true;
+    return [record.receiptNumber, record.supplierName, record.supplierCode, record.truckRegistrationNumber, record.supplierInvoiceNumber, record.remarks]
+      .join(' ')
+      .toLowerCase()
+      .includes(search);
+  });
+}
+
+function isOfflineReceipt(record) {
+  return record?.provisional === true
+    || record?.syncStatus === 'pending'
+    || record?.syncStatus === 'failed'
+    || String(record?.receiptNumber || '').startsWith('OFF-')
+    || String(record?._id || '').startsWith('local_');
+}
+
+function sortReceiptRecords(records) {
+  return [...records].sort((left, right) => {
+    const offline = Number(isOfflineReceipt(right)) - Number(isOfflineReceipt(left));
+    if (offline) return offline;
+    return new Date(right.receivedAt || 0) - new Date(left.receivedAt || 0);
+  });
+}
+
+function receiptListSummary(records, params) {
+  const hasDate = Boolean(params.date || params.startDate || params.endDate);
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const monthRows = hasDate
+    ? records
+    : records.filter((receipt) => {
+      const date = new Date(receipt.receivedAt || 0);
+      return date >= monthStart && date < monthEnd;
+    });
+  return {
+    thisMonthReceipts: monthRows.length,
+    thisMonthQuantityKg: roundMoney(monthRows.reduce((sum, receipt) => sum + (Number(receipt.receivedQuantityKg) || 0), 0)),
+    thisMonthPurchaseCost: roundMoney(monthRows.reduce((sum, receipt) => sum + (Number(receipt.totalPurchaseAmount) || 0), 0)),
+    pendingReceipts: records.filter((receipt) => receipt.receiptStatus === 'pending').length,
+    outstandingPurchaseAmount: roundMoney(records.reduce((sum, receipt) => (
+      receipt.receiptStatus === 'pending' ? sum : sum + (Number(receipt.outstandingAmount) || 0)
+    ), 0)),
+  };
+}
+
 function cylinderTypeKey(value) {
   return String(value?._id || value?.id || value || '');
 }
@@ -1361,10 +1615,26 @@ function applyTankKg(tank, reservedKg) {
   if (!tank || !reservedKg) return tank;
   const current = roundMoney(Math.max(0, (Number(tank.currentQuantityKg) || 0) - reservedKg));
   const capacity = Number(tank.capacityKg) || 0;
+  const minimum = Number(tank.minimumSafeQuantityKg) || 0;
+  const maximum = Number(tank.maximumSafeQuantityKg) || 0;
+  let stockStatus = 'ok';
+  let stockAlert = null;
+  if (minimum > 0 && current <= minimum) {
+    stockStatus = 'below-minimum';
+    stockAlert = `Tank is at or below the minimum safe threshold of ${minimum.toLocaleString('en-US')} KG.`;
+  } else if (minimum > 0 && current <= minimum * 2.5) {
+    stockStatus = 'approaching';
+    stockAlert = `Tank approaching minimum safe threshold level of ${minimum.toLocaleString('en-US')} KG.`;
+  } else if (maximum > 0 && current >= maximum) {
+    stockStatus = 'above-maximum';
+    stockAlert = `Tank is at or above the maximum safe capacity of ${maximum.toLocaleString('en-US')} KG.`;
+  }
   const next = {
     ...tank,
     currentQuantityKg: current,
     fillPercent: capacity > 0 ? Math.round((current / capacity) * 1000) / 10 : tank.fillPercent,
+    stockStatus,
+    stockAlert,
   };
   if (tank.availableCapacityKg != null) next.availableCapacityKg = roundMoney(capacity - current);
   if (tank.tankCode && tank.tankName) {
@@ -1373,11 +1643,78 @@ function applyTankKg(tank, reservedKg) {
   return next;
 }
 
+function localDashboardBatch(record) {
+  const lines = Array.isArray(record.lines) ? record.lines : [];
+  const typeName = lines.length
+    ? lines
+      .map((line) => (line.cylinderTypeName ? (lines.length > 1 ? `${line.cylinderTypeName} × ${line.cylinderCount}` : line.cylinderTypeName) : ''))
+      .filter(Boolean)
+      .join(', ')
+    : (record.cylinderTypeName || '');
+  return {
+    _id: record._id,
+    batchNumber: record.batchNumber,
+    fillingDate: record.fillingDate,
+    cylinderCount: record.cylinderCount,
+    typeName,
+    cylinderDescription: typeName,
+    provisional: true,
+  };
+}
+
+function mergeRecent(existing, incoming, dateKey) {
+  const byId = new Map();
+  for (const item of incoming) {
+    if (item?._id) byId.set(String(item._id), item);
+  }
+  for (const item of existing || []) {
+    if (item?._id && !byId.has(String(item._id))) byId.set(String(item._id), item);
+  }
+  return [...byId.values()]
+    .sort((left, right) => new Date(right[dateKey] || 0) - new Date(left[dateKey] || 0))
+    .slice(0, 5);
+}
+
+async function withTankActivity(data) {
+  if (!data) return data;
+  let next = { ...data };
+  if (next.currentQuantityKg != null && next.capacityKg != null && !next.tank) {
+    const { kg } = await pendingFillEffect();
+    const added = await pendingReceiptKg();
+    const net = roundMoney(kg - added);
+    if (net) next = applyTankKg(next, net);
+  }
+  const receipts = [];
+  for (const row of await allLpgReceipts()) {
+    if (row.syncStatus === 'synced') continue;
+    const record = rowRecord(row);
+    receipts.push({
+      _id: record._id,
+      receiptNumber: record.receiptNumber,
+      receivedAt: record.receivedAt,
+      receivedQuantityKg: record.receivedQuantityKg,
+      supplierId: record.supplierId,
+      supplierName: record.supplierName || '',
+      provisional: true,
+    });
+  }
+  const batches = [];
+  for (const row of await allFillingBatches()) {
+    if (row.syncStatus === 'synced') continue;
+    batches.push(localDashboardBatch(rowRecord(row)));
+  }
+  next.recentReceipts = mergeRecent(next.recentReceipts, receipts, 'receivedAt');
+  next.recentFillingBatches = mergeRecent(next.recentFillingBatches, batches, 'fillingDate');
+  return next;
+}
+
 async function withTankReservation(data) {
   if (!data?.tank || data.tank.currentQuantityKg == null) return data;
   const { kg } = await pendingFillEffect();
-  if (!kg) return data;
-  return { ...data, tank: applyTankKg(data.tank, kg) };
+  const added = await pendingReceiptKg();
+  const net = roundMoney(kg - added);
+  if (!net) return data;
+  return { ...data, tank: applyTankKg(data.tank, net) };
 }
 
 async function fillingCatalog() {
@@ -1466,7 +1803,7 @@ async function assertFillingTank(record, ignoreLocalId) {
     if (saved.batchStatus === 'pending') return sum;
     return sum + (Number(saved.actualLpgUsedKg) || 0);
   }, 0);
-  const available = roundMoney((Number(catalog.tank.currentQuantityKg) || 0) - reserved);
+  const available = roundMoney((Number(catalog.tank.currentQuantityKg) || 0) - reserved + await pendingReceiptKg());
   if ((Number(record.actualLpgUsedKg) || 0) > available + 0.001) {
     throw offlineReject('The storage tank does not have enough gas for this batch.');
   }
@@ -1692,6 +2029,27 @@ function shiftFilledStock(item, beforeCounts, afterCounts) {
   };
 }
 
+async function patchTankKg(deltaSubtract) {
+  if (!deltaSubtract) return;
+  const snaps = await db.snapshots.toArray();
+  for (const snap of snaps) {
+    const data = snap.envelope?.data;
+    if (!data) continue;
+    if ((snap.path === '/filling-batches/form-options' || snap.path === '/lpg-receipts/form-options') && data.tank) {
+      await db.snapshots.put({
+        ...snap,
+        envelope: { ...snap.envelope, data: { ...data, tank: applyTankKg(data.tank, deltaSubtract) } },
+      });
+    }
+    if (snap.path === '/storage-tanks/dashboard' && data.currentQuantityKg != null) {
+      await db.snapshots.put({
+        ...snap,
+        envelope: { ...snap.envelope, data: applyTankKg(data, deltaSubtract) },
+      });
+    }
+  }
+}
+
 async function patchInventoryForFill(before, after) {
   const beforeCounts = fillLineCounts(before);
   const afterCounts = fillLineCounts(after);
@@ -1785,7 +2143,9 @@ async function withPendingParties(data) {
   }
   if (data.tankCode && data.currentQuantityKg != null && data.capacityKg != null && !data.tank) {
     const { kg } = await pendingFillEffect();
-    if (kg) Object.assign(next, applyTankKg(data, kg));
+    const added = await pendingReceiptKg();
+    const net = roundMoney(kg - added);
+    if (net) Object.assign(next, applyTankKg(data, net));
   }
   if (data.itemCode && data.itemCategory && data.currentQuantity != null && !Array.isArray(data.items)) {
     const [adjusted] = await adjustStock([data]);
@@ -1820,13 +2180,14 @@ async function outstandingForCustomer(customerId) {
 export async function serveGet(config) {
   const path = requestPath(config);
   const params = paramsOf(config);
-  const idMatch = path.match(/^\/(customers|suppliers|accounts|sales|payments|filling-batches)\/([^/]+)$/);
+  const idMatch = path.match(/^\/(customers|suppliers|accounts|sales|payments|filling-batches|lpg-receipts)\/([^/]+)$/);
   if (idMatch && idMatch[2] !== 'form-options') {
     const table = idMatch[1] === 'customers' ? await findCustomer(idMatch[2])
       : idMatch[1] === 'suppliers' ? await findSupplier(idMatch[2])
         : idMatch[1] === 'accounts' ? await findAccount(idMatch[2])
           : idMatch[1] === 'sales' ? await findSale(idMatch[2])
             : idMatch[1] === 'filling-batches' ? await findFilling(idMatch[2])
+              : idMatch[1] === 'lpg-receipts' ? await findReceipt(idMatch[2])
             : (await allPayments()).find((row) => sameParty(row.localId, idMatch[2]) || sameParty(row.serverId, idMatch[2]));
     if (table) return envelope('Saved on this computer', rowRecord(table));
   }
@@ -1933,6 +2294,42 @@ export async function serveGet(config) {
       summary: salesListSummary(records),
     });
   }
+  if (path === '/storage-tanks/dashboard') {
+    const listed = await db.snapshots.get(cacheKey(config));
+    const snaps = await db.snapshots.toArray();
+    const cached = listed?.envelope?.data
+      || snaps.find((snap) => snap.path === '/storage-tanks/dashboard')?.envelope?.data
+      || null;
+    const base = cached || await tankSnapshot();
+    if (!base) return null;
+    const data = await withTankActivity(base);
+    return listed?.envelope ? { ...listed.envelope, data } : envelope('Storage tank fetched', data);
+  }
+  if (path === '/lpg-receipts') {
+    const localRows = await allLpgReceipts();
+    const snaps = await db.snapshots.toArray();
+    const cached = [];
+    const covered = new Set();
+    for (const row of localRows) {
+      if (row.serverId) covered.add(String(row.serverId));
+      const recordId = rowRecord(row)._id;
+      if (recordId) covered.add(String(recordId));
+    }
+    for (const snap of snaps) {
+      if (snap.path !== '/lpg-receipts') continue;
+      for (const item of snap.envelope?.data?.items || []) {
+        if (!item?._id || covered.has(String(item._id))) continue;
+        covered.add(String(item._id));
+        cached.push({ record: item, syncStatus: 'synced' });
+      }
+    }
+    const records = sortReceiptRecords(filterReceipts([...localRows, ...cached], params).map(rowRecord));
+    return envelope('LPG receipts fetched', {
+      ...paginate(records, params),
+      summary: receiptListSummary(records, params),
+      meta: { statuses: RECEIPT_STATUSES },
+    });
+  }
   if (path === '/filling-batches') {
     const localRows = await allFillingBatches();
     const snaps = await db.snapshots.toArray();
@@ -2026,6 +2423,10 @@ export async function serveWrite(config) {
   if (method === 'patch' && /^\/accounts\/[^/]+$/.test(path)) {
     return queueAccountUpdate(path.split('/')[2], payload);
   }
+  if (method === 'post' && path === '/lpg-receipts') return queueReceiptCreate(payload);
+  if (method === 'patch' && /^\/lpg-receipts\/[^/]+$/.test(path)) {
+    return queueReceiptUpdate(path.split('/')[2], payload);
+  }
   if (method === 'post' && path === '/filling-batches') return queueFillingCreate(payload);
   if (method === 'patch' && /^\/filling-batches\/[^/]+$/.test(path)) {
     return queueFillingUpdate(path.split('/')[2], payload);
@@ -2049,8 +2450,11 @@ export async function rememberOnlineResponse(config, payload) {
 export async function mergePendingIntoResponse(config, payload) {
   if (requestMethod(config) !== 'get' || !payload?.data) return payload;
   const path = requestPath(config);
+  if (path === '/storage-tanks/dashboard') {
+    return { ...payload, data: await withTankActivity(payload.data) };
+  }
   const params = paramsOf(config);
-  if (!['/customers', '/suppliers', '/accounts', '/sales', '/payments', '/filling-batches'].includes(path) || !Array.isArray(payload.data.items)) {
+  if (!['/customers', '/suppliers', '/accounts', '/sales', '/payments', '/filling-batches', '/lpg-receipts'].includes(path) || !Array.isArray(payload.data.items)) {
     const data = await withPendingParties(payload.data);
     if (path === '/filling-batches/form-options') {
       return { ...payload, data: await withTankReservation(data) };
@@ -2062,6 +2466,7 @@ export async function mergePendingIntoResponse(config, payload) {
       : path === '/accounts' ? filterAccounts(await allAccounts(), params)
         : path === '/sales' ? filterSales(await allSales(), params)
           : path === '/filling-batches' ? filterFillingBatches(await allFillingBatches(), params)
+            : path === '/lpg-receipts' ? filterReceipts(await allLpgReceipts(), params)
             : filterPayments(await allPayments(), params);
   const pending = table
     .filter((row) => row.syncStatus !== 'synced' && row.origin !== 'sale-receipt')
@@ -2073,6 +2478,15 @@ export async function mergePendingIntoResponse(config, payload) {
     pending.find((row) => String(row._id) === String(item._id)) || item
   ));
   const summary = payload.data.summary;
+  const freshReceipts = path === '/lpg-receipts'
+    ? extras.filter((receipt) => String(receipt._id || '').startsWith('local_') || String(receipt.receiptNumber || '').startsWith('OFF-'))
+    : [];
+  const receiptMonthStart = new Date();
+  receiptMonthStart.setDate(1);
+  receiptMonthStart.setHours(0, 0, 0, 0);
+  const monthReceipts = params.date || params.startDate || params.endDate
+    ? freshReceipts
+    : freshReceipts.filter((receipt) => new Date(receipt.receivedAt || 0) >= receiptMonthStart);
   const freshFills = path === '/filling-batches'
     ? extras.filter((batch) => String(batch._id || '').startsWith('local_') || String(batch.batchNumber || '').startsWith('OFF-'))
     : [];
@@ -2086,7 +2500,13 @@ export async function mergePendingIntoResponse(config, payload) {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   const todaySales = countedSales.filter((sale) => new Date(sale.invoiceDate || sale.createdAt || 0) >= todayStart);
-  const nextSummary = path === '/filling-batches' && summary ? {
+  const nextSummary = path === '/lpg-receipts' && summary ? {
+    ...summary,
+    thisMonthReceipts: (summary.thisMonthReceipts || 0) + monthReceipts.length,
+    thisMonthQuantityKg: roundMoney((summary.thisMonthQuantityKg || 0) + monthReceipts.reduce((sum, receipt) => sum + (Number(receipt.receivedQuantityKg) || 0), 0)),
+    thisMonthPurchaseCost: roundMoney((summary.thisMonthPurchaseCost || 0) + monthReceipts.reduce((sum, receipt) => sum + (Number(receipt.totalPurchaseAmount) || 0), 0)),
+    pendingReceipts: (summary.pendingReceipts || 0) + freshReceipts.filter((receipt) => receipt.receiptStatus === 'pending').length,
+  } : path === '/filling-batches' && summary ? {
     ...summary,
     totalBatches: (summary.totalBatches || 0) + freshFills.length,
     totalQuantityKg: roundMoney((summary.totalQuantityKg || 0) + completedFills.reduce((sum, batch) => sum + (Number(batch.actualLpgUsedKg) || 0), 0)),
@@ -2120,7 +2540,7 @@ export async function mergePendingIntoResponse(config, payload) {
       ...(nextSummary ? { summary: nextSummary } : {}),
       pagination: {
         ...payload.data.pagination,
-        total: (payload.data.pagination?.total || payload.data.items.length) + (path === '/sales' ? freshSales.length : path === '/filling-batches' ? freshFills.length : extras.length),
+        total: (payload.data.pagination?.total || payload.data.items.length) + (path === '/sales' ? freshSales.length : path === '/filling-batches' ? freshFills.length : path === '/lpg-receipts' ? freshReceipts.length : extras.length),
       },
     },
   };
@@ -2132,12 +2552,16 @@ export async function applyServerResult(localId, entity, serverRecord) {
       : entity === 'account' ? db.accounts
         : entity === 'sale' ? db.sales
           : entity === 'fillingBatch' ? db.fillingBatches
+            : entity === 'lpgReceipt' ? db.lpgReceipts
             : db.payments;
   const existing = await table.get(localId);
   if (!existing || !serverRecord?._id) return;
   const fillBefore = entity === 'fillingBatch'
     ? (existing.stockBaseline || (existing.syncStatus === 'synced' ? rowRecord(existing) : null))
     : null;
+  const receiptBeforeKg = entity === 'lpgReceipt'
+    ? receiptGasKg(existing.stockBaseline || (existing.syncStatus === 'synced' ? rowRecord(existing) : null))
+    : 0;
   const saved = {
     ...existing,
     serverId: String(serverRecord._id),
@@ -2148,6 +2572,7 @@ export async function applyServerResult(localId, entity, serverRecord) {
   delete saved.stockBaseline;
   await table.put(saved);
   if (entity === 'fillingBatch') await patchInventoryForFill(fillBefore, serverRecord);
+  if (entity === 'lpgReceipt') await patchTankKg(receiptBeforeKg - receiptGasKg(serverRecord));
   if (entity === 'sale') {
     const payments = await allPayments();
     for (const payment of payments) {
@@ -2218,6 +2643,7 @@ export async function discardFailedOperation(operationId) {
       : row.entity === 'account' ? db.accounts
         : row.entity === 'sale' ? db.sales
           : row.entity === 'fillingBatch' ? db.fillingBatches
+            : row.entity === 'lpgReceipt' ? db.lpgReceipts
             : db.payments;
   const record = await table.get(row.localId);
   if (row.action === 'create' && record && !record.serverId) {
@@ -2242,6 +2668,7 @@ export async function exportOfflineBackup() {
     sales: await db.sales.toArray(),
     payments: await db.payments.toArray(),
     fillingBatches: await db.fillingBatches.toArray(),
+    lpgReceipts: await db.lpgReceipts.toArray(),
     queue: await db.queue.toArray(),
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
@@ -2266,8 +2693,8 @@ export async function markSyncMeta(patch) {
 export function canQueueWrite(config) {
   const path = requestPath(config);
   const method = requestMethod(config);
-  if (method === 'post' && ['/customers', '/suppliers', '/accounts', '/sales', '/payments', '/filling-batches'].includes(path)) return true;
-  if (method === 'patch' && /^\/(customers|suppliers|accounts|sales|filling-batches)\/[^/]+$/.test(path)) return true;
+  if (method === 'post' && ['/customers', '/suppliers', '/accounts', '/sales', '/payments', '/filling-batches', '/lpg-receipts'].includes(path)) return true;
+  if (method === 'patch' && /^\/(customers|suppliers|accounts|sales|filling-batches|lpg-receipts)\/[^/]+$/.test(path)) return true;
   return false;
 }
 

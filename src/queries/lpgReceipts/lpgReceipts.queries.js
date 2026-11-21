@@ -41,6 +41,7 @@ export const useCreateLpgReceipt = () => {
     mutationFn: createLpgReceipt,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.lpgReceipts.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.storageTanks.all });
     },
   });
 };
@@ -52,6 +53,7 @@ export const useUpdateLpgReceipt = () => {
     mutationFn: ({ id, data }) => updateLpgReceipt(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.lpgReceipts.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.storageTanks.all });
     },
   });
 };

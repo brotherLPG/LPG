@@ -83,7 +83,8 @@ function StorageTanks() {
     receipt: receipt.receiptNumber,
     supplier: receipt.supplierName,
     quantity: `${formatNumber(receipt.receivedQuantityKg)} KG`,
-    date: receipt.receivedAt
+    date: receipt.receivedAt,
+    provisional: receipt.provisional === true || String(receipt.receiptNumber || "").startsWith("OFF-") || String(receipt._id || "").startsWith("local_"),
   })) || [];
 
   const fillingBatches = tankData?.data?.recentFillingBatches?.map(batch => ({
@@ -92,7 +93,8 @@ function StorageTanks() {
     typeName: batch.typeName,
     units: `${batch.cylinderCount} units`,
     quantity: batch.cylinderDescription,
-    date: batch.fillingDate
+    date: batch.fillingDate,
+    provisional: batch.provisional === true || String(batch.batchNumber || "").startsWith("OFF-") || String(batch._id || "").startsWith("local_"),
   })) || [];
 
   // Column definitions for receipts table
@@ -369,6 +371,7 @@ function StorageTanks() {
               columns={receiptColumns}
               data={recentReceipts}
               ariaLabel="Recent receipts"
+              rowClassName={(item) => (item.provisional ? "sales-offline-row" : "border-b border-slate-100 dark:border-gray-800 last:border-b-0")}
             />
           </section>
 
@@ -384,6 +387,7 @@ function StorageTanks() {
               columns={batchColumns}
               data={fillingBatches}
               ariaLabel="Recent filling batches"
+              rowClassName={(item) => (item.provisional ? "sales-offline-row" : "border-b border-slate-100 dark:border-gray-800 last:border-b-0")}
             />
           </section>
         </div>

@@ -26,6 +26,8 @@ async function resolveId(value) {
   if (sale?.serverId) return sale.serverId;
   const payment = await db.payments.get(value);
   if (payment?.serverId) return payment.serverId;
+  const receipt = await db.lpgReceipts.get(value);
+  if (receipt?.serverId) return receipt.serverId;
   return null;
 }
 
@@ -65,7 +67,11 @@ async function readyPayload(operation) {
         if (!resolved) return null;
         next.saleId = resolved;
       }
-      if (next.lpgReceiptId && isLocalId(next.lpgReceiptId)) return null;
+      if (next.lpgReceiptId && isLocalId(next.lpgReceiptId)) {
+        const resolved = await resolveId(next.lpgReceiptId);
+        if (!resolved) return null;
+        next.lpgReceiptId = resolved;
+      }
       payload.allocations.push(next);
     }
   }
@@ -86,6 +92,7 @@ async function readyPayload(operation) {
   delete payload.accountCode;
   delete payload.currentBalanceAmount;
   delete payload.batchNumber;
+  delete payload.receiptNumber;
   return payload;
 }
 
@@ -123,6 +130,12 @@ function requestFor(operation, serverId) {
   if (operation.entity === 'fillingBatch' && operation.action === 'update') {
     return { method: 'patch', url: `/filling-batches/${serverId}` };
   }
+  if (operation.entity === 'lpgReceipt' && operation.action === 'create') {
+    return { method: 'post', url: '/lpg-receipts' };
+  }
+  if (operation.entity === 'lpgReceipt' && operation.action === 'update') {
+    return { method: 'patch', url: `/lpg-receipts/${serverId}` };
+  }
   return null;
 }
 
@@ -145,6 +158,8 @@ async function sendOperation(operation) {
         ? await db.sales.get(operation.localId)
         : operation.entity === 'fillingBatch'
           ? await db.fillingBatches.get(operation.localId)
+          : operation.entity === 'lpgReceipt'
+            ? await db.lpgReceipts.get(operation.localId)
           : await db.payments.get(operation.localId);
   const target = requestFor(operation, row?.serverId);
   if (!target || (operation.action === 'update' && !row?.serverId)) {

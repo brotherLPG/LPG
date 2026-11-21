@@ -77,7 +77,7 @@ function LpgReceiptDetails() {
           <h2 className="border-b border-slate-100 dark:border-gray-800 px-4 py-3 text-base font-bold text-slate-800 dark:text-gray-100">Receipt Information</h2>
           <dl className="grid gap-5 p-5 sm:grid-cols-2">
             <DetailItem label="Receipt Number" value={receipt.receiptNumber} />
-            <DetailItem label="Status" value={receipt.status || "Confirmed"} />
+            <DetailItem label="Status" value={receipt.receiptStatusLabel || receipt.status || "Confirmed"} />
             <DetailItem label="Supplier" value={supplierName} />
             <DetailItem label="Supplier Invoice Number" value={receipt.supplierInvoiceNumber} />
             <DetailItem label="Received By" value={employeeName} />

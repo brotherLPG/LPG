@@ -11,8 +11,6 @@ import { usePermissions } from "../../contexts/PermissionContext";
 import { usePrint } from "../../utils/usePrint";
 
 
-const initialReceipts = [];
-
 function LpgReceipts() {
   const navigate = useNavigate();
   const { can } = usePermissions();
@@ -31,6 +29,10 @@ function LpgReceipts() {
     search: query,
     page: currentPage,
     limit: 10,
+    ...(supplier !== "All" ? { supplierId: supplier } : {}),
+    ...(status === "Confirmed" ? { receiptStatus: "confirmed" } : {}),
+    ...(status === "Pending" || status === "Draft" ? { receiptStatus: "pending" } : {}),
+    ...(selectedDate ? { date: selectedDate } : {}),
   });
 
   const deleteMutation = useDeleteLpgReceipt();
@@ -43,7 +45,7 @@ function LpgReceipts() {
   useEffect(() => {
     setSupplierOptions([
       { label: 'All', value: 'All' },
-      ...suppliersList.map((s) => ({ label: s.supplierName || s.supplierCode || s.name, value: s.supplierName || s.supplierCode || s.name }))
+      ...suppliersList.map((s) => ({ label: s.supplierName || s.supplierCode || s.name, value: s._id }))
     ]);
   }, [suppliersList]);
 
@@ -70,17 +72,10 @@ function LpgReceipts() {
       quantity: r.receivedQuantityKg,
       rate: r.purchaseRatePerKg,
       totalCost: r.totalPurchaseAmount,
-      status: r.status || 'Confirmed',
+      status: r.receiptStatusLabel || (r.receiptStatus === "pending" ? "Pending" : "Confirmed"),
+      provisional: r.provisional === true || r.syncStatus === "pending" || r.syncStatus === "failed" || String(r.receiptNumber || "").startsWith("OFF-") || String(r._id || "").startsWith("local_"),
     };
   }), [apiReceipts, suppliersList]);
-
-  const filteredReceipts = useMemo(() => mappedReceipts.filter((receipt) => {
-    const matchesQuery = `${receipt.receiptNo} ${receipt.supplier} ${receipt.truckReg}`.toLowerCase().includes(query.toLowerCase());
-    const matchesStatus = status === "All" || receipt.status === status;
-    const matchesSupplier = supplier === "All" || receipt.supplier === supplier;
-    const matchesDate = !selectedDate || receipt.receivedDate === selectedDate;
-    return matchesQuery && matchesStatus && matchesSupplier && matchesDate;
-  }), [query, status, supplier, selectedDate, mappedReceipts]);
 
   
 
@@ -198,7 +193,7 @@ const handlePrintReceipt = (receipt) => {
       { key: 'status', label: 'Status' },
     ];
 
-    const data = filteredReceipts.map(receipt => ({
+    const data = mappedReceipts.map(receipt => ({
       ...receipt,
       quantity: receipt.quantity.toLocaleString(),
       rate: receipt.rate.toLocaleString(),
@@ -209,26 +204,18 @@ const handlePrintReceipt = (receipt) => {
       columns,
       data,
       title: 'LPG Receipts',
-      subtitle: `Total: ${filteredReceipts.length} receipts`,
+      subtitle: `Total: ${mappedReceipts.length} receipts`,
     });
   };
 
   // Calculate summary statistics
-  const summaryStats = useMemo(() => {
-    const source = mappedReceipts.length ? mappedReceipts : initialReceipts;
-    const totalQuantity = source.reduce((sum, receipt) => sum + (receipt.quantity || 0), 0);
-    const totalCost = source.reduce((sum, receipt) => sum + (receipt.totalCost || 0), 0);
-    const confirmedCount = source.filter(r => r.status === "Confirmed").length;
-    const pendingCount = source.filter(r => r.status === "Pending").length;
-    const draftCount = source.filter(r => r.status === "Draft").length;
-
-    return {
-      thisMonthReceipts: source.length,
-      totalQuantity,
-      totalCost,
-      pendingReceipts: pendingCount + draftCount,
-    };
-  }, []);
+  const summary = receiptsData?.data?.summary || {};
+  const summaryStats = {
+    thisMonthReceipts: summary.thisMonthReceipts || 0,
+    totalQuantity: summary.thisMonthQuantityKg || 0,
+    totalCost: summary.thisMonthPurchaseCost || 0,
+    pendingReceipts: summary.pendingReceipts || 0,
+  };
 
   const receiptColumns = [
     {
@@ -495,7 +482,10 @@ const handlePrintReceipt = (receipt) => {
               <div className="absolute left-3 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full border-2 border-slate-300 dark:border-gray-600"></div>
               <input
                 value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setCurrentPage(1);
+                }}
                 className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50/50 dark:bg-gray-800/50 py-2.5 pl-8 pr-3 text-sm text-slate-700 dark:text-gray-300 outline-none transition placeholder:text-slate-500 dark:placeholder:text-gray-400 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
                 placeholder="Search by receipt number, supplier, or truck..."
               />
@@ -505,14 +495,20 @@ const handlePrintReceipt = (receipt) => {
                 <input
                   type="date"
                   value={selectedDate}
-                  onChange={(event) => setSelectedDate(event.target.value)}
+                  onChange={(event) => {
+                    setSelectedDate(event.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none transition focus:border-[#008951] focus:ring-1 focus:ring-[#008951] sm:w-40 lg:w-44"
                 />
               </div>
               <div className="relative">
                 <select
                   value={status}
-                  onChange={(event) => setStatus(event.target.value)}
+                  onChange={(event) => {
+                    setStatus(event.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] sm:w-40 lg:w-44"
                 >
                   <option value="All">Status: All</option>
@@ -525,7 +521,10 @@ const handlePrintReceipt = (receipt) => {
               <div className="relative">
                 <select
                   value={supplier}
-                  onChange={(event) => setSupplier(event.target.value)}
+                  onChange={(event) => {
+                    setSupplier(event.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
                 >
                   {supplierOptions.map((opt) => (
@@ -554,10 +553,14 @@ const handlePrintReceipt = (receipt) => {
           ) : (
             <GlobalTable
               columns={receiptColumns}
-              data={filteredReceipts}
+              data={mappedReceipts}
               ariaLabel="LPG Receipts Table"
               className=""
-              rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
+              rowClassName={(item) =>
+                item.provisional
+                  ? "sales-offline-row border-b border-rose-100 last:border-0 whitespace-nowrap"
+                  : "border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
+              }
               emptyContent="No receipts match your search."
               pagination={true}
               rowsPerPage={pagination.limit || 10}

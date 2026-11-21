@@ -104,6 +104,11 @@ function UpdateLpgReceipt() {
       setSupplierInvoiceError("");
     }
 
+    if (!receivedByEmployeeId) {
+      toast.error("Select the employee who received this shipment.");
+      hasError = true;
+    }
+
     return !hasError;
   };
 
