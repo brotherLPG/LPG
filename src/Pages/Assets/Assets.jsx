@@ -59,14 +59,16 @@ function Assets() {
     return assets.map((asset) => {
       const pDate = asset.purchaseDate ? new Date(asset.purchaseDate) : null;
       const assignedEmpName =
-        asset.assignedEmployeeId && typeof asset.assignedEmployeeId === "object"
+        asset.assignedEmployeeName
+        || (asset.assignedEmployeeId && typeof asset.assignedEmployeeId === "object"
           ? asset.assignedEmployeeId.fullName
-          : "-";
+          : "-");
 
       const accountName =
-        asset.accountId && typeof asset.accountId === "object"
+        asset.accountName
+        || (asset.accountId && typeof asset.accountId === "object"
           ? asset.accountId.accountName || asset.accountId.label || "-"
-          : "-";
+          : "-");
 
       return {
         _id: asset._id,
@@ -85,11 +87,20 @@ function Assets() {
         location: asset.locationName || "-",
         assignedEmployee: assignedEmpName,
         status: asset.assetStatus || "in-use",
+        provisional: asset.provisional === true || String(asset.assetCode || "").startsWith("OFF-") || String(asset._id || "").startsWith("local_"),
       };
     });
   }, [assets]);
 
+  const responseSummary = assetsResponse?.data?.summary;
   const summaryStats = useMemo(() => {
+    if (responseSummary && responseSummary.totalAssetValue != null) {
+      return {
+        totalAssetValue: responseSummary.totalAssetValue,
+        totalDepreciation: responseSummary.totalDepreciation,
+        netBookValue: responseSummary.netBookValue,
+      };
+    }
     const totalAssetValue = mappedAssets.reduce((sum, asset) => sum + (asset.purchaseCost || 0), 0);
     const totalBookValue = mappedAssets.reduce((sum, asset) => sum + (asset.bookValue || 0), 0);
     const totalDepreciation = totalAssetValue - totalBookValue;
@@ -99,7 +110,7 @@ function Assets() {
       totalDepreciation,
       netBookValue: totalBookValue,
     };
-  }, [mappedAssets]);
+  }, [mappedAssets, responseSummary]);
 
   const handleDeleteConfirm = async () => {
     if (!deleteModal.item) return;
@@ -381,7 +392,9 @@ function Assets() {
               data={mappedAssets}
               ariaLabel="Fixed Assets Table"
               className=""
-              rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
+              rowClassName={(item) => (item.provisional
+              ? "sales-offline-row"
+              : "border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors")}
               emptyContent="No assets match your search."
               pagination={true}
               rowsPerPage={pagination.limit || 10}

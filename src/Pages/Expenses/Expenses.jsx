@@ -24,6 +24,8 @@ function Expenses() {
 
   const { data: expensesResponse, isLoading, error } = useExpenses({
     search: query || undefined,
+    expenseCategoryId: categoryFilter === "All" ? undefined : categoryFilter,
+    expenseStatus: statusFilter === "All" ? undefined : statusFilter,
     page: currentPage,
     limit: 10,
   });
@@ -38,13 +40,10 @@ function Expenses() {
   const categories = meta.categories || [];
   const statuses = meta.statuses || [];
 
-  const filteredExpenses = useMemo(() => {
-    return expenses.filter((exp) => {
-      const matchesCategory = categoryFilter === "All" || exp.categoryName === categoryFilter;
-      const matchesStatus = statusFilter === "All" || exp.expenseStatus === statusFilter;
-      return matchesCategory && matchesStatus;
-    });
-  }, [expenses, categoryFilter, statusFilter]);
+  const filteredExpenses = useMemo(() => expenses.map((expense) => ({
+    ...expense,
+    provisional: expense.provisional === true || String(expense.expenseNumber || "").startsWith("OFF-") || String(expense._id || "").startsWith("local_"),
+  })), [expenses]);
 
   const getStatusBadgeStyle = (status) => {
     switch (status) {
@@ -362,7 +361,7 @@ function Expenses() {
                 >
                   <option value="All">Category: All</option>
                   {categories.map((cat) => (
-                    <option key={cat._id} value={cat.categoryName}>
+                    <option key={cat._id} value={cat._id}>
                       {cat.categoryName}
                     </option>
                   ))}
@@ -407,7 +406,9 @@ function Expenses() {
               data={filteredExpenses}
               ariaLabel="Expenses Table"
               className=""
-              rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
+              rowClassName={(item) => (item.provisional
+                ? "sales-offline-row"
+                : "border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors")}
               emptyContent="No expenses match your search."
               pagination={true}
               rowsPerPage={pagination.limit || 10}

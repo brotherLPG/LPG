@@ -172,6 +172,15 @@ async function absorbServerEnvelope(path, payload) {
   if (/^\/employees\/[^/]+$/.test(path) && !path.endsWith('/form-options') && payload?.data?._id) {
     await upsertServerRow(db.employees, payload.data);
   }
+  if (/^\/assets\/[^/]+$/.test(path) && !path.endsWith('/form-options') && payload?.data?._id) {
+    await upsertServerRow(db.assets, payload.data);
+  }
+  if (/^\/expenses\/[^/]+$/.test(path) && !path.endsWith('/form-options') && payload?.data?._id) {
+    await upsertServerRow(db.expenses, payload.data);
+  }
+  if (/^\/maintenance-records\/[^/]+$/.test(path) && !path.endsWith('/form-options') && payload?.data?._id) {
+    await upsertServerRow(db.maintenanceRecords, payload.data);
+  }
   const items = payload?.data?.items;
   if (!Array.isArray(items)) return;
   if (path === '/customers') {
@@ -194,6 +203,15 @@ async function absorbServerEnvelope(path, payload) {
   }
   if (path === '/employees') {
     for (const item of items) await upsertServerRow(db.employees, item);
+  }
+  if (path === '/assets') {
+    for (const item of items) await upsertServerRow(db.assets, item);
+  }
+  if (path === '/expenses') {
+    for (const item of items) await upsertServerRow(db.expenses, item);
+  }
+  if (path === '/maintenance-records') {
+    for (const item of items) await upsertServerRow(db.maintenanceRecords, item);
   }
   if (path === '/payments') {
     for (const item of items) {
@@ -269,6 +287,33 @@ async function allLpgReceipts() {
 
 async function allEmployees() {
   return db.employees.toArray();
+}
+
+async function allAssets() {
+  return db.assets.toArray();
+}
+
+async function allExpenses() {
+  return db.expenses.toArray();
+}
+
+async function allMaintenanceRecords() {
+  return db.maintenanceRecords.toArray();
+}
+
+async function findAsset(id) {
+  const rows = await allAssets();
+  return rows.find((row) => customerMatches(row, id)) || null;
+}
+
+async function findExpense(id) {
+  const rows = await allExpenses();
+  return rows.find((row) => customerMatches(row, id)) || null;
+}
+
+async function findMaintenance(id) {
+  const rows = await allMaintenanceRecords();
+  return rows.find((row) => customerMatches(row, id)) || null;
 }
 
 async function findEmployee(id) {
@@ -1025,6 +1070,681 @@ async function withEmployeeDependency(dependsOn, employeeId) {
   return next;
 }
 
+const ASSET_CATEGORIES = ['plant', 'vehicle', 'filling-machine', 'compressor', 'tank', 'building', 'furniture', 'other'];
+const ASSET_STATUSES = ['in-use', 'idle', 'under-maintenance', 'disposed'];
+const DEPRECIATION_METHODS = ['straight-line', 'reducing-balance', 'none'];
+const MAINTENANCE_TYPES = ['preventive', 'corrective', 'inspection', 'emergency'];
+const PAYMENT_METHOD_OPTIONS = [
+  { value: 'cash', label: 'Cash' },
+  { value: 'bank', label: 'Bank Transfer' },
+  { value: 'cheque', label: 'Cheque' },
+  { value: 'online', label: 'Online' },
+];
+const EXPENSE_STATUSES = [
+  { value: 'paid', label: 'Paid' },
+  { value: 'pending', label: 'Pending' },
+];
+
+function titleLabel(value) {
+  return String(value || '').split('-').filter(Boolean).map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+}
+
+function optionList(values) {
+  return values.map((value) => ({ value, label: titleLabel(value) }));
+}
+
+function postedMoney(record, kind) {
+  if (!record) return { accountId: null, amount: 0 };
+  if (kind === 'expense') {
+    if ((record.expenseStatus || 'paid') === 'pending') return { accountId: null, amount: 0 };
+    return { accountId: partyId(record.paidFromAccountId), amount: Number(record.expenseAmount) || 0 };
+  }
+  if (kind === 'asset') {
+    return { accountId: partyId(record.accountId), amount: Number(record.purchaseCostAmount) || 0 };
+  }
+  return { accountId: partyId(record.accountId), amount: Number(record.maintenanceCostAmount) || 0 };
+}
+
+async function pendingMoneyFor(accountId) {
+  let outflow = 0;
+  const apply = (row, kind) => {
+    const current = postedMoney(rowRecord(row), kind);
+    const baseline = row.syncStatus === 'synced' ? current : postedMoney(row.moneyBaseline, kind);
+    const currentHit = sameParty(current.accountId, accountId) ? current.amount : 0;
+    const baseHit = sameParty(baseline.accountId, accountId) ? baseline.amount : 0;
+    outflow += currentHit - baseHit;
+  };
+  for (const row of await allExpenses()) apply(row, 'expense');
+  for (const row of await allAssets()) apply(row, 'asset');
+  for (const row of await allMaintenanceRecords()) apply(row, 'maintenance');
+  return roundMoney(outflow);
+}
+
+async function adjustAccountMoney(items) {
+  if (!Array.isArray(items)) return items;
+  const known = new Map();
+  const next = [];
+  for (const item of items) {
+    if (!item?._id || item.currentBalanceAmount == null) {
+      next.push(item);
+      continue;
+    }
+    const key = String(item._id);
+    if (!known.has(key)) known.set(key, await pendingMoneyFor(item._id));
+    const pending = known.get(key);
+    next.push(pending ? { ...item, currentBalanceAmount: roundMoney((Number(item.currentBalanceAmount) || 0) - pending) } : item);
+  }
+  return next;
+}
+
+async function lookupAccountBalance(accountId) {
+  const local = await findAccount(accountId);
+  if (local && rowRecord(local).currentBalanceAmount != null) {
+    return Number(rowRecord(local).currentBalanceAmount) || 0;
+  }
+  const snaps = await db.snapshots.toArray();
+  for (const snap of snaps) {
+    const data = snap.envelope?.data;
+    const lists = [data?.items, data?.accounts, data?.parentAccounts].filter(Array.isArray);
+    if (data?.accountCode && sameParty(data._id, accountId) && data.currentBalanceAmount != null) {
+      return Number(data.currentBalanceAmount) || 0;
+    }
+    for (const list of lists) {
+      const match = list.find((item) => sameParty(item?._id, accountId) && item.currentBalanceAmount != null);
+      if (match) return Number(match.currentBalanceAmount) || 0;
+    }
+  }
+  return null;
+}
+
+async function assertAccountFunds(accountId, amount) {
+  if (!accountId || !(Number(amount) > 0)) return;
+  const balance = await lookupAccountBalance(accountId);
+  if (balance == null) return;
+  const pending = await pendingMoneyFor(accountId);
+  if (balance - pending + 0.001 < Number(amount)) {
+    throw offlineReject('Account does not have enough balance.');
+  }
+}
+
+async function accountDependency(dependsOn, accountId) {
+  const next = [...(dependsOn || [])];
+  if (!isLocalId(accountId)) return next;
+  const account = await findAccount(accountId);
+  if (!account) throw offlineReject('Select an account saved on this computer.');
+  const createOp = await pendingCreate('account', account.localId);
+  if (createOp && !next.includes(createOp.operationId)) next.push(createOp.operationId);
+  return next;
+}
+
+function moneyBaselineFrom(record, kind) {
+  const posted = postedMoney(record, kind);
+  if (kind === 'expense') {
+    return {
+      expenseStatus: posted.accountId ? 'paid' : 'pending',
+      paidFromAccountId: posted.accountId,
+      expenseAmount: posted.amount,
+    };
+  }
+  if (kind === 'asset') {
+    return { accountId: posted.accountId, purchaseCostAmount: posted.amount };
+  }
+  return { accountId: posted.accountId, maintenanceCostAmount: posted.amount };
+}
+
+async function cachedListItems(path) {
+  const snaps = await db.snapshots.toArray();
+  const items = [];
+  const seen = new Set();
+  for (const snap of snaps) {
+    if (snap.path !== path) continue;
+    for (const item of snap.envelope?.data?.items || []) {
+      if (!item?._id || seen.has(String(item._id))) continue;
+      seen.add(String(item._id));
+      items.push(item);
+    }
+  }
+  return items;
+}
+
+function unionWithCache(localRows, cachedItems) {
+  const covered = new Set();
+  for (const row of localRows) {
+    if (row.serverId) covered.add(String(row.serverId));
+    const recordId = rowRecord(row)._id;
+    if (recordId) covered.add(String(recordId));
+  }
+  const extras = cachedItems
+    .filter((item) => item?._id && !covered.has(String(item._id)))
+    .map((item) => ({ record: item, syncStatus: 'synced' }));
+  return [...localRows, ...extras];
+}
+
+function sortOfflineFirst(records, numberField) {
+  return [...records].sort((left, right) => {
+    const leftOffline = isProvisionalRecord(left, numberField);
+    const rightOffline = isProvisionalRecord(right, numberField);
+    if (leftOffline !== rightOffline) return leftOffline ? -1 : 1;
+    return new Date(right.updatedAt || right.createdAt || 0).getTime()
+      - new Date(left.updatedAt || left.createdAt || 0).getTime();
+  });
+}
+
+function isProvisionalRecord(record, numberField) {
+  return record?.provisional === true
+    || record?.syncStatus === 'pending'
+    || record?.syncStatus === 'failed'
+    || String(record?.[numberField] || '').startsWith('OFF-')
+    || String(record?._id || '').startsWith('local_');
+}
+
+async function accountChoices() {
+  const local = (await allAccounts()).map((row) => accountOption(rowRecord(row)));
+  const cached = await cachedListItems('/accounts');
+  const seen = new Set(local.map((item) => String(item._id)));
+  return [...local, ...cached.filter((item) => item?._id && !seen.has(String(item._id))).map((item) => accountOption(item))];
+}
+
+async function employeeChoices() {
+  const local = (await allEmployees()).map((row) => {
+    const record = rowRecord(row);
+    return {
+      _id: record._id,
+      employeeCode: record.employeeCode,
+      fullName: record.fullName,
+      jobTitle: record.jobTitle || '',
+      label: `${record.employeeCode} – ${record.fullName}`,
+    };
+  });
+  const seen = new Set(local.map((item) => String(item._id)));
+  const cached = await cachedListItems('/employees');
+  return [
+    ...local,
+    ...cached.filter((item) => item?._id && !seen.has(String(item._id))).map((item) => ({
+      _id: item._id,
+      employeeCode: item.employeeCode,
+      fullName: item.fullName,
+      jobTitle: item.jobTitle || '',
+      label: `${item.employeeCode} – ${item.fullName}`,
+    })),
+  ];
+}
+
+async function expenseCategoryChoices() {
+  const snaps = await db.snapshots.toArray();
+  const items = [];
+  const seen = new Set();
+  for (const snap of snaps) {
+    const lists = snap.path === '/expenses/form-options'
+      ? snap.envelope?.data?.categories
+      : snap.path === '/expenses'
+        ? snap.envelope?.data?.meta?.categories
+        : snap.path === '/expense-categories'
+          ? snap.envelope?.data?.items
+          : null;
+    for (const item of lists || []) {
+      const id = item?._id;
+      if (!id || seen.has(String(id))) continue;
+      seen.add(String(id));
+      items.push({
+        _id: id,
+        categoryCode: item.categoryCode || '',
+        categoryName: item.categoryName || item.label || '',
+        label: item.categoryName || item.label || '',
+      });
+    }
+  }
+  return items;
+}
+
+async function assetFormOptionsData() {
+  return {
+    nextAssetCode: 'Assigned when synced',
+    assetCategories: optionList(ASSET_CATEGORIES),
+    assetStatuses: optionList(ASSET_STATUSES),
+    depreciationMethods: optionList(DEPRECIATION_METHODS),
+    paymentMethods: PAYMENT_METHOD_OPTIONS,
+    employees: await employeeChoices(),
+    accounts: await adjustAccountMoney(await accountChoices()),
+  };
+}
+
+async function expenseFormOptionsData() {
+  return {
+    nextExpenseNumber: 'Assigned when synced',
+    statuses: EXPENSE_STATUSES,
+    paymentMethods: PAYMENT_METHOD_OPTIONS,
+    categories: await expenseCategoryChoices(),
+    accounts: await adjustAccountMoney(await accountChoices()),
+  };
+}
+
+async function maintenanceFormOptionsData() {
+  const assets = (await unionWithCache(await allAssets(), await cachedListItems('/assets')))
+    .map(rowRecord)
+    .filter((asset) => asset.assetStatus !== 'disposed')
+    .map((asset) => ({
+      _id: asset._id,
+      assetCode: asset.assetCode,
+      assetName: asset.assetName,
+      assetCategory: asset.assetCategory,
+      assetStatus: asset.assetStatus,
+      locationName: asset.locationName || '',
+      serialNumber: asset.serialNumber || null,
+      label: `${asset.assetCode} – ${asset.assetName}`,
+    }));
+  return {
+    nextMaintenanceNumber: 'Assigned when synced',
+    maintenanceTypes: optionList(MAINTENANCE_TYPES),
+    paymentMethods: PAYMENT_METHOD_OPTIONS,
+    assets,
+    employees: await employeeChoices(),
+    accounts: await adjustAccountMoney(await accountChoices()),
+  };
+}
+
+function assertAssetPayload(payload) {
+  if (String(payload.assetName || '').trim().length < 2) throw offlineReject('Asset name must contain at least 2 characters.');
+  if (!ASSET_CATEGORIES.includes(payload.assetCategory)) throw offlineReject('Select an asset category.');
+  if (!DEPRECIATION_METHODS.includes(payload.depreciationMethod || 'none') && payload.depreciationMethod) {
+    throw offlineReject('Select a depreciation method.');
+  }
+  if (!(Number(payload.purchaseCostAmount) >= 0)) throw offlineReject('Enter a purchase cost.');
+  const book = payload.currentBookValueAmount == null || payload.currentBookValueAmount === ''
+    ? Number(payload.purchaseCostAmount) || 0
+    : Number(payload.currentBookValueAmount) || 0;
+  if (book > (Number(payload.purchaseCostAmount) || 0) + 0.001) {
+    throw offlineReject('Book value cannot exceed the purchase cost.');
+  }
+  if (!payload.accountId) throw offlineReject('Select an account.');
+}
+
+async function assertAssetSerial(payload, ignoreLocalId) {
+  const serial = String(payload.serialNumber || '').trim();
+  if (!serial) return;
+  const self = ignoreLocalId ? await findAsset(ignoreLocalId) : null;
+  const ignore = new Set([String(self?.serverId || ''), String(rowRecord(self)._id || '')]);
+  for (const row of await allAssets()) {
+    if (ignoreLocalId && row.localId === ignoreLocalId) continue;
+    if (String(rowRecord(row).serialNumber || '') === serial) {
+      throw offlineReject(`Serial number already exists on ${rowRecord(row).assetCode || 'another asset'}.`);
+    }
+  }
+  for (const item of await cachedListItems('/assets')) {
+    if (ignore.has(String(item._id))) continue;
+    if (String(item.serialNumber || '') === serial) {
+      throw offlineReject(`Serial number already exists on ${item.assetCode || 'another asset'}.`);
+    }
+  }
+}
+
+function buildAssetRecord(payload, localId, existing) {
+  const previous = existing ? rowRecord(existing) : {};
+  const now = new Date().toISOString();
+  const purchase = roundMoney(payload.purchaseCostAmount ?? previous.purchaseCostAmount ?? 0);
+  const book = payload.currentBookValueAmount == null || payload.currentBookValueAmount === ''
+    ? purchase
+    : roundMoney(payload.currentBookValueAmount);
+  const employeeId = partyId(payload.assignedEmployeeId ?? previous.assignedEmployeeId);
+  const accountId = partyId(payload.accountId ?? previous.accountId);
+  return {
+    _id: previous._id || localId,
+    assetCode: previous.assetCode || `OFF-${String(localId).slice(-6).toUpperCase()}`,
+    assetName: String(payload.assetName ?? previous.assetName ?? '').trim(),
+    assetCategory: payload.assetCategory ?? previous.assetCategory,
+    manufacturerName: payload.manufacturerName ?? previous.manufacturerName ?? '',
+    modelNumber: payload.modelNumber ?? previous.modelNumber ?? '',
+    serialNumber: String(payload.serialNumber ?? previous.serialNumber ?? '').trim() || null,
+    purchaseDate: payload.purchaseDate ?? previous.purchaseDate ?? null,
+    purchaseCostAmount: purchase,
+    paymentMethod: payload.paymentMethod || previous.paymentMethod || 'cash',
+    accountId,
+    locationName: payload.locationName ?? previous.locationName ?? '',
+    assignedEmployeeId: employeeId,
+    depreciationMethod: payload.depreciationMethod || previous.depreciationMethod || 'none',
+    currentBookValueAmount: book,
+    assetStatus: payload.assetStatus || previous.assetStatus || 'in-use',
+    provisional: true,
+    syncStatus: 'pending',
+    createdAt: previous.createdAt || now,
+    updatedAt: now,
+  };
+}
+
+export async function queueAssetCreate(payload) {
+  assertAssetPayload(payload);
+  await assertAssetSerial(payload);
+  await assertAccountFunds(payload.accountId, payload.purchaseCostAmount);
+  const localId = newLocalId();
+  const record = buildAssetRecord(payload, localId);
+  const employee = payload.assignedEmployeeId ? await findEmployee(payload.assignedEmployeeId) : null;
+  if (employee) record.assignedEmployeeName = rowRecord(employee).fullName;
+  const account = payload.accountId ? await findAccount(payload.accountId) : null;
+  if (account) record.accountName = rowRecord(account).accountName;
+  const serverPayload = { ...payload };
+  delete serverPayload.assetCode;
+  if (!serverPayload.serialNumber) serverPayload.serialNumber = null;
+  await db.assets.put({
+    localId,
+    serverId: '',
+    syncStatus: 'pending',
+    origin: 'local',
+    record,
+    updatedAt: record.updatedAt,
+  });
+  let dependsOn = await accountDependency([], payload.accountId);
+  dependsOn = await withEmployeeDependency(dependsOn, payload.assignedEmployeeId);
+  await enqueue({ entity: 'asset', action: 'create', localId, payload: serverPayload, dependsOn });
+  return envelope('Asset saved on this computer', record);
+}
+
+export async function queueAssetUpdate(id, payload) {
+  const existing = await findAsset(id);
+  if (!existing) throw offlineReject('Asset is not on this computer yet.');
+  const merged = { ...rowRecord(existing), ...payload };
+  assertAssetPayload(merged);
+  await assertAssetSerial(merged, existing.localId);
+  const baseline = existing.moneyBaseline || (existing.syncStatus === 'synced' ? moneyBaselineFrom(rowRecord(existing), 'asset') : null);
+  const extra = roundMoney((Number(merged.purchaseCostAmount) || 0) - (Number(baseline?.purchaseCostAmount) || 0));
+  if (sameParty(merged.accountId, baseline?.accountId) && extra > 0) {
+    await assertAccountFunds(merged.accountId, extra);
+  } else if (!sameParty(merged.accountId, baseline?.accountId)) {
+    await assertAccountFunds(merged.accountId, merged.purchaseCostAmount);
+  }
+  const record = buildAssetRecord(merged, existing.localId, existing);
+  const employee = merged.assignedEmployeeId ? await findEmployee(merged.assignedEmployeeId) : null;
+  if (employee) record.assignedEmployeeName = rowRecord(employee).fullName;
+  const account = merged.accountId ? await findAccount(merged.accountId) : null;
+  if (account) record.accountName = rowRecord(account).accountName;
+  await db.assets.put({
+    ...existing,
+    moneyBaseline: baseline,
+    syncStatus: 'pending',
+    record,
+    updatedAt: record.updatedAt,
+  });
+  const serverPayload = { ...payload };
+  delete serverPayload.assetCode;
+  const createOp = await pendingCreate('asset', existing.localId);
+  if (createOp) {
+    createOp.payload = { ...createOp.payload, ...serverPayload };
+    delete createOp.payload.assetCode;
+    createOp.dependsOn = await withEmployeeDependency(await accountDependency(createOp.dependsOn, merged.accountId), merged.assignedEmployeeId);
+    createOp.status = 'pending';
+    createOp.updatedAt = new Date().toISOString();
+    await db.queue.put(createOp);
+  } else if (existing.serverId) {
+    await enqueue({
+      entity: 'asset',
+      action: 'update',
+      localId: existing.localId,
+      payload: serverPayload,
+      dependsOn: await withEmployeeDependency(await accountDependency([], merged.accountId), merged.assignedEmployeeId),
+    });
+  }
+  emitSync();
+  return envelope('Asset updated on this computer', record);
+}
+
+function expenseStatusOf(payload, previous = {}) {
+  if (payload.expenseStatus) return payload.expenseStatus;
+  if (payload.isApproved === false) return 'pending';
+  if (payload.isApproved === true) return 'paid';
+  return previous.expenseStatus || 'pending';
+}
+
+function assertExpensePayload(payload) {
+  if (!payload.expenseCategoryId) throw offlineReject('Select a category.');
+  if (!payload.expenseDate) throw offlineReject('Select an expense date.');
+  if (!(Number(payload.expenseAmount) > 0)) throw offlineReject('Enter an amount greater than 0.');
+  if (String(payload.expenseDescription || '').trim().length < 2) throw offlineReject('Enter an expense description.');
+  const status = expenseStatusOf(payload);
+  if (status !== 'pending' && !payload.paidFromAccountId && !payload.accountId) {
+    throw offlineReject('Select the account this expense was paid from.');
+  }
+}
+
+function buildExpenseRecord(payload, localId, existing, category) {
+  const previous = existing ? rowRecord(existing) : {};
+  const now = new Date().toISOString();
+  const status = expenseStatusOf(payload, previous);
+  const accountId = partyId(payload.paidFromAccountId ?? payload.accountId ?? previous.paidFromAccountId);
+  return {
+    _id: previous._id || localId,
+    expenseNumber: previous.expenseNumber || `OFF-${String(localId).slice(-6).toUpperCase()}`,
+    expenseCategoryId: payload.expenseCategoryId || previous.expenseCategoryId,
+    categoryName: category?.categoryName || previous.categoryName || '',
+    categoryCode: category?.categoryCode || previous.categoryCode || '',
+    expenseDate: payload.expenseDate || previous.expenseDate,
+    expenseDescription: String(payload.expenseDescription ?? previous.expenseDescription ?? '').trim(),
+    vendorPayeeName: payload.vendorPayeeName ?? previous.vendorPayeeName ?? '',
+    expenseAmount: roundMoney(payload.expenseAmount ?? previous.expenseAmount ?? 0),
+    paymentMethod: payload.paymentMethod || previous.paymentMethod || 'cash',
+    paymentMethodLabel: PAYMENT_METHOD_OPTIONS.find((item) => item.value === (payload.paymentMethod || previous.paymentMethod))?.label || '',
+    paidFromAccountId: accountId,
+    paidFromAccountName: previous.paidFromAccountName || '',
+    referenceNumber: payload.referenceNumber ?? previous.referenceNumber ?? '',
+    paymentDate: payload.paymentDate ?? previous.paymentDate ?? (status === 'paid' ? (payload.expenseDate || previous.expenseDate) : null),
+    expenseStatus: status,
+    expenseStatusLabel: EXPENSE_STATUSES.find((item) => item.value === status)?.label || titleLabel(status),
+    isApproved: status === 'paid',
+    remarks: payload.remarks ?? previous.remarks ?? '',
+    provisional: true,
+    syncStatus: 'pending',
+    createdAt: previous.createdAt || now,
+    updatedAt: now,
+  };
+}
+
+export async function queueExpenseCreate(payload) {
+  assertExpensePayload(payload);
+  const status = expenseStatusOf(payload);
+  const accountId = payload.paidFromAccountId || payload.accountId;
+  if (status !== 'pending') await assertAccountFunds(accountId, payload.expenseAmount);
+  const categories = await expenseCategoryChoices();
+  const category = categories.find((item) => sameParty(item._id, payload.expenseCategoryId));
+  const localId = newLocalId();
+  const record = buildExpenseRecord(payload, localId, null, category);
+  const serverPayload = { ...payload, expenseStatus: status };
+  delete serverPayload.expenseNumber;
+  await db.expenses.put({
+    localId,
+    serverId: '',
+    syncStatus: 'pending',
+    origin: 'local',
+    record,
+    updatedAt: record.updatedAt,
+  });
+  await enqueue({
+    entity: 'expense',
+    action: 'create',
+    localId,
+    payload: serverPayload,
+    dependsOn: await accountDependency([], accountId),
+  });
+  return envelope('Expense saved on this computer', record);
+}
+
+export async function queueExpenseUpdate(id, payload) {
+  const existing = await findExpense(id);
+  if (!existing) throw offlineReject('Expense is not on this computer yet.');
+  const merged = { ...rowRecord(existing), ...payload };
+  assertExpensePayload(merged);
+  const status = expenseStatusOf(merged, rowRecord(existing));
+  const accountId = merged.paidFromAccountId || merged.accountId;
+  const baseline = existing.moneyBaseline || (existing.syncStatus === 'synced' ? moneyBaselineFrom(rowRecord(existing), 'expense') : null);
+  const nextAmount = status === 'pending' ? 0 : Number(merged.expenseAmount) || 0;
+  const baseAmount = Number(baseline?.expenseAmount) || 0;
+  if (sameParty(accountId, baseline?.paidFromAccountId) && nextAmount > baseAmount) {
+    await assertAccountFunds(accountId, nextAmount - baseAmount);
+  } else if (!sameParty(accountId, baseline?.paidFromAccountId) && nextAmount > 0) {
+    await assertAccountFunds(accountId, nextAmount);
+  }
+  const categories = await expenseCategoryChoices();
+  const category = categories.find((item) => sameParty(item._id, merged.expenseCategoryId));
+  const record = buildExpenseRecord(merged, existing.localId, existing, category);
+  await db.expenses.put({
+    ...existing,
+    moneyBaseline: baseline,
+    syncStatus: 'pending',
+    record,
+    updatedAt: record.updatedAt,
+  });
+  const serverPayload = { ...payload, expenseStatus: status };
+  delete serverPayload.expenseNumber;
+  const createOp = await pendingCreate('expense', existing.localId);
+  if (createOp) {
+    createOp.payload = { ...createOp.payload, ...serverPayload };
+    delete createOp.payload.expenseNumber;
+    createOp.dependsOn = await accountDependency(createOp.dependsOn, accountId);
+    createOp.status = 'pending';
+    createOp.updatedAt = new Date().toISOString();
+    await db.queue.put(createOp);
+  } else if (existing.serverId) {
+    await enqueue({
+      entity: 'expense',
+      action: 'update',
+      localId: existing.localId,
+      payload: serverPayload,
+      dependsOn: await accountDependency([], accountId),
+    });
+  }
+  emitSync();
+  return envelope('Expense updated on this computer', record);
+}
+
+function assertMaintenancePayload(payload) {
+  if (!payload.assetId) throw offlineReject('Select an asset.');
+  if (!MAINTENANCE_TYPES.includes(payload.maintenanceType)) throw offlineReject('Select a maintenance type.');
+  if (!payload.maintenanceDate) throw offlineReject('Select a maintenance date.');
+  if (!payload.performedByEmployeeId) throw offlineReject('Select the employee who did the work.');
+  if (!(Number(payload.maintenanceCostAmount) >= 0)) throw offlineReject('Enter a maintenance cost.');
+  if (Number(payload.maintenanceCostAmount) > 0 && !payload.accountId) throw offlineReject('Select an account.');
+  if (payload.nextMaintenanceDate && payload.maintenanceDate && new Date(payload.nextMaintenanceDate) < new Date(payload.maintenanceDate)) {
+    throw offlineReject('The next maintenance date cannot be before the maintenance date.');
+  }
+}
+
+function buildMaintenanceRecord(payload, localId, existing, asset, employee) {
+  const previous = existing ? rowRecord(existing) : {};
+  const now = new Date().toISOString();
+  const assetRecord = asset ? rowRecord(asset) : (typeof previous.assetId === 'object' ? previous.assetId : null);
+  return {
+    _id: previous._id || localId,
+    maintenanceNumber: previous.maintenanceNumber || `OFF-${String(localId).slice(-6).toUpperCase()}`,
+    assetId: assetRecord ? {
+      _id: assetRecord._id,
+      assetCode: assetRecord.assetCode,
+      assetName: assetRecord.assetName,
+      assetCategory: assetRecord.assetCategory,
+      assetStatus: assetRecord.assetStatus,
+    } : (payload.assetId || previous.assetId),
+    maintenanceType: payload.maintenanceType || previous.maintenanceType,
+    maintenanceDate: payload.maintenanceDate || previous.maintenanceDate || now,
+    problemDescription: payload.problemDescription ?? previous.problemDescription ?? '',
+    workPerformed: payload.workPerformed ?? previous.workPerformed ?? '',
+    maintenanceCostAmount: roundMoney(payload.maintenanceCostAmount ?? previous.maintenanceCostAmount ?? 0),
+    paymentMethod: payload.paymentMethod || previous.paymentMethod || 'cash',
+    accountId: partyId(payload.accountId ?? previous.accountId),
+    nextMaintenanceDate: payload.nextMaintenanceDate ?? previous.nextMaintenanceDate ?? null,
+    performedByEmployeeId: employee ? {
+      _id: rowRecord(employee)._id,
+      employeeCode: rowRecord(employee).employeeCode,
+      fullName: rowRecord(employee).fullName,
+    } : (payload.performedByEmployeeId || previous.performedByEmployeeId),
+    provisional: true,
+    syncStatus: 'pending',
+    createdAt: previous.createdAt || now,
+    updatedAt: now,
+  };
+}
+
+export async function queueMaintenanceCreate(payload) {
+  assertMaintenancePayload(payload);
+  const asset = await findAsset(payload.assetId);
+  if (!asset && isLocalId(payload.assetId)) throw offlineReject('Select an asset saved on this computer.');
+  const assetRecord = asset ? rowRecord(asset) : null;
+  if (assetRecord?.assetStatus === 'disposed') throw offlineReject('Asset is disposed.');
+  if (Number(payload.maintenanceCostAmount) > 0) await assertAccountFunds(payload.accountId, payload.maintenanceCostAmount);
+  const employee = await findEmployee(payload.performedByEmployeeId);
+  const localId = newLocalId();
+  const record = buildMaintenanceRecord(payload, localId, null, asset, employee);
+  const serverPayload = { ...payload };
+  delete serverPayload.maintenanceNumber;
+  delete serverPayload.maintenanceAssetId;
+  await db.maintenanceRecords.put({
+    localId,
+    serverId: '',
+    syncStatus: 'pending',
+    origin: 'local',
+    record,
+    updatedAt: record.updatedAt,
+  });
+  if (asset && ['corrective', 'emergency'].includes(payload.maintenanceType) && rowRecord(asset).assetStatus === 'in-use') {
+    const nextAsset = { ...rowRecord(asset), assetStatus: 'under-maintenance' };
+    await db.assets.put({ ...asset, record: nextAsset, updatedAt: new Date().toISOString() });
+    const createOp = await pendingCreate('asset', asset.localId);
+    if (createOp) {
+      createOp.payload = { ...createOp.payload, assetStatus: 'under-maintenance' };
+      await db.queue.put(createOp);
+    }
+  }
+  let dependsOn = await accountDependency([], payload.accountId);
+  dependsOn = await withEmployeeDependency(dependsOn, payload.performedByEmployeeId);
+  if (isLocalId(payload.assetId)) {
+    const createOp = await pendingCreate('asset', asset?.localId || payload.assetId);
+    if (createOp) dependsOn.push(createOp.operationId);
+  }
+  await enqueue({ entity: 'maintenance', action: 'create', localId, payload: serverPayload, dependsOn });
+  return envelope('Maintenance record saved on this computer', record);
+}
+
+export async function queueMaintenanceUpdate(id, payload) {
+  const existing = await findMaintenance(id);
+  if (!existing) throw offlineReject('This maintenance record is not on this computer yet.');
+  const merged = { ...rowRecord(existing), ...payload, assetId: partyId(payload.assetId || rowRecord(existing).assetId), performedByEmployeeId: partyId(payload.performedByEmployeeId || rowRecord(existing).performedByEmployeeId), accountId: partyId(payload.accountId || rowRecord(existing).accountId) };
+  assertMaintenancePayload(merged);
+  const baseline = existing.moneyBaseline || (existing.syncStatus === 'synced' ? moneyBaselineFrom(rowRecord(existing), 'maintenance') : null);
+  const nextAmount = Number(merged.maintenanceCostAmount) || 0;
+  const baseAmount = Number(baseline?.maintenanceCostAmount) || 0;
+  if (sameParty(merged.accountId, baseline?.accountId) && nextAmount > baseAmount) {
+    await assertAccountFunds(merged.accountId, nextAmount - baseAmount);
+  } else if (!sameParty(merged.accountId, baseline?.accountId) && nextAmount > 0) {
+    await assertAccountFunds(merged.accountId, nextAmount);
+  }
+  const asset = await findAsset(merged.assetId);
+  const employee = await findEmployee(merged.performedByEmployeeId);
+  const record = buildMaintenanceRecord(merged, existing.localId, existing, asset, employee);
+  await db.maintenanceRecords.put({
+    ...existing,
+    moneyBaseline: baseline,
+    syncStatus: 'pending',
+    record,
+    updatedAt: record.updatedAt,
+  });
+  const serverPayload = { ...payload };
+  delete serverPayload.maintenanceNumber;
+  delete serverPayload.maintenanceAssetId;
+  const createOp = await pendingCreate('maintenance', existing.localId);
+  if (createOp) {
+    createOp.payload = { ...createOp.payload, ...serverPayload };
+    delete createOp.payload.maintenanceNumber;
+    createOp.status = 'pending';
+    createOp.updatedAt = new Date().toISOString();
+    await db.queue.put(createOp);
+  } else if (existing.serverId) {
+    await enqueue({
+      entity: 'maintenance',
+      action: 'update',
+      localId: existing.localId,
+      payload: serverPayload,
+      dependsOn: await withEmployeeDependency(await accountDependency([], merged.accountId), merged.performedByEmployeeId),
+    });
+  }
+  emitSync();
+  return envelope('Maintenance record updated on this computer', record);
+}
+
 function accountOption(record) {
   return {
     _id: record._id,
@@ -1744,6 +2464,71 @@ const RECEIPT_STATUSES = [
   { value: 'confirmed', label: 'Confirmed' },
 ];
 
+function filterAssets(rows, params) {
+  const search = String(params.search || '').trim().toLowerCase();
+  return rows.filter((row) => {
+    const record = rowRecord(row);
+    if (params.assetCategory && record.assetCategory !== params.assetCategory) return false;
+    if (params.assetStatus && record.assetStatus !== params.assetStatus) return false;
+    if (params.assignedEmployeeId && !sameParty(partyId(record.assignedEmployeeId), params.assignedEmployeeId)) return false;
+    if (!search) return true;
+    return [record.assetCode, record.assetName, record.serialNumber, record.locationName, record.manufacturerName]
+      .join(' ').toLowerCase().includes(search);
+  });
+}
+
+function assetListSummary(records) {
+  const purchase = roundMoney(records.reduce((sum, asset) => sum + (Number(asset.purchaseCostAmount) || 0), 0));
+  const book = roundMoney(records.reduce((sum, asset) => sum + (Number(asset.currentBookValueAmount) || 0), 0));
+  return { totalAssetValue: purchase, totalDepreciation: roundMoney(purchase - book), netBookValue: book };
+}
+
+function filterExpenses(rows, params) {
+  const search = String(params.search || '').trim().toLowerCase();
+  const status = params.expenseStatus || params.status || '';
+  return rows.filter((row) => {
+    const record = rowRecord(row);
+    if (params.expenseCategoryId && !sameParty(record.expenseCategoryId, params.expenseCategoryId)) return false;
+    if (status && record.expenseStatus !== status) return false;
+    if (!search) return true;
+    return [record.expenseNumber, record.expenseDescription, record.vendorPayeeName, record.referenceNumber, record.remarks, record.categoryName]
+      .join(' ').toLowerCase().includes(search);
+  });
+}
+
+function expenseListSummary(records) {
+  const start = new Date();
+  start.setDate(1);
+  start.setHours(0, 0, 0, 0);
+  const month = records.filter((item) => new Date(item.expenseDate || 0) >= start);
+  const cards = new Map();
+  for (const item of month) {
+    const key = String(item.expenseCategoryId || item.categoryName || 'other');
+    const card = cards.get(key) || { expenseCategoryId: item.expenseCategoryId, categoryName: item.categoryName || 'Other', categoryCode: item.categoryCode || '', amount: 0, count: 0 };
+    card.amount = roundMoney(card.amount + (Number(item.expenseAmount) || 0));
+    card.count += 1;
+    cards.set(key, card);
+  }
+  return {
+    thisMonthTotalAmount: roundMoney(month.reduce((sum, item) => sum + (Number(item.expenseAmount) || 0), 0)),
+    thisMonthCount: month.length,
+    categoryCards: [...cards.values()].sort((left, right) => right.amount - left.amount),
+  };
+}
+
+function filterMaintenance(rows, params) {
+  const search = String(params.search || '').trim().toLowerCase();
+  return rows.filter((row) => {
+    const record = rowRecord(row);
+    const asset = typeof record.assetId === 'object' ? record.assetId : {};
+    if (params.maintenanceType && record.maintenanceType !== params.maintenanceType) return false;
+    if (params.assetId && !sameParty(partyId(record.assetId), params.assetId)) return false;
+    if (!search) return true;
+    return [record.maintenanceNumber, record.problemDescription, record.workPerformed, asset.assetName, asset.assetCode]
+      .join(' ').toLowerCase().includes(search);
+  });
+}
+
 function filterEmployees(rows, params) {
   const search = String(params.search || '').trim().toLowerCase();
   const department = params.departmentName || params.department || '';
@@ -2442,6 +3227,8 @@ async function withPendingParties(data) {
     const seen = new Set(data.accounts.map((account) => String(account._id)));
     next.accounts = [...pendingAccounts.filter((account) => !seen.has(String(account._id))), ...data.accounts];
   }
+  if (Array.isArray(next.accounts)) next.accounts = await adjustAccountMoney(next.accounts);
+  if (Array.isArray(next.parentAccounts)) next.parentAccounts = await adjustAccountMoney(next.parentAccounts);
   if (pendingAccounts.length && Array.isArray(data.parentAccounts)) {
     const seen = new Set(data.parentAccounts.map((account) => String(account._id)));
     next.parentAccounts = [...pendingAccounts.filter((account) => !seen.has(String(account._id))), ...data.parentAccounts];
@@ -2463,6 +3250,10 @@ async function withPendingParties(data) {
     const added = await pendingReceiptKg();
     const net = roundMoney(kg - added);
     if (net) Object.assign(next, applyTankKg(data, net));
+  }
+  if (data.accountCode && data.currentBalanceAmount != null && !Array.isArray(data.items)) {
+    const [adjusted] = await adjustAccountMoney([next]);
+    Object.assign(next, adjusted);
   }
   if (data.itemCode && data.itemCategory && data.currentQuantity != null && !Array.isArray(data.items)) {
     const [adjusted] = await adjustStock([data]);
@@ -2497,12 +3288,15 @@ async function outstandingForCustomer(customerId) {
 export async function serveGet(config) {
   const path = requestPath(config);
   const params = paramsOf(config);
-  const idMatch = path.match(/^\/(customers|suppliers|accounts|employees|sales|payments|filling-batches|lpg-receipts)\/([^/]+)$/);
+  const idMatch = path.match(/^\/(customers|suppliers|accounts|employees|sales|payments|filling-batches|lpg-receipts|assets|expenses|maintenance-records)\/([^/]+)$/);
   if (idMatch && idMatch[2] !== 'form-options') {
     const table = idMatch[1] === 'customers' ? await findCustomer(idMatch[2])
       : idMatch[1] === 'suppliers' ? await findSupplier(idMatch[2])
         : idMatch[1] === 'accounts' ? await findAccount(idMatch[2])
           : idMatch[1] === 'employees' ? await findEmployee(idMatch[2])
+          : idMatch[1] === 'assets' ? await findAsset(idMatch[2])
+            : idMatch[1] === 'expenses' ? await findExpense(idMatch[2])
+              : idMatch[1] === 'maintenance-records' ? await findMaintenance(idMatch[2])
           : idMatch[1] === 'sales' ? await findSale(idMatch[2])
             : idMatch[1] === 'filling-batches' ? await findFilling(idMatch[2])
               : idMatch[1] === 'lpg-receipts' ? await findReceipt(idMatch[2])
@@ -2511,6 +3305,15 @@ export async function serveGet(config) {
       const record = rowRecord(table);
       if (idMatch[1] === 'employees') {
         return envelope('Employee fetched', { ...record, form: employeeFormOptionsData() });
+      }
+      if (idMatch[1] === 'assets') {
+        return envelope('Asset fetched', { ...record, form: await assetFormOptionsData() });
+      }
+      if (idMatch[1] === 'expenses') {
+        return envelope('Expense fetched', { ...record, form: await expenseFormOptionsData() });
+      }
+      if (idMatch[1] === 'maintenance-records') {
+        return envelope('Maintenance record fetched', { ...record, form: await maintenanceFormOptionsData() });
       }
       return envelope('Saved on this computer', record);
     }
@@ -2690,6 +3493,41 @@ export async function serveGet(config) {
       meta: { departments: EMPLOYEE_DEPARTMENTS, statuses: EMPLOYEE_STATUSES },
     });
   }
+  if (path === '/assets') {
+    const records = sortOfflineFirst(
+      filterAssets(unionWithCache(await allAssets(), await cachedListItems('/assets')), params).map(rowRecord),
+      'assetCode',
+    );
+    return envelope('Assets fetched', {
+      ...paginate(records, params),
+      summary: assetListSummary(records),
+      meta: {
+        assetCategories: optionList(ASSET_CATEGORIES),
+        assetStatuses: optionList(ASSET_STATUSES),
+      },
+    });
+  }
+  if (path === '/expenses') {
+    const records = sortOfflineFirst(
+      filterExpenses(unionWithCache(await allExpenses(), await cachedListItems('/expenses')), params).map(rowRecord),
+      'expenseNumber',
+    );
+    return envelope('Expenses fetched', {
+      ...paginate(records, params),
+      summary: expenseListSummary(records),
+      meta: { statuses: EXPENSE_STATUSES, categories: await expenseCategoryChoices() },
+    });
+  }
+  if (path === '/maintenance-records') {
+    const records = sortOfflineFirst(
+      filterMaintenance(unionWithCache(await allMaintenanceRecords(), await cachedListItems('/maintenance-records')), params).map(rowRecord),
+      'maintenanceNumber',
+    );
+    return envelope('Maintenance records fetched', {
+      ...paginate(records, params),
+      meta: { maintenanceTypes: MAINTENANCE_TYPES },
+    });
+  }
   if (path === '/payments' && (await allPayments()).length) {
     const source = await allPayments();
     const rows = filterPayments(source, params).filter((row) => keepPaymentRow(row, source));
@@ -2722,6 +3560,15 @@ export async function serveGet(config) {
     if (path === '/employees/form-options') {
       return envelope('Employee form options fetched', employeeFormOptionsData());
     }
+    if (path === '/assets/form-options') {
+      return envelope('Asset form options fetched', await assetFormOptionsData());
+    }
+    if (path === '/expenses/form-options') {
+      return envelope('Expense form options fetched', await expenseFormOptionsData());
+    }
+    if (path === '/maintenance-records/form-options') {
+      return envelope('Maintenance form options fetched', await maintenanceFormOptionsData());
+    }
     return null;
   }
   const data = await withPendingParties(snap.envelope.data);
@@ -2733,6 +3580,23 @@ export async function serveGet(config) {
     const adjusted = path === '/filling-batches/form-options' ? await withTankReservation(data) : data;
     const withEmployees = await withPendingEmployees(adjusted);
     Object.assign(data, withEmployees);
+  }
+  if (path === '/assets/form-options' || path === '/expenses/form-options' || path === '/maintenance-records/form-options') {
+    const fresh = path === '/assets/form-options'
+      ? await assetFormOptionsData()
+      : path === '/expenses/form-options'
+        ? await expenseFormOptionsData()
+        : await maintenanceFormOptionsData();
+    data.employees = fresh.employees;
+    data.accounts = fresh.accounts;
+    if (fresh.categories) data.categories = fresh.categories;
+    if (fresh.assets) data.assets = fresh.assets;
+    data.assetCategories = data.assetCategories || fresh.assetCategories;
+    data.assetStatuses = data.assetStatuses || fresh.assetStatuses;
+    data.depreciationMethods = data.depreciationMethods || fresh.depreciationMethods;
+    data.paymentMethods = data.paymentMethods || fresh.paymentMethods;
+    data.statuses = data.statuses || fresh.statuses;
+    data.maintenanceTypes = data.maintenanceTypes || fresh.maintenanceTypes;
   }
   if (path === '/sales/form-options') {
     const pending = (await allCustomers()).filter((row) => row.syncStatus !== 'synced');
@@ -2761,6 +3625,18 @@ export async function serveWrite(config) {
   if (method === 'post' && path === '/employees') return queueEmployeeCreate(payload);
   if (method === 'patch' && /^\/employees\/[^/]+$/.test(path)) {
     return queueEmployeeUpdate(path.split('/')[2], payload);
+  }
+  if (method === 'post' && path === '/assets') return queueAssetCreate(payload);
+  if (method === 'patch' && /^\/assets\/[^/]+$/.test(path)) {
+    return queueAssetUpdate(path.split('/')[2], payload);
+  }
+  if (method === 'post' && path === '/expenses') return queueExpenseCreate(payload);
+  if (method === 'patch' && /^\/expenses\/[^/]+$/.test(path)) {
+    return queueExpenseUpdate(path.split('/')[2], payload);
+  }
+  if (method === 'post' && path === '/maintenance-records') return queueMaintenanceCreate(payload);
+  if (method === 'patch' && /^\/maintenance-records\/[^/]+$/.test(path)) {
+    return queueMaintenanceUpdate(path.split('/')[2], payload);
   }
   if (method === 'delete' && /^\/employees\/[^/]+$/.test(path)) {
     const existing = await findEmployee(path.split('/')[2]);
@@ -2791,6 +3667,20 @@ export async function serveWrite(config) {
     return queueSaleUpdate(path.split('/')[2], payload);
   }
   if (method === 'post' && path === '/payments') return queuePaymentCreate(payload);
+  if (method === 'delete' && /^\/(assets|expenses)\/[^/]+$/.test(path)) {
+    const id = path.split('/')[2];
+    const existing = path.startsWith('/assets/') ? await findAsset(id) : await findExpense(id);
+    if (!existing || existing.serverId) {
+      throw offlineReject('This action needs an internet connection. Nothing was saved.');
+    }
+    const table = path.startsWith('/assets/') ? db.assets : db.expenses;
+    const queue = await db.queue.toArray();
+    const related = queue.filter((item) => item.localId === existing.localId || (item.dependsOn || []).includes(existing.localId));
+    if (related.length) await db.queue.bulkDelete(related.map((item) => item.operationId));
+    await table.delete(existing.localId);
+    emitSync();
+    return envelope('Removed from this computer', { _id: existing.localId });
+  }
   throw offlineReject('This action needs an internet connection. Nothing was saved.');
 }
 
@@ -2808,6 +3698,24 @@ export async function mergePendingIntoResponse(config, payload) {
   if (path === '/storage-tanks/dashboard') {
     return { ...payload, data: await withTankActivity(payload.data) };
   }
+  if (path === '/assets/form-options' || path === '/expenses/form-options' || path === '/maintenance-records/form-options') {
+    const fresh = path === '/assets/form-options'
+      ? await assetFormOptionsData()
+      : path === '/expenses/form-options'
+        ? await expenseFormOptionsData()
+        : await maintenanceFormOptionsData();
+    return {
+      ...payload,
+      data: {
+        ...fresh,
+        ...payload.data,
+        employees: fresh.employees,
+        accounts: fresh.accounts,
+        ...(fresh.categories ? { categories: fresh.categories } : {}),
+        ...(fresh.assets ? { assets: fresh.assets } : {}),
+      },
+    };
+  }
   if (/^\/employees\/[^/]+$/.test(path)) {
     const local = await findEmployee(path.split('/')[2]);
     if (local && local.syncStatus !== 'synced') {
@@ -2818,7 +3726,7 @@ export async function mergePendingIntoResponse(config, payload) {
     }
   }
   const params = paramsOf(config);
-  if (!['/customers', '/suppliers', '/accounts', '/employees', '/sales', '/payments', '/filling-batches', '/lpg-receipts'].includes(path) || !Array.isArray(payload.data.items)) {
+  if (!['/customers', '/suppliers', '/accounts', '/employees', '/assets', '/expenses', '/maintenance-records', '/sales', '/payments', '/filling-batches', '/lpg-receipts'].includes(path) || !Array.isArray(payload.data.items)) {
     const data = await withPendingParties(payload.data);
     if (path === '/filling-batches/form-options' || path === '/lpg-receipts/form-options') {
       const adjusted = path === '/filling-batches/form-options' ? await withTankReservation(data) : data;
@@ -2830,6 +3738,9 @@ export async function mergePendingIntoResponse(config, payload) {
     : path === '/suppliers' ? filterSuppliers(await allSuppliers(), params)
       : path === '/accounts' ? filterAccounts(await allAccounts(), params)
         : path === '/employees' ? filterEmployees(await allEmployees(), params)
+        : path === '/assets' ? filterAssets(await allAssets(), params)
+          : path === '/expenses' ? filterExpenses(await allExpenses(), params)
+            : path === '/maintenance-records' ? filterMaintenance(await allMaintenanceRecords(), params)
         : path === '/sales' ? filterSales(await allSales(), params)
           : path === '/filling-batches' ? filterFillingBatches(await allFillingBatches(), params)
             : path === '/lpg-receipts' ? filterReceipts(await allLpgReceipts(), params)
@@ -2912,11 +3823,47 @@ export async function mergePendingIntoResponse(config, payload) {
   };
 }
 
+async function patchAccountBalance(accountId, delta) {
+  if (!accountId || !delta) return;
+  for (const row of await db.accounts.toArray()) {
+    if (!sameParty(row.serverId, accountId) && !sameParty(rowRecord(row)._id, accountId)) continue;
+    const record = rowRecord(row);
+    await db.accounts.put({
+      ...row,
+      record: {
+        ...record,
+        currentBalanceAmount: roundMoney((Number(record.currentBalanceAmount) || 0) + delta),
+      },
+    });
+  }
+  for (const snap of await db.snapshots.toArray()) {
+    const data = snap.envelope?.data;
+    if (!data) continue;
+    let changed = false;
+    const applyList = (list) => list.map((item) => {
+      if (!sameParty(item?._id, accountId) || item.currentBalanceAmount == null) return item;
+      changed = true;
+      return { ...item, currentBalanceAmount: roundMoney((Number(item.currentBalanceAmount) || 0) + delta) };
+    });
+    const next = { ...data };
+    if (Array.isArray(data.items)) next.items = applyList(data.items);
+    if (Array.isArray(data.accounts)) next.accounts = applyList(data.accounts);
+    if (data.accountCode && sameParty(data._id, accountId) && data.currentBalanceAmount != null) {
+      next.currentBalanceAmount = roundMoney((Number(data.currentBalanceAmount) || 0) + delta);
+      changed = true;
+    }
+    if (changed) await db.snapshots.put({ ...snap, envelope: { ...snap.envelope, data: next } });
+  }
+}
+
 export async function applyServerResult(localId, entity, serverRecord) {
   const table = entity === 'customer' ? db.customers
     : entity === 'supplier' ? db.suppliers
       : entity === 'account' ? db.accounts
         : entity === 'employee' ? db.employees
+        : entity === 'asset' ? db.assets
+          : entity === 'expense' ? db.expenses
+            : entity === 'maintenance' ? db.maintenanceRecords
         : entity === 'sale' ? db.sales
           : entity === 'fillingBatch' ? db.fillingBatches
             : entity === 'lpgReceipt' ? db.lpgReceipts
@@ -2937,9 +3884,17 @@ export async function applyServerResult(localId, entity, serverRecord) {
     updatedAt: new Date().toISOString(),
   };
   delete saved.stockBaseline;
+  delete saved.moneyBaseline;
   await table.put(saved);
   if (entity === 'fillingBatch') await patchInventoryForFill(fillBefore, serverRecord);
   if (entity === 'lpgReceipt') await patchTankKg(receiptBeforeKg - receiptGasKg(serverRecord));
+  if (entity === 'asset' || entity === 'expense' || entity === 'maintenance') {
+    const before = existing.moneyBaseline || null;
+    const previous = postedMoney(before, entity);
+    const nextPosted = postedMoney(serverRecord, entity);
+    if (previous.accountId && previous.amount) await patchAccountBalance(previous.accountId, previous.amount);
+    if (nextPosted.accountId && nextPosted.amount) await patchAccountBalance(nextPosted.accountId, -nextPosted.amount);
+  }
   if (entity === 'sale') {
     const payments = await allPayments();
     for (const payment of payments) {
@@ -3009,6 +3964,9 @@ export async function discardFailedOperation(operationId) {
     : row.entity === 'supplier' ? db.suppliers
       : row.entity === 'account' ? db.accounts
         : row.entity === 'employee' ? db.employees
+        : row.entity === 'asset' ? db.assets
+          : row.entity === 'expense' ? db.expenses
+            : row.entity === 'maintenance' ? db.maintenanceRecords
         : row.entity === 'sale' ? db.sales
           : row.entity === 'fillingBatch' ? db.fillingBatches
             : row.entity === 'lpgReceipt' ? db.lpgReceipts
@@ -3034,6 +3992,9 @@ export async function exportOfflineBackup() {
     suppliers: await db.suppliers.toArray(),
     accounts: await db.accounts.toArray(),
     employees: await db.employees.toArray(),
+    assets: await db.assets.toArray(),
+    expenses: await db.expenses.toArray(),
+    maintenanceRecords: await db.maintenanceRecords.toArray(),
     sales: await db.sales.toArray(),
     payments: await db.payments.toArray(),
     fillingBatches: await db.fillingBatches.toArray(),
@@ -3062,8 +4023,8 @@ export async function markSyncMeta(patch) {
 export function canQueueWrite(config) {
   const path = requestPath(config);
   const method = requestMethod(config);
-  if (method === 'post' && ['/customers', '/suppliers', '/accounts', '/employees', '/sales', '/payments', '/filling-batches', '/lpg-receipts'].includes(path)) return true;
-  if (method === 'patch' && /^\/(customers|suppliers|accounts|employees|sales|filling-batches|lpg-receipts)\/[^/]+$/.test(path)) return true;
+  if (method === 'post' && ['/customers', '/suppliers', '/accounts', '/employees', '/assets', '/expenses', '/maintenance-records', '/sales', '/payments', '/filling-batches', '/lpg-receipts'].includes(path)) return true;
+  if (method === 'patch' && /^\/(customers|suppliers|accounts|employees|assets|expenses|maintenance-records|sales|filling-batches|lpg-receipts)\/[^/]+$/.test(path)) return true;
   if (method === 'delete' && /^\/employees\/[^/]+$/.test(path)) return true;
   return false;
 }

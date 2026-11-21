@@ -30,6 +30,8 @@ async function resolveId(value) {
   if (receipt?.serverId) return receipt.serverId;
   const employee = await db.employees.get(value);
   if (employee?.serverId) return employee.serverId;
+  const asset = await db.assets.get(value);
+  if (asset?.serverId) return asset.serverId;
   return null;
 }
 
@@ -70,6 +72,26 @@ async function readyPayload(operation) {
     if (!resolved) return null;
     payload.receivedByEmployeeId = resolved;
   }
+  if (isLocalId(payload.paidFromAccountId)) {
+    const resolved = await resolveId(payload.paidFromAccountId);
+    if (!resolved) return null;
+    payload.paidFromAccountId = resolved;
+  }
+  if (isLocalId(payload.assignedEmployeeId)) {
+    const resolved = await resolveId(payload.assignedEmployeeId);
+    if (!resolved) return null;
+    payload.assignedEmployeeId = resolved;
+  }
+  if (isLocalId(payload.performedByEmployeeId)) {
+    const resolved = await resolveId(payload.performedByEmployeeId);
+    if (!resolved) return null;
+    payload.performedByEmployeeId = resolved;
+  }
+  if (isLocalId(payload.assetId)) {
+    const resolved = await resolveId(payload.assetId);
+    if (!resolved) return null;
+    payload.assetId = resolved;
+  }
   if (Array.isArray(payload.allocations)) {
     payload.allocations = [];
     for (const line of operation.payload.allocations) {
@@ -103,6 +125,10 @@ async function readyPayload(operation) {
   delete payload.supplierCode;
   delete payload.accountCode;
   delete payload.employeeCode;
+  delete payload.assetCode;
+  delete payload.expenseNumber;
+  delete payload.maintenanceNumber;
+  delete payload.maintenanceAssetId;
   delete payload.currentBalanceAmount;
   delete payload.batchNumber;
   delete payload.receiptNumber;
@@ -133,6 +159,24 @@ function requestFor(operation, serverId) {
   }
   if (operation.entity === 'employee' && operation.action === 'update') {
     return { method: 'patch', url: `/employees/${serverId}` };
+  }
+  if (operation.entity === 'asset' && operation.action === 'create') {
+    return { method: 'post', url: '/assets' };
+  }
+  if (operation.entity === 'asset' && operation.action === 'update') {
+    return { method: 'patch', url: `/assets/${serverId}` };
+  }
+  if (operation.entity === 'expense' && operation.action === 'create') {
+    return { method: 'post', url: '/expenses' };
+  }
+  if (operation.entity === 'expense' && operation.action === 'update') {
+    return { method: 'patch', url: `/expenses/${serverId}` };
+  }
+  if (operation.entity === 'maintenance' && operation.action === 'create') {
+    return { method: 'post', url: '/maintenance-records' };
+  }
+  if (operation.entity === 'maintenance' && operation.action === 'update') {
+    return { method: 'patch', url: `/maintenance-records/${serverId}` };
   }
   if (operation.entity === 'sale' && operation.action === 'create') {
     return { method: 'post', url: '/sales' };
@@ -175,6 +219,12 @@ async function sendOperation(operation) {
         ? await db.accounts.get(operation.localId)
         : operation.entity === 'employee'
           ? await db.employees.get(operation.localId)
+          : operation.entity === 'asset'
+            ? await db.assets.get(operation.localId)
+            : operation.entity === 'expense'
+              ? await db.expenses.get(operation.localId)
+              : operation.entity === 'maintenance'
+                ? await db.maintenanceRecords.get(operation.localId)
         : operation.entity === 'sale'
         ? await db.sales.get(operation.localId)
         : operation.entity === 'fillingBatch'

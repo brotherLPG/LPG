@@ -92,6 +92,7 @@ function MaintenanceRecords() {
             .padStart(2, "0")}/${nDate.getFullYear()}`
           : "-",
         performedBy: performedBy,
+        provisional: record.provisional === true || String(record.maintenanceNumber || "").startsWith("OFF-") || String(record._id || "").startsWith("local_"),
       };
     });
   }, [records]);
@@ -353,7 +354,9 @@ function MaintenanceRecords() {
               data={mappedRecords}
               ariaLabel="Maintenance Records Table"
               className=""
-              rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
+              rowClassName={(item) => (item.provisional
+                ? "sales-offline-row"
+                : "border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors")}
               emptyContent="No maintenance records match your search."
               pagination={true}
               rowsPerPage={pagination.limit || 10}
