@@ -930,7 +930,6 @@ export async function queueFillingCreate(payload) {
   const localId = newLocalId();
   const record = await buildFillingRecord(payload, localId);
   await assertFillingTank(record, localId);
-  await assertFillingInventory(record, localId);
   const serverPayload = { ...payload };
   delete serverPayload.batchNumber;
   await db.fillingBatches.put({
@@ -952,7 +951,6 @@ export async function queueFillingUpdate(id, payload) {
   assertFillingPayload({ ...rowRecord(existing), ...payload, lines: payload.lines || rowRecord(existing).lines });
   const record = await buildFillingRecord(payload, existing.localId, rowRecord(existing));
   await assertFillingTank(record, existing.localId);
-  await assertFillingInventory(record, existing.localId);
   const stockBaseline = existing.syncStatus === 'synced' && !existing.stockBaseline
     ? rowRecord(existing)
     : existing.stockBaseline || null;
@@ -1325,7 +1323,6 @@ async function pendingFillEffect() {
     const apply = (typeId, delta) => {
       if (!delta) return;
       filled.set(typeId, (filled.get(typeId) || 0) + delta);
-      empty.set(typeId, (empty.get(typeId) || 0) + delta);
     };
     for (const [typeId, count] of currentCounts) apply(typeId, count - (baselineCounts.get(typeId) || 0));
     for (const [typeId, count] of baselineCounts) {
@@ -1351,7 +1348,6 @@ function applyFillToItem(item, effect) {
   const typeId = cylinderTypeKey(item.cylinderTypeId);
   let delta = 0;
   if (item.itemCategory === 'filled-cylinder') delta = effect.filled.get(typeId) || 0;
-  if (item.itemCategory === 'empty-cylinder') delta = -(effect.empty.get(typeId) || 0);
   if (!delta) return item;
   const currentQuantity = roundMoney(Math.max(0, (Number(item.currentQuantity) || 0) + delta));
   return {
@@ -1489,29 +1485,6 @@ async function cachedInventoryItems() {
     }
   }
   return items;
-}
-
-async function assertFillingInventory(record, ignoreLocalId) {
-  if (record.batchStatus === 'pending') return;
-  const items = await cachedInventoryItems();
-  if (!items.length) return;
-  const effect = await pendingFillEffect();
-  const existing = ignoreLocalId ? await db.fillingBatches.get(ignoreLocalId) : null;
-  if (existing) {
-    for (const [typeId, count] of fillLineCounts(rowRecord(existing))) {
-      effect.empty.set(typeId, (effect.empty.get(typeId) || 0) - count);
-    }
-  }
-  for (const line of record.lines || []) {
-    const typeId = cylinderTypeKey(line.cylinderTypeId);
-    const empty = items.find((item) => item.itemCategory === 'empty-cylinder' && cylinderTypeKey(item.cylinderTypeId) === typeId);
-    if (!empty) continue;
-    const available = (Number(empty.currentQuantity) || 0) - (effect.empty.get(typeId) || 0);
-    if ((Number(line.cylinderCount) || 0) > available + 0.001) {
-      const name = line.cylinderTypeName || empty.itemName || 'this cylinder type';
-      throw offlineReject(`Not enough empty cylinders for ${name}.`);
-    }
-  }
 }
 
 function filterSales(rows, params) {
@@ -1709,7 +1682,7 @@ function shiftFilledStock(item, beforeCounts, afterCounts) {
   if (!typeId) return item;
   const delta = (afterCounts.get(typeId) || 0) - (beforeCounts.get(typeId) || 0);
   if (!delta) return item;
-  const sign = item.itemCategory === 'filled-cylinder' ? 1 : item.itemCategory === 'empty-cylinder' ? -1 : 0;
+  const sign = item.itemCategory === 'filled-cylinder' ? 1 : 0;
   if (!sign) return item;
   const currentQuantity = roundMoney(Math.max(0, (Number(item.currentQuantity) || 0) + sign * delta));
   return {
