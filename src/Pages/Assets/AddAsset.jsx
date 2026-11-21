@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreateAsset, useAssetFormOptions } from "../../queries/assets/assets.queries";
 import { useToast } from "../../utils/GlobalToast";
@@ -51,6 +51,24 @@ function AddAsset() {
   const [accountId, setAccountId] = useState("");
   const [assignedEmployeeId, setAssignedEmployeeId] = useState("");
   const [currentBookValueAmount, setCurrentBookValueAmount] = useState("");
+
+  const assetNameRef = useRef(null);
+  const assetCategoryRef = useRef(null);
+  const assetStatusRef = useRef(null);
+  const locationNameRef = useRef(null);
+  const purchaseCostRef = useRef(null);
+  const paymentMethodRef = useRef(null);
+  const accountRef = useRef(null);
+  const depreciationRef = useRef(null);
+
+  const handleKeyDown = (e, nextRef) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (nextRef && nextRef.current) {
+        nextRef.current.focus();
+      }
+    }
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -182,10 +200,13 @@ function AddAsset() {
                     Asset Name <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <input
+                    ref={assetNameRef}
                     type="text"
                     required
+                    autoFocus
                     value={assetName}
                     onChange={(e) => setAssetName(e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, assetCategoryRef)}
                     placeholder="e.g. Delivery truck"
                     className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
@@ -199,6 +220,8 @@ function AddAsset() {
                     customers={assetCategoryOptions}
                     value={assetCategory}
                     onChange={(option) => setAssetCategory(option?._id || "")}
+                    onSelected={() => assetStatusRef.current?.focus()}
+                    triggerRef={assetCategoryRef}
                     disabled={optionsLoading}
                     placeholder={optionsLoading ? "Loading..." : "Select category"}
                     getLabel={(option) => option.label}
@@ -215,6 +238,8 @@ function AddAsset() {
                     customers={assetStatusOptions}
                     value={assetStatus}
                     onChange={(option) => setAssetStatus(option?._id || "")}
+                    onSelected={() => locationNameRef.current?.focus()}
+                    triggerRef={assetStatusRef}
                     disabled={optionsLoading}
                     placeholder={optionsLoading ? "Loading..." : "Select status"}
                     getLabel={(option) => option.label}
@@ -269,10 +294,12 @@ function AddAsset() {
                     Location Name <span className='text-rose-500 dark:text-rose-400'>*</span>
                   </label>
                   <input
+                    ref={locationNameRef}
                     type='text'
                     required
                     value={locationName}
                     onChange={e => setLocationName(e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, purchaseCostRef)}
                     placeholder='e.g. Yard'
                     className='w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100'
                   />
@@ -310,11 +337,13 @@ function AddAsset() {
                     Purchase Cost (Rs.) <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <input
+                    ref={purchaseCostRef}
                     type="number"
                     min="0"
                     required
                     value={purchaseCostAmount}
                     onChange={(e) => setPurchaseCostAmount(e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, paymentMethodRef)}
                     placeholder="e.g. 2500000"
                     className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
@@ -328,6 +357,8 @@ function AddAsset() {
                     customers={paymentMethodOptions}
                     value={paymentMethod}
                     onChange={(option) => setPaymentMethod(option?._id || "")}
+                    onSelected={() => accountRef.current?.focus()}
+                    triggerRef={paymentMethodRef}
                     disabled={optionsLoading}
                     placeholder={optionsLoading ? "Loading..." : "Select payment method"}
                     getLabel={(option) => option.label}
@@ -344,6 +375,8 @@ function AddAsset() {
                     customers={accountSelectOptions}
                     value={accountId}
                     onChange={(option) => setAccountId(option?._id || "")}
+                    onSelected={() => depreciationRef.current?.focus()}
+                    triggerRef={accountRef}
                     disabled={optionsLoading}
                     placeholder={optionsLoading ? "Loading..." : "Select account"}
                     getLabel={(option) => option.label}
@@ -374,6 +407,8 @@ function AddAsset() {
                     customers={depreciationMethodOptions}
                     value={depreciationMethod}
                     onChange={(option) => setDepreciationMethod(option?._id || "")}
+                    onSelected={() => handleSave({ preventDefault: () => {} })}
+                    triggerRef={depreciationRef}
                     disabled={optionsLoading}
                     placeholder={optionsLoading ? "Loading..." : "Select method"}
                     getLabel={(option) => option.label}

@@ -21,6 +21,15 @@ function AddInventoryItem() {
   const currentQuantityRef = useRef(null);
   const minimumStockLevelRef = useRef(null);
 
+  const handleKeyDown = (e, nextRef) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (nextRef && nextRef.current) {
+        nextRef.current.focus();
+      }
+    }
+  };
+
   // Error states
   const [itemNameError, setItemNameError] = useState("");
   const [itemCategoryError, setItemCategoryError] = useState("");
@@ -211,6 +220,8 @@ function AddInventoryItem() {
                 name="itemName"
                 value={formData.itemName}
                 onChange={handleChange}
+                autoFocus
+                onKeyDown={(e) => handleKeyDown(e, itemCategoryRef)}
                 placeholder="Standard Brass Valves 12KG"
                 className={`w-full rounded-lg border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-1 ${
                   itemNameError
@@ -235,6 +246,7 @@ function AddInventoryItem() {
                     setFormData((prev) => ({ ...prev, itemCategory: option?._id || "" }));
                     setItemCategoryError("");
                   }}
+                  onSelected={() => currentQuantityRef.current?.focus()}
                   triggerRef={itemCategoryRef}
                   disabled={optionsLoading}
                   error={!!itemCategoryError}
@@ -324,6 +336,7 @@ function AddInventoryItem() {
                 name="currentQuantity"
                 value={formData.currentQuantity}
                 onChange={handleChange}
+                onKeyDown={(e) => handleKeyDown(e, minimumStockLevelRef)}
                 placeholder="0"
                 className={`w-full rounded-lg border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-1 ${
                   currentQuantityError
@@ -346,6 +359,7 @@ function AddInventoryItem() {
                 name="minimumStockLevel"
                 value={formData.minimumStockLevel}
                 onChange={handleChange}
+                onKeyDown={(e) => handleKeyDown(e, unitOfMeasureRef)}
                 placeholder="30"
                 className={`w-full rounded-lg border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-1 ${
                   minimumStockLevelError
@@ -382,6 +396,12 @@ function AddInventoryItem() {
                   name="unitOfMeasure"
                   value={formData.unitOfMeasure}
                   onChange={handleChange}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleSubmit(e);
+                    }
+                  }}
                   disabled={optionsLoading}
                   className={`w-full appearance-none rounded-lg border bg-white dark:bg-gray-900 pl-3 pr-10 py-2 text-sm text-slate-700 dark:text-gray-300 outline-none focus:ring-1 ${
                     unitOfMeasureError

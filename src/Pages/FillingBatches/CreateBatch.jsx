@@ -79,8 +79,31 @@ function CreateBatch({ mode = "create" }) {
 
   const storageTankIdRef = useRef(null);
   const operatorEmployeeIdRef = useRef(null);
+  const fillingDateRef = useRef(null);
+  const remarksRef = useRef(null);
   const lineKeyRef = useRef(1);
+  const lineRefs = useRef({});
   const hydratedBatchIdRef = useRef("");
+
+  const setLineRef = (key, field) => (element) => {
+    if (!lineRefs.current[key]) lineRefs.current[key] = {};
+    lineRefs.current[key][field] = element;
+  };
+
+  const focusLineField = (lineIndex, field) => {
+    const key = formData.lines[lineIndex]?.key;
+    const element = key ? lineRefs.current[key]?.[field] : null;
+    element?.focus();
+  };
+
+  const handleKeyDown = (e, nextRef) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (nextRef && nextRef.current) {
+        nextRef.current.focus();
+      }
+    }
+  };
 
   const [storageTankIdError, setStorageTankIdError] = useState("");
   const [operatorEmployeeIdError, setOperatorEmployeeIdError] = useState("");
@@ -465,9 +488,12 @@ function CreateBatch({ mode = "create" }) {
                   Filling Date <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
+                  ref={fillingDateRef}
                   type="date"
                   value={formData.fillingDate}
+                  autoFocus
                   onChange={(e) => handleFieldChange("fillingDate", e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(e, storageTankIdRef)}
                   className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                 />
               </div>
@@ -572,6 +598,7 @@ function CreateBatch({ mode = "create" }) {
                               .toLowerCase()
                           }
                           emptyText="No cylinder type found"
+                          triggerRef={setLineRef(line.key, "type")}
                         />
                         {errors.cylinderTypeId && (
                           <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{errors.cylinderTypeId}</p>
@@ -583,9 +610,16 @@ function CreateBatch({ mode = "create" }) {
                           Cylinder Target Run Count <span className="text-rose-500 dark:text-rose-400">*</span>
                         </label>
                         <input
+                          ref={setLineRef(line.key, "count")}
                           type="number"
                           min="1"
                           value={line.cylinderCount}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              focusLineField(index, "weight");
+                            }
+                          }}
                           onChange={(e) => {
                             handleLineChange(line.key, "cylinderCount", e.target.value);
                             setLineErrors((prev) => ({
@@ -609,10 +643,21 @@ function CreateBatch({ mode = "create" }) {
                           Target Fill Weight per Cylinder <span className="text-rose-500 dark:text-rose-400">*</span>
                         </label>
                         <input
+                          ref={setLineRef(line.key, "weight")}
                           type="number"
                           min="0"
                           step="any"
                           value={line.targetFillWeightKg}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              if (index + 1 < formData.lines.length) {
+                                focusLineField(index + 1, "type");
+                              } else {
+                                operatorEmployeeIdRef.current?.focus();
+                              }
+                            }
+                          }}
                           onChange={(e) => {
                             handleLineChange(line.key, "targetFillWeightKg", e.target.value);
                             setLineErrors((prev) => ({
@@ -688,6 +733,7 @@ function CreateBatch({ mode = "create" }) {
                     handleFieldChange("operatorEmployeeId", operator?._id || "");
                     setOperatorEmployeeIdError("");
                   }}
+                  onSelected={() => remarksRef.current?.focus()}
                   triggerRef={operatorEmployeeIdRef}
                   error={!!operatorEmployeeIdError}
                   placeholder="Select Employee"
@@ -726,9 +772,16 @@ function CreateBatch({ mode = "create" }) {
                   Batch Execution Notes / Safety Checks
                 </label>
                 <textarea
+                  ref={remarksRef}
                   rows="2"
                   value={formData.remarks}
                   onChange={(e) => handleFieldChange("remarks", e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmit(e);
+                    }
+                  }}
                   className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 resize-none"
                 />
               </div>

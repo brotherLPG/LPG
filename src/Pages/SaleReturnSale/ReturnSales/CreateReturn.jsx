@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   useCreateReturnSale,
@@ -6,12 +6,30 @@ import {
 } from "../../../queries/returnsales/returnsales.queries";
 import { useSaleById, useSales } from "../../../queries/sales/sales.queries";
 import { useToast } from "../../../utils/GlobalToast";
+import SearchableCustomerSelect from "../../../components/SearchableCustomerSelect";
 
 function CreateReturn() {
   const navigate = useNavigate();
   const toast = useToast();
   const { data: formOptions } = useReturnSaleFormOptions();
   const createReturnMutation = useCreateReturnSale();
+
+  const returnDateRef = useRef(null);
+  const customerRef = useRef(null);
+  const saleRef = useRef(null);
+  const reasonRef = useRef(null);
+  const paymentMethodRef = useRef(null);
+  const accountRef = useRef(null);
+  const inspectionNotesRef = useRef(null);
+
+  const handleKeyDown = (e, nextRef) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (nextRef && nextRef.current) {
+        nextRef.current.focus();
+      }
+    }
+  };
 
   const [returnQuantities, setReturnQuantities] = useState({});
   const [returnPrices, setReturnPrices] = useState({});
@@ -29,6 +47,17 @@ function CreateReturn() {
   const returnReasons = formOptions?.data?.returnReasons || [];
   const paymentMethods = formOptions?.data?.paymentMethods || [];
   const accounts = formOptions?.data?.accounts || [];
+
+  const paymentMethodOptions = paymentMethods.map((method) => ({
+    _id: method.value,
+    label: method.label,
+  }));
+
+  const accountOptions = accounts.map((account) => ({
+    ...account,
+    label:
+      account.label || `${account.accountCode} – ${account.accountName}`,
+  }));
   const actionType = formOptions?.data?.actionType;
   const nextReturnNumber = formOptions?.data?.nextReturnNumber;
 
@@ -99,6 +128,11 @@ function CreateReturn() {
 
   const getReasonLabel = (reason) =>
     typeof reason === "string" ? reason : reason?.label ?? reason?.value ?? "";
+
+  const reasonOptions = returnReasons.map((reason) => ({
+    _id: getReasonValue(reason),
+    label: getReasonLabel(reason),
+  }));
 
   const updateReturnQty = (inventoryItemId, value) => {
     const item = returnedItems.find(
@@ -290,9 +324,12 @@ function CreateReturn() {
                     Return Date <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <input
+                    ref={returnDateRef}
                     type="date"
+                    autoFocus
                     value={returnDate}
                     onChange={(e) => setReturnDate(e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, customerRef)}
                     className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
@@ -302,19 +339,25 @@ function CreateReturn() {
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Customer entity <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
-                <select
+                <SearchableCustomerSelect
+                  triggerRef={customerRef}
+                  customers={customers}
                   value={selectedCustomer}
-                  onChange={(e) => handleCustomerChange(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                >
-                  <option value="">Select Customer</option>
-                  {customers.map((customer) => (
-                    <option key={customer._id} value={customer._id}>
-                      {customer.label ||
-                        `${customer.customerCode} - ${customer.customerName}`}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(customer) => handleCustomerChange(customer?._id || "")}
+                  placeholder="Select Customer"
+                  getLabel={(customer) =>
+                    customer.label ||
+                    `${customer.customerCode} - ${customer.customerName}`
+                  }
+                  getSearchText={(customer) =>
+                    (
+                      customer.label ||
+                      `${customer.customerCode} ${customer.customerName}` ||
+                      ""
+                    ).toLowerCase()
+                  }
+                  emptyText="No customer found"
+                />
               </div>
             </div>
           </div>
@@ -332,25 +375,25 @@ function CreateReturn() {
                   Original Invoice Number{" "}
                   <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
-                <select
+                <SearchableCustomerSelect
+                  triggerRef={saleRef}
+                  customers={customerSales}
                   value={selectedSaleId}
-                  onChange={(e) => handleSaleChange(e.target.value)}
-                  disabled={!selectedCustomer}
-                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 disabled:bg-slate-50 dark:disabled:bg-gray-800 disabled:text-slate-400 dark:disabled:text-gray-500 disabled:cursor-not-allowed"
-                >
-                  <option value="">
-                    {!selectedCustomer
+                  onChange={(sale) => handleSaleChange(sale?._id || "")}
+                  disabled={!selectedCustomer || isLoadingSales}
+                  placeholder={
+                    !selectedCustomer
                       ? "Select a customer first"
                       : isLoadingSales
                         ? "Loading invoices..."
-                        : "Select original invoice"}
-                  </option>
-                  {customerSales.map((sale) => (
-                    <option key={sale._id} value={sale._id}>
-                      {sale.invoiceNumber || sale.saleNumber}
-                    </option>
-                  ))}
-                </select>
+                        : "Select original invoice"
+                  }
+                  getLabel={(sale) => sale.invoiceNumber || sale.saleNumber}
+                  getSearchText={(sale) =>
+                    String(sale.invoiceNumber || sale.saleNumber || "").toLowerCase()
+                  }
+                  emptyText="No invoice found"
+                />
               </div>
 
               <div className="grid grid-cols-3 md:grid-cols-4 gap-5">
@@ -510,21 +553,16 @@ function CreateReturn() {
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Reason for Return <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
-                <select
+                <SearchableCustomerSelect
+                  triggerRef={reasonRef}
+                  customers={reasonOptions}
                   value={selectedReason}
-                  onChange={(e) => setSelectedReason(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                >
-                  <option value="">Select Reason</option>
-                  {returnReasons.map((reason) => {
-                    const value = getReasonValue(reason);
-                    return (
-                      <option key={value} value={value}>
-                        {getReasonLabel(reason)}
-                      </option>
-                    );
-                  })}
-                </select>
+                  onChange={(reason) => setSelectedReason(reason?._id || "")}
+                  placeholder="Select Reason"
+                  getLabel={(reason) => reason.label}
+                  getSearchText={(reason) => String(reason.label || "").toLowerCase()}
+                  emptyText="No reason found"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-4th-color">
@@ -538,36 +576,31 @@ function CreateReturn() {
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Payment Method <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
-                <select
+                <SearchableCustomerSelect
+                  triggerRef={paymentMethodRef}
+                  customers={paymentMethodOptions}
                   value={selectedPaymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                >
-                  <option value="">Select Payment Method</option>
-                  {paymentMethods.map((method) => (
-                    <option key={method.value} value={method.value}>
-                      {method.label}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(method) => setPaymentMethod(method?._id || "")}
+                  placeholder="Select Payment Method"
+                  getLabel={(method) => method.label}
+                  getSearchText={(method) => String(method.label || "").toLowerCase()}
+                  emptyText="No payment method found"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
                   Account <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
-                <select
+                <SearchableCustomerSelect
+                  triggerRef={accountRef}
+                  customers={accountOptions}
                   value={selectedAccountId}
-                  onChange={(e) => setAccountId(e.target.value)}
-                  className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
-                >
-                  <option value="">Select Account</option>
-                  {accounts.map((account) => (
-                    <option key={account._id} value={account._id}>
-                      {account.label ||
-                        `${account.accountCode} – ${account.accountName}`}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(account) => setAccountId(account?._id || "")}
+                  placeholder="Select Account"
+                  getLabel={(account) => account.label}
+                  getSearchText={(account) => String(account.label || "").toLowerCase()}
+                  emptyText="No account found"
+                />
               </div>
               <div className="flex flex-row justify-between my-auto items-center">
                 <label className="block text-[14px] font-bold text-BLUE-dark">
@@ -593,9 +626,16 @@ function CreateReturn() {
                   Inspection Notes
                 </label>
                 <textarea
+                  ref={inspectionNotesRef}
                   rows="4"
                   value={inspectionNotes}
                   onChange={(e) => setInspectionNotes(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmit();
+                    }
+                  }}
                   placeholder="Document quality control findings and inspection results..."
                   className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
                 />

@@ -1,4 +1,4 @@
-import { Eye, Edit3, Trash2, ChevronDown } from "lucide-react";
+import { Eye, Edit3, Trash2, ChevronDown, Building2, TrendingDown, Wallet } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Tooltip } from "@heroui/react";
@@ -166,19 +166,19 @@ function Assets() {
     },
     {
       key: "purchaseCost",
-      label: "Purchase Cost (Rs.)",
+      label: "Purchase Cost ",
       className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
       cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium whitespace-nowrap",
       renderCell: (item) => item.purchaseCost.toLocaleString(),
     },
     {
       key: "bookValue",
-      label: "Book Value (Rs.)",
+      label: "Book Value ",
       className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
       cellClassName: "px-4 py-4 whitespace-nowrap",
       renderCell: (item) => (
         <span className="text-slate-900 dark:text-gray-100 font-bold text-[13px]">
-          Rs. {item.bookValue.toLocaleString()}
+           {item.bookValue.toLocaleString()}
         </span>
       ),
     },
@@ -264,47 +264,47 @@ function Assets() {
       <section>
         {/* Summary Cards */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-950/60 dark:to-blue-900/40 p-5 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="rounded-lg bg-blue-200/70 dark:bg-blue-800/60 p-2">
+                <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div className="min-w-0">
                 <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Total Asset Value</p>
-                <p className="mt-2 text-2xl font-extrabold text-6th-color">
-                  Rs. {summaryStats.totalAssetValue.toLocaleString()}
+                <p className="mt-1 text-2xl font-extrabold text-blue-700 dark:text-blue-300">
+                  {summaryStats.totalAssetValue.toLocaleString()}
                 </p>
-                <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary">
-                  <span className="h-2 w-2 rounded-full bg-[#2563EB]"></span>
-                  Total purchase cost
-                </div>
+                <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">Total purchase cost</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-linear-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/60 dark:to-emerald-900/40 p-5 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="rounded-lg bg-emerald-200/70 dark:bg-emerald-800/60 p-2">
+                <TrendingDown className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div className="min-w-0">
                 <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Total Depreciation</p>
-                <p className="mt-2 text-2xl font-extrabold text-5th-color">
-                  Rs. {summaryStats.totalDepreciation.toLocaleString()}
+                <p className="mt-1 text-2xl font-extrabold text-emerald-700 dark:text-emerald-300">
+                  {summaryStats.totalDepreciation.toLocaleString()}
                 </p>
-                <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary">
-                  <span className="h-2 w-2 rounded-full bg-[#10B981]"></span>
-                  Accumulated depreciation
-                </div>
+                <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">Accumulated depreciation</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-linear-to-br from-slate-50 to-slate-100 dark:from-gray-800 dark:to-gray-900 p-5 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="rounded-lg bg-slate-200/70 dark:bg-gray-700 p-2">
+                <Wallet className="h-5 w-5 text-slate-700 dark:text-gray-300" />
+              </div>
+              <div className="min-w-0">
                 <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Net Book Value</p>
-                <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-gray-100">
-                  Rs. {summaryStats.netBookValue.toLocaleString()}
+                <p className="mt-1 text-2xl font-extrabold text-slate-900 dark:text-gray-100">
+                  {summaryStats.netBookValue.toLocaleString()}
                 </p>
-                <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary">
-                  <span className="h-2 w-2 rounded-full bg-[#4B5563]"></span>
-                  Current asset value
-                </div>
+                <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">Current asset value</p>
               </div>
             </div>
           </div>

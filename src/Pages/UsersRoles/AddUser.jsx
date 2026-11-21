@@ -63,6 +63,17 @@ function AddUser() {
   const cnicRef = useRef(null);
   const usernameRef = useRef(null);
   const passwordRef = useRef(null);
+  const confirmPasswordRef = useRef(null);
+  const roleRef = useRef(null);
+
+  const handleKeyDown = (e, nextRef) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (nextRef && nextRef.current) {
+        nextRef.current.focus();
+      }
+    }
+  };
 
   // Error states
   const [fullNameError, setFullNameError] = useState("");
@@ -116,8 +127,15 @@ function AddUser() {
     "w-full rounded border border-[#E5E7EB] dark:border-gray-700 bg-white dark:bg-gray-900 px-2.5 py-2 text-[13px] text-BLUE-dark outline-none transition placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
   const selectClass =
     "w-full rounded border border-[#E5E7EB] dark:border-gray-700 bg-[#F9FAFB] dark:bg-gray-900 px-2.5 py-2 text-[13px] text-BLUE-dark outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
+  const formatPhoneNumber = (value) => {
+    const digits = value.replace(/\D/g, "").slice(0, 11);
+    if (digits.length <= 4) return digits;
+    return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+  };
+
   const update = (key) => (event) => {
-    setForm((current) => ({ ...current, [key]: event.target.value }));
+    const value = key === "phone" ? formatPhoneNumber(event.target.value) : event.target.value;
+    setForm((current) => ({ ...current, [key]: value }));
 
     // Clear errors on change
     if (key === 'fullName') setFullNameError("");
@@ -264,6 +282,8 @@ function AddUser() {
                     ref={fullNameRef}
                     value={form.fullName}
                     onChange={update("fullName")}
+                    onKeyDown={(e) => handleKeyDown(e, emailRef)}
+                    autoFocus
                     className={`${inputClass} ${fullNameError ? "border-red-400 focus:border-red-500 focus:ring-red-100" : ""}`}
                     placeholder="Bilal Hassan"
                   />
@@ -277,6 +297,7 @@ function AddUser() {
                     type="email"
                     value={form.email}
                     onChange={update("email")}
+                    onKeyDown={(e) => handleKeyDown(e, phoneRef)}
                     className={`${inputClass} ${emailError ? "border-red-400 focus:border-red-500 focus:ring-red-100" : ""}`}
                     placeholder="bilal.hassan@almanida-lpg.pk"
                   />
@@ -289,6 +310,7 @@ function AddUser() {
                     ref={phoneRef}
                     value={form.phone}
                     onChange={update("phone")}
+                    onKeyDown={(e) => handleKeyDown(e, cnicRef)}
                     className={`${inputClass} ${phoneError ? "border-red-400 focus:border-red-500 focus:ring-red-100" : ""}`}
                     placeholder="0321-5678901"
                   />
@@ -310,6 +332,7 @@ function AddUser() {
                         cnic: formatCnic(event.target.value),
                       }))
                     }
+                    onKeyDown={(e) => handleKeyDown(e, usernameRef)}
                     className={`${inputClass} ${cnicError ? "border-red-400 focus:border-red-500 focus:ring-red-100" : ""}`}
                     placeholder="35201-1234567-9"
                   />
@@ -330,6 +353,7 @@ function AddUser() {
                     ref={usernameRef}
                     value={form.username}
                     onChange={update("username")}
+                    onKeyDown={(e) => handleKeyDown(e, passwordRef)}
                     className={`${inputClass} sm:col-span-2 ${usernameError ? "border-red-400 focus:border-red-500 focus:ring-red-100" : ""}`}
                     placeholder="bilal.hassan"
                   />
@@ -344,6 +368,7 @@ function AddUser() {
                       type={showPassword ? "text" : "password"}
                       value={form.password}
                       onChange={update("password")}
+                      onKeyDown={(e) => handleKeyDown(e, confirmPasswordRef)}
                       className={`${inputClass} pr-8 ${passwordError ? "border-red-400 focus:border-red-500 focus:ring-red-100" : ""}`}
                       placeholder="********"
                     />
@@ -362,9 +387,11 @@ function AddUser() {
                 <Field label="Confirm Password" required>
                   <span className="relative block">
                     <input
+                      ref={confirmPasswordRef}
                       type={showConfirmPassword ? "text" : "password"}
                       value={form.confirmPassword}
                       onChange={update("confirmPassword")}
+                      onKeyDown={(e) => handleKeyDown(e, roleRef)}
                       className={`${inputClass} pr-8`}
                       placeholder="********"
                     />
@@ -398,6 +425,8 @@ function AddUser() {
                     customers={roleOptions}
                     value={form.role}
                     onChange={(option) => update("role")({ target: { value: option?._id || "" } })}
+                    onSelected={() => handleSubmit({ preventDefault: () => {} })}
+                    triggerRef={roleRef}
                     placeholder="Select the Assigned Role"
                     getLabel={(option) => option.label}
                     getSearchText={(option) => option.searchText || option.label.toLowerCase()}

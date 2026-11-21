@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Eye, ChevronDown, Plus, Loader, Pencil, Printer } from "lucide-react";
+import { Search, Eye, ChevronDown, Plus, Loader, Pencil, Printer, Wallet, Landmark, TrendingUp, ClipboardCheck } from "lucide-react";
 import { Button, Tooltip } from "@heroui/react";
 import GlobalTable from "../../utils/GlobalTable";
 import { useGetAccounts, useAccountFormOptions } from "../../queries/accounts/accounts.queries";
@@ -57,8 +57,8 @@ function Accounting() {
       `Branch: ${item.branch}`,
       `Type: ${item.accountType}`,
       `Category: ${item.category}`,
-      `Opening Balance: Rs. ${item.openingBalance.toLocaleString()}`,
-      `Current Balance: Rs. ${item.currentBalance.toLocaleString()}`,
+      `Opening Balance:  ${item.openingBalance.toLocaleString()}`,
+      `Current Balance:  ${item.currentBalance.toLocaleString()}`,
       `Status: ${item.status}`,
     ].join('\n');
 
@@ -92,8 +92,8 @@ function Accounting() {
           <tr><th>Branch</th><td>${item.branch}</td></tr>
           <tr><th>Account Type</th><td>${item.accountType}</td></tr>
           <tr><th>Category</th><td>${item.category}</td></tr>
-          <tr><th>Opening Balance</th><td>Rs. ${item.openingBalance.toLocaleString()}</td></tr>
-          <tr><th>Current Balance</th><td><strong>Rs. ${item.currentBalance.toLocaleString()}</strong></td></tr>
+          <tr><th>Opening Balance</th><td> ${item.openingBalance.toLocaleString()}</td></tr>
+          <tr><th>Current Balance</th><td><strong> ${item.currentBalance.toLocaleString()}</strong></td></tr>
           <tr><th>Status</th><td>${item.status}</td></tr>
         </table>
       </div>
@@ -159,7 +159,7 @@ function Accounting() {
         "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 border-x border-slate-100 dark:border-gray-800 text-nowrap",
       cellClassName:
         "px-4 py-4 text-slate-700 dark:text-gray-300 text-sm font-semibold",
-      renderCell: (item) => `Rs. ${item.openingBalance.toLocaleString()}`,
+      renderCell: (item) => ` ${item.openingBalance.toLocaleString()}`,
     },
     {
       key: "currentBalance",
@@ -169,7 +169,7 @@ function Accounting() {
       cellClassName: "px-4 py-4",
       renderCell: (item) => (
         <span className="text-[13px] font-bold text-emerald-600 dark:text-emerald-400">
-          Rs. {item.currentBalance.toLocaleString()}
+           {item.currentBalance.toLocaleString()}
         </span>
       ),
     },
@@ -300,53 +300,77 @@ function Accounting() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
-          <h3 className="text-xs font-semibold text-slate-600 dark:text-gray-400">
-            Total Accounts
-          </h3>
-          <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-gray-100">
-            {summary.totalAccounts || 0}
-          </p>
-          <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500 dark:text-gray-400">
-            <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
-            Active financial records
+        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-linear-to-br from-slate-50 to-slate-100 dark:from-gray-800 dark:to-gray-900 p-5 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-slate-200/70 dark:bg-gray-700 p-2">
+              <Wallet className="h-5 w-5 text-slate-700 dark:text-gray-300" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-sm font-semibold text-slate-600 dark:text-gray-400">
+                Total Accounts
+              </h3>
+              <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-gray-100">
+                {summary.totalAccounts || 0}
+              </p>
+              <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">
+                Active financial records
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
-          <h3 className="text-xs font-semibold text-slate-600 dark:text-gray-400">
-            Opening Balance
-          </h3>
-          <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-gray-100">
-            Rs. {(summary.totalOpeningBalance || 0).toLocaleString()}
-          </p>
-          <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500 dark:text-gray-400">
-            <span className="h-2 w-2 rounded-full bg-blue-500"></span>
-            Total starting funds
+        <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-950/60 dark:to-blue-900/40 p-5 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-blue-200/70 dark:bg-blue-800/60 p-2">
+              <Landmark className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-sm font-semibold text-slate-600 dark:text-gray-400">
+                Opening Balance
+              </h3>
+              <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-gray-100">
+                 {(summary.totalOpeningBalance || 0).toLocaleString()}
+              </p>
+              <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">
+                Total starting funds
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
-          <h3 className="text-xs font-semibold text-slate-600 dark:text-gray-400">
-            Current Balance
-          </h3>
-          <p className="mt-2 text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-            Rs. {(summary.totalCurrentBalance || 0).toLocaleString()}
-          </p>
-          <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500 dark:text-gray-400">
-            <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
-            Live account value
+        <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-linear-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/60 dark:to-emerald-900/40 p-5 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-emerald-200/70 dark:bg-emerald-800/60 p-2">
+              <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-sm font-semibold text-slate-600 dark:text-gray-400">
+                Current Balance
+              </h3>
+              <p className="mt-1 text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                {(summary.totalCurrentBalance || 0).toLocaleString()}
+              </p>
+              <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">
+                Live account value
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
-          <h3 className="text-xs font-semibold text-slate-600 dark:text-gray-400">Needs Review</h3>
-          <p className="mt-2 text-2xl font-bold text-amber-500 dark:text-amber-400">
-            {summary.needsReviewCount || 0}
-          </p>
-          <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500 dark:text-gray-400">
-            <span className="h-2 w-2 rounded-full bg-amber-500"></span>
-            Accounts under review
+        <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-linear-to-br from-amber-50 to-amber-100 dark:from-amber-950/60 dark:to-amber-900/40 p-5 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-amber-200/70 dark:bg-amber-800/60 p-2">
+              <ClipboardCheck className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-sm font-semibold text-slate-600 dark:text-gray-400">Needs Review</h3>
+              <p className="mt-1 text-2xl font-bold text-amber-600 dark:text-amber-400">
+                {summary.needsReviewCount || 0}
+              </p>
+              <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">
+                Accounts under review
+              </p>
+            </div>
           </div>
         </div>
       </div>

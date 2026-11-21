@@ -13,10 +13,21 @@ function AddEmployee() {
 
   // Refs for required fields
   const fullNameRef = useRef(null);
+  const cnicNumberRef = useRef(null);
   const phoneNumberRef = useRef(null);
+
+  const handleKeyDown = (e, nextRef) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (nextRef && nextRef.current) {
+        nextRef.current.focus();
+      }
+    }
+  };
 
   // Error states
   const [fullNameError, setFullNameError] = useState("");
+  const [cnicNumberError, setCnicNumberError] = useState("");
   const [phoneNumberError, setPhoneNumberError] = useState("");
 
   const [formData, setFormData] = useState({
@@ -36,11 +47,26 @@ function AddEmployee() {
     homeAddress: "",
   });
 
+  const formatPhoneNumber = (value) => {
+    const digits = value.replace(/\D/g, "").slice(0, 11);
+    if (digits.length <= 4) return digits;
+    return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+  };
+
+  const formatCnicNumber = (value) => {
+    const digits = value.replace(/\D/g, "").slice(0, 13);
+    if (digits.length <= 5) return digits;
+    if (digits.length <= 12) return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+    return `${digits.slice(0, 5)}-${digits.slice(5, 12)}-${digits.slice(12)}`;
+  };
+
   const handleInputChange = (field, value) => {
-    setFormData((previous) => ({ ...previous, [field]: value }));
+    const nextValue = field === "phoneNumber" ? formatPhoneNumber(value) : field === "cnicNumber" ? formatCnicNumber(value) : value;
+    setFormData((previous) => ({ ...previous, [field]: nextValue }));
 
     // Clear errors on change
     if (field === 'fullName') setFullNameError("");
+    if (field === 'cnicNumber') setCnicNumberError("");
     if (field === 'phoneNumber') setPhoneNumberError("");
   };
 
@@ -50,6 +76,13 @@ function AddEmployee() {
     if (!formData.fullName.trim() || formData.fullName.trim().length < 2) {
       setFullNameError("Full name must contain at least 2 characters");
       fullNameRef.current?.focus();
+      hasError = true;
+    }
+
+    const cnicDigits = formData.cnicNumber.replace(/\D/g, "");
+    if (!cnicDigits || cnicDigits.length !== 13) {
+      setCnicNumberError("CNIC must be exactly 13 digits (e.g. 35201-1234567-9)");
+      if (!hasError) cnicNumberRef.current?.focus();
       hasError = true;
     }
 
@@ -158,9 +191,11 @@ function AddEmployee() {
                 </label>
                 <input
                   ref={fullNameRef}
+                  autoFocus
                   type="text"
                   value={formData.fullName}
                   onChange={(event) => handleInputChange("fullName", event.target.value)}
+                  onKeyDown={(e) => handleKeyDown(e, phoneNumberRef)}
                   placeholder="Enter legal full name"
                   className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-2 ${
                     fullNameError
@@ -191,12 +226,18 @@ function AddEmployee() {
                   CNIC Number
                 </label>
                 <input
+                  ref={cnicNumberRef}
                   type="text"
                   value={formData.cnicNumber}
                   onChange={(event) => handleInputChange("cnicNumber", event.target.value)}
-                  placeholder="e.g. 37405-1234567-1"
+                  onKeyDown={(e) => handleKeyDown(e, phoneNumberRef)}
+                  placeholder="e.g. 35201-1234567-9"
+                  maxLength={15}
                   className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
+                {cnicNumberError && (
+                  <p className="mt-1 text-xs text-red-500">{cnicNumberError}</p>
+                )}
               </div>
 
               <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -348,7 +389,13 @@ function AddEmployee() {
                 type="text"
                 value={formData.phoneNumber}
                 onChange={(event) => handleInputChange("phoneNumber", event.target.value)}
-                placeholder="e.g. 0300-5550011"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSubmit(e);
+                  }
+                }}
+                placeholder="e.g. 0321-5678901"
                 className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-2 ${
                   phoneNumberError
                     ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"

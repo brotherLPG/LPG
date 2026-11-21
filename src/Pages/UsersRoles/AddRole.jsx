@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCreateRole } from '../../queries/roles/roles.queries'
 import { usePermissions } from '../../queries/permissions/permissions.queries'
@@ -17,6 +17,7 @@ function AddRole () {
     isActive: true
   })
   const [selectedPermissions, setSelectedPermissions] = useState([])
+  const roleNameRef = useRef(null)
 
   const permissionsByModule = useMemo(
     () =>
@@ -104,11 +105,19 @@ function AddRole () {
             <label className="text-sm font-semibold text-slate-700 dark:text-gray-300">
               Role Name <span className="text-red-500 dark:text-red-400">*</span>
               <input
+                ref={roleNameRef}
                 required
+                autoFocus
                 value={formData.roleName}
                 onChange={(event) =>
                   updateField("roleName", event.target.value)
                 }
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault()
+                    handleSubmit(event)
+                  }
+                }}
                 className="mt-1.5 w-full rounded-md border border-slate-200 dark:border-gray-700 px-3 py-2 text-sm font-normal outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 placeholder="e.g. Supervisor"
               />

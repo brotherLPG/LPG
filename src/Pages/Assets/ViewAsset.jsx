@@ -7,6 +7,13 @@ import {
   Package,
   UserRound,
   Wallet,
+  Hash,
+  Tag,
+  Factory,
+  Barcode,
+  CheckCircle2,
+  CreditCard,
+  TrendingDown,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAssetById } from "../../queries/assets/assets.queries";
@@ -59,7 +66,7 @@ const formatLabel = (str) => {
     .join(" ");
 };
 
-const formatRs = (amount) => `Rs. ${Number(amount || 0).toLocaleString()}`;
+const formatRs = (amount) => ` ${Number(amount || 0).toLocaleString()}`;
 
 const formatDate = (value) => {
   if (!value) return "-";
@@ -79,30 +86,40 @@ const statusStyles = {
   disposed: "bg-rose-50 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800",
 };
 
-function Field({ label, value }) {
+function Field({ label, value, icon: Icon }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
+      <div className="flex items-start gap-3 rounded-xl border border-slate-100 dark:border-gray-800 bg-linear-to-br from-slate-50 to-white dark:from-gray-800/60 dark:to-gray-900/40 px-4 py-3 transition hover:border-blue-200 dark:hover:border-blue-800">
+        {Icon && (
+          <div className="mt-0.5 shrink-0 rounded-lg bg-blue-100/80 dark:bg-blue-900/50 p-1.5">
+            <Icon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+          </div>
+        )}
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-gray-500">
         {label}
-      </label>
-      <input
-        type="text"
-        readOnly
-        value={textValue(value) || "-"}
-        className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800 px-3 py-2.5 text-sm font-medium text-slate-900 dark:text-gray-100 outline-none"
+          </p>
+          <p className="mt-0.5 wrap-break-word text-sm font-semibold text-slate-800 dark:text-gray-200">{textValue(value) || "-"}</p>
+        </div>
+      </div>
+      <div
+        
+        
+        
+        className="hidden"
       />
     </div>
   );
 }
 
-function SummaryCard({ label, value, hint, icon: Icon, iconClass, iconWrapClass }) {
+function SummaryCard({ label, value, hint, icon: Icon, iconClass, iconWrapClass, cardClass, valueClass }) {
   return (
-    <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
+    <div className={`rounded-xl border p-5 shadow-sm ${cardClass}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">{label}</p>
-          <p className="mt-2 text-2xl font-extrabold text-BLUE-dark">{value}</p>
-          {hint ? <p className="mt-1 text-xs text-tertiary">{hint}</p> : null}
+          <p className={`mt-1 text-2xl font-extrabold ${valueClass}`}>{value}</p>
+          {hint ? <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">{hint}</p> : null}
         </div>
         <div className={`rounded-lg p-2 ${iconWrapClass}`}>
           <Icon className={`h-5 w-5 ${iconClass}`} />
@@ -226,7 +243,7 @@ function ViewAsset() {
           value={formatRs(purchaseCost)}
           hint={formatDate(asset.purchaseDate)}
           icon={Wallet}
-          iconWrapClass="bg-blue-50 dark:bg-blue-950"
+          cardClass="border-blue-200 dark:border-blue-800 bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-950/60 dark:to-blue-900/40" iconWrapClass="bg-blue-200/70 dark:bg-blue-800/60" valueClass="text-blue-700 dark:text-blue-300"
           iconClass="text-blue-600 dark:text-blue-400"
         />
         <SummaryCard
@@ -234,7 +251,7 @@ function ViewAsset() {
           value={formatRs(bookValue)}
           hint={`${remainingPct.toFixed(0)}% of purchase cost remaining`}
           icon={Landmark}
-          iconWrapClass="bg-emerald-50 dark:bg-emerald-950"
+          cardClass="border-emerald-200 dark:border-emerald-800 bg-linear-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/60 dark:to-emerald-900/40" iconWrapClass="bg-emerald-200/70 dark:bg-emerald-800/60" valueClass="text-emerald-700 dark:text-emerald-300"
           iconClass="text-emerald-600 dark:text-emerald-400"
         />
         <SummaryCard
@@ -242,7 +259,7 @@ function ViewAsset() {
           value={formatRs(depreciation)}
           hint={formatLabel(asset.depreciationMethod)}
           icon={Package}
-          iconWrapClass="bg-slate-100 dark:bg-gray-800"
+          cardClass="border-slate-200 dark:border-gray-700 bg-linear-to-br from-slate-50 to-slate-100 dark:from-gray-800 dark:to-gray-900" iconWrapClass="bg-slate-200/70 dark:bg-gray-700" valueClass="text-slate-900 dark:text-gray-100"
           iconClass="text-slate-600 dark:text-gray-400"
         />
       </div>
@@ -251,29 +268,29 @@ function ViewAsset() {
         <div className="space-y-6 lg:col-span-2">
           <section className="overflow-hidden rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
             <div className="border-b border-slate-200 dark:border-gray-700 p-4">
-              <h2 className="text-[16px] font-bold text-BLUE-dark">Asset Information</h2>
+              <div className="flex items-center gap-2"><Package className="h-4 w-4 text-blue-600 dark:text-blue-400" /><h2 className="text-[16px] font-bold text-BLUE-dark">Asset Information</h2></div>
             </div>
             <div className="grid grid-cols-1 gap-5 p-5 md:grid-cols-2">
-              <Field label="Asset Code" value={asset.assetCode} />
-              <Field label="Asset Name" value={asset.assetName} />
-              <Field label="Category" value={formatLabel(asset.assetCategory)} />
-              <Field label="Location" value={asset.locationName} />
-              <Field label="Manufacturer" value={asset.manufacturerName} />
-              <Field label="Model Number" value={asset.modelNumber} />
-              <Field label="Serial Number" value={asset.serialNumber} />
-              <Field label="Status" value={formatLabel(asset.assetStatus)} />
+              <Field label="Asset Code" value={asset.assetCode} icon={Hash} />
+              <Field label="Asset Name" value={asset.assetName} icon={Package} />
+              <Field label="Category" value={formatLabel(asset.assetCategory)} icon={Tag} />
+              <Field label="Location" value={asset.locationName} icon={MapPin} />
+              <Field label="Manufacturer" value={asset.manufacturerName} icon={Factory} />
+              <Field label="Model Number" value={asset.modelNumber} icon={Barcode} />
+              <Field label="Serial Number" value={asset.serialNumber} icon={Hash} />
+              <Field label="Status" value={formatLabel(asset.assetStatus)} icon={CheckCircle2} />
             </div>
           </section>
 
           <section className="overflow-hidden rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
             <div className="border-b border-slate-200 dark:border-gray-700 p-4">
-              <h2 className="text-[16px] font-bold text-BLUE-dark">Purchase & Payment</h2>
+              <div className="flex items-center gap-2"><Wallet className="h-4 w-4 text-emerald-600 dark:text-emerald-400" /><h2 className="text-[16px] font-bold text-BLUE-dark">Purchase & Payment</h2></div>
             </div>
             <div className="grid grid-cols-1 gap-5 p-5 md:grid-cols-2">
-              <Field label="Purchase Date" value={formatDate(asset.purchaseDate)} />
-              <Field label="Payment Method" value={paymentMethodValue} />
-              <Field label="Account" value={accountValue} />
-              <Field label="Depreciation Method" value={formatLabel(asset.depreciationMethod)} />
+              <Field label="Purchase Date" value={formatDate(asset.purchaseDate)} icon={CalendarDays} />
+              <Field label="Payment Method" value={paymentMethodValue} icon={CreditCard} />
+              <Field label="Account" value={accountValue} icon={Landmark} />
+              <Field label="Depreciation Method" value={formatLabel(asset.depreciationMethod)} icon={TrendingDown} />
             </div>
           </section>
         </div>
@@ -281,7 +298,7 @@ function ViewAsset() {
         <div className="space-y-6">
           <section className="overflow-hidden rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
             <div className="border-b border-slate-200 dark:border-gray-700 p-4">
-              <h2 className="text-[16px] font-bold text-BLUE-dark">Valuation</h2>
+              <div className="flex items-center gap-2"><TrendingDown className="h-4 w-4 text-amber-600 dark:text-amber-400" /><h2 className="text-[16px] font-bold text-BLUE-dark">Valuation</h2></div>
             </div>
             <div className="space-y-4 p-5">
               <div className="flex items-center justify-between text-sm">
@@ -313,7 +330,7 @@ function ViewAsset() {
 
           <section className="overflow-hidden rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
             <div className="border-b border-slate-200 dark:border-gray-700 p-4">
-              <h2 className="text-[16px] font-bold text-BLUE-dark">Assignment</h2>
+              <div className="flex items-center gap-2"><UserRound className="h-4 w-4 text-blue-600 dark:text-blue-400" /><h2 className="text-[16px] font-bold text-BLUE-dark">Assignment</h2></div>
             </div>
             <div className="p-5">
               {employee ? (

@@ -36,7 +36,7 @@ const formatAmount = (value) => {
   return amount.toLocaleString();
 };
 
-const formatRs = (value) => `Rs. ${Number(value || 0).toLocaleString()}`;
+const formatRs = (value) => ` ${Number(value || 0).toLocaleString()}`;
 
 function ViewAccount() {
   const navigate = useNavigate();
@@ -108,7 +108,7 @@ function ViewAccount() {
       },
       {
         key: "inwardAmount",
-        label: "Inward (Rs.)",
+        label: "Inward ",
         className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap ",
         cellClassName: "px-4 py-4 text-center whitespace-nowrap",
         renderCell: (item) => (
@@ -119,7 +119,7 @@ function ViewAccount() {
       },
       {
         key: "outwardAmount",
-        label: "Outward (Rs.)",
+        label: "Outward ",
         className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap ",
         cellClassName: "px-4 py-4 text-center whitespace-nowrap",
         renderCell: (item) => (
@@ -130,7 +130,7 @@ function ViewAccount() {
       },
       {
         key: "remainingBalance",
-        label: "Remaining Balance (Rs.)",
+        label: "Remaining Balance ",
         className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
         cellClassName: "px-4 py-4 text-center whitespace-nowrap",
         renderCell: (item) => {
@@ -226,9 +226,9 @@ function ViewAccount() {
       </div>
 
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4 xl:grid-cols-4">
-        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
+        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-linear-to-br from-slate-50 to-slate-100 dark:from-gray-800 dark:to-gray-900 p-5 shadow-sm">
           <div className="flex items-start gap-3">
-            <div className="rounded-lg bg-slate-100 dark:bg-gray-800 p-2">
+            <div className="rounded-lg bg-slate-200/70 dark:bg-gray-700 p-2">
               <Wallet className="h-5 w-5 text-slate-700 dark:text-gray-300" />
             </div>
             <div className="min-w-0">
@@ -246,9 +246,9 @@ function ViewAccount() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
+        <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-linear-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/60 dark:to-emerald-900/40 p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-emerald-100 dark:bg-emerald-900 p-2">
+            <div className="rounded-lg bg-emerald-200/70 dark:bg-emerald-800/60 p-2">
               <Landmark className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
@@ -264,9 +264,9 @@ function ViewAccount() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
+        <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-950/60 dark:to-blue-900/40 p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-blue-100 dark:bg-blue-900 p-2">
+            <div className="rounded-lg bg-blue-200/70 dark:bg-blue-800/60 p-2">
               <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
@@ -281,9 +281,9 @@ function ViewAccount() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
+        <div className={`rounded-xl border p-5 shadow-sm ${account.isActive ? 'border-emerald-200 dark:border-emerald-800 bg-linear-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/60 dark:to-emerald-900/40' : 'border-red-200 dark:border-red-800 bg-linear-to-br from-red-50 to-red-100 dark:from-red-950/60 dark:to-red-900/40'}`}>
           <div className="flex items-center gap-3">
-            <div className={`rounded-lg p-2 ${account.isActive ? 'bg-emerald-100 dark:bg-emerald-900' : 'bg-red-100 dark:bg-red-900'}`}>
+            <div className={`rounded-lg p-2 ${account.isActive ? 'bg-emerald-200/70 dark:bg-emerald-800/60' : 'bg-red-200/70 dark:bg-red-800/60'}`}>
               {account.isActive ? (
                 <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
               ) : (
@@ -301,9 +301,9 @@ function ViewAccount() {
       </div>
 
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
+        <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-linear-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/60 dark:to-emerald-900/40 p-5 shadow-sm">
           <div className="flex items-start gap-3">
-            <div className="rounded-lg bg-emerald-100 dark:bg-emerald-900 p-2">
+            <div className="rounded-lg bg-emerald-200/70 dark:bg-emerald-800/60 p-2">
               <ArrowDownLeft className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div className="min-w-0">
@@ -317,9 +317,9 @@ function ViewAccount() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
+        <div className="rounded-xl border border-red-200 dark:border-red-800 bg-linear-to-br from-red-50 to-red-100 dark:from-red-950/60 dark:to-red-900/40 p-5 shadow-sm">
           <div className="flex items-start gap-3">
-            <div className="rounded-lg bg-red-100 dark:bg-red-900 p-2">
+            <div className="rounded-lg bg-red-200/70 dark:bg-red-800/60 p-2">
               <ArrowUpRight className="h-5 w-5 text-red-600 dark:text-red-400" />
             </div>
             <div className="min-w-0">
@@ -333,9 +333,9 @@ function ViewAccount() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
+        <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-950/60 dark:to-blue-900/40 p-5 shadow-sm">
           <div className="flex items-start gap-3">
-            <div className="rounded-lg bg-blue-100 dark:bg-blue-900 p-2">
+            <div className="rounded-lg bg-blue-200/70 dark:bg-blue-800/60 p-2">
               <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div className="min-w-0">
@@ -349,9 +349,9 @@ function ViewAccount() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
+        <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-linear-to-br from-slate-50 to-slate-100 dark:from-gray-800 dark:to-gray-900 p-5 shadow-sm">
           <div className="flex items-start gap-3">
-            <div className="rounded-lg bg-slate-100 dark:bg-gray-800 p-2">
+            <div className="rounded-lg bg-slate-200/70 dark:bg-gray-700 p-2">
               <Receipt className="h-5 w-5 text-slate-700 dark:text-gray-300" />
             </div>
             <div className="min-w-0">

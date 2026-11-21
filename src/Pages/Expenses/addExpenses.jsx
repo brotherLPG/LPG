@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import {
@@ -48,6 +48,21 @@ function AddExpenses() {
   const [referenceNumber, setReferenceNumber] = useState("");
   const [paymentDate, setPaymentDate] = useState("");
   const [remarks, setRemarks] = useState("");
+
+  const categoryRef = useRef(null);
+  const expenseDateRef = useRef(null);
+  const amountRef = useRef(null);
+  const paymentMethodRef = useRef(null);
+  const accountRef = useRef(null);
+
+  const handleKeyDown = (e, nextRef) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (nextRef && nextRef.current) {
+        nextRef.current.focus();
+      }
+    }
+  };
 
   const resetForm = () => {
     setExpenseStatus("pending");
@@ -185,6 +200,8 @@ function AddExpenses() {
                     customers={categoryOptions}
                     value={expenseCategoryId}
                     onChange={(option) => setExpenseCategoryId(option?._id || "")}
+                    onSelected={() => expenseDateRef.current?.focus()}
+                    triggerRef={categoryRef}
                     disabled={isLoadingOptions}
                     placeholder={isLoadingOptions ? "Loading categories..." : "Select category"}
                     getLabel={(option) => option.label}
@@ -199,9 +216,12 @@ function AddExpenses() {
                     Date <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <input
+                    ref={expenseDateRef}
                     type="date"
+                    autoFocus
                     value={expenseDate}
                     onChange={(e) => setExpenseDate(e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, amountRef)}
                     className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
@@ -305,10 +325,12 @@ function AddExpenses() {
                     Amount (Rs.) <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <input
+                    ref={amountRef}
                     type="number"
                     min="0"
                     value={expenseAmount}
                     onChange={(e) => setExpenseAmount(e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, paymentMethodRef)}
                     placeholder="e.g. 65000"
                     className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
@@ -323,6 +345,8 @@ function AddExpenses() {
                     customers={paymentMethodOptions}
                     value={paymentMethod}
                     onChange={(option) => setPaymentMethod(option?._id || "")}
+                    onSelected={() => accountRef.current?.focus()}
+                    triggerRef={paymentMethodRef}
                     disabled={isLoadingOptions}
                     placeholder={isLoadingOptions ? "Loading..." : "Select payment method"}
                     getLabel={(option) => option.label}
@@ -340,6 +364,8 @@ function AddExpenses() {
                     customers={accountOptions}
                     value={paidFromAccountId}
                     onChange={(option) => setPaidFromAccountId(option?._id || "")}
+                    onSelected={() => handleSubmit({ preventDefault: () => {} })}
+                    triggerRef={accountRef}
                     disabled={isLoadingOptions}
                     placeholder={isLoadingOptions ? "Loading..." : "Select source account"}
                     getLabel={(option) => option.label}

@@ -41,6 +41,7 @@ function AddSupplier() {
   const supplierNameRef = useRef(null);
   const contactPersonNameRef = useRef(null);
   const phoneNumberRef = useRef(null);
+  const emailAddressRef = useRef(null);
   const paymentTermDaysRef = useRef(null);
   const businessAddressRef = useRef(null);
 
@@ -199,7 +200,9 @@ function AddSupplier() {
             Suppliers
           </span>{" "}
           <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
-          <span className="font-semibold text-slate-600 dark:text-gray-400">Add Supplier</span>
+          <span className="font-semibold text-slate-600 dark:text-gray-400">
+            Add Supplier
+          </span>
         </p>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-gray-100">
           Add Supplier
@@ -253,15 +256,19 @@ function AddSupplier() {
                       : "border-slate-200 dark:border-gray-700 focus:border-[#008951] focus:ring-emerald-100"
                   }`}
                   required
+                  autoFocus
                 />
                 {supplierNameError && (
-                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{supplierNameError}</p>
+                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">
+                    {supplierNameError}
+                  </p>
                 )}
               </div>
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
-                  Contact Person <span className="text-rose-500 dark:text-rose-400">*</span>
+                  Contact Person{" "}
+                  <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   ref={contactPersonNameRef}
@@ -280,13 +287,16 @@ function AddSupplier() {
                   }`}
                 />
                 {contactPersonNameError && (
-                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{contactPersonNameError}</p>
+                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">
+                    {contactPersonNameError}
+                  </p>
                 )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
-                  Phone Number <span className="text-rose-500 dark:text-rose-400">*</span>
+                  Phone Number{" "}
+                  <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
                   ref={phoneNumberRef}
@@ -297,7 +307,7 @@ function AddSupplier() {
                     setPhoneNumber(e.target.value);
                     clearError(setPhoneNumberError);
                   }}
-                  onKeyDown={(e) => handleKeyDown(e, emailAddress ? null : paymentTermDaysRef)}
+                  onKeyDown={(e) => handleKeyDown(e, emailAddressRef)}
                   className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-2 ${
                     phoneNumberError
                       ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
@@ -305,7 +315,9 @@ function AddSupplier() {
                   }`}
                 />
                 {phoneNumberError && (
-                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{phoneNumberError}</p>
+                  <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">
+                    {phoneNumberError}
+                  </p>
                 )}
               </div>
 
@@ -314,11 +326,12 @@ function AddSupplier() {
                   Email Address
                 </label>
                 <input
+                  ref={emailAddressRef}
                   type="email"
                   placeholder="e.g. supplier@domain.com"
                   value={emailAddress}
                   onChange={(e) => setEmailAddress(e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(e, paymentTermDaysRef)}
+                  onKeyDown={(e) => handleKeyDown(e, businessAddressRef)}
                   className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
@@ -364,7 +377,8 @@ function AddSupplier() {
             <div className="p-5 space-y-5">
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
-                  Payment Terms <span className="text-rose-500 dark:text-rose-400">*</span>
+                  Payment Terms{" "}
+                  <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={PAYMENT_TERM_OPTIONS}
@@ -424,7 +438,7 @@ function AddSupplier() {
                 value={businessAddress}
                 onChange={(e) => setBusinessAddress(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
+                  if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     handleSubmit(e);
                   }
@@ -538,7 +552,9 @@ function AddSupplier() {
                 }`}
               />
               {ibanError ? (
-                <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{ibanError}</p>
+                <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">
+                  {ibanError}
+                </p>
               ) : (
                 <p className="mt-1.5 text-xs text-slate-400 dark:text-gray-500">
                   Pakistan IBAN: PK + 22 characters (24 total)

@@ -202,7 +202,7 @@ function PaymentDetails() {
               Payment Amount
             </p>
             <p className="text-3xl font-extrabold text-slate-900 dark:text-gray-100">
-              Rs. {(payment.paymentAmount || 0).toLocaleString()}
+               {(payment.paymentAmount || 0).toLocaleString()}
             </p>
           </div>
         </div>
@@ -242,7 +242,7 @@ function PaymentDetails() {
               />
               <DetailItem
                 label="Allocated Total"
-                value={`Rs. ${allocatedTotal.toLocaleString()}`}
+                value={` ${allocatedTotal.toLocaleString()}`}
                 icon={Wallet}
               />
             </dl>
@@ -340,10 +340,10 @@ function PaymentDetails() {
                             "-"}
                         </td>
                         <td className="px-4 py-3 text-right text-emerald-600 dark:text-emerald-400 font-semibold tabular-nums">
-                          Rs. {(allocation?.amountApplied || 0).toLocaleString()}
+                           {(allocation?.amountApplied || 0).toLocaleString()}
                         </td>
                         <td className="px-4 py-3 text-right text-slate-600 dark:text-gray-400 tabular-nums">
-                          Rs. {(allocation?.outstandingAmount || 0).toLocaleString()}
+                           {(allocation?.outstandingAmount || 0).toLocaleString()}
                         </td>
                       </tr>
                     ))}
@@ -354,7 +354,7 @@ function PaymentDetails() {
                         Total
                       </td>
                       <td className="px-4 py-3 text-right text-sm font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
-                        Rs. {allocatedTotal.toLocaleString()}
+                         {allocatedTotal.toLocaleString()}
                       </td>
                       <td className="px-4 py-3" />
                     </tr>

@@ -30,7 +30,7 @@ const formatAccountOptionLabel = (account) => {
     account.label ||
     [account.accountCode, account.accountName].filter(Boolean).join(" – ");
   const balance = Number(account.currentBalanceAmount || 0);
-  return `${base} (Rs. ${balance.toLocaleString()})`;
+  return `${base} ( ${balance.toLocaleString()})`;
 };
 
 const partyLabel = (party) =>
@@ -215,7 +215,7 @@ function AddPayment() {
     : allocationAmounts;
   const ledgerBalanceLabel =
     partyFormOptions?.data?.ledgerBalanceLabel ||
-    (formData.customerId ? "Loading..." : "Rs. 0");
+    (formData.customerId ? "Loading..." : " 0");
 
   const directionOptions = useMemo(() => {
     const fromApi = formOptions?.data?.directions || [];
@@ -445,13 +445,13 @@ function AddPayment() {
       const amount = parseAmount(activeAllocationAmounts[invoiceId]);
       if (!invoice || amount <= 0) return null;
       const label = invoice.invoiceNumber || invoice.saleNumber || invoiceId;
-      return `${label}: Rs. ${amount.toLocaleString()}`;
+      return `${label}:  ${amount.toLocaleString()}`;
     })
     .filter(Boolean)
     .join(" · ");
   const appliedAmountsLabel = allocationRemark
     ? unallocatedAmount > 0
-      ? `${allocationRemark} · Unallocated Rs. ${unallocatedAmount.toLocaleString()}`
+      ? `${allocationRemark} · Unallocated  ${unallocatedAmount.toLocaleString()}`
       : allocationRemark
     : "";
 
@@ -489,7 +489,9 @@ function AddPayment() {
               Payments
             </span>{" "}
             <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
-            <span className="font-semibold text-slate-600 dark:text-gray-400">Add Payment</span>
+            <span className="font-semibold text-slate-600 dark:text-gray-400">
+              Add Payment
+            </span>
           </p>
           <h1 className=" text-2xl font-bold tracking-tight text-BLUE-dark mt-2">
             Record Payment Voucher
@@ -530,6 +532,7 @@ function AddPayment() {
                     </label>
                     <input
                       type="date"
+                      autoFocus
                       value={formData.paymentDate}
                       onChange={(event) =>
                         handleInputChange("paymentDate", event.target.value)
@@ -563,10 +566,10 @@ function AddPayment() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                   <div>
                     <label className="block text-sm font-semibold text-BLUE-dark mb-1.5">
-                      {isCustomerParty
-                        ? "Select Customer"
-                        : "Select Supplier"}{" "}
-                      <span className="text-rose-500 dark:text-rose-400">*</span>
+                      {isCustomerParty ? "Select Customer" : "Select Supplier"}{" "}
+                      <span className="text-rose-500 dark:text-rose-400">
+                        *
+                      </span>
                     </label>
                     <SearchableCustomerSelect
                       customers={partyOptions}
@@ -589,7 +592,9 @@ function AddPayment() {
                       }
                     />
                     {customerIdError && (
-                      <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{customerIdError}</p>
+                      <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">
+                        {customerIdError}
+                      </p>
                     )}
                   </div>
 
@@ -619,11 +624,13 @@ function AddPayment() {
                   <div>
                     <label className="block text-sm font-semibold text-BLUE-dark mb-1.5">
                       {isRefund
-                        ? "Refund Amount Paid (Rs.)"
+                        ? "Refund Amount Paid "
                         : isCustomerReceipt
-                          ? "Payment Amount Received (Rs.)"
-                          : "Payment Amount Paid (Rs.)"}{" "}
-                      <span className="text-rose-500 dark:text-rose-400">*</span>
+                          ? "Payment Amount Received "
+                          : "Payment Amount Paid "}{" "}
+                      <span className="text-rose-500 dark:text-rose-400">
+                        *
+                      </span>
                     </label>
                     <div className="relative">
                       <button
@@ -656,13 +663,18 @@ function AddPayment() {
                       />
                     </div>
                     {paymentAmountError && (
-                      <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{paymentAmountError}</p>
+                      <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">
+                        {paymentAmountError}
+                      </p>
                     )}
                   </div>
 
                   <div>
                     <label className="block text-sm font-semibold text-BLUE-dark mb-1.5">
-                      Payment Method <span className="text-rose-500 dark:text-rose-400">*</span>
+                      Payment Method{" "}
+                      <span className="text-rose-500 dark:text-rose-400">
+                        *
+                      </span>
                     </label>
                     <SearchableCustomerSelect
                       customers={paymentMethodOptions}
@@ -681,7 +693,9 @@ function AddPayment() {
                       emptyText="No payment method found"
                     />
                     {paymentMethodError && (
-                      <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{paymentMethodError}</p>
+                      <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">
+                        {paymentMethodError}
+                      </p>
                     )}
                   </div>
 
@@ -690,7 +704,9 @@ function AddPayment() {
                       {isRefund
                         ? "Pay From Cash / Bank Account"
                         : "Target Plant Account"}{" "}
-                      <span className="text-rose-500 dark:text-rose-400">*</span>
+                      <span className="text-rose-500 dark:text-rose-400">
+                        *
+                      </span>
                     </label>
                     <SearchableCustomerSelect
                       customers={accountOptions}
@@ -717,7 +733,9 @@ function AddPayment() {
                       emptyText="No account found"
                     />
                     {accountIdError && (
-                      <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">{accountIdError}</p>
+                      <p className="mt-1.5 text-xs text-rose-500 dark:text-rose-400">
+                        {accountIdError}
+                      </p>
                     )}
                   </div>
 
@@ -745,7 +763,9 @@ function AddPayment() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <h2 className="text-[16px] font-bold text-BLUE-dark">
-                    {isRefund ? "Refund Due Allocation" : "Invoice Auto-Allocation"}
+                    {isRefund
+                      ? "Refund Due Allocation"
+                      : "Invoice Auto-Allocation"}
                   </h2>
                   <p className="mt-1 text-sm text-tertiary">
                     {isAutomatic
@@ -809,20 +829,23 @@ function AddPayment() {
                         Date
                       </th>
                       <th className="px-4 py-3 text-right font-semibold text-slate-700 dark:text-gray-300">
-                        Total (Rs.)
+                        Total 
                       </th>
                       <th className="px-4 py-3 text-right font-semibold text-slate-700 dark:text-gray-300">
-                        {isRefund ? "Refund Due (Rs.)" : "Outstanding (Rs.)"}
+                        {isRefund ? "Refund Due " : "Outstanding "}
                       </th>
                       <th className="px-4 py-3 text-right font-semibold text-slate-700 dark:text-gray-300">
-                        {isRefund ? "Amount to refund (Rs.)" : "Amount to apply (Rs.)"}
+                        {isRefund
+                          ? "Amount to refund "
+                          : "Amount to apply "}
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     {invoices.map((invoice) => {
                       const invoiceId = getInvoiceId(invoice);
-                      const isSelected = activeSelectedInvoices.includes(invoiceId);
+                      const isSelected =
+                        activeSelectedInvoices.includes(invoiceId);
 
                       return (
                         <tr

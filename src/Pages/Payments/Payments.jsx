@@ -73,7 +73,7 @@ function Payments() {
         voucherNo: payment.paymentNumber,
         date: new Date(payment.paymentDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
         party: payment.partyName,
-        amount: `Rs. ${payment.paymentAmount.toLocaleString()}`,
+        amount: ` ${payment.paymentAmount.toLocaleString()}`,
         method: payment.paymentMethodLabel || payment.paymentMethod,
         direction: typeMeta.direction,
         directionLabel: typeMeta.label,

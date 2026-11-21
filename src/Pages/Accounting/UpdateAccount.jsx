@@ -166,7 +166,9 @@ function UpdateAccount() {
             Accounts
           </span>{" "}
           <span className="px-1 text-slate-400 dark:text-gray-500">/</span>{" "}
-          <span className="font-semibold text-slate-600 dark:text-gray-400">Update Account</span>
+          <span className="font-semibold text-slate-600 dark:text-gray-400">
+            Update Account
+          </span>
         </p>
 
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-gray-100">
@@ -201,15 +203,19 @@ function UpdateAccount() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
-                  Account Name <span className="text-red-500 dark:text-red-400">*</span>
+                  Account Name{" "}
+                  <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.accountName}
+                  autoFocus
                   onChange={(e) => handleChange("accountName", e.target.value)}
                   placeholder="Enter account name"
                   className={`w-full rounded-md border ${
-                    formErrors.accountName ? "border-red-500" : "border-slate-200 dark:border-gray-700"
+                    formErrors.accountName
+                      ? "border-red-500"
+                      : "border-slate-200 dark:border-gray-700"
                   } bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100`}
                 />
                 {formErrors.accountName && (
@@ -221,7 +227,8 @@ function UpdateAccount() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
-                  Account Type <span className="text-red-500 dark:text-red-400">*</span>
+                  Account Type{" "}
+                  <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={accountTypeOptions}
@@ -231,7 +238,9 @@ function UpdateAccount() {
                   }
                   disabled={optionsLoading}
                   error={!!formErrors.accountType}
-                  placeholder={optionsLoading ? "Loading..." : "Select account type"}
+                  placeholder={
+                    optionsLoading ? "Loading..." : "Select account type"
+                  }
                   getLabel={(option) => option.label}
                   getSearchText={(option) => option.label.toLowerCase()}
                   emptyText="No account type found"
@@ -245,7 +254,8 @@ function UpdateAccount() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
-                  Account Category <span className="text-red-500 dark:text-red-400">*</span>
+                  Account Category{" "}
+                  <span className="text-red-500 dark:text-red-400">*</span>
                 </label>
                 <SearchableCustomerSelect
                   customers={accountCategoryOptions}
@@ -255,14 +265,17 @@ function UpdateAccount() {
                   }
                   disabled={optionsLoading}
                   error={!!formErrors.accountCategory}
-                  placeholder={optionsLoading ? "Loading..." : "Select category"}
+                  placeholder={
+                    optionsLoading ? "Loading..." : "Select category"
+                  }
                   getLabel={(option) => option.label}
                   getSearchText={(option) => option.label.toLowerCase()}
                   emptyText="No category found"
                 />
                 {formErrors.accountCategory && (
                   <p className="text-xs text-red-500 dark:text-red-400 mt-1 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" /> {formErrors.accountCategory}
+                    <AlertCircle className="h-3 w-3" />{" "}
+                    {formErrors.accountCategory}
                   </p>
                 )}
               </div>
@@ -278,7 +291,9 @@ function UpdateAccount() {
                     handleChange("parentAccountId", account?._id || null)
                   }
                   disabled={optionsLoading}
-                  placeholder={optionsLoading ? "Loading..." : "Select parent account"}
+                  placeholder={
+                    optionsLoading ? "Loading..." : "Select parent account"
+                  }
                   getLabel={(account) => account.label}
                   getSearchText={(account) =>
                     (account.label || "").toLowerCase()
@@ -381,7 +396,8 @@ function UpdateAccount() {
                 />
                 {formErrors.openingBalanceAmount && (
                   <p className="text-xs text-red-500 dark:text-red-400 mt-1 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" /> {formErrors.openingBalanceAmount}
+                    <AlertCircle className="h-3 w-3" />{" "}
+                    {formErrors.openingBalanceAmount}
                   </p>
                 )}
               </div>
@@ -433,21 +449,32 @@ function UpdateAccount() {
                 </span>
                 <button
                   type="button"
-                  onClick={() => handleChange("allowManualEntries", !formData.allowManualEntries)}
+                  onClick={() =>
+                    handleChange(
+                      "allowManualEntries",
+                      !formData.allowManualEntries,
+                    )
+                  }
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    formData.allowManualEntries ? "bg-[#008951]" : "bg-slate-300"
+                    formData.allowManualEntries
+                      ? "bg-[#008951]"
+                      : "bg-slate-300"
                   }`}
                 >
                   <span
                     className={`inline-block h-5 w-5 transform rounded-full bg-white dark:bg-gray-900 transition-transform ${
-                      formData.allowManualEntries ? "translate-x-5" : "translate-x-1"
+                      formData.allowManualEntries
+                        ? "translate-x-5"
+                        : "translate-x-1"
                     }`}
                   />
                 </button>
               </label>
 
               <label className="flex items-center justify-between gap-3 rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2">
-                <span className="text-sm text-slate-700 dark:text-gray-300">Primary Account</span>
+                <span className="text-sm text-slate-700 dark:text-gray-300">
+                  Primary Account
+                </span>
                 <button
                   type="button"
                   onClick={() => handleChange("isPrimary", !formData.isPrimary)}
@@ -480,7 +507,9 @@ function UpdateAccount() {
             disabled={updateMutation.isPending || optionsLoading}
             className="inline-flex items-center gap-2 rounded-lg bg-[#008951] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#007545] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {updateMutation.isPending && <Loader className="h-4 w-4 animate-spin" />}
+            {updateMutation.isPending && (
+              <Loader className="h-4 w-4 animate-spin" />
+            )}
             {updateMutation.isPending ? "Updating..." : "Update Account"}
           </button>
         </div>

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CirclePlus, Eye, Edit3, ChevronDown } from "lucide-react";
+import { CirclePlus, Eye, Edit3, ChevronDown, Layers, Weight, CheckCircle2, Clock3 } from "lucide-react";
 import { Button, Tooltip } from "@heroui/react";
 import GlobalTable from "../../utils/GlobalTable";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
@@ -242,39 +242,55 @@ function FillingBatches() {
         </div>
 
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
-            <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Total Batches</p>
-            <p className="mt-2 text-2xl font-extrabold text-6th-color">{summaryStats.totalBatches}</p>
-            <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary">
-              <span className="h-2 w-2 rounded-full bg-[#2563EB]"></span>
-              All batch runs
+          <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-950/60 dark:to-blue-900/40 p-5 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="rounded-lg bg-blue-200/70 dark:bg-blue-800/60 p-2">
+                <Layers className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Total Batches</p>
+                <p className="mt-1 text-2xl font-extrabold text-blue-700 dark:text-blue-300">{summaryStats.totalBatches}</p>
+                <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">All batch runs</p>
+              </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
-            <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Total Quantity</p>
-            <p className="mt-2 text-2xl font-extrabold text-5th-color">{summaryStats.totalQuantity.toLocaleString()} KG</p>
-            <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary">
-              <span className="h-2 w-2 rounded-full bg-[#10B981]"></span>
-              Gas filled this cycle
+          <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-linear-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/60 dark:to-emerald-900/40 p-5 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="rounded-lg bg-emerald-200/70 dark:bg-emerald-800/60 p-2">
+                <Weight className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Total Quantity</p>
+                <p className="mt-1 text-2xl font-extrabold text-emerald-700 dark:text-emerald-300">{summaryStats.totalQuantity.toLocaleString()} KG</p>
+                <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">Gas filled this cycle</p>
+              </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
-            <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Completed</p>
-            <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-gray-100">{summaryStats.completedCount}</p>
-            <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary">
-              <span className="h-2 w-2 rounded-full bg-[#4B5563]"></span>
-              Finished batches
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-linear-to-br from-slate-50 to-slate-100 dark:from-gray-800 dark:to-gray-900 p-5 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="rounded-lg bg-slate-200/70 dark:bg-gray-700 p-2">
+                <CheckCircle2 className="h-5 w-5 text-slate-700 dark:text-gray-300" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Completed</p>
+                <p className="mt-1 text-2xl font-extrabold text-slate-900 dark:text-gray-100">{summaryStats.completedCount}</p>
+                <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">Finished batches</p>
+              </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
-            <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Pending</p>
-            <p className="mt-2 text-2xl font-extrabold text-orange">{summaryStats.pendingCount}</p>
-            <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary">
-              <span className="h-2 w-2 rounded-full bg-amber-500"></span>
-              Awaiting action
+          <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-linear-to-br from-amber-50 to-amber-100 dark:from-amber-950/60 dark:to-amber-900/40 p-5 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="rounded-lg bg-amber-200/70 dark:bg-amber-800/60 p-2">
+                <Clock3 className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Pending</p>
+                <p className="mt-1 text-2xl font-extrabold text-amber-600 dark:text-amber-400">{summaryStats.pendingCount}</p>
+                <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">Awaiting action</p>
+              </div>
             </div>
           </div>
         </div>

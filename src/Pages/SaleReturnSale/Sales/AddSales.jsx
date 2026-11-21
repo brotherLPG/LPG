@@ -58,6 +58,24 @@ function AddSales() {
 
   const createSaleMutation = useCreateSale();
 
+  const invoiceDateRef = useRef(null);
+  const customerTriggerRef = useRef(null);
+  const paymentTermsRef = useRef(null);
+  const paymentMethodRef = useRef(null);
+  const accountIdRef = useRef(null);
+  const referenceNumberRef = useRef(null);
+  const amountPaidRef = useRef(null);
+  const remarksRef = useRef(null);
+
+  const handleKeyDown = (e, nextRef) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (nextRef && nextRef.current) {
+        nextRef.current.focus();
+      }
+    }
+  };
+
 
   useEffect(() => {
     if (accountId || accounts.length === 0) return
@@ -297,9 +315,12 @@ function AddSales() {
                     Invoice Date <span className="text-rose-500 dark:text-rose-400">*</span>
                   </label>
                   <input
+                    ref={invoiceDateRef}
                     type="date"
+                    autoFocus
                     value={invoiceDate}
                     onChange={(e) => setInvoiceDate(e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, customerTriggerRef)}
                     className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
@@ -312,6 +333,7 @@ function AddSales() {
                     Customer <span className='text-rose-500 dark:text-rose-400'>*</span>
                   </label>
                   <SearchableCustomerSelect
+                    triggerRef={customerTriggerRef}
                     customers={customers}
                     value={customerId}
                     disabled={optionsLoading}
@@ -360,8 +382,10 @@ function AddSales() {
                   </label>
                   <div className="relative">
                     <select
+                      ref={paymentTermsRef}
                       value={paymentTermDays}
                       onChange={(e) => setPaymentTermDays(Number(e.target.value))}
+                      onKeyDown={(e) => handleKeyDown(e, paymentMethodRef)}
                       disabled={optionsLoading}
                       className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                     >
@@ -384,8 +408,10 @@ function AddSales() {
                 </label>
                 <div className='relative'>
                   <select
+                    ref={paymentMethodRef}
                     value={paymentMethod}
                     onChange={e => setPaymentMethod(e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, accountIdRef)}
                     className='w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2 text-sm text-slate-700 dark:text-gray-300 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100'
                   >
                     <option value=''>Select sale type</option>
@@ -408,11 +434,13 @@ function AddSales() {
                   </label>
                   <div className="relative">
                     <select
+                      ref={accountIdRef}
                       value={accountId}
                       onChange={(e) => {
                         setAccountId(e.target.value);
                         setAccountIdError("");
                       }}
+                      onKeyDown={(e) => handleKeyDown(e, referenceNumberRef)}
                       disabled={optionsLoading}
                       className={`w-full appearance-none rounded-md border bg-white dark:bg-gray-900 pl-3 pr-10 py-2 text-sm text-slate-700 dark:text-gray-300 outline-none focus:ring-2 ${
                         accountIdError
@@ -439,9 +467,11 @@ function AddSales() {
                     Reference Number
                   </label>
                   <input
+                    ref={referenceNumberRef}
                     type='text'
                     value={referenceNumber}
                     onChange={e => setReferenceNumber(e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, amountPaidRef)}
                     placeholder='Enter reference number'
                     className='w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951]'
                   />
@@ -646,9 +676,11 @@ function AddSales() {
                     <Sparkles size={15} strokeWidth={1.75} />
                   </button>
                   <input
+                    ref={amountPaidRef}
                     type="number"
                     min="0"
                     value={amountPaid === 0 || amountPaid === "0" ? "" : amountPaid}
+                    onKeyDown={(e) => handleKeyDown(e, remarksRef)}
                     onChange={(e) => {
                       const raw = e.target.value;
                       if (raw === "") {
@@ -722,9 +754,16 @@ function AddSales() {
                   Internal Remarks
                 </label>
                 <textarea
+                  ref={remarksRef}
                   rows="3"
                   value={remarks}
                   onChange={(e) => setRemarks(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmit(false);
+                    }
+                  }}
                   placeholder="Add internal notes for reference..."
                   className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100 resize-none"
                 />

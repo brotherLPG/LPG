@@ -25,6 +25,15 @@ function ReceiveLpg() {
   const truckRegRef = useRef(null);
   const supplierInvoiceRef = useRef(null);
 
+  const handleKeyDown = (e, nextRef) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (nextRef && nextRef.current) {
+        nextRef.current.focus();
+      }
+    }
+  };
+
   // Error states
   const [supplierIdError, setSupplierIdError] = useState("");
   const [quantityError, setQuantityError] = useState("");
@@ -193,6 +202,7 @@ function ReceiveLpg() {
                     setSupplierId(option?._id || "");
                     clearError(setSupplierIdError);
                   }}
+                  onSelected={() => truckRegRef.current?.focus()}
                   triggerRef={supplierIdRef}
                   error={!!supplierIdError}
                   placeholder="Select Supplier"
@@ -215,11 +225,13 @@ function ReceiveLpg() {
                   ref={truckRegRef}
                   type="text"
                   // defaultValue="LEA-4521"
+                  autoFocus
                   value={truckReg}
                   onChange={(e) => {
                     setTruckReg(e.target.value);
                     clearError(setTruckRegError);
                   }}
+                  onKeyDown={(e) => handleKeyDown(e, supplierInvoiceRef)}
                   placeholder="LEA-4521"
                   className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-2 ${
                     truckRegError
@@ -246,6 +258,7 @@ function ReceiveLpg() {
                     setSupplierInvoice(e.target.value);
                     clearError(setSupplierInvoiceError);
                   }}
+                  onKeyDown={(e) => handleKeyDown(e, quantityRef)}
                   className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-2 ${
                     supplierInvoiceError
                       ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
@@ -297,6 +310,12 @@ function ReceiveLpg() {
                     onChange={(e) => {
                       setQuantity(e.target.value);
                       clearError(setQuantityError);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleSubmit(e);
+                      }
                     }}
                     className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-2 ${
                       quantityError

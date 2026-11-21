@@ -57,6 +57,7 @@ function SearchableCustomerSelect({
   getSearchText = customerSearchText,
   emptyText = "No customer found",
   triggerRef,
+  onSelected,
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -129,6 +130,7 @@ function SearchableCustomerSelect({
 
   const choose = (customer) => {
     onChange(customer || null);
+    onSelected?.(customer || null);
     setOpen(false);
   };
 

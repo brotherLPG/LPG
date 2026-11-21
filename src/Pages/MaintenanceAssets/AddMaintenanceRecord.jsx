@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   useCreateMaintenanceRecord,
@@ -51,6 +51,24 @@ function AddMaintenanceRecord() {
   const [performedByEmployeeId, setPerformedByEmployeeId] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
   const [accountId, setAccountId] = useState("");
+
+  const maintenanceDateRef = useRef(null);
+  const assetRef = useRef(null);
+  const maintenanceTypeRef = useRef(null);
+  const employeeRef = useRef(null);
+  const costRef = useRef(null);
+  const paymentMethodRef = useRef(null);
+  const accountRef = useRef(null);
+  const workPerformedRef = useRef(null);
+
+  const handleKeyDown = (e, nextRef) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (nextRef && nextRef.current) {
+        nextRef.current.focus();
+      }
+    }
+  };
 
   const selectedAsset = assetList.find((a) => a._id === assetId);
 
@@ -204,9 +222,12 @@ function AddMaintenanceRecord() {
                   Maintenance Date <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
+                  ref={maintenanceDateRef}
                   type="date"
+                  autoFocus
                   value={maintenanceDate}
                   onChange={(e) => setMaintenanceDate(e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(e, assetRef)}
                   required
                   className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                 />
@@ -237,6 +258,8 @@ function AddMaintenanceRecord() {
                   customers={assetOptions}
                   value={assetId}
                   onChange={(option) => setassetId(option?._id || "")}
+                  onSelected={() => maintenanceTypeRef.current?.focus()}
+                  triggerRef={assetRef}
                   disabled={isLoadingOptions}
                   placeholder={isLoadingOptions ? "Loading assets..." : "Select an asset..."}
                   getLabel={(option) => option.label}
@@ -271,6 +294,8 @@ function AddMaintenanceRecord() {
                   customers={maintenanceTypeOptions}
                   value={maintenanceType}
                   onChange={(option) => setMaintenanceType(option?._id || "")}
+                  onSelected={() => employeeRef.current?.focus()}
+                  triggerRef={maintenanceTypeRef}
                   disabled={isLoadingOptions}
                   placeholder={isLoadingOptions ? "Loading types..." : "Select maintenance type..."}
                   getLabel={(option) => option.label}
@@ -288,6 +313,8 @@ function AddMaintenanceRecord() {
                   customers={employeeOptions}
                   value={performedByEmployeeId}
                   onChange={(option) => setPerformedByEmployeeId(option?._id || "")}
+                  onSelected={() => costRef.current?.focus()}
+                  triggerRef={employeeRef}
                   disabled={isLoadingOptions}
                   placeholder={isLoadingOptions ? "Loading employees..." : "Select employee / technician..."}
                   getLabel={(option) => option.label}
@@ -302,10 +329,12 @@ function AddMaintenanceRecord() {
                   Maintenance Cost (Rs.) <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
+                  ref={costRef}
                   type="number"
                   min="0"
                   value={maintenanceCostAmount}
                   onChange={(e) => setMaintenanceCostAmount(e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(e, paymentMethodRef)}
                   placeholder="e.g. 18000"
                   required
                   className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
@@ -321,6 +350,8 @@ function AddMaintenanceRecord() {
                   customers={paymentMethodOptions}
                   value={paymentMethod}
                   onChange={(option) => setPaymentMethod(option?._id || "")}
+                  onSelected={() => accountRef.current?.focus()}
+                  triggerRef={paymentMethodRef}
                   disabled={isLoadingOptions}
                   placeholder={isLoadingOptions ? "Loading..." : "Select payment method"}
                   getLabel={(option) => option.label}
@@ -338,6 +369,8 @@ function AddMaintenanceRecord() {
                   customers={accountOptions}
                   value={accountId}
                   onChange={(option) => setAccountId(option?._id || "")}
+                  onSelected={() => workPerformedRef.current?.focus()}
+                  triggerRef={accountRef}
                   disabled={isLoadingOptions}
                   placeholder={isLoadingOptions ? "Loading..." : "Select account"}
                   getLabel={(option) => option.label}
@@ -370,8 +403,15 @@ function AddMaintenanceRecord() {
                   Work Performed <span className='text-rose-500 dark:text-rose-400'>*</span>
                 </label>
                 <textarea
+                  ref={workPerformedRef}
                   value={workPerformed}
                   onChange={e => setWorkPerformed(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmit(e);
+                    }
+                  }}
                   rows={3}
                   placeholder='Describe the service or repair work performed...'
                   required

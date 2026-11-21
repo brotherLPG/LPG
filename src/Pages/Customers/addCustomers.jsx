@@ -136,6 +136,7 @@ function AddCustomers() {
                   className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100"
                   placeholder="Enter customer name"
                   required
+                  autoFocus
                 />
               </div>
 

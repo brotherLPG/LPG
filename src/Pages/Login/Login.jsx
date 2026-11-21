@@ -1,15 +1,17 @@
 import { useState } from "react";
-import { AlertCircle, LoaderCircle} from "lucide-react";
+import { AlertCircle, LoaderCircle, Sun, Moon } from "lucide-react";
 import logo from "../../assets/Images/logo.jpeg";
 import loginpimage from "../../assets/Images/loginpage.jpg";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../utils/GlobalToast";
 import { useLogin } from "../../queries/auth/auth.queries";
+import { useTheme } from "../../contexts/ThemeContext";
 
 function Login() {
   const navigate = useNavigate();
   const toast = useToast();
   const loginMutation = useLogin();
+  const { isDark, toggleTheme } = useTheme();
 
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
@@ -40,6 +42,14 @@ function Login() {
 
   return (
     <main className="flex min-h-screen w-full bg-white dark:bg-gray-900">
+      <button
+        type="button"
+        onClick={toggleTheme}
+        aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        className="fixed right-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-slate-600 dark:text-gray-300 shadow-sm transition-colors hover:bg-slate-50 dark:hover:bg-gray-700"
+      >
+        {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+      </button>
       <section className="grid w-full lg:grid-cols-2">
         {/* Left Panel - Branding */}
         <div
@@ -109,7 +119,7 @@ function Login() {
               </div>
             )}
 
-            <div className="bg-[white] shadow-2xl shadow-[#0F172A1A] rounded-lg p-6">
+            <div className="bg-[white] dark:bg-gray-800 shadow-2xl shadow-[#0F172A1A] rounded-lg p-6">
               <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <label className="block">
                   <span className="block text-sm font-semibold mb-2 text-slate-900 dark:text-gray-100">
@@ -158,12 +168,12 @@ function Login() {
                     />
                     <span className="text-BLUE-dark">Remember me</span>
                   </label>
-                  <button
+                  {/* <button
                     type="button"
                     className="font-semibold hover:underline text-accent-blue"
                   >
                     Forgot Password?
-                  </button>
+                  </button> */}
                 </div>
 
                 <button

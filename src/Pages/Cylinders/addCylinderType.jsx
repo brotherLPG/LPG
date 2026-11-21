@@ -20,6 +20,15 @@ function AddCylinderType() {
   const tareWeightKgRef = useRef(null);
   const sellingPriceRef = useRef(null);
 
+  const handleKeyDown = (e, nextRef) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (nextRef && nextRef.current) {
+        nextRef.current.focus();
+      }
+    }
+  };
+
   // Error states
   const [typeNameError, setTypeNameError] = useState("");
   const [categoryError, setCategoryError] = useState("");
@@ -229,6 +238,7 @@ function AddCylinderType() {
                     setTypeName(e.target.value);
                     clearError(setTypeNameError);
                   }}
+                  onKeyDown={(e) => handleKeyDown(e, categoryRef)}
                   className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-2 ${
                     typeNameError
                       ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
@@ -254,6 +264,7 @@ function AddCylinderType() {
                     setCategory(option?._id || "");
                     clearError(setCategoryError);
                   }}
+                  onSelected={() => capacityKgRef.current?.focus()}
                   triggerRef={categoryRef}
                   disabled={optionsLoading}
                   error={!!categoryError}
@@ -285,6 +296,7 @@ function AddCylinderType() {
                     setCapacityKg(e.target.value);
                     clearError(setCapacityKgError);
                   }}
+                  onKeyDown={(e) => handleKeyDown(e, tareWeightKgRef)}
                   className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-2 ${
                     capacityKgError
                       ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
@@ -312,6 +324,7 @@ function AddCylinderType() {
                     setTareWeightKg(e.target.value);
                     clearError(setTareWeightKgError);
                   }}
+                  onKeyDown={(e) => handleKeyDown(e, sellingPriceRef)}
                   className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-2 ${
                     tareWeightKgError
                       ? "border-rose-400 focus:border-rose-500 focus:ring-rose-100"
@@ -407,6 +420,12 @@ function AddCylinderType() {
                   onChange={(e) => {
                     setSellingPrice(e.target.value);
                     clearError(setSellingPriceError);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleSubmit(e);
+                    }
                   }}
                   className={`w-full rounded-md border bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:ring-2 ${
                     sellingPriceError

@@ -1,4 +1,4 @@
-import { CirclePlus, Eye, Edit3, ChevronDown, Printer } from "lucide-react";
+import { CirclePlus, Eye, Edit3, ChevronDown, Printer, Truck, Weight, Banknote, Clock3 } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Tooltip } from "@heroui/react";
@@ -419,70 +419,78 @@ const handlePrintReceipt = (receipt) => {
 
         {/* Summary Cards */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-950/60 dark:to-blue-900/40 p-5 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="rounded-lg bg-blue-200/70 dark:bg-blue-800/60 p-2">
+                <Truck className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div className="min-w-0">
                 <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">
                   This Month Receipts
                 </p>
-                <p className="mt-2 text-2xl font-extrabold text-6th-color">
+                <p className="mt-1 text-2xl font-extrabold text-blue-700 dark:text-blue-300">
                   {summaryStats.thisMonthReceipts} Shipments
                 </p>
-                <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary my-auto">
-                  <span className="h-2 w-2 rounded-full bg-[#2563EB]"></span>
+                <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">
                   Total deliveries received
-                </div>
+                </p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-linear-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/60 dark:to-emerald-900/40 p-5 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="rounded-lg bg-emerald-200/70 dark:bg-emerald-800/60 p-2">
+                <Weight className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div className="min-w-0">
                 <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">
                   Total Quantity Received
                 </p>
-                <p className="mt-2 text-2xl font-extrabold text-5th-color">
+                <p className="mt-1 text-2xl font-extrabold text-emerald-700 dark:text-emerald-300">
                   {summaryStats.totalQuantity.toLocaleString()} KG
                 </p>
-                <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary my-auto">
-                  <span className="h-2 w-2 rounded-full bg-[#10B981]"></span>
+                <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">
                   May 2025 volume
-                </div>
+                </p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-linear-to-br from-slate-50 to-slate-100 dark:from-gray-800 dark:to-gray-900 p-5 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="rounded-lg bg-slate-200/70 dark:bg-gray-700 p-2">
+                <Banknote className="h-5 w-5 text-slate-700 dark:text-gray-300" />
+              </div>
+              <div className="min-w-0">
                 <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">
                   Total Purchase Cost
                 </p>
-                <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-gray-100">
+                <p className="mt-1 text-2xl font-extrabold text-slate-900 dark:text-gray-100">
                   Rs. {summaryStats.totalCost.toLocaleString()}
                 </p>
-                <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary my-auto">
-                  <span className="h-2 w-2 rounded-full bg-[#4B5563]"></span>
+                <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">
                   Monthly spend
-                </div>
+                </p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-linear-to-br from-amber-50 to-amber-100 dark:from-amber-950/60 dark:to-amber-900/40 p-5 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="rounded-lg bg-amber-200/70 dark:bg-amber-800/60 p-2">
+                <Clock3 className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div className="min-w-0">
                 <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">
                   Pending Receipts
                 </p>
-                <p className="mt-2 text-2xl font-extrabold text-orange">
+                <p className="mt-1 text-2xl font-extrabold text-amber-600 dark:text-amber-400">
                   {summaryStats.pendingReceipts}
                 </p>
-                <div className="mt-1 flex items-center gap-1.5 text-xs text-tertiary my-auto">
-                  <span className="h-2 w-2 rounded-full bg-amber-500"></span>
+                <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">
                   Awaiting confirmation
-                </div>
+                </p>
               </div>
             </div>
           </div>
