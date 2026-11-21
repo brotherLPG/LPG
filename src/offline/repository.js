@@ -169,6 +169,9 @@ async function absorbServerEnvelope(path, payload) {
   if (/^\/lpg-receipts\/[^/]+$/.test(path) && !path.endsWith('/form-options') && payload?.data?._id) {
     await upsertServerRow(db.lpgReceipts, payload.data);
   }
+  if (/^\/employees\/[^/]+$/.test(path) && !path.endsWith('/form-options') && payload?.data?._id) {
+    await upsertServerRow(db.employees, payload.data);
+  }
   const items = payload?.data?.items;
   if (!Array.isArray(items)) return;
   if (path === '/customers') {
@@ -188,6 +191,9 @@ async function absorbServerEnvelope(path, payload) {
   }
   if (path === '/lpg-receipts') {
     for (const item of items) await upsertServerRow(db.lpgReceipts, item);
+  }
+  if (path === '/employees') {
+    for (const item of items) await upsertServerRow(db.employees, item);
   }
   if (path === '/payments') {
     for (const item of items) {
@@ -259,6 +265,30 @@ async function allFillingBatches() {
 
 async function allLpgReceipts() {
   return db.lpgReceipts.toArray();
+}
+
+async function allEmployees() {
+  return db.employees.toArray();
+}
+
+async function findEmployee(id) {
+  const rows = await allEmployees();
+  return rows.find((row) => customerMatches(row, id)) || null;
+}
+
+async function cachedEmployeeItems() {
+  const snaps = await db.snapshots.toArray();
+  const items = [];
+  const seen = new Set();
+  for (const snap of snaps) {
+    if (snap.path !== '/employees') continue;
+    for (const item of snap.envelope?.data?.items || []) {
+      if (!item?._id || seen.has(String(item._id))) continue;
+      seen.add(String(item._id));
+      items.push(item);
+    }
+  }
+  return items;
 }
 
 function customerMatches(row, id) {
@@ -804,6 +834,197 @@ export async function queueSupplierUpdate(id, payload) {
   return envelope('Supplier updated on this computer', record);
 }
 
+const EMPLOYEE_DEPARTMENTS = [
+  { value: 'filling', label: 'Filling' },
+  { value: 'maintenance', label: 'Maintenance' },
+  { value: 'operations', label: 'Operations' },
+  { value: 'sales', label: 'Sales' },
+  { value: 'accounts', label: 'Accounts' },
+  { value: 'stores', label: 'Stores' },
+  { value: 'transport', label: 'Transport' },
+  { value: 'security', label: 'Security' },
+  { value: 'admin', label: 'Administration' },
+];
+const EMPLOYEE_GENDERS = [
+  { value: 'male', label: 'Male' },
+  { value: 'female', label: 'Female' },
+  { value: 'other', label: 'Other' },
+];
+const EMPLOYEE_STATUSES = [
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' },
+  { value: 'terminated', label: 'Terminated' },
+];
+
+function optionLabel(options, value) {
+  return options.find((item) => item.value === value)?.label || '';
+}
+
+function normalizePhone(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+  let local = digits;
+  if (local.startsWith('92') && local.length === 12) local = `0${local.slice(2)}`;
+  if (local.length === 11 && local.startsWith('03')) return `${local.slice(0, 4)}-${local.slice(4)}`;
+  return String(value || '').trim();
+}
+
+function normalizeCnic(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+  if (digits.length !== 13) return String(value || '').trim();
+  return `${digits.slice(0, 5)}-${digits.slice(5, 12)}-${digits.slice(12)}`;
+}
+
+function assertEmployeePayload(payload) {
+  if (String(payload.fullName || '').trim().length < 2) {
+    throw offlineReject('Full name must contain at least 2 characters.');
+  }
+  const phone = normalizePhone(payload.phoneNumber);
+  if (!/^03\d{2}-\d{7}$/.test(phone)) {
+    throw offlineReject('Phone must be a Pakistani mobile number (e.g. 0321-5678901).');
+  }
+  payload.phoneNumber = phone;
+  if (String(payload.cnicNumber || '').trim()) {
+    const cnic = normalizeCnic(payload.cnicNumber);
+    if (!/^\d{5}-\d{7}-\d$/.test(cnic)) {
+      throw offlineReject('CNIC must be 13 digits (e.g. 35201-1234567-9).');
+    }
+    payload.cnicNumber = cnic;
+  } else {
+    payload.cnicNumber = '';
+  }
+  if (String(payload.emailAddress || '').trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(payload.emailAddress).trim())) {
+    throw offlineReject('Invalid email.');
+  }
+  if (String(payload.emergencyContactPhone || '').trim()) {
+    const emergency = normalizePhone(payload.emergencyContactPhone);
+    if (!/^03\d{2}-\d{7}$/.test(emergency)) {
+      throw offlineReject('Emergency phone must be a Pakistani mobile number (e.g. 0321-5678901).');
+    }
+    payload.emergencyContactPhone = emergency;
+  }
+}
+
+async function assertEmployeeUnique(payload, ignoreLocalId) {
+  const cnic = String(payload.cnicNumber || '').trim();
+  if (!cnic) return;
+  const self = ignoreLocalId ? await findEmployee(ignoreLocalId) : null;
+  const ignoreIds = new Set([String(self?.serverId || ''), String(rowRecord(self)._id || '')]);
+  for (const row of await allEmployees()) {
+    if (ignoreLocalId && row.localId === ignoreLocalId) continue;
+    const record = rowRecord(row);
+    if (String(record.cnicNumber || '') === cnic) {
+      throw offlineReject(`CNIC already exists on ${record.employeeCode || 'another employee'}.`);
+    }
+  }
+  for (const item of await cachedEmployeeItems()) {
+    if (ignoreIds.has(String(item._id))) continue;
+    if (String(item.cnicNumber || '') === cnic) {
+      throw offlineReject(`CNIC already exists on ${item.employeeCode || 'another employee'}.`);
+    }
+  }
+}
+
+function buildEmployeeRecord(payload, localId, existing) {
+  const previous = existing ? rowRecord(existing) : {};
+  const now = new Date().toISOString();
+  const gender = payload.gender ?? previous.gender ?? '';
+  const department = payload.departmentName ?? previous.departmentName ?? '';
+  const status = payload.employmentStatus || previous.employmentStatus || 'active';
+  return {
+    _id: previous._id || localId,
+    employeeCode: previous.employeeCode || `OFF-${String(localId).slice(-6).toUpperCase()}`,
+    fullName: String(payload.fullName ?? previous.fullName ?? '').trim(),
+    fatherHusbandName: payload.fatherHusbandName ?? previous.fatherHusbandName ?? '',
+    cnicNumber: payload.cnicNumber ?? previous.cnicNumber ?? '',
+    dateOfBirth: payload.dateOfBirth ?? previous.dateOfBirth ?? null,
+    gender,
+    genderLabel: optionLabel(EMPLOYEE_GENDERS, gender),
+    departmentName: department,
+    departmentLabel: optionLabel(EMPLOYEE_DEPARTMENTS, department),
+    jobTitle: payload.jobTitle ?? previous.jobTitle ?? '',
+    phoneNumber: payload.phoneNumber ?? previous.phoneNumber ?? '',
+    emailAddress: String(payload.emailAddress ?? previous.emailAddress ?? '').trim().toLowerCase(),
+    joiningDate: payload.joiningDate ?? previous.joiningDate ?? null,
+    monthlySalaryAmount: roundMoney(payload.monthlySalaryAmount ?? previous.monthlySalaryAmount ?? 0),
+    emergencyContactName: payload.emergencyContactName ?? previous.emergencyContactName ?? '',
+    emergencyContactPhone: payload.emergencyContactPhone ?? previous.emergencyContactPhone ?? '',
+    homeAddress: payload.homeAddress ?? previous.homeAddress ?? '',
+    employmentStatus: status,
+    employmentStatusLabel: optionLabel(EMPLOYEE_STATUSES, status),
+    provisional: true,
+    syncStatus: 'pending',
+    createdAt: previous.createdAt || now,
+    updatedAt: now,
+  };
+}
+
+function employeeFormOptionsData() {
+  return {
+    nextEmployeeCode: 'Assigned when synced',
+    departments: EMPLOYEE_DEPARTMENTS,
+    genders: EMPLOYEE_GENDERS,
+    statuses: EMPLOYEE_STATUSES,
+  };
+}
+
+export async function queueEmployeeCreate(payload) {
+  assertEmployeePayload(payload);
+  await assertEmployeeUnique(payload);
+  const localId = newLocalId();
+  const record = buildEmployeeRecord(payload, localId);
+  const serverPayload = { ...payload };
+  delete serverPayload.employeeCode;
+  await db.employees.put({
+    localId,
+    serverId: '',
+    syncStatus: 'pending',
+    origin: 'local',
+    record,
+    updatedAt: record.updatedAt,
+  });
+  await enqueue({ entity: 'employee', action: 'create', localId, payload: serverPayload });
+  return envelope('Employee saved on this computer', record);
+}
+
+export async function queueEmployeeUpdate(id, payload) {
+  const existing = await findEmployee(id);
+  if (!existing) throw offlineReject('Employee is not on this computer yet.');
+  const merged = { ...rowRecord(existing), ...payload };
+  assertEmployeePayload(merged);
+  await assertEmployeeUnique(merged, existing.localId);
+  const record = buildEmployeeRecord(merged, existing.localId, existing);
+  await db.employees.put({ ...existing, syncStatus: 'pending', record, updatedAt: record.updatedAt });
+  const serverPayload = { ...payload };
+  delete serverPayload.employeeCode;
+  const createOp = await pendingCreate('employee', existing.localId);
+  if (createOp) {
+    createOp.payload = { ...createOp.payload, ...serverPayload };
+    delete createOp.payload.employeeCode;
+    createOp.status = 'pending';
+    createOp.updatedAt = new Date().toISOString();
+    await db.queue.put(createOp);
+  } else if (existing.serverId) {
+    await enqueue({ entity: 'employee', action: 'update', localId: existing.localId, payload: serverPayload });
+  }
+  emitSync();
+  return envelope('Employee updated on this computer', record);
+}
+
+async function employeeCreateDependency(employeeId) {
+  if (!isLocalId(employeeId)) return null;
+  const employee = await findEmployee(employeeId);
+  if (!employee) throw offlineReject('Select an employee saved on this computer.');
+  const createOp = await pendingCreate('employee', employee.localId);
+  return createOp?.operationId || null;
+}
+
+async function withEmployeeDependency(dependsOn, employeeId) {
+  const next = [...(dependsOn || [])];
+  const operationId = await employeeCreateDependency(employeeId);
+  if (operationId && !next.includes(operationId)) next.push(operationId);
+  return next;
+}
+
 function accountOption(record) {
   return {
     _id: record._id,
@@ -955,7 +1176,13 @@ export async function queueFillingCreate(payload) {
     record,
     updatedAt: record.updatedAt,
   });
-  await enqueue({ entity: 'fillingBatch', action: 'create', localId, payload: serverPayload });
+  await enqueue({
+    entity: 'fillingBatch',
+    action: 'create',
+    localId,
+    payload: serverPayload,
+    dependsOn: await withEmployeeDependency([], payload.operatorEmployeeId),
+  });
   emitSync();
   return envelope('Filling batch saved on this computer', record);
 }
@@ -980,17 +1207,30 @@ export async function queueFillingUpdate(id, payload) {
   if (createOp) {
     createOp.payload = { ...createOp.payload, ...payload };
     delete createOp.payload.batchNumber;
+    createOp.dependsOn = await withEmployeeDependency(createOp.dependsOn, payload.operatorEmployeeId);
     createOp.status = 'pending';
     createOp.updatedAt = new Date().toISOString();
     await db.queue.put(createOp);
   } else if (existing.serverId) {
     const serverPayload = { ...payload };
     delete serverPayload.batchNumber;
-    await enqueue({ entity: 'fillingBatch', action: 'update', localId: existing.localId, payload: serverPayload });
+    await enqueue({
+      entity: 'fillingBatch',
+      action: 'update',
+      localId: existing.localId,
+      payload: serverPayload,
+      dependsOn: await withEmployeeDependency([], payload.operatorEmployeeId),
+    });
   } else {
     const serverPayload = { ...payload };
     delete serverPayload.batchNumber;
-    await enqueue({ entity: 'fillingBatch', action: 'create', localId: existing.localId, payload: serverPayload });
+    await enqueue({
+      entity: 'fillingBatch',
+      action: 'create',
+      localId: existing.localId,
+      payload: serverPayload,
+      dependsOn: await withEmployeeDependency([], payload.operatorEmployeeId),
+    });
   }
   emitSync();
   return envelope('Filling batch updated on this computer', record);
@@ -1024,6 +1264,8 @@ async function tankSnapshot() {
 
 async function employeeNameFor(employeeId) {
   if (!employeeId) return '';
+  const saved = await findEmployee(employeeId);
+  if (saved && rowRecord(saved).fullName) return rowRecord(saved).fullName;
   const snaps = await db.snapshots.toArray();
   for (const snap of snaps) {
     if (snap.path !== '/employees') continue;
@@ -1114,7 +1356,7 @@ export async function queueReceiptCreate(payload) {
   await assertReceiptTank(record, localId);
   const serverPayload = { ...payload };
   delete serverPayload.receiptNumber;
-  const dependsOn = [];
+  const dependsOn = await withEmployeeDependency([], payload.receivedByEmployeeId);
   if (isLocalId(payload.supplierId)) {
     const supplier = await findSupplier(payload.supplierId);
     if (!supplier) throw offlineReject('Select a supplier saved on this computer.');
@@ -1156,13 +1398,26 @@ export async function queueReceiptUpdate(id, payload) {
   if (createOp) {
     createOp.payload = { ...createOp.payload, ...serverPayload };
     delete createOp.payload.receiptNumber;
+    createOp.dependsOn = await withEmployeeDependency(createOp.dependsOn, payload.receivedByEmployeeId);
     createOp.status = 'pending';
     createOp.updatedAt = new Date().toISOString();
     await db.queue.put(createOp);
   } else if (existing.serverId) {
-    await enqueue({ entity: 'lpgReceipt', action: 'update', localId: existing.localId, payload: serverPayload });
+    await enqueue({
+      entity: 'lpgReceipt',
+      action: 'update',
+      localId: existing.localId,
+      payload: serverPayload,
+      dependsOn: await withEmployeeDependency([], payload.receivedByEmployeeId),
+    });
   } else {
-    await enqueue({ entity: 'lpgReceipt', action: 'create', localId: existing.localId, payload: serverPayload });
+    await enqueue({
+      entity: 'lpgReceipt',
+      action: 'create',
+      localId: existing.localId,
+      payload: serverPayload,
+      dependsOn: await withEmployeeDependency([], payload.receivedByEmployeeId),
+    });
   }
   emitSync();
   return envelope('LPG receipt updated on this computer', record);
@@ -1489,6 +1744,65 @@ const RECEIPT_STATUSES = [
   { value: 'confirmed', label: 'Confirmed' },
 ];
 
+function filterEmployees(rows, params) {
+  const search = String(params.search || '').trim().toLowerCase();
+  const department = params.departmentName || params.department || '';
+  const status = params.employmentStatus || params.status || '';
+  return rows.filter((row) => {
+    const record = rowRecord(row);
+    if (department && record.departmentName !== department) return false;
+    if (status && status !== 'all' && record.employmentStatus !== status) return false;
+    if (!search) return true;
+    return [
+      record.employeeCode,
+      record.fullName,
+      record.fatherHusbandName,
+      record.phoneNumber,
+      record.emailAddress,
+      record.jobTitle,
+      record.cnicNumber,
+    ].join(' ').toLowerCase().includes(search);
+  });
+}
+
+function isOfflineEmployee(record) {
+  return record?.provisional === true
+    || record?.syncStatus === 'pending'
+    || record?.syncStatus === 'failed'
+    || String(record?.employeeCode || '').startsWith('OFF-')
+    || String(record?._id || '').startsWith('local_');
+}
+
+function sortEmployeeRecords(records) {
+  return [...records].sort((left, right) => {
+    const leftOffline = isOfflineEmployee(left);
+    const rightOffline = isOfflineEmployee(right);
+    if (leftOffline !== rightOffline) return leftOffline ? -1 : 1;
+    return new Date(right.updatedAt || right.createdAt || 0).getTime()
+      - new Date(left.updatedAt || left.createdAt || 0).getTime();
+  });
+}
+
+async function withPendingEmployees(data) {
+  if (!data || !Array.isArray(data.employees)) return data;
+  const pending = (await allEmployees())
+    .filter((row) => row.syncStatus !== 'synced' && rowRecord(row).employmentStatus !== 'terminated')
+    .map((row) => {
+      const record = rowRecord(row);
+      return {
+        _id: record._id,
+        employeeCode: record.employeeCode,
+        fullName: record.fullName,
+        jobTitle: record.jobTitle || '',
+        employmentStatus: record.employmentStatus,
+        displayName: record.jobTitle ? `${record.fullName} (${record.jobTitle})` : record.fullName,
+      };
+    });
+  const byId = new Map(pending.map((employee) => [String(employee._id), employee]));
+  const rest = data.employees.filter((employee) => !byId.has(String(employee._id)));
+  return { ...data, employees: [...pending, ...rest] };
+}
+
 function filterReceipts(rows, params) {
   const search = String(params.search || '').trim().toLowerCase();
   return rows.filter((row) => {
@@ -1736,7 +2050,10 @@ async function buildFillingRecord(payload, localId, previous = {}) {
       cylinderType: type._id ? { _id: type._id, typeCode: type.typeCode, typeName: type.typeName, capacityKg: type.capacityKg } : line.cylinderType || null,
     };
   });
-  const operator = (catalog.employees || []).find((item) => sameParty(item._id, payload.operatorEmployeeId || previous.operatorEmployeeId)) || {};
+  const operatorId = payload.operatorEmployeeId || previous.operatorEmployeeId;
+  const savedOperator = operatorId ? await findEmployee(operatorId) : null;
+  const operator = (catalog.employees || []).find((item) => sameParty(item._id, operatorId))
+    || (savedOperator ? rowRecord(savedOperator) : {});
   const status = payload.batchStatus || previous.batchStatus || 'completed';
   const now = new Date().toISOString();
   const cylinderTypeName = lines.length > 1
@@ -2180,16 +2497,23 @@ async function outstandingForCustomer(customerId) {
 export async function serveGet(config) {
   const path = requestPath(config);
   const params = paramsOf(config);
-  const idMatch = path.match(/^\/(customers|suppliers|accounts|sales|payments|filling-batches|lpg-receipts)\/([^/]+)$/);
+  const idMatch = path.match(/^\/(customers|suppliers|accounts|employees|sales|payments|filling-batches|lpg-receipts)\/([^/]+)$/);
   if (idMatch && idMatch[2] !== 'form-options') {
     const table = idMatch[1] === 'customers' ? await findCustomer(idMatch[2])
       : idMatch[1] === 'suppliers' ? await findSupplier(idMatch[2])
         : idMatch[1] === 'accounts' ? await findAccount(idMatch[2])
+          : idMatch[1] === 'employees' ? await findEmployee(idMatch[2])
           : idMatch[1] === 'sales' ? await findSale(idMatch[2])
             : idMatch[1] === 'filling-batches' ? await findFilling(idMatch[2])
               : idMatch[1] === 'lpg-receipts' ? await findReceipt(idMatch[2])
             : (await allPayments()).find((row) => sameParty(row.localId, idMatch[2]) || sameParty(row.serverId, idMatch[2]));
-    if (table) return envelope('Saved on this computer', rowRecord(table));
+    if (table) {
+      const record = rowRecord(table);
+      if (idMatch[1] === 'employees') {
+        return envelope('Employee fetched', { ...record, form: employeeFormOptionsData() });
+      }
+      return envelope('Saved on this computer', record);
+    }
   }
   if (/^\/customers\/[^/]+\/ledger$/.test(path)) {
     const ledger = await customerLedger(path.split('/')[2]);
@@ -2355,6 +2679,17 @@ export async function serveGet(config) {
       meta: { statuses: FILLING_STATUSES },
     });
   }
+  if (path === '/employees') {
+    const localRows = await allEmployees();
+    const cached = (await cachedEmployeeItems())
+      .filter((item) => !localRows.some((row) => sameParty(row.serverId, item._id) || sameParty(rowRecord(row)._id, item._id)))
+      .map((item) => ({ record: item, syncStatus: 'synced' }));
+    const records = sortEmployeeRecords(filterEmployees([...localRows, ...cached], params).map(rowRecord));
+    return envelope('Employees fetched', {
+      ...paginate(records, params),
+      meta: { departments: EMPLOYEE_DEPARTMENTS, statuses: EMPLOYEE_STATUSES },
+    });
+  }
   if (path === '/payments' && (await allPayments()).length) {
     const source = await allPayments();
     const rows = filterPayments(source, params).filter((row) => keepPaymentRow(row, source));
@@ -2384,6 +2719,9 @@ export async function serveGet(config) {
       const parents = (await allAccounts()).map(rowRecord);
       return envelope('Account form options fetched', accountFormOptionsData(parents));
     }
+    if (path === '/employees/form-options') {
+      return envelope('Employee form options fetched', employeeFormOptionsData());
+    }
     return null;
   }
   const data = await withPendingParties(snap.envelope.data);
@@ -2391,9 +2729,10 @@ export async function serveGet(config) {
     data.outstandingInvoices = await outstandingForCustomer(params.customerId);
     data.customers = (await withPendingParties({ customers: data.customers || [] })).customers;
   }
-  if (path === '/filling-batches/form-options') {
-    const adjusted = await withTankReservation(data);
-    Object.assign(data, adjusted);
+  if (path === '/filling-batches/form-options' || path === '/lpg-receipts/form-options') {
+    const adjusted = path === '/filling-batches/form-options' ? await withTankReservation(data) : data;
+    const withEmployees = await withPendingEmployees(adjusted);
+    Object.assign(data, withEmployees);
   }
   if (path === '/sales/form-options') {
     const pending = (await allCustomers()).filter((row) => row.syncStatus !== 'synced');
@@ -2418,6 +2757,22 @@ export async function serveWrite(config) {
   if (method === 'post' && path === '/suppliers') return queueSupplierCreate(payload);
   if (method === 'patch' && /^\/suppliers\/[^/]+$/.test(path)) {
     return queueSupplierUpdate(path.split('/')[2], payload);
+  }
+  if (method === 'post' && path === '/employees') return queueEmployeeCreate(payload);
+  if (method === 'patch' && /^\/employees\/[^/]+$/.test(path)) {
+    return queueEmployeeUpdate(path.split('/')[2], payload);
+  }
+  if (method === 'delete' && /^\/employees\/[^/]+$/.test(path)) {
+    const existing = await findEmployee(path.split('/')[2]);
+    if (!existing || existing.serverId) {
+      throw offlineReject('This action needs an internet connection. Nothing was saved.');
+    }
+    const queue = await db.queue.toArray();
+    const related = queue.filter((item) => item.localId === existing.localId || (item.dependsOn || []).includes(existing.localId));
+    if (related.length) await db.queue.bulkDelete(related.map((item) => item.operationId));
+    await db.employees.delete(existing.localId);
+    emitSync();
+    return envelope('Employee removed from this computer', { _id: existing.localId });
   }
   if (method === 'post' && path === '/accounts') return queueAccountCreate(payload);
   if (method === 'patch' && /^\/accounts\/[^/]+$/.test(path)) {
@@ -2453,17 +2808,28 @@ export async function mergePendingIntoResponse(config, payload) {
   if (path === '/storage-tanks/dashboard') {
     return { ...payload, data: await withTankActivity(payload.data) };
   }
+  if (/^\/employees\/[^/]+$/.test(path)) {
+    const local = await findEmployee(path.split('/')[2]);
+    if (local && local.syncStatus !== 'synced') {
+      return {
+        ...payload,
+        data: { ...rowRecord(local), form: payload.data.form || employeeFormOptionsData() },
+      };
+    }
+  }
   const params = paramsOf(config);
-  if (!['/customers', '/suppliers', '/accounts', '/sales', '/payments', '/filling-batches', '/lpg-receipts'].includes(path) || !Array.isArray(payload.data.items)) {
+  if (!['/customers', '/suppliers', '/accounts', '/employees', '/sales', '/payments', '/filling-batches', '/lpg-receipts'].includes(path) || !Array.isArray(payload.data.items)) {
     const data = await withPendingParties(payload.data);
-    if (path === '/filling-batches/form-options') {
-      return { ...payload, data: await withTankReservation(data) };
+    if (path === '/filling-batches/form-options' || path === '/lpg-receipts/form-options') {
+      const adjusted = path === '/filling-batches/form-options' ? await withTankReservation(data) : data;
+      return { ...payload, data: await withPendingEmployees(adjusted) };
     }
     return { ...payload, data };
   }
   const table = path === '/customers' ? filterCustomers(await allCustomers(), params)
     : path === '/suppliers' ? filterSuppliers(await allSuppliers(), params)
       : path === '/accounts' ? filterAccounts(await allAccounts(), params)
+        : path === '/employees' ? filterEmployees(await allEmployees(), params)
         : path === '/sales' ? filterSales(await allSales(), params)
           : path === '/filling-batches' ? filterFillingBatches(await allFillingBatches(), params)
             : path === '/lpg-receipts' ? filterReceipts(await allLpgReceipts(), params)
@@ -2550,6 +2916,7 @@ export async function applyServerResult(localId, entity, serverRecord) {
   const table = entity === 'customer' ? db.customers
     : entity === 'supplier' ? db.suppliers
       : entity === 'account' ? db.accounts
+        : entity === 'employee' ? db.employees
         : entity === 'sale' ? db.sales
           : entity === 'fillingBatch' ? db.fillingBatches
             : entity === 'lpgReceipt' ? db.lpgReceipts
@@ -2641,6 +3008,7 @@ export async function discardFailedOperation(operationId) {
   const table = row.entity === 'customer' ? db.customers
     : row.entity === 'supplier' ? db.suppliers
       : row.entity === 'account' ? db.accounts
+        : row.entity === 'employee' ? db.employees
         : row.entity === 'sale' ? db.sales
           : row.entity === 'fillingBatch' ? db.fillingBatches
             : row.entity === 'lpgReceipt' ? db.lpgReceipts
@@ -2665,6 +3033,7 @@ export async function exportOfflineBackup() {
     customers: await db.customers.toArray(),
     suppliers: await db.suppliers.toArray(),
     accounts: await db.accounts.toArray(),
+    employees: await db.employees.toArray(),
     sales: await db.sales.toArray(),
     payments: await db.payments.toArray(),
     fillingBatches: await db.fillingBatches.toArray(),
@@ -2693,8 +3062,9 @@ export async function markSyncMeta(patch) {
 export function canQueueWrite(config) {
   const path = requestPath(config);
   const method = requestMethod(config);
-  if (method === 'post' && ['/customers', '/suppliers', '/accounts', '/sales', '/payments', '/filling-batches', '/lpg-receipts'].includes(path)) return true;
-  if (method === 'patch' && /^\/(customers|suppliers|accounts|sales|filling-batches|lpg-receipts)\/[^/]+$/.test(path)) return true;
+  if (method === 'post' && ['/customers', '/suppliers', '/accounts', '/employees', '/sales', '/payments', '/filling-batches', '/lpg-receipts'].includes(path)) return true;
+  if (method === 'patch' && /^\/(customers|suppliers|accounts|employees|sales|filling-batches|lpg-receipts)\/[^/]+$/.test(path)) return true;
+  if (method === 'delete' && /^\/employees\/[^/]+$/.test(path)) return true;
   return false;
 }
 

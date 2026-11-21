@@ -8,6 +8,26 @@ import { useEmployees, useDeleteEmployee } from "../../queries/employees/employe
 import { useToast } from "../../utils/GlobalToast";
 import { usePermissions } from "../../contexts/PermissionContext";
 
+const EMPLOYEE_DEPARTMENTS = [
+  { value: "filling", label: "Filling" },
+  { value: "maintenance", label: "Maintenance" },
+  { value: "operations", label: "Operations" },
+  { value: "sales", label: "Sales" },
+  { value: "accounts", label: "Accounts" },
+  { value: "stores", label: "Stores" },
+  { value: "transport", label: "Transport" },
+  { value: "security", label: "Security" },
+  { value: "admin", label: "Administration" },
+];
+
+function isOfflineEmployee(employee) {
+  return employee?.provisional === true
+    || employee?.syncStatus === "pending"
+    || employee?.syncStatus === "failed"
+    || String(employee?.employeeCode || "").startsWith("OFF-")
+    || String(employee?._id || "").startsWith("local_");
+}
+
 function Employees() {
   const navigate = useNavigate();
   const toast = useToast();
@@ -20,6 +40,7 @@ function Employees() {
 
   const { data: employeesData, isLoading, error } = useEmployees({
     search: query || undefined,
+    departmentName: department === "All" ? undefined : department,
     employmentStatus: status === "All" ? undefined : status.toLowerCase(),
     page: currentPage,
     limit: 10,
@@ -27,20 +48,19 @@ function Employees() {
   const deleteMutation = useDeleteEmployee();
   const employees = employeesData?.data?.items || [];
   const pagination = employeesData?.data?.pagination || { total: 0, page: 1, totalPages: 1 };
-  const departments = [...new Set(employees.map((employee) => employee.departmentName).filter(Boolean))];
 
   const filteredEmployees = useMemo(() => employees
-    .filter((employee) => department === "All" || employee.departmentName === department)
     .map((employee) => ({
       ...employee,
       code: employee.employeeCode,
       id: employee._id,
       name: employee.fullName,
-      department: employee.departmentName || "-",
+      department: employee.departmentLabel || employee.departmentName || "-",
       phone: employee.phoneNumber || "-",
       salary: employee.monthlySalaryAmount || 0,
       status: employee.employmentStatus,
-    })), [employees, department]);
+      provisional: isOfflineEmployee(employee),
+    })), [employees]);
 
   const handleDeleteConfirm = async () => {
     if (!deleteModal.item) return;
@@ -231,7 +251,10 @@ function Employees() {
               <div className="absolute left-3 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full border-2 border-slate-300 dark:border-gray-600"></div>
               <input
                 value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setCurrentPage(1);
+                }}
                 className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50/50 dark:bg-gray-800/50 py-2.5 pl-8 pr-3 text-sm text-slate-700 dark:text-gray-300 outline-none transition placeholder:text-slate-500 dark:placeholder:text-gray-400 focus:border-[#008951] focus:ring-1 focus:ring-[#008951]"
                 placeholder="Search by code or employee name..."
               />
@@ -240,22 +263,29 @@ function Employees() {
               <div className="relative">
                 <select
                   value={department}
-                  onChange={(event) => setDepartment(event.target.value)}
+                  onChange={(event) => {
+                    setDepartment(event.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] sm:w-48 lg:w-56"
                 >
                   <option value="All">Department: All</option>
-                  {departments.map((name) => <option key={name} value={name}>Department: {name}</option>)}
+                  {EMPLOYEE_DEPARTMENTS.map((item) => <option key={item.value} value={item.value}>Department: {item.label}</option>)}
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 dark:text-gray-400 pointer-events-none" />
               </div>
               <div className="relative">
                 <select
                   value={status}
-                  onChange={(event) => setStatus(event.target.value)}
+                  onChange={(event) => {
+                    setStatus(event.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full appearance-none rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3 pr-10 py-2.5 text-sm font-medium text-slate-600 dark:text-gray-400 outline-none focus:border-[#008951] sm:w-40 lg:w-44"
                 >
                   <option value="All">Status: All</option>
                   <option value="Active">Status: Active</option>
+                  <option value="Inactive">Status: Inactive</option>
                   <option value="Terminated">Status: Terminated</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600 dark:text-gray-400 pointer-events-none" />
@@ -271,7 +301,9 @@ function Employees() {
             data={filteredEmployees}
             ariaLabel="Employees Table"
             className=""
-            rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
+            rowClassName={(item) => (item.provisional
+              ? "sales-offline-row"
+              : "border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors")}
             emptyContent="No employees match your search."
             pagination={true}
             rowsPerPage={10}

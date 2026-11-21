@@ -28,6 +28,8 @@ async function resolveId(value) {
   if (payment?.serverId) return payment.serverId;
   const receipt = await db.lpgReceipts.get(value);
   if (receipt?.serverId) return receipt.serverId;
+  const employee = await db.employees.get(value);
+  if (employee?.serverId) return employee.serverId;
   return null;
 }
 
@@ -57,6 +59,16 @@ async function readyPayload(operation) {
     const resolved = await resolveId(payload.parentAccountId);
     if (!resolved) return null;
     payload.parentAccountId = resolved;
+  }
+  if (isLocalId(payload.operatorEmployeeId)) {
+    const resolved = await resolveId(payload.operatorEmployeeId);
+    if (!resolved) return null;
+    payload.operatorEmployeeId = resolved;
+  }
+  if (isLocalId(payload.receivedByEmployeeId)) {
+    const resolved = await resolveId(payload.receivedByEmployeeId);
+    if (!resolved) return null;
+    payload.receivedByEmployeeId = resolved;
   }
   if (Array.isArray(payload.allocations)) {
     payload.allocations = [];
@@ -90,6 +102,7 @@ async function readyPayload(operation) {
   delete payload.customerCode;
   delete payload.supplierCode;
   delete payload.accountCode;
+  delete payload.employeeCode;
   delete payload.currentBalanceAmount;
   delete payload.batchNumber;
   delete payload.receiptNumber;
@@ -114,6 +127,12 @@ function requestFor(operation, serverId) {
   }
   if (operation.entity === 'account' && operation.action === 'update') {
     return { method: 'patch', url: `/accounts/${serverId}` };
+  }
+  if (operation.entity === 'employee' && operation.action === 'create') {
+    return { method: 'post', url: '/employees' };
+  }
+  if (operation.entity === 'employee' && operation.action === 'update') {
+    return { method: 'patch', url: `/employees/${serverId}` };
   }
   if (operation.entity === 'sale' && operation.action === 'create') {
     return { method: 'post', url: '/sales' };
@@ -154,6 +173,8 @@ async function sendOperation(operation) {
       ? await db.suppliers.get(operation.localId)
       : operation.entity === 'account'
         ? await db.accounts.get(operation.localId)
+        : operation.entity === 'employee'
+          ? await db.employees.get(operation.localId)
         : operation.entity === 'sale'
         ? await db.sales.get(operation.localId)
         : operation.entity === 'fillingBatch'
