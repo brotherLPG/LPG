@@ -930,6 +930,7 @@ export async function queueFillingCreate(payload) {
   const localId = newLocalId();
   const record = await buildFillingRecord(payload, localId);
   await assertFillingTank(record, localId);
+  await assertFillingInventory(record, localId);
   const serverPayload = { ...payload };
   delete serverPayload.batchNumber;
   await db.fillingBatches.put({
@@ -941,6 +942,7 @@ export async function queueFillingCreate(payload) {
     updatedAt: record.updatedAt,
   });
   await enqueue({ entity: 'fillingBatch', action: 'create', localId, payload: serverPayload });
+  emitSync();
   return envelope('Filling batch saved on this computer', record);
 }
 
@@ -950,7 +952,17 @@ export async function queueFillingUpdate(id, payload) {
   assertFillingPayload({ ...rowRecord(existing), ...payload, lines: payload.lines || rowRecord(existing).lines });
   const record = await buildFillingRecord(payload, existing.localId, rowRecord(existing));
   await assertFillingTank(record, existing.localId);
-  await db.fillingBatches.put({ ...existing, syncStatus: 'pending', record, updatedAt: record.updatedAt });
+  await assertFillingInventory(record, existing.localId);
+  const stockBaseline = existing.syncStatus === 'synced' && !existing.stockBaseline
+    ? rowRecord(existing)
+    : existing.stockBaseline || null;
+  await db.fillingBatches.put({
+    ...existing,
+    stockBaseline,
+    syncStatus: 'pending',
+    record,
+    updatedAt: record.updatedAt,
+  });
   const createOp = await pendingCreate('fillingBatch', existing.localId);
   if (createOp) {
     createOp.payload = { ...createOp.payload, ...payload };
@@ -1281,26 +1293,95 @@ const FILLING_STATUSES = [
   { value: 'completed', label: 'Completed' },
 ];
 
+function cylinderTypeKey(value) {
+  return String(value?._id || value?.id || value || '');
+}
+
+function fillLineCounts(record) {
+  const counts = new Map();
+  if (!record || record.batchStatus === 'pending') return counts;
+  for (const line of record.lines || []) {
+    const typeId = cylinderTypeKey(line.cylinderTypeId);
+    const count = Number(line.cylinderCount) || 0;
+    if (!typeId || count <= 0) continue;
+    counts.set(typeId, (counts.get(typeId) || 0) + count);
+  }
+  return counts;
+}
+
+function fillUsedKg(record) {
+  if (!record || record.batchStatus === 'pending') return 0;
+  if (record.actualLpgUsedKg != null) return Number(record.actualLpgUsedKg) || 0;
+  return (record.lines || []).reduce((sum, line) => sum + (Number(line.actualLpgUsedKg) || 0), 0);
+}
+
+async function pendingFillEffect() {
+  const filled = new Map();
+  const empty = new Map();
+  let kg = 0;
+  for (const row of await allFillingBatches()) {
+    const currentCounts = fillLineCounts(rowRecord(row));
+    const baselineCounts = row.syncStatus === 'synced' ? currentCounts : fillLineCounts(row.stockBaseline);
+    const apply = (typeId, delta) => {
+      if (!delta) return;
+      filled.set(typeId, (filled.get(typeId) || 0) + delta);
+      empty.set(typeId, (empty.get(typeId) || 0) + delta);
+    };
+    for (const [typeId, count] of currentCounts) apply(typeId, count - (baselineCounts.get(typeId) || 0));
+    for (const [typeId, count] of baselineCounts) {
+      if (!currentCounts.has(typeId)) apply(typeId, -count);
+    }
+    const currentKg = fillUsedKg(rowRecord(row));
+    const baselineKg = row.syncStatus === 'synced' ? currentKg : fillUsedKg(row.stockBaseline);
+    kg += currentKg - baselineKg;
+  }
+  return { filled, empty, kg: roundMoney(kg) };
+}
+
+function stockLabels(quantity, minimumStockLevel) {
+  const qty = Number(quantity) || 0;
+  const min = Number(minimumStockLevel) || 0;
+  if (qty <= 0) return { stockStatus: 'out-of-stock', stockStatusLabel: 'Out of Stock' };
+  if (min > 0 && qty <= min) return { stockStatus: 'low-stock', stockStatusLabel: 'Low Stock' };
+  return { stockStatus: 'in-stock', stockStatusLabel: 'In Stock' };
+}
+
+function applyFillToItem(item, effect) {
+  if (!item) return item;
+  const typeId = cylinderTypeKey(item.cylinderTypeId);
+  let delta = 0;
+  if (item.itemCategory === 'filled-cylinder') delta = effect.filled.get(typeId) || 0;
+  if (item.itemCategory === 'empty-cylinder') delta = -(effect.empty.get(typeId) || 0);
+  if (!delta) return item;
+  const currentQuantity = roundMoney(Math.max(0, (Number(item.currentQuantity) || 0) + delta));
+  return {
+    ...item,
+    currentQuantity,
+    ...(item.stockStatusLabel || item.minimumStockLevel != null ? stockLabels(currentQuantity, item.minimumStockLevel) : {}),
+  };
+}
+
+function applyTankKg(tank, reservedKg) {
+  if (!tank || !reservedKg) return tank;
+  const current = roundMoney(Math.max(0, (Number(tank.currentQuantityKg) || 0) - reservedKg));
+  const capacity = Number(tank.capacityKg) || 0;
+  const next = {
+    ...tank,
+    currentQuantityKg: current,
+    fillPercent: capacity > 0 ? Math.round((current / capacity) * 1000) / 10 : tank.fillPercent,
+  };
+  if (tank.availableCapacityKg != null) next.availableCapacityKg = roundMoney(capacity - current);
+  if (tank.tankCode && tank.tankName) {
+    next.displayName = `${tank.tankCode} — ${tank.tankName} (${current.toLocaleString('en-US')} / ${capacity.toLocaleString('en-US')} KG)`;
+  }
+  return next;
+}
+
 async function withTankReservation(data) {
   if (!data?.tank || data.tank.currentQuantityKg == null) return data;
-  const reserved = (await allFillingBatches()).reduce((sum, row) => {
-    if (row.syncStatus === 'synced') return sum;
-    const record = rowRecord(row);
-    if (record.batchStatus === 'pending') return sum;
-    return sum + (Number(record.actualLpgUsedKg) || 0);
-  }, 0);
-  if (!reserved) return data;
-  const current = roundMoney(Math.max(0, (Number(data.tank.currentQuantityKg) || 0) - reserved));
-  const capacity = Number(data.tank.capacityKg) || 0;
-  return {
-    ...data,
-    tank: {
-      ...data.tank,
-      currentQuantityKg: current,
-      availableCapacityKg: roundMoney(capacity - current),
-      displayName: `${data.tank.tankCode} — ${data.tank.tankName} (${current.toLocaleString('en-US')} / ${capacity.toLocaleString('en-US')} KG)`,
-    },
-  };
+  const { kg } = await pendingFillEffect();
+  if (!kg) return data;
+  return { ...data, tank: applyTankKg(data.tank, kg) };
 }
 
 async function fillingCatalog() {
@@ -1392,6 +1473,44 @@ async function assertFillingTank(record, ignoreLocalId) {
   const available = roundMoney((Number(catalog.tank.currentQuantityKg) || 0) - reserved);
   if ((Number(record.actualLpgUsedKg) || 0) > available + 0.001) {
     throw offlineReject('The storage tank does not have enough gas for this batch.');
+  }
+}
+
+async function cachedInventoryItems() {
+  const snaps = await db.snapshots.toArray();
+  const items = [];
+  const seen = new Set();
+  for (const snap of snaps) {
+    if (snap.path !== '/inventory-items') continue;
+    for (const item of snap.envelope?.data?.items || []) {
+      if (!item?._id || seen.has(String(item._id))) continue;
+      seen.add(String(item._id));
+      items.push(item);
+    }
+  }
+  return items;
+}
+
+async function assertFillingInventory(record, ignoreLocalId) {
+  if (record.batchStatus === 'pending') return;
+  const items = await cachedInventoryItems();
+  if (!items.length) return;
+  const effect = await pendingFillEffect();
+  const existing = ignoreLocalId ? await db.fillingBatches.get(ignoreLocalId) : null;
+  if (existing) {
+    for (const [typeId, count] of fillLineCounts(rowRecord(existing))) {
+      effect.empty.set(typeId, (effect.empty.get(typeId) || 0) - count);
+    }
+  }
+  for (const line of record.lines || []) {
+    const typeId = cylinderTypeKey(line.cylinderTypeId);
+    const empty = items.find((item) => item.itemCategory === 'empty-cylinder' && cylinderTypeKey(item.cylinderTypeId) === typeId);
+    if (!empty) continue;
+    const available = (Number(empty.currentQuantity) || 0) - (effect.empty.get(typeId) || 0);
+    if ((Number(line.cylinderCount) || 0) > available + 0.001) {
+      const name = line.cylinderTypeName || empty.itemName || 'this cylinder type';
+      throw offlineReject(`Not enough empty cylinders for ${name}.`);
+    }
   }
 }
 
@@ -1553,6 +1672,7 @@ async function accountLedger(id) {
 
 async function adjustStock(items) {
   if (!Array.isArray(items)) return items;
+  const effect = await pendingFillEffect();
   const copy = [];
   for (const item of items) {
     if (!item?._id || item.currentQuantity == null) {
@@ -1560,12 +1680,81 @@ async function adjustStock(items) {
       continue;
     }
     const reserved = await pendingSaleQty(item._id);
-    copy.push({
+    const afterSales = {
       ...item,
       currentQuantity: roundMoney(Math.max(0, (Number(item.currentQuantity) || 0) - reserved)),
-    });
+    };
+    copy.push(applyFillToItem(afterSales, effect));
   }
   return copy;
+}
+
+async function adjustCylinderCards(cards) {
+  if (!Array.isArray(cards)) return cards;
+  const effect = await pendingFillEffect();
+  const known = await cachedInventoryItems();
+  return cards.map((card) => {
+    const match = known.find((item) => String(item._id) === String(card.itemId || card._id));
+    return applyFillToItem({
+      ...card,
+      cylinderTypeId: cylinderTypeKey(card.cylinderTypeId) || cylinderTypeKey(match?.cylinderTypeId),
+      itemCategory: card.itemCategory || match?.itemCategory,
+      minimumStockLevel: card.minimumStockLevel ?? match?.minimumStockLevel,
+    }, effect);
+  });
+}
+
+function shiftFilledStock(item, beforeCounts, afterCounts) {
+  const typeId = cylinderTypeKey(item?.cylinderTypeId);
+  if (!typeId) return item;
+  const delta = (afterCounts.get(typeId) || 0) - (beforeCounts.get(typeId) || 0);
+  if (!delta) return item;
+  const sign = item.itemCategory === 'filled-cylinder' ? 1 : item.itemCategory === 'empty-cylinder' ? -1 : 0;
+  if (!sign) return item;
+  const currentQuantity = roundMoney(Math.max(0, (Number(item.currentQuantity) || 0) + sign * delta));
+  return {
+    ...item,
+    currentQuantity,
+    ...(item.stockStatusLabel || item.minimumStockLevel != null ? stockLabels(currentQuantity, item.minimumStockLevel) : {}),
+  };
+}
+
+async function patchInventoryForFill(before, after) {
+  const beforeCounts = fillLineCounts(before);
+  const afterCounts = fillLineCounts(after);
+  const kgDelta = roundMoney(fillUsedKg(after) - fillUsedKg(before));
+  const snaps = await db.snapshots.toArray();
+  for (const snap of snaps) {
+    const data = snap.envelope?.data;
+    if (!data) continue;
+    if (snap.path === '/inventory-items') {
+      const next = { ...data };
+      if (Array.isArray(data.items)) next.items = data.items.map((item) => shiftFilledStock(item, beforeCounts, afterCounts));
+      if (Array.isArray(data.summary?.cylinderCards)) {
+        const types = new Map((next.items || data.items || []).map((item) => [String(item._id), cylinderTypeKey(item.cylinderTypeId)]));
+        next.summary = {
+          ...data.summary,
+          cylinderCards: data.summary.cylinderCards.map((card) => shiftFilledStock({
+            ...card,
+            cylinderTypeId: cylinderTypeKey(card.cylinderTypeId) || types.get(String(card.itemId || card._id)) || '',
+          }, beforeCounts, afterCounts)),
+        };
+      }
+      await db.snapshots.put({ ...snap, envelope: { ...snap.envelope, data: next } });
+    }
+    if (kgDelta && snap.path === '/filling-batches/form-options' && data.tank) {
+      await db.snapshots.put({
+        ...snap,
+        envelope: { ...snap.envelope, data: { ...data, tank: applyTankKg(data.tank, kgDelta) } },
+      });
+    }
+    if (kgDelta && snap.path === '/storage-tanks/dashboard' && data.currentQuantityKg != null) {
+      await db.snapshots.put({
+        ...snap,
+        envelope: { ...snap.envelope, data: applyTankKg(data, kgDelta) },
+      });
+    }
+  }
 }
 
 async function withPendingParties(data) {
@@ -1614,6 +1803,20 @@ async function withPendingParties(data) {
   }
   if (Array.isArray(data.items) && data.items.some((item) => item?.currentQuantity != null && item?.itemName)) {
     next.items = await adjustStock(data.items);
+  }
+  if (Array.isArray(data.summary?.cylinderCards)) {
+    next.summary = {
+      ...data.summary,
+      cylinderCards: await adjustCylinderCards(data.summary.cylinderCards),
+    };
+  }
+  if (data.tankCode && data.currentQuantityKg != null && data.capacityKg != null && !data.tank) {
+    const { kg } = await pendingFillEffect();
+    if (kg) Object.assign(next, applyTankKg(data, kg));
+  }
+  if (data.itemCode && data.itemCategory && data.currentQuantity != null && !Array.isArray(data.items)) {
+    const [adjusted] = await adjustStock([data]);
+    Object.assign(next, adjusted);
   }
   return next;
 }
@@ -1959,13 +2162,19 @@ export async function applyServerResult(localId, entity, serverRecord) {
             : db.payments;
   const existing = await table.get(localId);
   if (!existing || !serverRecord?._id) return;
-  await table.put({
+  const fillBefore = entity === 'fillingBatch'
+    ? (existing.stockBaseline || (existing.syncStatus === 'synced' ? rowRecord(existing) : null))
+    : null;
+  const saved = {
     ...existing,
     serverId: String(serverRecord._id),
     syncStatus: 'synced',
     record: { ...serverRecord, syncStatus: 'synced', provisional: false },
     updatedAt: new Date().toISOString(),
-  });
+  };
+  delete saved.stockBaseline;
+  await table.put(saved);
+  if (entity === 'fillingBatch') await patchInventoryForFill(fillBefore, serverRecord);
   if (entity === 'sale') {
     const payments = await allPayments();
     for (const payment of payments) {

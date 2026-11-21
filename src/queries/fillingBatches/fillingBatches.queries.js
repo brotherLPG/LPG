@@ -49,6 +49,8 @@ export const useCreateFillingBatch = () => {
     mutationFn: createFillingBatch,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.fillingBatches.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.storageTanks.all });
     },
   });
 };
@@ -60,6 +62,8 @@ export const useUpdateFillingBatch = () => {
     mutationFn: ({ id, data }) => updateFillingBatch(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.fillingBatches.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.storageTanks.all });
     },
   });
 };
