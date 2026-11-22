@@ -118,14 +118,14 @@ function Customers() {
     },
     {
       key: "limit",
-      label: "Credit Limit (Rs.)",
+      label: "Credit Limit ",
       renderCell: (customer) => customer.limit?.toLocaleString() || 0,
       className:
         "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
     },
     {
       key: "outstanding",
-      label: "Outstanding (Rs.)",
+      label: "Outstanding ",
       renderCell: (customer) => customer.outstanding?.toLocaleString() || 0,
       className:
         "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",

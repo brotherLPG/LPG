@@ -125,7 +125,7 @@ function LpgReceiptDetails() {
             </div>
             <div className="min-w-0">
               <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Purchase Rate</p>
-              <p className="mt-1 text-2xl font-extrabold text-blue-700 dark:text-blue-300">{receipt.purchaseRatePerKg ? `Rs. ${receipt.purchaseRatePerKg.toLocaleString()}` : "—"}</p>
+              <p className="mt-1 text-2xl font-extrabold text-blue-700 dark:text-blue-300">{receipt.purchaseRatePerKg ? `${receipt.purchaseRatePerKg.toLocaleString()}` : "—"}</p>
               <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">Per KG rate</p>
             </div>
           </div>
@@ -138,7 +138,7 @@ function LpgReceiptDetails() {
             </div>
             <div className="min-w-0">
               <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Total Purchase Amount</p>
-              <p className="mt-1 text-2xl font-extrabold text-slate-900 dark:text-gray-100">{receipt.totalPurchaseAmount ? `Rs. ${receipt.totalPurchaseAmount.toLocaleString()}` : "—"}</p>
+              <p className="mt-1 text-2xl font-extrabold text-slate-900 dark:text-gray-100">{receipt.totalPurchaseAmount ? `${receipt.totalPurchaseAmount.toLocaleString()}` : "—"}</p>
               <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">Invoice total</p>
             </div>
           </div>

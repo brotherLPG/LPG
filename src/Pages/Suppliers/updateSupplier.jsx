@@ -381,7 +381,7 @@ function UpdateSupplier() {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
-                    Credit Limit (Rs.)
+                    Credit Limit 
                   </label>
                   <input
                     type="text"
@@ -396,7 +396,7 @@ function UpdateSupplier() {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
-                    Opening Balance (Rs.)
+                    Opening Balance 
                   </label>
                   <input
                     type="number"

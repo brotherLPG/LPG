@@ -12,7 +12,7 @@ import {
   useDeleteSupplier,
 } from "../../queries/suppliers/suppliers.queries";
 
-const formatRs = (value) => `Rs. ${Number(value || 0).toLocaleString()}`;
+const formatRs = (value) => `${Number(value || 0).toLocaleString()}`;
 
 const formatAmount = (value) => Number(value || 0).toLocaleString();
 
@@ -293,7 +293,7 @@ function SupplierDetails() {
       },
       {
         key: "paymentAmount",
-        label: "Amount (Rs.)",
+        label: "Amount ",
         className:
           "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-right",
         cellClassName: "px-4 py-4 text-right whitespace-nowrap",

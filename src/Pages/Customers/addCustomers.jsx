@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown } from "lucide-react";
 import { useCustomers, useCreateCustomer } from "../../queries/customers/customers.queries";
 import { useToast } from "../../utils/GlobalToast";
 import SearchableCustomerSelect from "../../components/SearchableCustomerSelect";
@@ -263,7 +262,7 @@ function AddCustomers() {
             <div className="p-5 space-y-5">
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
-                  Credit Limit (Rs.)
+                  Credit Limit 
                 </label>
                 <input
                   type="number"
@@ -293,7 +292,7 @@ function AddCustomers() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
-                  Opening Balance (Rs.)
+                  Opening Balance 
                 </label>
                 <input
                   type="number"

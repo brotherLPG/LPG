@@ -94,61 +94,79 @@ function FillingBatches() {
       key: "batchNo",
       label: "Batch #",
       isRowHeader: true,
-      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
-      cellClassName: "px-4 py-4",
+      className:
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 text-nowrap",
+      cellClassName: "px-4 py-4 ",
       renderCell: (item) => (
-        <span className="font-bold text-slate-800 dark:text-gray-100 text-[13px]">{item.batchNo}</span>
+        <span className="font-bold text-slate-800 dark:text-gray-100 text-[13px]">
+          {item.batchNo}
+        </span>
       ),
     },
     {
       key: "tank",
       label: "Source Tank",
-      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
-      cellClassName: "px-4 py-4",
+      className:
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 text-nowrap word-nowrap",
+      cellClassName: "px-4 py-4 text-nowrap word-nowrap",
     },
     {
       key: "cylinderType",
       label: "Cylinder Type",
-      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
-      cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium",
+      className:
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 text-nowrap word-nowrap",
+      cellClassName:
+        "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium",
     },
     {
       key: "quantity",
       label: "Qty",
-      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
-      cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium",
+      className:
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
+      cellClassName:
+        "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium",
       renderCell: (item) => `${item.quantity.toLocaleString()} Cyl`,
     },
     {
       key: "actualLpgUsedKg",
       label: "LPG Used",
-      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
-      cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium",
+      className:
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
+      cellClassName:
+        "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium",
       renderCell: (item) => `${item.actualLpgUsedKg?.toLocaleString() || 0} KG`,
     },
     {
       key: "operator",
       label: "Operator",
-      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
-      cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium",
+      className:
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 text-nowrap word-nowrap",
+      cellClassName:
+        "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium text-nowrap word-nowrap",
     },
     {
       key: "date",
       label: "Date",
-      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
-      cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium",
+      className:
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
+      cellClassName:
+        "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium",
       renderCell: (item) => item.date || "-",
     },
     {
       key: "status",
       label: "Status",
-      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
+      className:
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
       cellClassName: "px-4 py-4",
       renderCell: (item) => {
         const statusStyles = {
-          completed: "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900",
-          "in-progress": "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900",
-          pending: "bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900",
+          completed:
+            "bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900",
+          "in-progress":
+            "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900",
+          pending:
+            "bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900",
         };
 
         return (
@@ -163,7 +181,8 @@ function FillingBatches() {
     {
       key: "actions",
       label: "Actions",
-      className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 text-right pr-6",
+      className:
+        "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 text-right pr-6",
       cellClassName: "px-4 py-4 pr-6",
       renderCell: (item) => (
         <div className="flex items-center justify-end gap-3">

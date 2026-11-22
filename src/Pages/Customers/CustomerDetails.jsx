@@ -12,7 +12,7 @@ import {
   useDeleteCustomer,
 } from "../../queries/customers/customers.queries";
 
-const formatRs = (value) => `Rs. ${Number(value || 0).toLocaleString()}`;
+const formatRs = (value) => `${Number(value || 0).toLocaleString()}`;
 
 const formatItemDetails = (sale) => {
   if (!sale.lineItems?.length) return "—";
@@ -155,7 +155,8 @@ function CustomerDetails() {
         label: "Invoice Date",
         className:
           "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
-        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap",
+        cellClassName:
+          "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap",
         renderCell: (sale) => formatReceivedDate(sale.invoiceDate) || "—",
       },
       {
@@ -163,7 +164,8 @@ function CustomerDetails() {
         label: "Due Date",
         className:
           "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap ",
-        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap text-nowrap ",
+        cellClassName:
+          "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap text-nowrap ",
         renderCell: (sale) => formatReceivedDate(getSaleDueDate(sale)) || "—",
       },
       {
@@ -171,17 +173,19 @@ function CustomerDetails() {
         label: "Item Details",
         className:
           "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 text-nowrap ",
-        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] text-nowrap ",
+        cellClassName:
+          "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] text-nowrap ",
         renderCell: (sale) => formatItemDetails(sale),
       },
       {
         key: "itemQuantity",
         label: "Qty",
         className:
-          "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-right",
+          "bg-slate-50/80 dark:bg-slate-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-right",
         cellClassName:
-          "px-4 py-4 text-right text-[13px] text-slate-700 dark:text-gray-300 whitespace-nowrap",
-        renderCell: (sale) => Number(sale.itemQuantity || sale.items || 0).toLocaleString(),
+          "px-4 py-4 text-right text-[13px] text-slate-700 dark:text-slate-500 whitespace-nowrap",
+        renderCell: (sale) =>
+          Number(sale.itemQuantity || sale.items || 0).toLocaleString(),
       },
       {
         key: "totalAmount",
@@ -190,7 +194,7 @@ function CustomerDetails() {
           "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-right",
         cellClassName: "px-4 py-4 text-right whitespace-nowrap",
         renderCell: (sale) => (
-          <span className="text-[13px] font-semibold text-slate-800 dark:text-gray-100">
+          <span className="text-[13px] font-semibold text-slate-800 dark:text-gray-500">
             {formatAmount(sale.totalAmount ?? sale.amount)}
           </span>
         ),
@@ -202,7 +206,7 @@ function CustomerDetails() {
           "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-nowrap ",
         cellClassName: "px-4 py-4 whitespace-nowrap text-nowrap ",
         renderCell: (sale) => (
-          <span className="text-[13px] text-slate-700 dark:text-gray-300">
+          <span className="text-[13px] text-slate-700 dark:text-gray-500">
             {formatAmount(sale.discountAmount)}
           </span>
         ),
@@ -236,7 +240,8 @@ function CustomerDetails() {
         label: "Account Name",
         className:
           "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap",
-        cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap",
+        cellClassName:
+          "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] whitespace-nowrap",
         renderCell: (sale) => sale.accountName || "—",
       },
       // {
@@ -307,7 +312,7 @@ function CustomerDetails() {
         ),
       },
     ],
-    []
+    [],
   );
 
   const paymentHistoryParams = {
@@ -362,7 +367,7 @@ function CustomerDetails() {
       },
       {
         key: "paymentAmount",
-        label: "Amount (Rs.)",
+        label: "Amount ",
         className:
           "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300 whitespace-nowrap text-right",
         cellClassName: "px-4 py-4 text-right whitespace-nowrap",

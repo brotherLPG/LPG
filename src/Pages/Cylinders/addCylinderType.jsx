@@ -409,7 +409,7 @@ function AddCylinderType() {
             <div className="p-5 space-y-5">
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
-                  Selling Price (Rs.){" "}
+                  Selling Price {" "}
                   <span className="text-rose-500 dark:text-rose-400">*</span>
                 </label>
                 <input
@@ -442,7 +442,7 @@ function AddCylinderType() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
-                  Purchase Price (Rs.)
+                  Purchase Price 
                 </label>
                 <input
                   type="text"
@@ -455,7 +455,7 @@ function AddCylinderType() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
-                  Refill Price (Rs.)
+                  Refill Price 
                 </label>
                 <input
                   type="text"
@@ -468,7 +468,7 @@ function AddCylinderType() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">
-                  Security Deposit (Rs.)
+                  Security Deposit 
                 </label>
                 <input
                   type="text"

@@ -158,8 +158,8 @@ const handlePrintReceipt = (receipt) => {
         <thead>
           <tr>
             <th>Quantity (KG)</th>
-            <th>Rate/KG (Rs.)</th>
-            <th>Total Cost (Rs.)</th>
+            <th>Rate/KG </th>
+            <th>Total Cost</th>
           </tr>
         </thead>
 
@@ -171,7 +171,7 @@ const handlePrintReceipt = (receipt) => {
           </tr>
           <tr class="total-row">
             <td colspan="2" style="text-align: right;">Grand Total</td>
-            <td>Rs. ${receipt.totalCost.toLocaleString()}</td>
+            <td> ${receipt.totalCost.toLocaleString()}</td>
           </tr>
         </tbody>
       </table>
@@ -193,8 +193,8 @@ const handlePrintReceipt = (receipt) => {
       { key: 'date', label: 'Date Received' },
       { key: 'truckReg', label: 'Truck Reg #' },
       { key: 'quantity', label: 'Quantity (KG)' },
-      { key: 'rate', label: 'Rate/KG (Rs.)' },
-      { key: 'totalCost', label: 'Total Cost (Rs.)' },
+      { key: 'rate', label: 'Rate/KG ' },
+      { key: 'totalCost', label: 'Total Cost ' },
       { key: 'status', label: 'Status' },
     ];
 
@@ -202,7 +202,7 @@ const handlePrintReceipt = (receipt) => {
       ...receipt,
       quantity: receipt.quantity.toLocaleString(),
       rate: receipt.rate.toLocaleString(),
-      totalCost: `Rs. ${receipt.totalCost.toLocaleString()}`,
+      totalCost: ` ${receipt.totalCost.toLocaleString()}`,
     }));
 
     printTable({
@@ -281,17 +281,17 @@ const handlePrintReceipt = (receipt) => {
     },
     {
       key: "rate",
-      label: "Rate/KG (Rs.)",
+      label: "Rate/KG ",
       className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
       cellClassName: "px-4 py-4 text-slate-600 dark:text-gray-400 text-[13px] font-medium",
     },
     {
       key: "totalCost",
-      label: "Total Cost (Rs.)",
+      label: "Total Cost ",
       className: "bg-slate-50/80 dark:bg-gray-800/80 px-4 py-4 text-[13px] font-bold text-slate-700 dark:text-gray-300",
       cellClassName: "px-4 py-4",
       renderCell: (item) => (
-        <span className="text-slate-900 dark:text-gray-100 font-bold text-[13px]">Rs. {item.totalCost.toLocaleString()}</span>
+        <span className="text-slate-900 dark:text-gray-100 font-bold text-[13px]">{item.totalCost.toLocaleString()}</span>
       ),
     },
     {
@@ -467,7 +467,7 @@ const handlePrintReceipt = (receipt) => {
                   Total Purchase Cost
                 </p>
                 <p className="mt-1 text-2xl font-extrabold text-slate-900 dark:text-gray-100">
-                  Rs. {summaryStats.totalCost.toLocaleString()}
+                   {summaryStats.totalCost.toLocaleString()}
                 </p>
                 <p className="mt-1 text-[11px] text-slate-400 dark:text-gray-500">
                   Monthly spend

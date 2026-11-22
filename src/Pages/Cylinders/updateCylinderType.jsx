@@ -344,7 +344,7 @@ function UpdateCylinderType() {
             </div>
             <div className="p-5 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">Selling Price (Rs.) <span className="text-rose-500 dark:text-rose-400">*</span></label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">Selling Price  <span className="text-rose-500 dark:text-rose-400">*</span></label>
                 <input
                   ref={sellingPriceRef}
                   type="text"
@@ -366,17 +366,17 @@ function UpdateCylinderType() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">Purchase Price (Rs.)</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">Purchase Price </label>
                 <input type="text" placeholder="0.00" value={purchasePrice} onChange={(e) => setPurchasePrice(e.target.value)} className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">Refill Price (Rs.)</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">Refill Price </label>
                 <input type="text" placeholder="0.00" value={refillPrice} onChange={(e) => setRefillPrice(e.target.value)} className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">Security Deposit (Rs.)</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1.5">Security Deposit </label>
                 <input type="text" placeholder="0.00" value={securityDeposit} onChange={(e) => setSecurityDeposit(e.target.value)} className="w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-slate-900 dark:text-gray-100 outline-none focus:border-[#008951] focus:ring-2 focus:ring-emerald-100" />
               </div>
             </div>

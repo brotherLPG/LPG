@@ -38,9 +38,9 @@ function CylinderTypes() {
     name: s.typeName,
     capacity: `${s.capacityKg?.toFixed?.(1) || s.capacityKg} KG`,
     tare: `${s.tareWeightKg?.toFixed?.(1) || s.tareWeightKg} KG`,
-    price: s.sellingPricePerCylinder?.toLocaleString ? `Rs. ${s.sellingPricePerCylinder.toLocaleString()}` : s.sellingPricePerCylinder,
-    purchasePrice: s.purchasePriceAmount?.toLocaleString ? `Rs. ${s.purchasePriceAmount.toLocaleString()}` : s.purchasePriceAmount,
-    refillPrice: s.refillPriceAmount?.toLocaleString ? `Rs. ${s.refillPriceAmount.toLocaleString()}` : s.refillPriceAmount,
+    price: s.sellingPricePerCylinder?.toLocaleString ? ` ${s.sellingPricePerCylinder.toLocaleString()}` : s.sellingPricePerCylinder,
+    purchasePrice: s.purchasePriceAmount?.toLocaleString ? ` ${s.purchasePriceAmount.toLocaleString()}` : s.purchasePriceAmount,
+    refillPrice: s.refillPriceAmount?.toLocaleString ? ` ${s.refillPriceAmount.toLocaleString()}` : s.refillPriceAmount,
     status: s.isActive ? "Active" : "Inactive",
     _id: s._id,
   })), [cylinderTypes]);

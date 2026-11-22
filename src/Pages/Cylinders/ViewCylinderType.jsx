@@ -95,7 +95,7 @@ function ViewCylinderType() {
             <div>
               <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Selling Price</p>
               <p className="text-xl font-bold text-slate-900 dark:text-gray-100">
-                Rs. {cylinderData.sellingPricePerCylinder?.toLocaleString() || 0}
+                 {cylinderData.sellingPricePerCylinder?.toLocaleString() || 0}
               </p>
             </div>
           </div>
@@ -109,7 +109,7 @@ function ViewCylinderType() {
             <div>
               <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">Purchase Price</p>
               <p className="text-xl font-bold text-slate-900 dark:text-gray-100">
-                Rs. {cylinderData.purchasePriceAmount?.toLocaleString() || 0}
+                 {cylinderData.purchasePriceAmount?.toLocaleString() || 0}
               </p>
             </div>
           </div>
@@ -199,28 +199,28 @@ function ViewCylinderType() {
             <div>
               <label className="block text-sm font-medium text-slate-500 dark:text-gray-400 mb-1">Selling Price</label>
               <p className="text-sm font-semibold text-slate-900 dark:text-gray-100">
-                Rs. {cylinderData.sellingPricePerCylinder?.toLocaleString() || 0}
+                 {cylinderData.sellingPricePerCylinder?.toLocaleString() || 0}
               </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-500 dark:text-gray-400 mb-1">Purchase Price</label>
               <p className="text-sm font-semibold text-slate-900 dark:text-gray-100">
-                Rs. {cylinderData.purchasePriceAmount?.toLocaleString() || 0}
+                {cylinderData.purchasePriceAmount?.toLocaleString() || 0}
               </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-500 dark:text-gray-400 mb-1">Refill Price</label>
               <p className="text-sm font-semibold text-slate-900 dark:text-gray-100">
-                Rs. {cylinderData.refillPriceAmount?.toLocaleString() || 0}
+                 {cylinderData.refillPriceAmount?.toLocaleString() || 0}
               </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-500 dark:text-gray-400 mb-1">Security Deposit</label>
               <p className="text-sm font-semibold text-slate-900 dark:text-gray-100">
-                Rs. {cylinderData.securityDepositAmount?.toLocaleString() || 0}
+                {cylinderData.securityDepositAmount?.toLocaleString() || 0}
               </p>
             </div>
           </div>
