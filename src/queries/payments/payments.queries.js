@@ -49,6 +49,8 @@ export const useCreatePayment = () => {
     mutationFn: createPayment,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.payments.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sales.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.customers.all });
     },
   });
 };
@@ -60,6 +62,8 @@ export const useUpdatePayment = () => {
     mutationFn: ({ id, data }) => updatePayment(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.payments.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sales.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.customers.all });
     },
   });
 };
@@ -71,6 +75,8 @@ export const useDeletePayment = () => {
     mutationFn: deletePayment,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.payments.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sales.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.customers.all });
     },
   });
 };

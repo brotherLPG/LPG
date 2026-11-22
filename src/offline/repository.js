@@ -3008,6 +3008,116 @@ function filterSales(rows, params) {
   });
 }
 
+const SALE_PAYMENT_LABELS = {
+  unpaid: 'Unpaid',
+  partial: 'Partial',
+  paid: 'Paid',
+  'refund-due': 'Refund Due',
+};
+
+function saleIdentityKeys(row, record = rowRecord(row)) {
+  return [row?.localId, row?.serverId, record?._id].filter(Boolean).map(String);
+}
+
+async function pendingSalePaymentEffects() {
+  const payments = await allPayments();
+  const sales = await db.sales.toArray();
+  const aliases = new Map();
+  for (const row of sales) {
+    const keys = saleIdentityKeys(row);
+    const root = keys[0];
+    if (!root) continue;
+    for (const key of keys) aliases.set(key, root);
+  }
+  const totals = new Map();
+  for (const row of payments) {
+    if (row.syncStatus === 'synced' || row.origin === 'sale-receipt') continue;
+    if (!keepPaymentRow(row, payments)) continue;
+    const payment = rowRecord(row);
+    const kind = payment.paymentType === 'refund' ? 'refund' : payment.paymentType === 'pay' ? '' : 'paid';
+    if (!kind) continue;
+    const lines = Array.isArray(payment.allocations) && payment.allocations.length
+      ? payment.allocations
+      : (payment.saleId ? [{ saleId: payment.saleId, amountApplied: payment.paymentAmount }] : []);
+    for (const line of lines) {
+      const saleId = partyId(line.saleId);
+      if (!saleId) continue;
+      const key = aliases.get(saleId) || saleId;
+      const current = totals.get(key) || { paid: 0, refund: 0, customers: [] };
+      current[kind] = roundMoney(current[kind] + (Number(line.amountApplied) || 0));
+      const saleRow = sales.find((item) => saleIdentityKeys(item).includes(saleId) || saleIdentityKeys(item).includes(key));
+      const owner = partyId(payment.customerId) || partyId(rowRecord(saleRow)?.customerId) || saleRow?.customerLocalId || '';
+      if (owner && !current.customers.includes(String(owner))) current.customers.push(String(owner));
+      totals.set(key, current);
+      aliases.set(saleId, key);
+    }
+  }
+  return { aliases, totals };
+}
+
+function effectForSale(row, effects) {
+  if (!effects?.totals?.size) return null;
+  const seen = new Set();
+  let paid = 0;
+  let refund = 0;
+  for (const id of saleIdentityKeys(row)) {
+    const key = effects.aliases.get(id) || id;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const effect = effects.totals.get(key);
+    if (!effect) continue;
+    paid += effect.paid;
+    refund += effect.refund;
+  }
+  if (!paid && !refund) return null;
+  return { paid: roundMoney(paid), refund: roundMoney(refund) };
+}
+
+function applyPaymentToSale(sale, effect) {
+  if (!sale || !effect) return sale;
+  const paidAmount = roundMoney((Number(sale.paidAmount) || 0) + effect.paid - effect.refund);
+  const outstandingAmount = roundMoney((Number(sale.totalAmount) || 0) - (Number(sale.returnedAmount) || 0) - paidAmount);
+  let paymentStatus = 'unpaid';
+  if (outstandingAmount < -0.009) paymentStatus = 'refund-due';
+  else if (outstandingAmount <= 0.009) paymentStatus = 'paid';
+  else if (paidAmount > 0.009) paymentStatus = 'partial';
+  return {
+    ...sale,
+    paidAmount,
+    outstandingAmount,
+    paymentStatus,
+    paymentStatusLabel: SALE_PAYMENT_LABELS[paymentStatus],
+  };
+}
+
+function saleCreditRelief(effects, { ignoreIds = [], customerId = '' } = {}) {
+  if (!effects?.totals?.size) return 0;
+  const ignore = new Set();
+  for (const id of ignoreIds) {
+    if (!id) continue;
+    const text = String(id);
+    ignore.add(effects.aliases?.get(text) || text);
+    ignore.add(text);
+  }
+  let relief = 0;
+  for (const [key, effect] of effects.totals) {
+    if (ignore.has(key)) continue;
+    if (customerId && !(effect.customers || []).some((id) => sameParty(id, customerId))) continue;
+    relief += effect.paid - effect.refund;
+  }
+  return roundMoney(relief);
+}
+
+async function withPendingSalePayments(rows) {
+  const effects = await pendingSalePaymentEffects();
+  if (!effects.totals.size) return rows;
+  return rows.map((row) => {
+    const effect = effectForSale(row, effects);
+    if (!effect) return row;
+    return { ...row, record: applyPaymentToSale(rowRecord(row), effect) };
+  });
+}
+
 function keepPaymentRow(row, rows) {
   if (row.origin !== 'sale-receipt') return true;
   if (!row.saleServerId) return true;
@@ -3359,7 +3469,7 @@ async function withPendingParties(data) {
 }
 
 async function outstandingForCustomer(customerId) {
-  const sales = (await allSales()).filter((row) => {
+  const sales = (await withPendingSalePayments(await allSales())).filter((row) => {
     const sale = rowRecord(row);
     return (sameParty(row.customerLocalId, customerId) || sameParty(sale.customerId, customerId))
       && sale.saleStatus !== 'cancelled'
@@ -3621,7 +3731,7 @@ export async function serveGet(config) {
   }
   if (/^\/customers\/[^/]+\/sales-history$/.test(path)) {
     const id = path.split('/')[2];
-    const rows = filterSales(await allSales(), { ...params, customerId: id });
+    const rows = filterSales(await withPendingSalePayments(await allSales()), { ...params, customerId: id });
     return envelope('Customer sales history fetched', paginate(rows.map(rowRecord), params));
   }
   if (/^\/customers\/[^/]+\/payment-history$/.test(path)) {
@@ -3711,7 +3821,7 @@ export async function serveGet(config) {
     }
   }
   if (path === '/sales' && (await allSales()).length) {
-    const rows = filterSales(await allSales(), params);
+    const rows = filterSales(await withPendingSalePayments(await allSales()), params);
     const records = sortSaleRecords(rows.map(rowRecord));
     return envelope('Sales fetched', {
       ...paginate(records, params),
@@ -4068,10 +4178,39 @@ export async function mergePendingIntoResponse(config, payload) {
           : path === '/filling-batches' ? filterFillingBatches(await allFillingBatches(), params)
             : path === '/lpg-receipts' ? filterReceipts(await allLpgReceipts(), params)
             : filterPayments(await allPayments(), params);
+  const saleEffects = path === '/sales' ? await pendingSalePaymentEffects() : null;
+  if (saleEffects?.totals?.size && Array.isArray(payload.data?.items)) {
+    payload = {
+      ...payload,
+      data: {
+        ...payload.data,
+        items: payload.data.items.map((item) => applyPaymentToSale(item, effectForSale({ localId: item._id, serverId: item._id, record: item }, saleEffects))),
+      },
+    };
+  }
   const pending = table
     .filter((row) => row.syncStatus !== 'synced' && (row.origin !== 'sale-receipt' || (path === '/payments' && keepPaymentRow(row, table))))
-    .map((row) => (path === '/payments' ? paymentListRecord(row) : rowRecord(row)));
-  if (!pending.length || Number(params.page || 1) !== 1) return payload;
+    .map((row) => {
+      if (path === '/payments') return paymentListRecord(row);
+      if (path === '/sales') return applyPaymentToSale(rowRecord(row), effectForSale(row, saleEffects));
+      return rowRecord(row);
+    });
+  if (!pending.length || Number(params.page || 1) !== 1) {
+    if (path === '/sales' && saleEffects?.totals?.size && Number(params.page || 1) === 1 && payload.data?.summary) {
+      const relief = saleCreditRelief(saleEffects, { customerId: params.customerId });
+      payload = {
+        ...payload,
+        data: {
+          ...payload.data,
+          summary: {
+            ...payload.data.summary,
+            pendingCreditAmount: roundMoney((Number(payload.data.summary.pendingCreditAmount) || 0) - relief),
+          },
+        },
+      };
+    }
+    return payload;
+  }
   const seen = new Set(payload.data.items.map((item) => String(item._id)));
   const extras = pending.filter((item) => !seen.has(String(item._id)));
   const replaced = payload.data.items.map((item) => (
@@ -4100,6 +4239,10 @@ export async function mergePendingIntoResponse(config, payload) {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   const todaySales = countedSales.filter((sale) => new Date(sale.invoiceDate || sale.createdAt || 0) >= todayStart);
+  const existingSaleRelief = saleCreditRelief(saleEffects, {
+    ignoreIds: countedSales.map((sale) => sale._id),
+    customerId: params.customerId,
+  });
   const nextSummary = path === '/lpg-receipts' && summary ? {
     ...summary,
     thisMonthReceipts: (summary.thisMonthReceipts || 0) + monthReceipts.length,
@@ -4123,7 +4266,7 @@ export async function mergePendingIntoResponse(config, payload) {
     cashSalesCount: (summary.cashSalesCount || 0) + countedSales.filter((sale) => !isCreditSale(sale)).length,
     creditSalesAmount: roundMoney((summary.creditSalesAmount || 0) + countedSales.filter(isCreditSale).reduce((sum, sale) => sum + saleAmount(sale), 0)),
     creditSalesCount: (summary.creditSalesCount || 0) + countedSales.filter(isCreditSale).length,
-    pendingCreditAmount: roundMoney((summary.pendingCreditAmount || 0) + countedSales.reduce((sum, sale) => sum + (Number(sale.outstandingAmount) || 0), 0)),
+    pendingCreditAmount: roundMoney((summary.pendingCreditAmount || 0) - existingSaleRelief + countedSales.reduce((sum, sale) => sum + (Number(sale.outstandingAmount) || 0), 0)),
   } : path === '/accounts' && summary ? {
     ...summary,
     totalAccounts: (summary.totalAccounts || 0) + extras.length,
