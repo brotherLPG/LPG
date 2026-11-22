@@ -17,6 +17,10 @@ function RecentPayments({ payments }) {
     paymentAmount:
       payment.formattedPaymentAmount ||
       `Rs. ${Number(payment.paymentAmount || 0).toLocaleString("en-US")}`,
+    provisional:
+      payment.provisional === true
+      || String(payment.receiptNumber || payment.paymentNumber || "").startsWith("OFF-")
+      || String(payment.paymentId || "").startsWith("local_"),
   }));
 
   const paymentColumns = [
@@ -79,7 +83,9 @@ function RecentPayments({ payments }) {
           data={items}
           ariaLabel="Recent payments"
           className=""
-          rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-b-0 hover:bg-slate-50 dark:hover:bg-gray-800"
+          rowClassName={(item) => (item.provisional
+            ? "sales-offline-row"
+            : "border-b border-slate-100 dark:border-gray-800 last:border-b-0 hover:bg-slate-50 dark:hover:bg-gray-800")}
         />
         </section>
       )}

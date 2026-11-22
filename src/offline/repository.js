@@ -3285,6 +3285,207 @@ async function outstandingForCustomer(customerId) {
   });
 }
 
+function formatRs(value) {
+  return `Rs. ${roundMoney(value).toLocaleString('en-US')}`;
+}
+
+function dateKey(value) {
+  const text = String(value || '');
+  const match = text.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (match) return match[1];
+  const date = new Date(text);
+  if (Number.isNaN(date.getTime())) return '';
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+function inDateRange(value, start, end) {
+  const key = dateKey(value);
+  if (!key || !start || !end) return false;
+  return key >= start && key <= end;
+}
+
+function bumpMetric(metric, delta) {
+  if (!metric || !delta) return metric;
+  const amount = roundMoney((Number(metric.amount) || 0) + delta);
+  const previous = Number(metric.previousAmount) || 0;
+  const changePercent = previous === 0
+    ? (amount > 0 ? 100 : 0)
+    : Math.round((((amount - previous) / previous) * 100) * 10) / 10;
+  const label = String(metric.changeLabel || '');
+  const suffix = label.includes('vs.') ? label.slice(label.indexOf('vs.')) : '';
+  const sign = changePercent > 0 ? '+' : '';
+  return {
+    ...metric,
+    amount,
+    formattedAmount: formatRs(amount),
+    changePercent,
+    changeLabel: suffix ? `${sign}${changePercent}% ${suffix}` : metric.changeLabel,
+    trend: changePercent > 0 ? 'up' : changePercent < 0 ? 'down' : 'flat',
+  };
+}
+
+async function withDashboardActivity(data) {
+  if (!data?.recentSales) return data;
+  const sales = await allSales();
+  const payments = await allPayments();
+  const pendingSales = sales
+    .filter((row) => row.syncStatus !== 'synced')
+    .map((row) => ({ row, record: rowRecord(row) }))
+    .filter(({ record }) => record.saleStatus !== 'draft' && record.saleStatus !== 'cancelled');
+  pendingSales.sort((left, right) => String(right.record.createdAt || right.record.invoiceDate || '')
+    .localeCompare(String(left.record.createdAt || left.record.invoiceDate || '')));
+
+  const seenSales = new Set();
+  const saleItems = pendingSales.map(({ row, record }) => {
+    [record._id, row.localId, row.serverId].filter(Boolean).forEach((id) => seenSales.add(String(id)));
+    return {
+      saleId: record._id || row.localId,
+      invoiceNumber: record.invoiceNumber || record.saleNumber,
+      customerId: record.customerId || null,
+      customerName: record.customerName || '',
+      customerCode: record.customerCode || '',
+      invoiceDate: record.invoiceDate || null,
+      totalAmount: roundMoney(record.totalAmount),
+      formattedTotalAmount: formatRs(record.totalAmount),
+      saleStatus: record.saleStatus,
+      paymentStatus: record.paymentStatus,
+      provisional: true,
+    };
+  });
+  const recentSales = {
+    ...data.recentSales,
+    items: [
+      ...saleItems,
+      ...(data.recentSales.items || []).filter((item) => !seenSales.has(String(item.saleId))),
+    ].slice(0, Math.max(5, data.recentSales.items?.length || 0)),
+  };
+
+  const pendingPayments = payments
+    .filter((row) => row.syncStatus !== 'synced' && keepPaymentRow(row, payments))
+    .map((row) => ({ row, record: rowRecord(row) }))
+    .filter(({ record }) => record.paymentStatus !== 'pending');
+  pendingPayments.sort((left, right) => String(right.record.createdAt || right.record.paymentDate || '')
+    .localeCompare(String(left.record.createdAt || left.record.paymentDate || '')));
+  const seenPayments = new Set();
+  const paymentItems = pendingPayments.map(({ row, record }) => {
+    [record._id, row.localId, row.serverId].filter(Boolean).forEach((id) => seenPayments.add(String(id)));
+    return {
+      paymentId: record._id || row.localId,
+      receiptNumber: record.paymentNumber,
+      paymentNumber: record.paymentNumber,
+      payeeAccountName: record.partyName || record.accountName || '',
+      partyName: record.partyName || '',
+      paymentType: record.paymentType,
+      paymentDate: record.paymentDate || null,
+      paymentAmount: roundMoney(record.paymentAmount),
+      formattedPaymentAmount: formatRs(record.paymentAmount),
+      paymentStatus: record.paymentStatus,
+      provisional: true,
+    };
+  });
+  const recentPayments = data.recentPayments ? {
+    ...data.recentPayments,
+    items: [
+      ...paymentItems,
+      ...(data.recentPayments.items || []).filter((item) => !seenPayments.has(String(item.paymentId))),
+    ].slice(0, Math.max(5, data.recentPayments.items?.length || 0)),
+  } : data.recentPayments;
+
+  let next = { ...data, recentSales, recentPayments };
+  const periodStart = data.kpis?.periodStart;
+  const periodEnd = data.kpis?.periodEnd;
+  const salesDelta = roundMoney(pendingSales.reduce((sum, { row, record }) => {
+    if (row.serverId || !inDateRange(record.invoiceDate, periodStart, periodEnd)) return sum;
+    return sum + (Number(record.totalAmount) || 0);
+  }, 0));
+  const receivedDelta = roundMoney(pendingPayments.reduce((sum, { row, record }) => {
+    if (row.serverId || (record.paymentType && record.paymentType !== 'receive')) return sum;
+    if (!inDateRange(record.paymentDate, periodStart, periodEnd)) return sum;
+    return sum + (Number(record.paymentAmount) || 0);
+  }, 0));
+
+  if (next.kpis && (salesDelta || receivedDelta)) {
+    const totalSales = bumpMetric(next.kpis.totalSales, salesDelta);
+    const totalReceivedPayment = bumpMetric(next.kpis.totalReceivedPayment, receivedDelta);
+    const outstanding = roundMoney(Math.max(0, (totalSales?.amount || 0) - (totalReceivedPayment?.amount || 0)));
+    next = {
+      ...next,
+      kpis: {
+        ...next.kpis,
+        totalSales,
+        totalReceivedPayment,
+        outstandingReceivable: {
+          ...next.kpis.outstandingReceivable,
+          amount: outstanding,
+          formattedAmount: formatRs(outstanding),
+        },
+      },
+    };
+  }
+
+  if (next.salesPaymentTrend?.series && (salesDelta || receivedDelta)) {
+    const series = next.salesPaymentTrend.series.map((point) => ({ ...point }));
+    for (const { row, record } of pendingSales) {
+      if (row.serverId) continue;
+      const point = series.find((item) => item.date === dateKey(record.invoiceDate));
+      if (!point) continue;
+      point.salesAmount = roundMoney((Number(point.salesAmount) || 0) + (Number(record.totalAmount) || 0));
+      point.salesFormattedAmount = formatRs(point.salesAmount);
+      point.differenceAmount = roundMoney(point.salesAmount - (Number(point.receivedAmount) || 0));
+    }
+    for (const { row, record } of pendingPayments) {
+      if (row.serverId || (record.paymentType && record.paymentType !== 'receive')) continue;
+      const point = series.find((item) => item.date === dateKey(record.paymentDate));
+      if (!point) continue;
+      point.receivedAmount = roundMoney((Number(point.receivedAmount) || 0) + (Number(record.paymentAmount) || 0));
+      point.receivedFormattedAmount = formatRs(point.receivedAmount);
+      point.differenceAmount = roundMoney((Number(point.salesAmount) || 0) - point.receivedAmount);
+    }
+    let highestSales = series[0];
+    let highestReceived = series[0];
+    for (const point of series) {
+      if ((point.salesAmount || 0) > (highestSales?.salesAmount || 0)) highestSales = point;
+      if ((point.receivedAmount || 0) > (highestReceived?.receivedAmount || 0)) highestReceived = point;
+    }
+    const average = series.length
+      ? roundMoney(series.reduce((sum, point) => sum + (Number(point.differenceAmount) || 0), 0) / series.length)
+      : 0;
+    const highlights = next.salesPaymentTrend.highlights || {};
+    next = {
+      ...next,
+      salesPaymentTrend: {
+        ...next.salesPaymentTrend,
+        series,
+        highlights: {
+          ...highlights,
+          highestSales: highestSales ? {
+            ...highlights.highestSales,
+            amount: highestSales.salesAmount,
+            formattedAmount: formatRs(highestSales.salesAmount),
+            date: highestSales.date,
+            dateLabel: highestSales.dateLabel,
+          } : highlights.highestSales,
+          highestReceivedPayment: highestReceived ? {
+            ...highlights.highestReceivedPayment,
+            amount: highestReceived.receivedAmount,
+            formattedAmount: formatRs(highestReceived.receivedAmount),
+            date: highestReceived.date,
+            dateLabel: highestReceived.dateLabel,
+          } : highlights.highestReceivedPayment,
+          averageDifference: {
+            ...highlights.averageDifference,
+            amount: average,
+            formattedAmount: formatRs(average),
+          },
+        },
+      },
+    };
+  }
+  return next;
+}
+
 export async function serveGet(config) {
   const path = requestPath(config);
   const params = paramsOf(config);
@@ -3431,6 +3632,16 @@ export async function serveGet(config) {
     if (!base) return null;
     const data = await withTankActivity(base);
     return listed?.envelope ? { ...listed.envelope, data } : envelope('Storage tank fetched', data);
+  }
+  if (path === '/dashboard/operations') {
+    const listed = await db.snapshots.get(cacheKey(config));
+    const snaps = await db.snapshots.toArray();
+    const cached = listed?.envelope?.data
+      || snaps.find((snap) => snap.path === '/dashboard/operations')?.envelope?.data
+      || null;
+    if (!cached) return null;
+    const data = await withDashboardActivity(cached);
+    return listed?.envelope ? { ...listed.envelope, data } : envelope('Operations overview fetched', data);
   }
   if (path === '/lpg-receipts') {
     const localRows = await allLpgReceipts();
@@ -3697,6 +3908,9 @@ export async function mergePendingIntoResponse(config, payload) {
   const path = requestPath(config);
   if (path === '/storage-tanks/dashboard') {
     return { ...payload, data: await withTankActivity(payload.data) };
+  }
+  if (path === '/dashboard/operations') {
+    return { ...payload, data: await withDashboardActivity(payload.data) };
   }
   if (path === '/assets/form-options' || path === '/expenses/form-options' || path === '/maintenance-records/form-options') {
     const fresh = path === '/assets/form-options'

@@ -16,6 +16,10 @@ function RecentSales({ sales }) {
     totalAmount:
       sale.formattedTotalAmount ||
       `Rs. ${Number(sale.totalAmount || 0).toLocaleString("en-US")}`,
+    provisional:
+      sale.provisional === true
+      || String(sale.invoiceNumber || "").startsWith("OFF-")
+      || String(sale.saleId || "").startsWith("local_"),
   }));
 
   const salesColumns = [
@@ -78,7 +82,9 @@ function RecentSales({ sales }) {
             data={items}
             ariaLabel="Recent sales"
             className=""
-            rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-b-0 hover:bg-slate-50 dark:hover:bg-gray-800"
+            rowClassName={(item) => (item.provisional
+              ? "sales-offline-row"
+              : "border-b border-slate-100 dark:border-gray-800 last:border-b-0 hover:bg-slate-50 dark:hover:bg-gray-800")}
           />
         </section>
       )}
