@@ -79,6 +79,12 @@ function Payments() {
         directionLabel: typeMeta.label,
         directionTone: typeMeta.tone,
         status: payment.paymentStatusLabel || payment.paymentStatus,
+        provisional:
+          payment.provisional === true
+          || payment.syncStatus === "pending"
+          || payment.syncStatus === "failed"
+          || String(payment.paymentNumber || "").startsWith("OFF-")
+          || String(payment._id || "").startsWith("local_"),
       };
     });
   }, [paymentRecords]);
@@ -398,11 +404,14 @@ function Payments() {
               data={filteredPayments}
               ariaLabel="Payments Table"
               className=""
-              rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
+              rowClassName={(item) => (item.provisional
+                ? "sales-offline-row border-b border-rose-100 last:border-0"
+                : "border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors")}
               emptyContent="No payments match your search."
               pagination={true}
               rowsPerPage={pagination.limit || 10}
               totalCount={pagination.total}
+              page={currentPage}
               onPageChange={(p) => setCurrentPage(p)}
             />
           )}

@@ -3016,14 +3016,42 @@ function keepPaymentRow(row, rows) {
     && paymentSaleIds(rowRecord(other)).includes(String(row.saleServerId)));
 }
 
+function isOfflinePaymentRecord(record) {
+  return record?.provisional === true
+    || record?.syncStatus === 'pending'
+    || record?.syncStatus === 'failed'
+    || String(record?.paymentNumber || '').startsWith('OFF-')
+    || String(record?._id || '').startsWith('local_');
+}
+
+function sortPaymentRecords(records) {
+  return [...records].sort((left, right) => {
+    const leftOffline = isOfflinePaymentRecord(left);
+    const rightOffline = isOfflinePaymentRecord(right);
+    if (leftOffline !== rightOffline) return leftOffline ? -1 : 1;
+    return new Date(right.createdAt || right.paymentDate || 0).getTime()
+      - new Date(left.createdAt || left.paymentDate || 0).getTime();
+  });
+}
+
+function paymentListRecord(row) {
+  const record = rowRecord(row);
+  if (row.syncStatus === 'synced' && row.origin !== 'sale-receipt') return record;
+  if (row.syncStatus === 'synced') return record;
+  return { ...record, provisional: true, syncStatus: row.syncStatus || record.syncStatus || 'pending' };
+}
+
 function filterPayments(rows, params) {
+  const type = params.paymentType || (params.direction && params.direction !== 'all' ? params.direction : '');
+  const status = params.paymentStatus || params.status || '';
   return rows.filter((row) => {
     const record = rowRecord(row);
     if (params.customerId && !sameParty(record.customerId, params.customerId) && !sameParty(row.customerLocalId, params.customerId)) {
       return false;
     }
     if (params.supplierId && !sameParty(record.supplierId, params.supplierId)) return false;
-    if (params.paymentType && record.paymentType !== params.paymentType) return false;
+    if (type && record.paymentType !== type && record.direction !== type) return false;
+    if (status && status !== 'all' && record.paymentStatus !== status) return false;
     if (!params.search) return true;
     return [record.paymentNumber, record.partyName, record.referenceNumber]
       .some((value) => includesText(value, params.search));
@@ -3807,10 +3835,23 @@ export async function serveGet(config) {
       meta: { maintenanceTypes: MAINTENANCE_TYPES },
     });
   }
-  if (path === '/payments' && (await allPayments()).length) {
-    const source = await allPayments();
-    const rows = filterPayments(source, params).filter((row) => keepPaymentRow(row, source));
-    return envelope('Payments fetched', paginate(rows.map(rowRecord), params));
+  if (path === '/payments') {
+    const localRows = await allPayments();
+    const cached = await cachedListItems('/payments');
+    const covered = new Set();
+    for (const row of localRows) {
+      if (row.serverId) covered.add(String(row.serverId));
+      const recordId = rowRecord(row)._id;
+      if (recordId) covered.add(String(recordId));
+    }
+    const extras = cached
+      .filter((item) => item?._id && !covered.has(String(item._id)))
+      .map((item) => ({ record: item, syncStatus: 'synced', origin: 'server', localId: String(item._id), serverId: String(item._id) }));
+    const source = [...localRows, ...extras];
+    if (source.length) {
+      const rows = filterPayments(source, params).filter((row) => keepPaymentRow(row, source));
+      return envelope('Payments fetched', paginate(sortPaymentRecords(rows.map(paymentListRecord)), params));
+    }
   }
 
   const snap = await db.snapshots.get(cacheKey(config));
@@ -4028,8 +4069,8 @@ export async function mergePendingIntoResponse(config, payload) {
             : path === '/lpg-receipts' ? filterReceipts(await allLpgReceipts(), params)
             : filterPayments(await allPayments(), params);
   const pending = table
-    .filter((row) => row.syncStatus !== 'synced' && row.origin !== 'sale-receipt')
-    .map(rowRecord);
+    .filter((row) => row.syncStatus !== 'synced' && (row.origin !== 'sale-receipt' || (path === '/payments' && keepPaymentRow(row, table))))
+    .map((row) => (path === '/payments' ? paymentListRecord(row) : rowRecord(row)));
   if (!pending.length || Number(params.page || 1) !== 1) return payload;
   const seen = new Set(payload.data.items.map((item) => String(item._id)));
   const extras = pending.filter((item) => !seen.has(String(item._id)));
