@@ -15,7 +15,7 @@ function RecentSales({ sales }) {
     customerName: sale.customerName || "—",
     totalAmount:
       sale.formattedTotalAmount ||
-      `Rs. ${Number(sale.totalAmount || 0).toLocaleString("en-US")}`,
+      ` ${Number(sale.totalAmount || 0).toLocaleString("en-US")}`,
   }));
 
   const salesColumns = [

@@ -70,7 +70,7 @@ function Dashboard() {
   const kpiCards = [
     {
       label: kpis?.totalSales?.label || "Total Sales",
-      value: kpis?.totalSales?.formattedAmount || "Rs. 0",
+      value: kpis?.totalSales?.formattedAmount || " 0",
       hint: `vs. previous ${periodDays} days`,
       change: formatChange(kpis?.totalSales),
       trend: kpis?.totalSales?.trend || "flat",
@@ -81,7 +81,7 @@ function Dashboard() {
     },
     {
       label: kpis?.totalReceivedPayment?.label || "Total Received Payment",
-      value: kpis?.totalReceivedPayment?.formattedAmount || "Rs. 0",
+      value: kpis?.totalReceivedPayment?.formattedAmount || " 0",
       hint: `vs. previous ${periodDays} days`,
       change: formatChange(kpis?.totalReceivedPayment),
       trend: kpis?.totalReceivedPayment?.trend || "flat",
@@ -92,7 +92,7 @@ function Dashboard() {
     },
     {
       label: kpis?.outstandingReceivable?.label || "Outstanding Receivable",
-      value: kpis?.outstandingReceivable?.formattedAmount || "Rs. 0",
+      value: kpis?.outstandingReceivable?.formattedAmount || " 0",
       hint: kpis?.outstandingReceivable?.description || "Sales minus received",
       icon: Receipt,
       cardClass: "bg-[#FEF2F2] dark:bg-red-950",

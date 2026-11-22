@@ -16,7 +16,7 @@ function RecentPayments({ payments }) {
     payeeAccountName: payment.payeeAccountName || payment.partyName || "—",
     paymentAmount:
       payment.formattedPaymentAmount ||
-      `Rs. ${Number(payment.paymentAmount || 0).toLocaleString("en-US")}`,
+      ` ${Number(payment.paymentAmount || 0).toLocaleString("en-US")}`,
   }));
 
   const paymentColumns = [

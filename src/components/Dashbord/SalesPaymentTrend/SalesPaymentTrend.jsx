@@ -8,7 +8,7 @@ const CHART_HEIGHT = 280;
 const PLOT = { left: 78, top: 28, right: 148, bottom: 44 };
 
 const formatRupees = (value) =>
-  `Rs. ${Number(value || 0).toLocaleString("en-US")}`;
+  ` ${Number(value || 0).toLocaleString("en-US")}`;
 
 const niceMax = (value) => {
   const amount = Math.max(Number(value) || 0, 1);
