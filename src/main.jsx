@@ -13,7 +13,12 @@ import { installOffline } from './offline/httpOffline';
 
 installOffline(api);
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { networkMode: 'always' },
+    mutations: { networkMode: 'always' },
+  },
+});
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
