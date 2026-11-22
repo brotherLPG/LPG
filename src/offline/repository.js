@@ -269,7 +269,75 @@ async function allAccounts() {
   return db.accounts.toArray();
 }
 
+function saleQuantity(record) {
+  if (record?.itemQuantity != null) return Number(record.itemQuantity) || 0;
+  if (record?.items != null && !Array.isArray(record.items)) return Number(record.items) || 0;
+  return (record?.lineItems || []).reduce((sum, line) => sum + (Number(line.quantity) || 0), 0);
+}
+
+async function customerToken(record) {
+  const id = partyId(record?.customerId);
+  if (isLocalId(id)) {
+    const customer = await db.customers.get(id);
+    if (customer?.serverId) return `id:${customer.serverId}`;
+    return `local:${id}`;
+  }
+  return id ? `id:${id}` : '';
+}
+
+function samePublishedSale(localRecord, localToken, serverRecord, serverToken) {
+  if (dateKey(localRecord.invoiceDate) !== dateKey(serverRecord.invoiceDate)) return false;
+  if (roundMoney(localRecord.totalAmount) !== roundMoney(serverRecord.totalAmount)) return false;
+  if (roundMoney(localRecord.paidAmount) !== roundMoney(serverRecord.paidAmount)) return false;
+  if (saleQuantity(localRecord) !== saleQuantity(serverRecord)) return false;
+  if (localToken && serverToken && localToken === serverToken) return true;
+  const localName = String(localRecord.customerName || '').trim().toLowerCase();
+  const serverName = String(serverRecord.customerName || '').trim().toLowerCase();
+  return localName !== '' && localName === serverName;
+}
+
+async function settlePublishedSale(local, serverRow) {
+  const serverRecord = rowRecord(serverRow);
+  if (!serverRecord?._id || isLocalId(serverRecord._id)) return;
+  const queue = await db.queue.toArray();
+  const saleOps = queue.filter((item) => item.entity === 'sale' && item.localId === local.localId);
+  if (saleOps.some((item) => item.action === 'update' && item.status !== 'synced')) return;
+  await applyServerResult(local.localId, 'sale', serverRecord);
+  if (serverRow.localId !== local.localId) await db.sales.delete(serverRow.localId);
+  const receipts = await db.payments.filter((row) => row.origin === 'sale-receipt' && row.saleLocalId === local.localId).toArray();
+  if (receipts.length) await db.payments.bulkDelete(receipts.map((row) => row.localId));
+  const now = new Date().toISOString();
+  for (const item of saleOps) {
+    if (item.action === 'create' && item.status !== 'synced') {
+      await db.queue.put({ ...item, status: 'synced', lastError: '', updatedAt: now });
+    }
+  }
+}
+
+async function reconcilePublishedSales() {
+  const rows = await db.sales.toArray();
+  const pending = rows.filter((row) => !row.serverId && row.syncStatus !== 'synced');
+  const published = rows.filter((row) => row.serverId && row.syncStatus === 'synced');
+  if (!pending.length || !published.length) return;
+  const used = new Set();
+  for (const local of pending) {
+    const localRecord = rowRecord(local);
+    const localToken = await customerToken(localRecord);
+    const matches = [];
+    for (const server of published) {
+      if (used.has(server.localId)) continue;
+      const serverRecord = rowRecord(server);
+      const serverToken = await customerToken(serverRecord);
+      if (samePublishedSale(localRecord, localToken, serverRecord, serverToken)) matches.push(server);
+    }
+    if (matches.length !== 1) continue;
+    used.add(matches[0].localId);
+    await settlePublishedSale(local, matches[0]);
+  }
+}
+
 async function allSales() {
+  await reconcilePublishedSales();
   return db.sales.toArray();
 }
 
