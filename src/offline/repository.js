@@ -3491,6 +3491,58 @@ async function outstandingForCustomer(customerId) {
   });
 }
 
+function customerOwnsPayment(row, customerId) {
+  const payment = rowRecord(row);
+  return sameParty(row.customerLocalId, customerId) || sameParty(payment.customerId, customerId);
+}
+
+async function customerPaymentDelta(customerId, looseOnly) {
+  const payments = await allPayments();
+  let delta = 0;
+  for (const row of payments) {
+    if (row.syncStatus === 'synced' || row.origin === 'sale-receipt') continue;
+    if (!keepPaymentRow(row, payments) || !customerOwnsPayment(row, customerId)) continue;
+    const payment = rowRecord(row);
+    const allocated = (payment.allocations || []).reduce((sum, line) => sum + (Number(line.amountApplied) || 0), 0);
+    const amount = looseOnly
+      ? roundMoney((Number(payment.paymentAmount) || 0) - allocated)
+      : (Number(payment.paymentAmount) || 0);
+    if (amount <= 0) continue;
+    if (payment.paymentType === 'refund') delta += amount;
+    else if (payment.paymentType !== 'pay') delta -= amount;
+  }
+  return roundMoney(delta);
+}
+
+async function withCustomerPaymentOptions(data, customerId) {
+  if (!data || !customerId) return data;
+  const hasLocalSales = (await allSales()).some((row) => {
+    const sale = rowRecord(row);
+    return sameParty(row.customerLocalId, customerId) || sameParty(sale.customerId, customerId);
+  });
+  if (!hasLocalSales) {
+    const delta = await customerPaymentDelta(customerId, false);
+    if (!delta) return data;
+    const balance = roundMoney((Number(data.ledgerBalance) || 0) + delta);
+    return {
+      ...data,
+      ledgerBalance: balance,
+      ledgerBalanceLabel: `${formatRs(balance)} Outstanding`,
+    };
+  }
+  const invoices = await outstandingForCustomer(customerId);
+  const balance = roundMoney(
+    invoices.reduce((sum, invoice) => sum + (Number(invoice.outstandingAmount) || 0), 0)
+      + await customerPaymentDelta(customerId, true)
+  );
+  return {
+    ...data,
+    outstandingInvoices: invoices,
+    ledgerBalance: balance,
+    ledgerBalanceLabel: `${formatRs(balance)} Outstanding`,
+  };
+}
+
 function formatRs(value) {
   return `Rs. ${roundMoney(value).toLocaleString('en-US')}`;
 }
@@ -4003,7 +4055,7 @@ export async function serveGet(config) {
   }
   const data = await withPendingParties(snap.envelope.data);
   if (path === '/payments/form-options' && params.customerId) {
-    data.outstandingInvoices = await outstandingForCustomer(params.customerId);
+    Object.assign(data, await withCustomerPaymentOptions(data, params.customerId));
     data.customers = (await withPendingParties({ customers: data.customers || [] })).customers;
   }
   if (path === '/filling-batches/form-options' || path === '/lpg-receipts/form-options') {
@@ -4161,6 +4213,11 @@ export async function mergePendingIntoResponse(config, payload) {
   const params = paramsOf(config);
   if (!['/customers', '/suppliers', '/accounts', '/employees', '/assets', '/expenses', '/maintenance-records', '/sales', '/payments', '/filling-batches', '/lpg-receipts'].includes(path) || !Array.isArray(payload.data.items)) {
     const data = await withPendingParties(payload.data);
+    if (path === '/payments/form-options' && params.customerId) {
+      const adjusted = await withCustomerPaymentOptions(data, params.customerId);
+      adjusted.customers = (await withPendingParties({ customers: adjusted.customers || [] })).customers;
+      return { ...payload, data: adjusted };
+    }
     if (path === '/filling-batches/form-options' || path === '/lpg-receipts/form-options') {
       const adjusted = path === '/filling-batches/form-options' ? await withTankReservation(data) : data;
       return { ...payload, data: await withPendingEmployees(adjusted) };
