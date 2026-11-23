@@ -2842,6 +2842,29 @@ function mergeRecent(existing, incoming, dateKey) {
     .slice(0, 5);
 }
 
+function snapshotWasAdjustedLocally(data) {
+  const batches = data?.recentFillingBatches || [];
+  const receipts = data?.recentReceipts || [];
+  return [...batches, ...receipts].some((row) => (
+    row?.provisional
+    || String(row?.batchNumber || row?.receiptNumber || '').startsWith('OFF-')
+  ));
+}
+
+async function restoreServerTankKg(base) {
+  if (!base || base.currentQuantityKg == null || !snapshotWasAdjustedLocally(base)) return base;
+  const snaps = await db.snapshots.toArray();
+  let best = Number(base.currentQuantityKg) || 0;
+  for (const path of ['/filling-batches/form-options', '/lpg-receipts/form-options']) {
+    const tank = snaps.find((snap) => snap.path === path)?.envelope?.data?.tank;
+    if (tank?.currentQuantityKg == null) continue;
+    if (base.tankCode && tank.tankCode && String(base.tankCode) !== String(tank.tankCode)) continue;
+    best = Math.max(best, Number(tank.currentQuantityKg) || 0);
+  }
+  if (best <= Number(base.currentQuantityKg) + 0.001) return base;
+  return { ...base, currentQuantityKg: roundMoney(best) };
+}
+
 async function withTankActivity(data) {
   if (!data) return data;
   let next = { ...data };
@@ -3886,7 +3909,7 @@ export async function serveGet(config) {
     const cached = listed?.envelope?.data
       || snaps.find((snap) => snap.path === '/storage-tanks/dashboard')?.envelope?.data
       || null;
-    const base = cached || await tankSnapshot();
+    const base = await restoreServerTankKg(cached || await tankSnapshot());
     if (!base) return null;
     const data = await withTankActivity(base);
     return listed?.envelope ? { ...listed.envelope, data } : envelope('Storage tank fetched', data);

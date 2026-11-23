@@ -44,10 +44,12 @@ async function offlineResult(config) {
   if (method === 'get') {
     const data = await serveGet(config);
     if (!data) return null;
+    config.servedOffline = true;
     return axiosResponse(config, data);
   }
   if (canQueueWrite(config) || method === 'post' || method === 'patch' || method === 'put' || method === 'delete') {
     const data = await serveWrite(config);
+    config.servedOffline = true;
     return axiosResponse(config, data, method === 'post' ? 201 : 200);
   }
   return null;
@@ -67,6 +69,7 @@ export function installOffline(api) {
 
   api.interceptors.response.use(
     async (response) => {
+      if (response.config?.servedOffline) return response;
       if (!response.config?.skipOffline && response.config) {
         await rememberOnlineResponse(response.config, response.data);
         try {
