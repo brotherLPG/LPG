@@ -95,4 +95,23 @@ db.version(7).stores({
   meta: 'key',
 });
 
+db.version(8).stores({
+  customers: 'localId, serverId, syncStatus, updatedAt',
+  suppliers: 'localId, serverId, syncStatus, updatedAt',
+  accounts: 'localId, serverId, syncStatus, updatedAt',
+  employees: 'localId, serverId, syncStatus, updatedAt',
+  sales: 'localId, serverId, syncStatus, customerLocalId, updatedAt',
+  payments: 'localId, serverId, syncStatus, customerLocalId, updatedAt',
+  fillingBatches: 'localId, serverId, syncStatus, updatedAt',
+  lpgReceipts: 'localId, serverId, syncStatus, updatedAt',
+  assets: 'localId, serverId, syncStatus, updatedAt',
+  expenses: 'localId, serverId, syncStatus, updatedAt',
+  maintenanceRecords: 'localId, serverId, syncStatus, updatedAt',
+  cylinderTypes: 'localId, serverId, syncStatus, updatedAt',
+  queue: 'operationId, status, entity, createdAt',
+  snapshots: 'key',
+  auth: 'email',
+  meta: 'key',
+});
+
 export default db;

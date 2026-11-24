@@ -172,6 +172,9 @@ async function absorbServerEnvelope(path, payload) {
   if (/^\/employees\/[^/]+$/.test(path) && !path.endsWith('/form-options') && payload?.data?._id) {
     await upsertServerRow(db.employees, payload.data);
   }
+  if (/^\/cylinder-types\/[^/]+$/.test(path) && !path.endsWith('/form-options') && payload?.data?._id) {
+    await upsertServerRow(db.cylinderTypes, payload.data);
+  }
   if (/^\/assets\/[^/]+$/.test(path) && !path.endsWith('/form-options') && payload?.data?._id) {
     await upsertServerRow(db.assets, payload.data);
   }
@@ -203,6 +206,9 @@ async function absorbServerEnvelope(path, payload) {
   }
   if (path === '/employees') {
     for (const item of items) await upsertServerRow(db.employees, item);
+  }
+  if (path === '/cylinder-types') {
+    for (const item of items) await upsertServerRow(db.cylinderTypes, item);
   }
   if (path === '/assets') {
     for (const item of items) await upsertServerRow(db.assets, item);
@@ -357,6 +363,10 @@ async function allEmployees() {
   return db.employees.toArray();
 }
 
+async function allCylinderTypes() {
+  return db.cylinderTypes.toArray();
+}
+
 async function allAssets() {
   return db.assets.toArray();
 }
@@ -387,6 +397,26 @@ async function findMaintenance(id) {
 async function findEmployee(id) {
   const rows = await allEmployees();
   return rows.find((row) => customerMatches(row, id)) || null;
+}
+
+async function findCylinderType(id) {
+  const rows = await allCylinderTypes();
+  return rows.find((row) => customerMatches(row, id)) || null;
+}
+
+async function cachedCylinderTypeItems() {
+  const snaps = await db.snapshots.toArray();
+  const items = [];
+  const seen = new Set();
+  for (const snap of snaps) {
+    if (snap.path !== '/cylinder-types') continue;
+    for (const item of snap.envelope?.data?.items || []) {
+      if (!item?._id || seen.has(String(item._id))) continue;
+      seen.add(String(item._id));
+      items.push(item);
+    }
+  }
+  return items;
 }
 
 async function cachedEmployeeItems() {
@@ -1121,6 +1151,153 @@ export async function queueEmployeeUpdate(id, payload) {
   }
   emitSync();
   return envelope('Employee updated on this computer', record);
+}
+
+const CYLINDER_CATEGORIES = [
+  { value: 'domestic', label: 'Domestic' },
+  { value: 'commercial', label: 'Commercial' },
+  { value: 'industrial', label: 'Industrial' },
+  { value: 'automotive', label: 'Automotive' },
+  { value: 'camping', label: 'Camping / Picnic' },
+];
+const CYLINDER_COLOR_CODES = [
+  { value: 'red', label: 'Red' },
+  { value: 'orange', label: 'Orange' },
+  { value: 'blue', label: 'Blue' },
+  { value: 'grey', label: 'Grey' },
+  { value: 'yellow', label: 'Yellow' },
+  { value: 'green', label: 'Green' },
+  { value: 'brown', label: 'Brown' },
+  { value: 'silver', label: 'Silver' },
+  { value: 'white', label: 'White' },
+  { value: 'black', label: 'Black' },
+];
+const CYLINDER_VALVE_TYPES = [
+  { value: 'pol', label: 'POL' },
+  { value: 'compact', label: 'Compact' },
+  { value: 'clip-on', label: 'Clip-on' },
+  { value: 'acme', label: 'ACME' },
+  { value: 'opd', label: 'OPD' },
+  { value: 'camping', label: 'Camping Screw' },
+];
+const CYLINDER_MATERIALS = [
+  { value: 'steel', label: 'Steel' },
+  { value: 'aluminium', label: 'Aluminium' },
+  { value: 'composite', label: 'Composite' },
+];
+const CYLINDER_ACTIVE_STATUSES = [
+  { value: true, label: 'Active' },
+  { value: false, label: 'Inactive' },
+];
+
+function cylinderTypeFormOptionsData() {
+  return {
+    nextTypeCode: '',
+    categories: CYLINDER_CATEGORIES,
+    colorCodes: CYLINDER_COLOR_CODES,
+    valveTypes: CYLINDER_VALVE_TYPES,
+    materials: CYLINDER_MATERIALS,
+    statuses: CYLINDER_ACTIVE_STATUSES,
+  };
+}
+
+function assertCylinderTypePayload(payload) {
+  const name = String(payload.typeName || '').trim();
+  if (name.length < 2 || name.length > 120) {
+    throw offlineReject('Type name must contain at least 2 characters.');
+  }
+  if (!CYLINDER_CATEGORIES.some((item) => item.value === payload.cylinderCategory)) {
+    throw offlineReject('Category is required.');
+  }
+  if (!(Number(payload.capacityKg) > 0)) throw offlineReject('Capacity must be greater than 0.');
+  if (!(Number(payload.tareWeightKg) > 0)) throw offlineReject('Tare weight must be greater than 0.');
+  if (!(Number(payload.sellingPricePerCylinder) > 0)) throw offlineReject('Selling price must be greater than 0.');
+  for (const [field, options, label] of [
+    ['colorCode', CYLINDER_COLOR_CODES, 'Color'],
+    ['valveType', CYLINDER_VALVE_TYPES, 'Valve type'],
+    ['material', CYLINDER_MATERIALS, 'Material'],
+  ]) {
+    const value = String(payload[field] || '').trim();
+    if (value && !options.some((item) => item.value === value)) {
+      throw offlineReject(`${label} is not a valid choice.`);
+    }
+  }
+}
+
+function buildCylinderTypeRecord(payload, localId, existing) {
+  const previous = existing ? rowRecord(existing) : {};
+  const now = new Date().toISOString();
+  const category = payload.cylinderCategory ?? previous.cylinderCategory ?? '';
+  return {
+    _id: previous._id || localId,
+    typeCode: previous.typeCode || `OFF-${String(localId).slice(-6).toUpperCase()}`,
+    typeName: String(payload.typeName ?? previous.typeName ?? '').trim(),
+    cylinderCategory: category,
+    cylinderCategoryLabel: optionLabel(CYLINDER_CATEGORIES, category),
+    capacityKg: Number(payload.capacityKg ?? previous.capacityKg) || 0,
+    tareWeightKg: Number(payload.tareWeightKg ?? previous.tareWeightKg) || 0,
+    colorCode: payload.colorCode ?? previous.colorCode ?? '',
+    isActive: payload.isActive ?? previous.isActive ?? true,
+    sellingPricePerCylinder: roundMoney(payload.sellingPricePerCylinder ?? previous.sellingPricePerCylinder ?? 0),
+    purchasePriceAmount: roundMoney(payload.purchasePriceAmount ?? previous.purchasePriceAmount ?? 0),
+    refillPriceAmount: roundMoney(payload.refillPriceAmount ?? previous.refillPriceAmount ?? 0),
+    securityDepositAmount: roundMoney(payload.securityDepositAmount ?? previous.securityDepositAmount ?? 0),
+    description: payload.description ?? previous.description ?? '',
+    valveType: payload.valveType ?? previous.valveType ?? '',
+    material: payload.material ?? previous.material ?? '',
+    safetyCertificationNumber: payload.safetyCertificationNumber ?? previous.safetyCertificationNumber ?? '',
+    provisional: true,
+    syncStatus: 'pending',
+    createdAt: previous.createdAt || now,
+    updatedAt: now,
+  };
+}
+
+function cylinderTypeServerPayload(payload) {
+  const next = { ...payload };
+  delete next.typeCode;
+  for (const field of ['colorCode', 'valveType', 'material', 'description', 'safetyCertificationNumber']) {
+    if (String(next[field] || '').trim() === '') delete next[field];
+  }
+  return next;
+}
+
+export async function queueCylinderTypeCreate(payload) {
+  assertCylinderTypePayload(payload);
+  const localId = newLocalId();
+  const record = buildCylinderTypeRecord(payload, localId);
+  await db.cylinderTypes.put({
+    localId,
+    serverId: '',
+    syncStatus: 'pending',
+    origin: 'local',
+    record,
+    updatedAt: record.updatedAt,
+  });
+  await enqueue({ entity: 'cylinderType', action: 'create', localId, payload: cylinderTypeServerPayload(payload) });
+  return envelope('Cylinder type saved on this computer', record);
+}
+
+export async function queueCylinderTypeUpdate(id, payload) {
+  const existing = await findCylinderType(id);
+  if (!existing) throw offlineReject('Cylinder type is not on this computer yet.');
+  const merged = { ...rowRecord(existing), ...payload };
+  assertCylinderTypePayload(merged);
+  const record = buildCylinderTypeRecord(merged, existing.localId, existing);
+  await db.cylinderTypes.put({ ...existing, syncStatus: 'pending', record, updatedAt: record.updatedAt });
+  const serverPayload = cylinderTypeServerPayload(payload);
+  const createOp = await pendingCreate('cylinderType', existing.localId);
+  if (createOp) {
+    createOp.payload = { ...createOp.payload, ...serverPayload };
+    delete createOp.payload.typeCode;
+    createOp.status = 'pending';
+    createOp.updatedAt = new Date().toISOString();
+    await db.queue.put(createOp);
+  } else if (existing.serverId) {
+    await enqueue({ entity: 'cylinderType', action: 'update', localId: existing.localId, payload: serverPayload });
+  }
+  emitSync();
+  return envelope('Cylinder type updated on this computer', record);
 }
 
 async function employeeCreateDependency(employeeId) {
@@ -2597,6 +2774,68 @@ function filterMaintenance(rows, params) {
   });
 }
 
+function activeFlag(value) {
+  if (value === true || value === 'true') return true;
+  if (value === false || value === 'false') return false;
+  return null;
+}
+
+function filterCylinderTypes(rows, params) {
+  const search = String(params.search || '').trim().toLowerCase();
+  const active = activeFlag(params.isActive);
+  return rows.filter((row) => {
+    const record = rowRecord(row);
+    if (active != null && Boolean(record.isActive) !== active) return false;
+    if (!search) return true;
+    return [
+      record.typeCode,
+      record.typeName,
+      record.cylinderCategory,
+      record.colorCode,
+      record.safetyCertificationNumber,
+    ].join(' ').toLowerCase().includes(search);
+  });
+}
+
+function isOfflineCylinderType(record) {
+  return record?.provisional === true
+    || record?.syncStatus === 'pending'
+    || record?.syncStatus === 'failed'
+    || String(record?.typeCode || '').startsWith('OFF-')
+    || String(record?._id || '').startsWith('local_');
+}
+
+function sortCylinderTypeRecords(records) {
+  return [...records].sort((left, right) => {
+    const leftOffline = isOfflineCylinderType(left);
+    const rightOffline = isOfflineCylinderType(right);
+    if (leftOffline !== rightOffline) return leftOffline ? -1 : 1;
+    const capacity = (Number(left.capacityKg) || 0) - (Number(right.capacityKg) || 0);
+    if (capacity) return capacity;
+    return String(left.typeName || '').localeCompare(String(right.typeName || ''));
+  });
+}
+
+async function withPendingCylinderTypes(data) {
+  if (!data || !Array.isArray(data.cylinderTypes)) return data;
+  const pending = (await allCylinderTypes())
+    .filter((row) => row.syncStatus !== 'synced' && rowRecord(row).isActive !== false)
+    .map((row) => {
+      const record = rowRecord(row);
+      return {
+        _id: record._id,
+        typeCode: record.typeCode,
+        typeName: record.typeName,
+        capacityKg: record.capacityKg,
+        cylinderCategory: record.cylinderCategory,
+        label: `${record.typeCode} – ${record.typeName}`,
+      };
+    });
+  const byId = new Map(pending.map((type) => [String(type._id), type]));
+  const rest = data.cylinderTypes.filter((type) => !byId.has(String(type._id)));
+  return { ...data, cylinderTypes: [...pending, ...rest] };
+}
+
 function filterEmployees(rows, params) {
   const search = String(params.search || '').trim().toLowerCase();
   const department = params.departmentName || params.department || '';
@@ -3770,12 +4009,13 @@ async function withDashboardActivity(data) {
 export async function serveGet(config) {
   const path = requestPath(config);
   const params = paramsOf(config);
-  const idMatch = path.match(/^\/(customers|suppliers|accounts|employees|sales|payments|filling-batches|lpg-receipts|assets|expenses|maintenance-records)\/([^/]+)$/);
+  const idMatch = path.match(/^\/(customers|suppliers|accounts|employees|cylinder-types|sales|payments|filling-batches|lpg-receipts|assets|expenses|maintenance-records)\/([^/]+)$/);
   if (idMatch && idMatch[2] !== 'form-options') {
     const table = idMatch[1] === 'customers' ? await findCustomer(idMatch[2])
       : idMatch[1] === 'suppliers' ? await findSupplier(idMatch[2])
         : idMatch[1] === 'accounts' ? await findAccount(idMatch[2])
           : idMatch[1] === 'employees' ? await findEmployee(idMatch[2])
+            : idMatch[1] === 'cylinder-types' ? await findCylinderType(idMatch[2])
           : idMatch[1] === 'assets' ? await findAsset(idMatch[2])
             : idMatch[1] === 'expenses' ? await findExpense(idMatch[2])
               : idMatch[1] === 'maintenance-records' ? await findMaintenance(idMatch[2])
@@ -3787,6 +4027,9 @@ export async function serveGet(config) {
       const record = rowRecord(table);
       if (idMatch[1] === 'employees') {
         return envelope('Employee fetched', { ...record, form: employeeFormOptionsData() });
+      }
+      if (idMatch[1] === 'cylinder-types') {
+        return envelope('Cylinder type fetched', { ...record, form: cylinderTypeFormOptionsData() });
       }
       if (idMatch[1] === 'assets') {
         return envelope('Asset fetched', { ...record, form: await assetFormOptionsData() });
@@ -3985,6 +4228,17 @@ export async function serveGet(config) {
       meta: { departments: EMPLOYEE_DEPARTMENTS, statuses: EMPLOYEE_STATUSES },
     });
   }
+  if (path === '/cylinder-types') {
+    const localRows = await allCylinderTypes();
+    const cached = (await cachedCylinderTypeItems())
+      .filter((item) => !localRows.some((row) => sameParty(row.serverId, item._id) || sameParty(rowRecord(row)._id, item._id)))
+      .map((item) => ({ record: item, syncStatus: 'synced' }));
+    const records = sortCylinderTypeRecords(filterCylinderTypes([...localRows, ...cached], params).map(rowRecord));
+    return envelope('Cylinder types fetched', {
+      ...paginate(records, params),
+      meta: cylinderTypeFormOptionsData(),
+    });
+  }
   if (path === '/assets') {
     const records = sortOfflineFirst(
       filterAssets(unionWithCache(await allAssets(), await cachedListItems('/assets')), params).map(rowRecord),
@@ -4065,6 +4319,9 @@ export async function serveGet(config) {
     if (path === '/employees/form-options') {
       return envelope('Employee form options fetched', employeeFormOptionsData());
     }
+    if (path === '/cylinder-types/form-options') {
+      return envelope('Cylinder type form options fetched', cylinderTypeFormOptionsData());
+    }
     if (path === '/assets/form-options') {
       return envelope('Asset form options fetched', await assetFormOptionsData());
     }
@@ -4084,7 +4341,8 @@ export async function serveGet(config) {
   if (path === '/filling-batches/form-options' || path === '/lpg-receipts/form-options') {
     const adjusted = path === '/filling-batches/form-options' ? await withTankReservation(data) : data;
     const withEmployees = await withPendingEmployees(adjusted);
-    Object.assign(data, withEmployees);
+    const withTypes = await withPendingCylinderTypes(withEmployees);
+    Object.assign(data, withTypes);
   }
   if (path === '/assets/form-options' || path === '/expenses/form-options' || path === '/maintenance-records/form-options') {
     const fresh = path === '/assets/form-options'
@@ -4112,7 +4370,7 @@ export async function serveGet(config) {
     const seen = new Set((data.customers || []).map((customer) => String(customer._id)));
     data.customers = [...extras.filter((customer) => !seen.has(String(customer._id))), ...(data.customers || [])];
   }
-  return { ...snap.envelope, data };
+  return { ...snap.envelope, data: await withPendingCylinderTypes(data) };
 }
 
 export async function serveWrite(config) {
@@ -4126,6 +4384,10 @@ export async function serveWrite(config) {
   if (method === 'post' && path === '/suppliers') return queueSupplierCreate(payload);
   if (method === 'patch' && /^\/suppliers\/[^/]+$/.test(path)) {
     return queueSupplierUpdate(path.split('/')[2], payload);
+  }
+  if (method === 'post' && path === '/cylinder-types') return queueCylinderTypeCreate(payload);
+  if (method === 'patch' && /^\/cylinder-types\/[^/]+$/.test(path)) {
+    return queueCylinderTypeUpdate(path.split('/')[2], payload);
   }
   if (method === 'post' && path === '/employees') return queueEmployeeCreate(payload);
   if (method === 'patch' && /^\/employees\/[^/]+$/.test(path)) {
@@ -4233,8 +4495,17 @@ export async function mergePendingIntoResponse(config, payload) {
       };
     }
   }
+  if (/^\/cylinder-types\/[^/]+$/.test(path) && !path.endsWith('/form-options')) {
+    const local = await findCylinderType(path.split('/')[2]);
+    if (local && local.syncStatus !== 'synced') {
+      return {
+        ...payload,
+        data: { ...rowRecord(local), form: payload.data?.form || cylinderTypeFormOptionsData() },
+      };
+    }
+  }
   const params = paramsOf(config);
-  if (!['/customers', '/suppliers', '/accounts', '/employees', '/assets', '/expenses', '/maintenance-records', '/sales', '/payments', '/filling-batches', '/lpg-receipts'].includes(path) || !Array.isArray(payload.data.items)) {
+  if (!['/customers', '/suppliers', '/accounts', '/employees', '/cylinder-types', '/assets', '/expenses', '/maintenance-records', '/sales', '/payments', '/filling-batches', '/lpg-receipts'].includes(path) || !Array.isArray(payload.data.items)) {
     const data = await withPendingParties(payload.data);
     if (path === '/payments/form-options' && params.customerId) {
       const adjusted = await withCustomerPaymentOptions(data, params.customerId);
@@ -4243,14 +4514,15 @@ export async function mergePendingIntoResponse(config, payload) {
     }
     if (path === '/filling-batches/form-options' || path === '/lpg-receipts/form-options') {
       const adjusted = path === '/filling-batches/form-options' ? await withTankReservation(data) : data;
-      return { ...payload, data: await withPendingEmployees(adjusted) };
+      return { ...payload, data: await withPendingCylinderTypes(await withPendingEmployees(adjusted)) };
     }
-    return { ...payload, data };
+    return { ...payload, data: await withPendingCylinderTypes(data) };
   }
   const table = path === '/customers' ? filterCustomers(await allCustomers(), params)
     : path === '/suppliers' ? filterSuppliers(await allSuppliers(), params)
       : path === '/accounts' ? filterAccounts(await allAccounts(), params)
         : path === '/employees' ? filterEmployees(await allEmployees(), params)
+          : path === '/cylinder-types' ? filterCylinderTypes(await allCylinderTypes(), params)
         : path === '/assets' ? filterAssets(await allAssets(), params)
           : path === '/expenses' ? filterExpenses(await allExpenses(), params)
             : path === '/maintenance-records' ? filterMaintenance(await allMaintenanceRecords(), params)
@@ -4407,6 +4679,7 @@ export async function applyServerResult(localId, entity, serverRecord) {
     : entity === 'supplier' ? db.suppliers
       : entity === 'account' ? db.accounts
         : entity === 'employee' ? db.employees
+          : entity === 'cylinderType' ? db.cylinderTypes
         : entity === 'asset' ? db.assets
           : entity === 'expense' ? db.expenses
             : entity === 'maintenance' ? db.maintenanceRecords
@@ -4510,6 +4783,7 @@ export async function discardFailedOperation(operationId) {
     : row.entity === 'supplier' ? db.suppliers
       : row.entity === 'account' ? db.accounts
         : row.entity === 'employee' ? db.employees
+          : row.entity === 'cylinderType' ? db.cylinderTypes
         : row.entity === 'asset' ? db.assets
           : row.entity === 'expense' ? db.expenses
             : row.entity === 'maintenance' ? db.maintenanceRecords
@@ -4538,6 +4812,7 @@ export async function exportOfflineBackup() {
     suppliers: await db.suppliers.toArray(),
     accounts: await db.accounts.toArray(),
     employees: await db.employees.toArray(),
+    cylinderTypes: await db.cylinderTypes.toArray(),
     assets: await db.assets.toArray(),
     expenses: await db.expenses.toArray(),
     maintenanceRecords: await db.maintenanceRecords.toArray(),
@@ -4569,8 +4844,8 @@ export async function markSyncMeta(patch) {
 export function canQueueWrite(config) {
   const path = requestPath(config);
   const method = requestMethod(config);
-  if (method === 'post' && ['/customers', '/suppliers', '/accounts', '/employees', '/assets', '/expenses', '/maintenance-records', '/sales', '/payments', '/filling-batches', '/lpg-receipts'].includes(path)) return true;
-  if (method === 'patch' && /^\/(customers|suppliers|accounts|employees|assets|expenses|maintenance-records|sales|filling-batches|lpg-receipts)\/[^/]+$/.test(path)) return true;
+  if (method === 'post' && ['/customers', '/suppliers', '/accounts', '/employees', '/cylinder-types', '/assets', '/expenses', '/maintenance-records', '/sales', '/payments', '/filling-batches', '/lpg-receipts'].includes(path)) return true;
+  if (method === 'patch' && /^\/(customers|suppliers|accounts|employees|cylinder-types|assets|expenses|maintenance-records|sales|filling-batches|lpg-receipts)\/[^/]+$/.test(path)) return true;
   if (method === 'delete' && /^\/employees\/[^/]+$/.test(path)) return true;
   return false;
 }

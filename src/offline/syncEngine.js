@@ -160,6 +160,12 @@ function requestFor(operation, serverId) {
   if (operation.entity === 'employee' && operation.action === 'update') {
     return { method: 'patch', url: `/employees/${serverId}` };
   }
+  if (operation.entity === 'cylinderType' && operation.action === 'create') {
+    return { method: 'post', url: '/cylinder-types' };
+  }
+  if (operation.entity === 'cylinderType' && operation.action === 'update') {
+    return { method: 'patch', url: `/cylinder-types/${serverId}` };
+  }
   if (operation.entity === 'asset' && operation.action === 'create') {
     return { method: 'post', url: '/assets' };
   }
@@ -219,6 +225,8 @@ async function sendOperation(operation) {
         ? await db.accounts.get(operation.localId)
         : operation.entity === 'employee'
           ? await db.employees.get(operation.localId)
+          : operation.entity === 'cylinderType'
+            ? await db.cylinderTypes.get(operation.localId)
           : operation.entity === 'asset'
             ? await db.assets.get(operation.localId)
             : operation.entity === 'expense'

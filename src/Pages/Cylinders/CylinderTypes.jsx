@@ -43,6 +43,11 @@ function CylinderTypes() {
     refillPrice: s.refillPriceAmount?.toLocaleString ? `Rs. ${s.refillPriceAmount.toLocaleString()}` : s.refillPriceAmount,
     status: s.isActive ? "Active" : "Inactive",
     _id: s._id,
+    provisional: s.provisional === true
+      || s.syncStatus === "pending"
+      || s.syncStatus === "failed"
+      || String(s.typeCode || "").startsWith("OFF-")
+      || String(s._id || "").startsWith("local_"),
   })), [cylinderTypes]);
 
   const filteredCylinders = useMemo(() => cylinderTypes.filter((cyl) => {
@@ -396,7 +401,9 @@ function CylinderTypes() {
               data={mappedCylinders}
               ariaLabel="Cylinder Types Table"
               className=""
-              rowClassName="border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
+              rowClassName={(item) => (item.provisional
+                ? "sales-offline-row"
+                : "border-b border-slate-100 dark:border-gray-800 last:border-0 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors")}
               emptyContent="No cylinder types match your search."
               pagination={true}
               rowsPerPage={pagination.limit || 10}
