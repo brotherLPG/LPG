@@ -1075,7 +1075,7 @@ function buildEmployeeRecord(payload, localId, existing) {
   const status = payload.employmentStatus || previous.employmentStatus || 'active';
   return {
     _id: previous._id || localId,
-    employeeCode: previous.employeeCode || `OFF-${String(localId).slice(-6).toUpperCase()}`,
+    employeeCode: previous.employeeCode || payload.employeeCode || `OFF-${String(localId).slice(-6).toUpperCase()}`,
     fullName: String(payload.fullName ?? previous.fullName ?? '').trim(),
     fatherHusbandName: payload.fatherHusbandName ?? previous.fatherHusbandName ?? '',
     cnicNumber: payload.cnicNumber ?? previous.cnicNumber ?? '',
@@ -1101,12 +1101,58 @@ function buildEmployeeRecord(payload, localId, existing) {
   };
 }
 
+function employeeCodeNumber(code) {
+  const match = String(code || '').trim().match(/^EMP-(\d+)$/i);
+  return match ? Number(match[1]) : 0;
+}
+
+function formatEmployeeCode(seq) {
+  return `EMP-${String(seq).padStart(3, '0')}`;
+}
+
+async function peekNextEmployeeCode() {
+  const used = new Set();
+  let max = 0;
+  const consider = (code) => {
+    const seq = employeeCodeNumber(code);
+    if (!seq) return;
+    used.add(formatEmployeeCode(seq));
+    if (seq > max) max = seq;
+  };
+  for (const row of await allEmployees()) consider(rowRecord(row).employeeCode);
+  for (const item of await cachedEmployeeItems()) consider(item.employeeCode);
+  const snaps = await db.snapshots.toArray();
+  for (const snap of snaps) {
+    const data = snap.envelope?.data;
+    if (!data) continue;
+    for (const employee of data.employees || []) consider(employee.employeeCode);
+    if (snap.path !== '/employees/form-options') continue;
+    const seq = employeeCodeNumber(data.nextEmployeeCode);
+    const peeked = seq ? formatEmployeeCode(seq) : '';
+    if (seq && !used.has(peeked) && seq - 1 > max) max = seq - 1;
+  }
+  let next = max + 1;
+  let code = formatEmployeeCode(next);
+  while (used.has(code)) {
+    next += 1;
+    code = formatEmployeeCode(next);
+  }
+  return code;
+}
+
 function employeeFormOptionsData() {
   return {
-    nextEmployeeCode: 'Assigned when synced',
+    nextEmployeeCode: '',
     departments: EMPLOYEE_DEPARTMENTS,
     genders: EMPLOYEE_GENDERS,
     statuses: EMPLOYEE_STATUSES,
+  };
+}
+
+async function employeeFormOptions() {
+  return {
+    ...employeeFormOptionsData(),
+    nextEmployeeCode: await peekNextEmployeeCode(),
   };
 }
 
@@ -1114,7 +1160,7 @@ export async function queueEmployeeCreate(payload) {
   assertEmployeePayload(payload);
   await assertEmployeeUnique(payload);
   const localId = newLocalId();
-  const record = buildEmployeeRecord(payload, localId);
+  const record = buildEmployeeRecord({ ...payload, employeeCode: await peekNextEmployeeCode() }, localId);
   const serverPayload = { ...payload };
   delete serverPayload.employeeCode;
   await db.employees.put({
@@ -4317,7 +4363,7 @@ export async function serveGet(config) {
       return envelope('Account form options fetched', accountFormOptionsData(parents));
     }
     if (path === '/employees/form-options') {
-      return envelope('Employee form options fetched', employeeFormOptionsData());
+      return envelope('Employee form options fetched', await employeeFormOptions());
     }
     if (path === '/cylinder-types/form-options') {
       return envelope('Cylinder type form options fetched', cylinderTypeFormOptionsData());
@@ -4360,6 +4406,12 @@ export async function serveGet(config) {
     data.paymentMethods = data.paymentMethods || fresh.paymentMethods;
     data.statuses = data.statuses || fresh.statuses;
     data.maintenanceTypes = data.maintenanceTypes || fresh.maintenanceTypes;
+  }
+  if (path === '/employees/form-options') {
+    data.nextEmployeeCode = await peekNextEmployeeCode();
+    data.departments = data.departments?.length ? data.departments : EMPLOYEE_DEPARTMENTS;
+    data.genders = data.genders?.length ? data.genders : EMPLOYEE_GENDERS;
+    data.statuses = data.statuses?.length ? data.statuses : EMPLOYEE_STATUSES;
   }
   if (path === '/sales/form-options') {
     const pending = (await allCustomers()).filter((row) => row.syncStatus !== 'synced');
@@ -4516,6 +4568,7 @@ export async function mergePendingIntoResponse(config, payload) {
       const adjusted = path === '/filling-batches/form-options' ? await withTankReservation(data) : data;
       return { ...payload, data: await withPendingCylinderTypes(await withPendingEmployees(adjusted)) };
     }
+    if (path === '/employees/form-options') data.nextEmployeeCode = await peekNextEmployeeCode();
     return { ...payload, data: await withPendingCylinderTypes(data) };
   }
   const table = path === '/customers' ? filterCustomers(await allCustomers(), params)
