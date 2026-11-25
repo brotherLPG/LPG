@@ -38,6 +38,13 @@ function axiosResponse(config, data, status = 200) {
   };
 }
 
+function isLocalRecordWrite(config) {
+  const method = String(config.method || 'get').toLowerCase();
+  if (method !== 'delete' && method !== 'patch' && method !== 'put') return false;
+  const path = String(config.url || '').split('?')[0];
+  return /\/local_[^/]+$/.test(path);
+}
+
 async function offlineResult(config) {
   if (config.skipOffline) return null;
   const method = String(config.method || 'get').toLowerCase();
@@ -60,7 +67,8 @@ export function installOffline(api) {
   installed = true;
 
   api.interceptors.request.use(async (config) => {
-    if (config.skipOffline || navigator.onLine) return config;
+    if (config.skipOffline) return config;
+    if (navigator.onLine && !isLocalRecordWrite(config)) return config;
     const offline = await offlineResult(config);
     if (!offline) return config;
     config.adapter = async () => offline;
@@ -99,7 +107,8 @@ export function installOffline(api) {
         }
       }
 
-      if (config && !config.skipOffline && (!error.response || !navigator.onLine)) {
+      const localWriteRejected = isLocalRecordWrite(config) && status === 400;
+      if (config && !config.skipOffline && (!error.response || !navigator.onLine || localWriteRejected)) {
         try {
           const offline = await offlineResult(config);
           if (offline) return offline;
