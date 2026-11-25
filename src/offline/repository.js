@@ -1588,9 +1588,45 @@ async function expenseCategoryChoices() {
   return items;
 }
 
+function assetCodeNumber(code) {
+  const match = String(code || '').trim().match(/^AST-(\d+)$/i);
+  return match ? Number(match[1]) : 0;
+}
+
+function formatAssetCode(seq) {
+  return `AST-${String(seq).padStart(3, '0')}`;
+}
+
+async function peekNextAssetCode() {
+  const used = new Set();
+  let max = 0;
+  const consider = (code) => {
+    const seq = assetCodeNumber(code);
+    if (!seq) return;
+    used.add(formatAssetCode(seq));
+    if (seq > max) max = seq;
+  };
+  for (const row of await allAssets()) consider(rowRecord(row).assetCode);
+  for (const item of await cachedListItems('/assets')) consider(item.assetCode);
+  const snaps = await db.snapshots.toArray();
+  for (const snap of snaps) {
+    if (snap.path !== '/assets/form-options') continue;
+    const seq = assetCodeNumber(snap.envelope?.data?.nextAssetCode);
+    const peeked = seq ? formatAssetCode(seq) : '';
+    if (seq && !used.has(peeked) && seq - 1 > max) max = seq - 1;
+  }
+  let next = max + 1;
+  let code = formatAssetCode(next);
+  while (used.has(code)) {
+    next += 1;
+    code = formatAssetCode(next);
+  }
+  return code;
+}
+
 async function assetFormOptionsData() {
   return {
-    nextAssetCode: 'Assigned when synced',
+    nextAssetCode: await peekNextAssetCode(),
     assetCategories: optionList(ASSET_CATEGORIES),
     assetStatuses: optionList(ASSET_STATUSES),
     depreciationMethods: optionList(DEPRECIATION_METHODS),
@@ -1680,7 +1716,7 @@ function buildAssetRecord(payload, localId, existing) {
   const accountId = partyId(payload.accountId ?? previous.accountId);
   return {
     _id: previous._id || localId,
-    assetCode: previous.assetCode || `OFF-${String(localId).slice(-6).toUpperCase()}`,
+    assetCode: previous.assetCode || payload.assetCode || `OFF-${String(localId).slice(-6).toUpperCase()}`,
     assetName: String(payload.assetName ?? previous.assetName ?? '').trim(),
     assetCategory: payload.assetCategory ?? previous.assetCategory,
     manufacturerName: payload.manufacturerName ?? previous.manufacturerName ?? '',
@@ -1707,7 +1743,7 @@ export async function queueAssetCreate(payload) {
   await assertAssetSerial(payload);
   await assertAccountFunds(payload.accountId, payload.purchaseCostAmount);
   const localId = newLocalId();
-  const record = buildAssetRecord(payload, localId);
+  const record = buildAssetRecord({ ...payload, assetCode: await peekNextAssetCode() }, localId);
   const employee = payload.assignedEmployeeId ? await findEmployee(payload.assignedEmployeeId) : null;
   if (employee) record.assignedEmployeeName = rowRecord(employee).fullName;
   const account = payload.accountId ? await findAccount(payload.accountId) : null;
@@ -4398,6 +4434,7 @@ export async function serveGet(config) {
         : await maintenanceFormOptionsData();
     data.employees = fresh.employees;
     data.accounts = fresh.accounts;
+    if (path === '/assets/form-options') data.nextAssetCode = fresh.nextAssetCode;
     if (fresh.categories) data.categories = fresh.categories;
     if (fresh.assets) data.assets = fresh.assets;
     data.assetCategories = data.assetCategories || fresh.assetCategories;
@@ -4533,6 +4570,7 @@ export async function mergePendingIntoResponse(config, payload) {
         ...payload.data,
         employees: fresh.employees,
         accounts: fresh.accounts,
+        ...(path === '/assets/form-options' ? { nextAssetCode: fresh.nextAssetCode } : {}),
         ...(fresh.categories ? { categories: fresh.categories } : {}),
         ...(fresh.assets ? { assets: fresh.assets } : {}),
       },

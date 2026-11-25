@@ -14,6 +14,7 @@ import { installOffline } from './offline/httpOffline';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      networkMode: 'always',
       retry: (failureCount, error) => {
         // Stop retrying immediately on 401 Unauthorized or 403 Forbidden
         if (error?.response?.status === 401 || error?.response?.status === 403) {
@@ -22,8 +23,13 @@ const queryClient = new QueryClient({
         return failureCount < 1;
       },
     },
+    mutations: {
+      networkMode: 'always',
+    },
   },
 });
+
+installOffline(api);
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
