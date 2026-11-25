@@ -1,8 +1,6 @@
 import './App.css';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useState } from 'react';
 import Sidebar from './components/Sidebar';
-import Header from './components/Header';
 import PageRouter from './routes/PageRouter';
 import CalculatorWidget from './components/CalculatorWidget';
 import ErpGuide from './components/chat/ErpGuide';
@@ -19,11 +17,6 @@ function App() {
   const location = useLocation();
   const isPublicPage = PUBLIC_PATHS.includes(location.pathname);
   const isAuthenticated = hasAuthTokens();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  useEffect(() => {
-    setIsSidebarOpen(false);
-  }, [location.pathname]);
 
   if (!isAuthenticated && !isPublicPage) {
     return <Navigate to="/" replace />;
@@ -32,9 +25,8 @@ function App() {
   return (
     <ToastProvider>
       <div className="flex h-screen bg-gray-100 dark:bg-gray-950 overflow-hidden">
-        {!isPublicPage && isSidebarOpen && <Sidebar />}
+        {!isPublicPage && <Sidebar />}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* {!isPublicPage && <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} isSidebarOpen={isSidebarOpen} />} */}
           <PageRouter />
         </div>
 
