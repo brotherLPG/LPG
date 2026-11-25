@@ -22,20 +22,11 @@ function safeEvaluate(expression) {
   }
 }
 
-const OPERATORS = ['+', '-', '×', '÷', '%', '(', ')'];
-
 function CalculatorWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [expression, setExpression] = useState('');
   const [result, setResult] = useState('');
-  const [history, setHistory] = useState([]);
   const [copied, setCopied] = useState(false);
-
-  const insertOperator = (op) => {
-    const symbol = { '×': '*', '÷': '/' }[op] || op;
-    setExpression((prev) => prev + symbol);
-    setResult('');
-  };
 
   const handleChange = (event) => {
     setExpression(event.target.value);
@@ -46,9 +37,6 @@ function CalculatorWidget() {
     const value = safeEvaluate(expression);
     setResult(value);
     if (value !== 'Error' && expression.trim()) {
-      setHistory((prev) =>
-        [{ expression: expression.trim(), result: value }, ...prev].slice(0, 5)
-      );
       setExpression(value);
     }
   };
@@ -89,12 +77,12 @@ function CalculatorWidget() {
         type="button"
         onClick={() => setIsOpen((open) => !open)}
         aria-label="Open calculator"
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-primary text-white shadow-xl transition-transform hover:scale-105 active:scale-95"
+        className="fixed bottom-6 right-44 z-50 flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-[#005a36] shadow-md transition-all hover:bg-slate-50 hover:scale-105 active:scale-95 cursor-pointer"
       >
         {isOpen ? (
-          <X className="h-6 w-6" />
+          <X className="h-5 w-5 text-slate-600" />
         ) : (
-          <Calculator className="h-6 w-6" />
+          <Calculator className="h-5 w-5 text-[#005a36]" />
         )}
       </button>
 
@@ -135,7 +123,6 @@ function CalculatorWidget() {
             </div>
           </div>
 
-
           {/* Actions */}
           <div className="flex items-center gap-2 px-4 pb-4 mb-2">
             <button
@@ -173,8 +160,7 @@ function CalculatorWidget() {
               <Equal className="h-4 w-4" /> Calculate
             </button>
           </div>
-
-         </div>
+        </div>
       )}
     </>
   );

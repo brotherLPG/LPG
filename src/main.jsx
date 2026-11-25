@@ -11,12 +11,17 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import api from './api/axios';
 import { installOffline } from './offline/httpOffline';
 
-installOffline(api);
-
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: { networkMode: 'always' },
-    mutations: { networkMode: 'always' },
+    queries: {
+      retry: (failureCount, error) => {
+        // Stop retrying immediately on 401 Unauthorized or 403 Forbidden
+        if (error?.response?.status === 401 || error?.response?.status === 403) {
+          return false;
+        }
+        return failureCount < 1;
+      },
+    },
   },
 });
 

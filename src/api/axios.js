@@ -27,7 +27,16 @@ api.interceptors.response.use(
 
   error => {
     if (error.response?.status === 401) {
+      // Clear invalid or expired credentials
       localStorage.removeItem('token')
+      localStorage.removeItem('refreshToken')
+      localStorage.removeItem('user')
+
+      // Redirect to login if user is on a protected route
+      const publicPaths = ['/', '/registration', '/public/logs']
+      if (typeof window !== 'undefined' && !publicPaths.includes(window.location.pathname)) {
+        window.location.href = '/'
+      }
     }
 
     return Promise.reject(error)

@@ -1,11 +1,11 @@
-import './App.css'
-import { Navigate, useLocation } from 'react-router-dom'
-import { useEffect, useState } from 'react'
-import { Menu, X } from 'lucide-react'
-import Sidebar from './components/Sidebar'
-import Header from './components/Header'
+import './App.css';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import Sidebar from './components/Sidebar';
+import Header from './components/Header';
 import PageRouter from './routes/PageRouter';
 import CalculatorWidget from './components/CalculatorWidget';
+import ErpGuide from './components/chat/ErpGuide';
 import { ToastProvider } from './utils/GlobalToast';
 
 const PUBLIC_PATHS = ['/', '/registration', '/public/logs'];
@@ -32,41 +32,22 @@ function App() {
   return (
     <ToastProvider>
       <div className="flex h-screen bg-gray-100 dark:bg-gray-950 overflow-hidden">
+        {!isPublicPage && isSidebarOpen && <Sidebar />}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* {!isPublicPage && <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} isSidebarOpen={isSidebarOpen} />} */}
+          <PageRouter />
+        </div>
+
+        {/* Floating ERP widgets mounted once in signed-in app shell */}
         {!isPublicPage && (
           <>
-            {isSidebarOpen && (
-              <div
-                className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-                onClick={() => setIsSidebarOpen(false)}
-              />
-            )}
-            <div
-              className={
-                isSidebarOpen
-                  ? 'fixed inset-y-0 left-0 z-50 lg:static lg:z-auto'
-                  : 'hidden lg:block'
-              }
-            >
-              <Sidebar />
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsSidebarOpen((open) => !open)}
-              aria-label="Toggle sidebar"
-              className="fixed top-4 left-4 z-50 flex h-10 w-10 items-center justify-center -m-5 rounded-xl bg-gradient-primary text-white shadow-lg transition-colors hover:opacity-90 lg:hidden"
-            >
-              {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
+            <CalculatorWidget />
+            <ErpGuide />
           </>
         )}
-        <div className="flex-1 flex flex-col overflow-hidden ">
-          {/* {!isPublicPage && <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} isSidebarOpen={isSidebarOpen} />} */}
-          <PageRouter/>
-        </div>
-        {!isPublicPage && <CalculatorWidget />}
       </div>
     </ToastProvider>
   );
 }
 
-export default App
+export default App;
