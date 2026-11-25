@@ -8,7 +8,19 @@ import ToastProvider from './utils/GlobalToast';
 import ConfirmationProvider from './utils/GlobalConfirmation';
 import { PermissionProvider } from './contexts/PermissionContext';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error) => {
+        // Stop retrying immediately on 401 Unauthorized or 403 Forbidden
+        if (error?.response?.status === 401 || error?.response?.status === 403) {
+          return false;
+        }
+        return failureCount < 1;
+      },
+    },
+  },
+});
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
