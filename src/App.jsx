@@ -54,7 +54,7 @@ function App() {
               type="button"
               onClick={() => setIsSidebarOpen((open) => !open)}
               aria-label="Toggle sidebar"
-              className="fixed top-4 left-4 z-50 flex h-10 w-10 items-center justify-center -m-5 rounded-xl bg-gradient-primary text-white shadow-lg transition-colors hover:opacity-90 lg:hidden"
+              className={`fixed top-4 z-50 flex h-10 w-10 items-center justify-center rounded-xl border border-blue-400 bg-blue-100 text-blue-700 shadow-lg transition-all hover:bg-blue-200 lg:hidden ${isSidebarOpen ? 'left-[12.5rem]' : 'left-4'}`}
             >
               {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
